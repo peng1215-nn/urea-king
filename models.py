@@ -16,9 +16,9 @@ class User(Base):
 
     password_hash = Column(String(255), nullable=False)
 
-    role = Column(String(30), nullable=False, default="user")
+    nickname = Column(String(50), nullable=False)
 
-    points = Column(Integer, nullable=False, default=0)
+    role = Column(String(30), nullable=False, default="user")
 
     invitation_code = Column(String(100), nullable=True)
 
@@ -35,6 +35,8 @@ class InvitationCode(Base):
     assigned_to = Column(String(100), nullable=True)
 
     role = Column(String(30), nullable=False, default="user")
+
+    group_id = Column(Integer, nullable=True)
 
     is_used = Column(Integer, nullable=False, default=0)
 

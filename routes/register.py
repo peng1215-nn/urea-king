@@ -12,10 +12,7 @@ router = APIRouter()
 
 templates = Jinja2Templates(directory="templates")
 
-pwd_context = CryptContext(
-    schemes=["pbkdf2_sha256"],
-    deprecated="auto"
-)
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
 @router.get("/login", response_class=HTMLResponse)
