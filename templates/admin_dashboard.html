@@ -170,15 +170,15 @@
     <div class="logo">UREAKING</div>
 
     <div class="menu">
-        <div class="menu-item active">控制台</div>
+        <div class="menu-item">系统监控</div>
         <div class="menu-item">用户管理</div>
         <div class="menu-item">邀请码管理</div>
-        <div class="menu-item">组别管理</div>
-        <div class="menu-item">局头管理</div>
         <div class="menu-item">系统日志</div>
-        <div class="menu-item">系统设置</div>
-        <div class="menu-item">退出登录</div>
+        <div class="menu-item">公告管理</div>
+        <div class="menu-item">修改密码</div>
+        <div class="menu-item" onclick="logout()">退出登录</div>
     </div>
+
 </div>
 
 <div class="main">
@@ -195,74 +195,96 @@
         </div>
     </div>
 
-    <div class="stats">
-        <div class="stat-card">
-            <div class="stat-title">总用户数</div>
-            <div class="stat-value" id="total-users">--</div>
-        </div>
+   <div class="stats">
 
-        <div class="stat-card">
-            <div class="stat-title">局头数量</div>
-            <div class="stat-value" id="organizer-count">--</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-title">未使用邀请码</div>
-            <div class="stat-value" id="unused-invite-count">--</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-title">组别数量</div>
-            <div class="stat-value" id="group-count">--</div>
-        </div>
+    <div class="stat-card">
+        <div class="stat-title">总用户数</div>
+        <div class="stat-value" id="total-users">--</div>
     </div>
+
+    <div class="stat-card">
+        <div class="stat-title">管理员数量</div>
+        <div class="stat-value" id="admin-count">--</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-title">局头数量</div>
+        <div class="stat-value" id="organizer-count">--</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-title">未使用邀请码</div>
+        <div class="stat-value" id="unused-invite-count">--</div>
+    </div>
+
+</div>
 
     <h2 class="section-title">管理模块</h2>
 
-    <div class="modules">
-        <div class="module-card">
-            <h2>用户管理</h2>
-            <p>查看用户信息、修改身份权限、禁用账号与维护用户状态。</p>
-        </div>
+<div class="modules">
 
-        <div class="module-card">
-            <h2>邀请码管理</h2>
-            <p>生成邀请码，绑定身份级别与组别，用于控制注册来源。</p>
-        </div>
-
-        <div class="module-card">
-            <h2>组别管理</h2>
-            <p>创建和维护组别，约束局头和普通用户的所属范围。</p>
-        </div>
-
-        <div class="module-card">
-            <h2>局头管理</h2>
-            <p>分配局头身份，查看其管辖组别与权限范围。</p>
-        </div>
-
-        <div class="module-card">
-            <h2>系统日志</h2>
-            <p>查看注册、登录、邀请码使用和权限变更等系统记录。</p>
-        </div>
-
-        <div class="module-card">
-            <h2>系统设置</h2>
-            <p>维护网站基础配置、权限规则和生态系统级别参数。</p>
-        </div>
+    <div class="module-card">
+        <h2>系统监控</h2>
+        <p>查看系统运行状态、用户活跃情况与整体生态数据。</p>
     </div>
+
+    <div class="module-card">
+        <h2>用户管理</h2>
+        <p>查看用户信息、维护身份权限、组别归属与账号状态。</p>
+    </div>
+
+    <div class="module-card">
+        <h2>邀请码管理</h2>
+        <p>生成邀请码并绑定身份与组别，控制系统注册来源。</p>
+    </div>
+
+    <div class="module-card">
+        <h2>系统日志</h2>
+        <p>查看登录、注册、邀请码使用与权限变更等系统记录。</p>
+    </div>
+
+    <div class="module-card">
+        <h2>公告管理</h2>
+        <p>发布系统公告、活动通知与生态规则相关说明内容。</p>
+    </div>
+
+    <div class="module-card">
+        <h2>修改密码</h2>
+        <p>修改当前管理员账户密码并提升系统账号安全性。</p>
+    </div>
+
+</div>
+
 <script>
     async function loadAdminStats() {
-        const response = await fetch("/admin/stats");
-        const data = await response.json();
+        try {
+            const response = await fetch("/admin/stats");
+            const data = await response.json();
 
-        if (!data.success) {
-            return;
+            if (!data.success) {
+                return;
+            }
+
+            document.getElementById("total-users").innerText =
+                data.total_users;
+
+            document.getElementById("admin-count").innerText =
+                data.admin_count;
+
+            document.getElementById("organizer-count").innerText =
+                data.organizer_count;
+
+            document.getElementById("unused-invite-count").innerText =
+                data.unused_invitation_codes;
+
+        } catch (error) {
+            console.error("加载管理员统计数据失败：", error);
         }
+    }
 
-        document.getElementById("total-users").innerText = data.total_users;
-        document.getElementById("organizer-count").innerText = data.organizer_count;
-        document.getElementById("unused-invite-count").innerText = data.unused_invitation_codes;
-        document.getElementById("group-count").innerText = data.group_count;
+
+    function logout() {
+        window.location.href = "/logout";
     }
 
     loadAdminStats();

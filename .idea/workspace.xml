@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f31c30b7-80ff-4d1a-a695-20f570bf1d89" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/routes/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/register.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/register.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/admin_dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin_dashboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
