@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>UREAKING 注册</title>
+    <title>UREAKING Register</title>
 
     <style>
         * {
@@ -19,24 +19,15 @@
             background-position: center;
             background-repeat: no-repeat;
             color: white;
-            overflow: hidden;
+            overflow: auto;
         }
 
         body::before {
             content: "";
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.72);
+            background: rgba(0, 0, 0, 0.55);
             z-index: 0;
-        }
-
-        .page {
-            position: relative;
-            z-index: 1;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
         .sidebar {
@@ -70,16 +61,41 @@
             writing-mode: horizontal-tb;
         }
 
+        .page {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
         .register-card {
             width: 420px;
-            padding: 38px;
+            max-height: 88vh;
+            padding: 36px;
             border-radius: 18px;
-            background: rgba(10, 10, 18, 0.88);
+            background: rgba(10, 10, 18, 0.75);
             backdrop-filter: blur(12px);
             box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
             display: flex;
             flex-direction: column;
             gap: 18px;
+            overflow-y: auto;
+        }
+
+        .register-card::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .register-card::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 10px;
+        }
+
+        .register-card::-webkit-scrollbar-track {
+            background: transparent;
         }
 
         .title-area {
@@ -87,7 +103,7 @@
             flex-direction: column;
             align-items: center;
             gap: 8px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .title-area h1 {
@@ -97,7 +113,7 @@
 
         .title-area p {
             font-size: 15px;
-            color: rgba(255, 255, 255, 0.75);
+            color: rgba(255,255,255,0.75);
             letter-spacing: 1px;
         }
 
@@ -109,33 +125,44 @@
 
         label {
             font-size: 14px;
-            color: rgba(255, 255, 255, 0.82);
+            color: rgba(255,255,255,0.82);
         }
 
         input {
-            height: 44px;
+            height: 42px;
             border: none;
             border-radius: 10px;
             padding: 0 14px;
             outline: none;
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255,255,255,0.92);
             color: #111;
             font-size: 14px;
         }
 
-        #message-box {
-            min-height: 22px;
-            text-align: center;
+        .message-box {
+            display: none;
+            padding: 12px 14px;
+            border-radius: 10px;
             font-size: 14px;
-            font-weight: bold;
-            margin-top: -4px;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .success-message {
+            background: rgba(92,255,178,0.15);
+            color: #5CFFB2;
+        }
+
+        .error-message {
+            background: rgba(255,90,90,0.15);
+            color: #ff8a8a;
         }
 
         .register-button {
-            height: 46px;
+            min-height: 44px;
             border: none;
             border-radius: 10px;
-            margin-top: 8px;
+            margin-top: 4px;
             background: white;
             color: #111;
             font-size: 16px;
@@ -149,20 +176,20 @@
             transform: translateY(-1px);
         }
 
-        .bottom-links {
+        .text-links {
             display: flex;
             justify-content: center;
-            margin-top: 10px;
+            margin-top: 6px;
             font-size: 13px;
         }
 
-        .bottom-links a {
-            color: rgba(255, 255, 255, 0.78);
+        .text-links a {
+            color: rgba(255,255,255,0.78);
             text-decoration: none;
             cursor: pointer;
         }
 
-        .bottom-links a:hover {
+        .text-links a:hover {
             color: white;
             text-decoration: underline;
         }
@@ -176,17 +203,23 @@
 </div>
 
 <div class="page">
-
     <div class="register-card">
 
         <div class="title-area">
-            <h1>UREAKING</h1>
+            <h1>REGISTER</h1>
             <p>8th-Ecosystem</p>
         </div>
+
+        <div id="message-box" class="message-box"></div>
 
         <div class="form-group">
             <label for="username">用户名</label>
             <input type="text" id="username" placeholder="请输入用户名">
+        </div>
+
+        <div class="form-group">
+            <label for="nickname">昵称</label>
+            <input type="text" id="nickname" placeholder="请输入昵称">
         </div>
 
         <div class="form-group">
@@ -204,78 +237,47 @@
             <input type="text" id="invite-code" placeholder="请输入邀请码">
         </div>
 
-        <div id="message-box"></div>
-
         <button class="register-button" onclick="register()">
             注册账号
         </button>
 
-        <div class="bottom-links">
+        <div class="text-links">
             <a href="/login">返回登录</a>
         </div>
 
     </div>
-
 </div>
 
 <script>
-    function showMessage(message, success = false)
-    {
+    function showMessage(message, success = false) {
         const box = document.getElementById("message-box");
 
         box.innerText = message;
+        box.style.display = "block";
 
-        if (success)
-        {
-            box.style.color = "#5CFFB2";
-        }
-        else
-        {
-            box.style.color = "#FF6B6B";
+        if (success) {
+            box.className = "message-box success-message";
+        } else {
+            box.className = "message-box error-message";
         }
     }
 
     async function register() {
         const username = document.getElementById("username").value.trim();
+        const nickname = document.getElementById("nickname").value.trim();
         const password = document.getElementById("password").value;
         const confirmPassword = document.getElementById("confirm-password").value;
         const inviteCode = document.getElementById("invite-code").value.trim();
 
-        const usernamePattern = /^[A-Za-z][A-Za-z0-9_]{4,}$/;
-
-        if (!usernamePattern.test(username))
-        {
-            showMessage("用户名必须以字母开头，且至少 5 位，只能包含字母、数字和下划线。");
-            return;
-        }
-
-        if (password.length < 6)
-        {
-            showMessage("密码长度必须大于等于 6 位。");
-            return;
-        }
-
-        if (password !== confirmPassword)
-        {
-            showMessage("两次输入的密码不一致。");
-            return;
-        }
-
-        if (inviteCode.length === 0)
-        {
-            showMessage("请输入邀请码。");
-            return;
-        }
-
         const formData = new FormData();
 
         formData.append("username", username);
+        formData.append("nickname", nickname);
         formData.append("password", password);
         formData.append("confirm_password", confirmPassword);
         formData.append("invite_code", inviteCode);
 
-        const response = await fetch("/register",
-            {
+        const response = await fetch("/register", {
             method: "POST",
             body: formData
         });
@@ -284,12 +286,10 @@
 
         showMessage(data.message, data.success);
 
-        if (data.success)
-        {
-            setTimeout(() =>
-            {
+        if (data.success) {
+            setTimeout(() => {
                 window.location.href = "/login";
-            }, 1200);
+            }, 2000);
         }
     }
 </script>
