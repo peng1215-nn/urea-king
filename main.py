@@ -6,7 +6,7 @@ app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
-points = 60
+points = 80
 
 
 @app.get("/", response_class=HTMLResponse)
