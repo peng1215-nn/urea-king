@@ -16,16 +16,3 @@ def home(request: Request):
         request=request,
         name="login.html"
     )
-
-
-@app.post("/add-points")
-def add_points(amount: int):
-
-    global points
-
-    points += amount
-
-    return {
-        "message": f"Added {amount} points.",
-        "points": points
-    }
