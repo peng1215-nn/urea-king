@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>UREAKING Login</title>
+    <title>UREAKING 登录</title>
 
     <style>
         * {
@@ -26,7 +26,7 @@
             content: "";
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.55);
+            background: rgba(0, 0, 0, 0.72);
             z-index: 0;
         }
 
@@ -74,7 +74,7 @@
             width: 380px;
             padding: 36px;
             border-radius: 18px;
-            background: rgba(10, 10, 18, 0.75);
+            background: rgba(10, 10, 18, 0.88);
             backdrop-filter: blur(12px);
             box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
             display: flex;
@@ -177,35 +177,35 @@
         </div>
 
         <div class="form-group">
-            <label for="role">Identity</label>
+            <label for="role">身份权限</label>
             <select id="role">
-                <option value="user">User</option>
-                <option value="organizer">Organizer</option>
-                <option value="admin">Administrator</option>
+                <option value="user">普通用户</option>
+                <option value="organizer">局头</option>
+                <option value="admin">管理员</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" placeholder="Enter username">
+            <label for="username">用户名</label>
+            <input type="text" id="username" placeholder="请输入用户名">
         </div>
 
         <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="Enter password">
+            <label for="password">密码</label>
+            <input type="password" id="password" placeholder="请输入密码">
         </div>
 
         <div class="form-group">
-            <label for="invite-code">Invitation Code</label>
-            <input type="text" id="invite-code" placeholder="Enter invitation code">
+            <label for="invite-code">邀请码</label>
+            <input type="text" id="invite-code" placeholder="请输入邀请码">
         </div>
 
-        <button class="login-button" onclick="login()">Login</button>
+        <button class="login-button" onclick="login()">登录</button>
 
         <div class="text-links">
-            <a onclick="register()">Register</a>
-            <a onclick="forgotPassword()">Forgot Password</a>
-            <a onclick="reportIssue()">Report Issue</a>
+            <a onclick="register()">注册账号</a>
+            <a onclick="forgotPassword()">忘记密码</a>
+            <a onclick="reportIssue()">报告问题</a>
         </div>
 
     </div>
@@ -213,31 +213,32 @@
 
 <script>
     function login() {
+
         const role = document.getElementById("role").value;
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
         const inviteCode = document.getElementById("invite-code").value;
 
-        console.log("Login request:", {
+        console.log("登录请求:", {
             role,
             username,
             password,
             inviteCode
         });
 
-        alert("Login function will be connected to FastAPI later.");
+        alert("登录功能后续将连接 FastAPI 后端。");
     }
 
     function register() {
-        alert("Register page will be added later.");
+        alert("注册页面后续开放。");
     }
 
     function forgotPassword() {
-        alert("Password recovery will be added later.");
+        alert("密码找回功能后续开放。");
     }
 
     function reportIssue() {
-        alert("Issue report function will be added later.");
+        alert("问题反馈功能后续开放。");
     }
 </script>
 
