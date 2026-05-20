@@ -406,48 +406,6 @@
         }
     }
 
-    async function login() {
-
-        const role =
-            document.getElementById("role").value;
-
-        const username =
-            document.getElementById("username").value.trim();
-
-        const password =
-            document.getElementById("password").value;
-
-        const formData = new FormData();
-
-        formData.append("role", role);
-        formData.append("username", username);
-        formData.append("password", password);
-
-        const response = await fetch("/login", {
-
-            method: "POST",
-
-            body: formData
-        });
-
-        const data = await response.json();
-
-        showMessage(data.message, data.success);
-
-        if (
-            data.success &&
-            data.role === "admin"
-        ) {
-
-            setTimeout(() => {
-
-                window.location.href =
-                    "/admin-dashboard";
-
-            }, 5000);
-        }
-    }
-
     function forgotPassword() {
 
         showMessage(
