@@ -26,7 +26,6 @@ class User(Base):
 
 
 class InvitationCode(Base):
-
     __tablename__ = "invitation_codes"
 
     id = Column(Integer, primary_key=True, index=True)

@@ -2,10 +2,9 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>UREAKING 登录</title>
+    <title>UREAKING 注册</title>
 
     <style>
-
         * {
             box-sizing: border-box;
             margin: 0;
@@ -71,17 +70,13 @@
             writing-mode: horizontal-tb;
         }
 
-        .login-card {
-            width: 380px;
-            padding: 36px;
+        .register-card {
+            width: 420px;
+            padding: 38px;
             border-radius: 18px;
-
             background: rgba(10, 10, 18, 0.88);
-
             backdrop-filter: blur(12px);
-
             box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
-
             display: flex;
             flex-direction: column;
             gap: 18px;
@@ -96,7 +91,7 @@
         }
 
         .title-area h1 {
-            font-size: 42px;
+            font-size: 40px;
             letter-spacing: 4px;
         }
 
@@ -117,78 +112,53 @@
             color: rgba(255, 255, 255, 0.82);
         }
 
-        input,
-        select {
-            height: 42px;
+        input {
+            height: 44px;
             border: none;
             border-radius: 10px;
             padding: 0 14px;
             outline: none;
-
             background: rgba(255, 255, 255, 0.92);
             color: #111;
-
             font-size: 14px;
         }
 
-        .login-button {
-            height: 44px;
+        .register-button {
+            height: 46px;
             border: none;
             border-radius: 10px;
-
             margin-top: 8px;
-
             background: white;
             color: #111;
-
             font-size: 16px;
             font-weight: bold;
-
             cursor: pointer;
-
             transition: 0.25s;
         }
 
-        .login-button:hover {
+        .register-button:hover {
             background: #dcdcdc;
             transform: translateY(-1px);
         }
 
-        #message-box {
-
-            min-height: 22px;
-
-            text-align: center;
-
-            font-size: 14px;
-
-            font-weight: bold;
-
-            margin-top: -4px;
-        }
-
-        .text-links {
+        .bottom-links {
             display: flex;
-            justify-content: space-between;
-
-            margin-top: 4px;
-
+            justify-content: center;
+            margin-top: 10px;
             font-size: 13px;
         }
 
-        .text-links a {
+        .bottom-links a {
             color: rgba(255, 255, 255, 0.78);
             text-decoration: none;
             cursor: pointer;
         }
 
-        .text-links a:hover {
+        .bottom-links a:hover {
             color: white;
             text-decoration: underline;
         }
-
     </style>
-
 </head>
 
 <body>
@@ -199,7 +169,7 @@
 
 <div class="page">
 
-    <div class="login-card">
+    <div class="register-card">
 
         <div class="title-area">
             <h1>UREAKING</h1>
@@ -207,90 +177,31 @@
         </div>
 
         <div class="form-group">
-            <label for="role">身份权限</label>
-
-            <select id="role">
-
-                <option value="user">
-                    普通用户
-                </option>
-
-                <option value="organizer">
-                    局头
-                </option>
-
-                <option value="admin">
-                    管理员
-                </option>
-
-            </select>
+            <label for="username">用户名</label>
+            <input type="text" id="username" placeholder="请输入用户名">
         </div>
 
         <div class="form-group">
-
-            <label for="username">
-                用户名
-            </label>
-
-            <input
-                    type="text"
-                    id="username"
-                    placeholder="请输入用户名"
-            >
-
+            <label for="password">密码</label>
+            <input type="password" id="password" placeholder="请输入密码">
         </div>
 
         <div class="form-group">
-
-            <label for="password">
-                密码
-            </label>
-
-            <input
-                    type="password"
-                    id="password"
-                    placeholder="请输入密码"
-            >
-
+            <label for="confirm-password">确认密码</label>
+            <input type="password" id="confirm-password" placeholder="请再次输入密码">
         </div>
 
         <div class="form-group">
-
-            <label for="invite-code">
-                邀请码
-            </label>
-
-            <input
-                    type="text"
-                    id="invite-code"
-                    placeholder="请输入邀请码"
-            >
-
+            <label for="invite-code">邀请码</label>
+            <input type="text" id="invite-code" placeholder="请输入邀请码">
         </div>
 
-        <div id="message-box"></div>
-
-        <button
-                class="login-button"
-                onclick="login()"
-        >
-            登录
+        <button class="register-button" onclick="register()">
+            注册账号
         </button>
 
-        <div class="text-links">
-
-            <a onclick="register()">
-                注册账号
-            </a>
-
-            <a onclick="forgotPassword()">
-                忘记密码
-            </a>
-
-            <a onclick="reportIssue()">
-                报告问题
-            </a>
-
+        <div class="bottom-links">
+            <a href="/login">返回登录</a>
         </div>
 
     </div>
@@ -298,70 +209,53 @@
 </div>
 
 <script>
+    async function register() {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+        const inviteCode = document.getElementById("invite-code").value.trim();
 
-    function showMessage(message, success=false) {
+        const usernamePattern = /^[A-Za-z][A-Za-z0-9_]{4,}$/;
 
-        const box =
-            document.getElementById("message-box");
-
-        box.innerText = message;
-
-        if (success) {
-            box.style.color = "#5CFFB2";
+        if (!usernamePattern.test(username)) {
+            alert("用户名必须以字母开头，且至少 5 位，只能包含字母、数字和下划线。");
+            return;
         }
 
-        else {
-            box.style.color = "#FF6B6B";
+        if (password.length < 6) {
+            alert("密码长度必须大于等于 6 位。");
+            return;
         }
-    }
 
-    function login() {
+        if (password !== confirmPassword) {
+            alert("两次输入的密码不一致。");
+            return;
+        }
 
-        const role =
-            document.getElementById("role").value;
+        if (inviteCode.length === 0) {
+            alert("请输入邀请码。");
+            return;
+        }
 
-        const username =
-            document.getElementById("username").value;
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("password", password);
+        formData.append("confirm_password", confirmPassword);
+        formData.append("invite_code", inviteCode);
 
-        const password =
-            document.getElementById("password").value;
-
-        const inviteCode =
-            document.getElementById("invite-code").value;
-
-        console.log("登录请求:", {
-            role,
-            username,
-            password,
-            inviteCode
+        const response = await fetch("/register", {
+            method: "POST",
+            body: formData
         });
 
-        showMessage(
-            "登录功能后续将连接 FastAPI 后端。",
-            false
-        );
+        const data = await response.json();
+
+        alert(data.message);
+
+        if (data.success) {
+            window.location.href = "/login";
+        }
     }
-
-    function register() {
-        window.location.href = "/register";
-    }
-
-    function forgotPassword() {
-
-        showMessage(
-            "密码找回功能后续开放。",
-            false
-        );
-    }
-
-    function reportIssue() {
-
-        showMessage(
-            "问题反馈功能后续开放。",
-            false
-        );
-    }
-
 </script>
 
 </body>
