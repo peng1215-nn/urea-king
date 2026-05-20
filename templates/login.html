@@ -1,9 +1,245 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UREAKING Login</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background-image: url("/static/images/login_background.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 0;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: -190px;
+            top: 0;
+            width: 220px;
+            height: 100vh;
+            background: rgba(15, 15, 25, 0.88);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: left 0.3s ease;
+            z-index: 2;
+            border-right: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .sidebar:hover {
+            left: 0;
+        }
+
+        .sidebar-title {
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            writing-mode: vertical-rl;
+        }
+
+        .sidebar:hover .sidebar-title {
+            writing-mode: horizontal-tb;
+        }
+
+        .login-card {
+            width: 380px;
+            padding: 36px;
+            border-radius: 18px;
+            background: rgba(10, 10, 18, 0.75);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .title-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .title-area h1 {
+            font-size: 42px;
+            letter-spacing: 4px;
+        }
+
+        .title-area p {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.75);
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        input,
+        select {
+            height: 42px;
+            border: none;
+            border-radius: 10px;
+            padding: 0 14px;
+            outline: none;
+            background: rgba(255, 255, 255, 0.92);
+            color: #111;
+            font-size: 14px;
+        }
+
+        .login-button {
+            height: 44px;
+            border: none;
+            border-radius: 10px;
+            margin-top: 8px;
+            background: white;
+            color: #111;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .login-button:hover {
+            background: #dcdcdc;
+            transform: translateY(-1px);
+        }
+
+        .text-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+
+        .text-links a {
+            color: rgba(255, 255, 255, 0.78);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .text-links a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
 
 <body>
 
-<h1>Egg</h1>
+<div class="sidebar">
+    <div class="sidebar-title">Ureaking</div>
+</div>
+
+<div class="page">
+    <div class="login-card">
+
+        <div class="title-area">
+            <h1>UREAKING</h1>
+            <p>8th-Ecosystem</p>
+        </div>
+
+        <div class="form-group">
+            <label for="role">Identity</label>
+            <select id="role">
+                <option value="user">User</option>
+                <option value="organizer">Organizer</option>
+                <option value="admin">Administrator</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter username">
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter password">
+        </div>
+
+        <div class="form-group">
+            <label for="invite-code">Invitation Code</label>
+            <input type="text" id="invite-code" placeholder="Enter invitation code">
+        </div>
+
+        <button class="login-button" onclick="login()">Login</button>
+
+        <div class="text-links">
+            <a onclick="register()">Register</a>
+            <a onclick="forgotPassword()">Forgot Password</a>
+            <a onclick="reportIssue()">Report Issue</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function login() {
+        const role = document.getElementById("role").value;
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const inviteCode = document.getElementById("invite-code").value;
+
+        console.log("Login request:", {
+            role,
+            username,
+            password,
+            inviteCode
+        });
+
+        alert("Login function will be connected to FastAPI later.");
+    }
+
+    function register() {
+        alert("Register page will be added later.");
+    }
+
+    function forgotPassword() {
+        alert("Password recovery will be added later.");
+    }
+
+    function reportIssue() {
+        alert("Issue report function will be added later.");
+    }
+</script>
 
 </body>
 </html>
