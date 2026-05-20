@@ -13,8 +13,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
-Base.metadata.create_all(bind=engine)
-
 
 app.include_router(register_router)
 
