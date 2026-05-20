@@ -13,7 +13,7 @@ router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 pwd_context = CryptContext(
-    schemes=["bcrypt"],
+    schemes=["pbkdf2_sha256"],
     deprecated="auto"
 )
 
