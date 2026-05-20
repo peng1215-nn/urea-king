@@ -1,5 +1,5 @@
-import re
 from datetime import datetime
+import re
 
 from fastapi import APIRouter, Form
 from passlib.context import CryptContext
@@ -23,6 +23,7 @@ def register_user(
     confirm_password: str = Form(...),
     invite_code: str = Form(...)
 ):
+
     username = username.strip()
     nickname = nickname.strip()
     invite_code = invite_code.strip()
@@ -38,13 +39,13 @@ def register_user(
     if len(nickname) == 0:
         return {
             "success": False,
-            "message": "请输入昵称。"
+            "message": "昵称不能为空。"
         }
 
     if len(password) < 6:
         return {
             "success": False,
-            "message": "密码长度必须大于等于 6 位。"
+            "message": "密码长度至少为 6 位。"
         }
 
     if password != confirm_password:
@@ -63,7 +64,7 @@ def register_user(
         if existing_user:
             return {
                 "success": False,
-                "message": "用户名已存在，请更换用户名。"
+                "message": "用户名已存在。"
             }
 
         invitation = db.query(InvitationCode).filter(
@@ -82,10 +83,12 @@ def register_user(
                 "message": "邀请码已被使用。"
             }
 
+        hashed_password = pwd_context.hash(password)
+
         new_user = User(
             username=username,
             nickname=nickname,
-            password_hash=pwd_context.hash(password),
+            password_hash=hashed_password,
             role=invitation.role,
             invitation_code=invite_code
         )
@@ -100,14 +103,16 @@ def register_user(
 
         return {
             "success": True,
-            "message": f"注册成功，身份权限：{invitation.role}"
+            "message": f"注册成功，欢迎 {nickname}。"
         }
 
     except Exception as e:
+        print(e)
         db.rollback()
+
         return {
             "success": False,
-            "message": f"注册失败：{str(e)}"
+            "message": str(e)
         }
 
     finally:
