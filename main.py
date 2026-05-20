@@ -1,19 +1,12 @@
-from fastapi import FastAPI
-from fastapi import Request
-from fastapi import Form
-
+from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from passlib.context import CryptContext
 
-from database import Base
-from database import engine
-
-from models import User
-from models import InvitationCode
-
+from database import SessionLocal
+from models import User, InvitationCode
 from routes.register import router as register_router
-
 
 app = FastAPI()
 
@@ -23,16 +16,26 @@ app.mount(
     name="static"
 )
 
-templates = Jinja2Templates(
-    directory="templates"
-)
+templates = Jinja2Templates(directory="templates")
 
 app.include_router(register_router)
+
+pwd_context = CryptContext(
+    schemes=["pbkdf2_sha256"],
+    deprecated="auto"
+)
 
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html"
+    )
 
+
+@app.get("/login", response_class=HTMLResponse)
+def login_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="login.html"
@@ -41,10 +44,71 @@ def home(request: Request):
 
 @app.get("/register", response_class=HTMLResponse)
 def register_page(request: Request):
-
     return templates.TemplateResponse(
         request=request,
         name="register.html"
     )
 
 
+@app.get("/admin-dashboard", response_class=HTMLResponse)
+def admin_dashboard(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="admin_dashboard.html"
+    )
+
+
+@app.post("/login")
+def login_user(
+    username: str = Form(...),
+    password: str = Form(...),
+    role: str = Form(...)
+):
+    db = SessionLocal()
+
+    try:
+        user = db.query(User).filter(
+            User.username == username.strip()
+        ).first()
+
+        if not user:
+            return {
+                "success": False,
+                "message": "用户不存在。"
+            }
+
+        if not pwd_context.verify(password, user.password_hash):
+            return {
+                "success": False,
+                "message": "密码错误。"
+            }
+
+        if user.role != role:
+            return {
+                "success": False,
+                "message": "身份权限选择错误。"
+            }
+
+        if user.role != "admin":
+            return {
+                "success": False,
+                "message": "当前仅开放管理员登录。"
+            }
+
+        display_name = user.nickname or user.username
+
+        return {
+            "success": True,
+            "message": f"管理员 {display_name} 登录成功，5秒后跳转。",
+            "role": user.role
+        }
+
+    except Exception as e:
+        print(e)
+        return {
+            "success": False,
+            "message": str(e)
+        }
+
+    finally:
+        db.close()

@@ -383,36 +383,45 @@
 </div>
 
 <script>
-
     function showMessage(message, success=false) {
-
-        const box =
-            document.getElementById("message-box");
+        const box = document.getElementById("message-box");
 
         box.innerText = message;
-
         box.style.display = "block";
 
         if (success) {
-
-            box.className =
-                "message-box success-message";
+            box.className = "message-box success-message";
+        } else {
+            box.className = "message-box error-message";
         }
+    }
 
-        else {
+    async function login() {
+        const formData = new FormData();
 
-            box.className =
-                "message-box error-message";
+        formData.append("role", document.getElementById("role").value);
+        formData.append("username", document.getElementById("username").value.trim());
+        formData.append("password", document.getElementById("password").value);
+
+        const response = await fetch("/login", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        showMessage(data.message, data.success);
+
+        if (data.success && data.role === "admin") {
+            setTimeout(() => {
+                window.location.href = "/admin-dashboard";
+            }, 5000);
         }
     }
 
     function forgotPassword() {
-
-        showMessage(
-            "密码找回功能暂未开放。"
-        );
+        showMessage("密码找回功能暂未开放。");
     }
-
 </script>
 
 </body>
