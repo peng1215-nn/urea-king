@@ -198,22 +198,22 @@
     <div class="stats">
         <div class="stat-card">
             <div class="stat-title">总用户数</div>
-            <div class="stat-value">--</div>
+            <div class="stat-value" id="total-users">--</div>
         </div>
 
         <div class="stat-card">
             <div class="stat-title">局头数量</div>
-            <div class="stat-value">--</div>
+            <div class="stat-value" id="organizer-count">--</div>
         </div>
 
         <div class="stat-card">
             <div class="stat-title">未使用邀请码</div>
-            <div class="stat-value">--</div>
+            <div class="stat-value" id="unused-invite-count">--</div>
         </div>
 
         <div class="stat-card">
             <div class="stat-title">组别数量</div>
-            <div class="stat-value">--</div>
+            <div class="stat-value" id="group-count">--</div>
         </div>
     </div>
 
@@ -250,7 +250,23 @@
             <p>维护网站基础配置、权限规则和生态系统级别参数。</p>
         </div>
     </div>
+<script>
+    async function loadAdminStats() {
+        const response = await fetch("/admin/stats");
+        const data = await response.json();
 
+        if (!data.success) {
+            return;
+        }
+
+        document.getElementById("total-users").innerText = data.total_users;
+        document.getElementById("organizer-count").innerText = data.organizer_count;
+        document.getElementById("unused-invite-count").innerText = data.unused_invitation_codes;
+        document.getElementById("group-count").innerText = data.group_count;
+    }
+
+    loadAdminStats();
+</script>
 </div>
 
 </body>

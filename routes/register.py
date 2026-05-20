@@ -1,11 +1,10 @@
 from datetime import datetime
 import re
-
 from fastapi import APIRouter, Form
 from passlib.context import CryptContext
-
 from database import SessionLocal
 from models import User, InvitationCode
+
 
 router = APIRouter()
 

@@ -3,10 +3,11 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from passlib.context import CryptContext
-
 from database import SessionLocal
 from models import User, InvitationCode
 from routes.register import router as register_router
+from routes.admin import router as admin_router
+
 
 app = FastAPI()
 
@@ -19,6 +20,8 @@ app.mount(
 templates = Jinja2Templates(directory="templates")
 
 app.include_router(register_router)
+app.include_router(admin_router)
+
 
 pwd_context = CryptContext(
     schemes=["pbkdf2_sha256"],
