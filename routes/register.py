@@ -30,34 +30,57 @@ def register_user(
     username_pattern = r"^[A-Za-z][A-Za-z0-9_]{4,}$"
 
     if not re.match(username_pattern, username):
-        return {"success": False, "message": "用户名必须以字母开头，且至少 5 位。"}
+        return {
+            "success": False,
+            "message": "用户名必须以字母开头，且至少 5 位。"
+        }
 
     if len(nickname) == 0:
-        return {"success": False, "message": "请输入昵称。"}
+        return {
+            "success": False,
+            "message": "请输入昵称。"
+        }
 
     if len(password) < 6:
-        return {"success": False, "message": "密码长度必须大于等于 6 位。"}
+        return {
+            "success": False,
+            "message": "密码长度必须大于等于 6 位。"
+        }
 
     if password != confirm_password:
-        return {"success": False, "message": "两次输入的密码不一致。"}
+        return {
+            "success": False,
+            "message": "两次输入的密码不一致。"
+        }
 
     db = SessionLocal()
 
     try:
-        existing_user = db.query(User).filter(User.username == username).first()
+        existing_user = db.query(User).filter(
+            User.username == username
+        ).first()
 
         if existing_user:
-            return {"success": False, "message": "用户名已存在，请更换用户名。"}
+            return {
+                "success": False,
+                "message": "用户名已存在，请更换用户名。"
+            }
 
         invitation = db.query(InvitationCode).filter(
             InvitationCode.code == invite_code
         ).first()
 
         if not invitation:
-            return {"success": False, "message": "邀请码不存在。"}
+            return {
+                "success": False,
+                "message": "邀请码不存在。"
+            }
 
         if invitation.is_used == 1:
-            return {"success": False, "message": "邀请码已被使用。"}
+            return {
+                "success": False,
+                "message": "邀请码已被使用。"
+            }
 
         new_user = User(
             username=username,
@@ -82,7 +105,10 @@ def register_user(
 
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": f"注册失败：{str(e)}"}
+        return {
+            "success": False,
+            "message": f"注册失败：{str(e)}"
+        }
 
     finally:
         db.close()
