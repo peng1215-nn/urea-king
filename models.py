@@ -20,6 +20,8 @@ class User(Base):
 
     role = Column(String(30), nullable=False, default="user")
 
+    group_id = Column(String(30), nullable=True)
+
     invitation_code = Column(String(100), nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -35,6 +37,8 @@ class InvitationCode(Base):
     assigned_to = Column(String(100), nullable=True)
 
     role = Column(String(30), nullable=False, default="user")
+
+    group_id = Column(String(30), nullable=True)
 
     is_used = Column(Integer, nullable=False, default=0)
 

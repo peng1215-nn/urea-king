@@ -23,7 +23,6 @@ def register_user(
     confirm_password: str = Form(...),
     invite_code: str = Form(...)
 ):
-
     username = username.strip()
     nickname = nickname.strip()
     invite_code = invite_code.strip()
@@ -83,13 +82,25 @@ def register_user(
                 "message": "邀请码已被使用。"
             }
 
+        if invitation.role != "admin" and not invitation.group_id:
+            return {
+                "success": False,
+                "message": "该邀请码未绑定组别，无法注册。"
+            }
+
         hashed_password = pwd_context.hash(password)
+
+        if invitation.role == "admin":
+            user_group_id = None
+        else:
+            user_group_id = invitation.group_id
 
         new_user = User(
             username=username,
             nickname=nickname,
             password_hash=hashed_password,
             role=invitation.role,
+            group_id=user_group_id,
             invitation_code=invite_code
         )
 
@@ -108,6 +119,7 @@ def register_user(
 
     except Exception as e:
         print(e)
+
         db.rollback()
 
         return {
