@@ -1,24 +1,27 @@
+from datetime import datetime
 from sqlalchemy import Column
+from sqlalchemy import DateTime
+from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import String
-from sqlalchemy import DateTime
-from datetime import datetime
 from database import Base
 
 
 class User(Base):
+
     __tablename__ = "users"
 
-    id = (Column(
+    id = Column(
         Integer,
         primary_key=True,
         index=True
-    ))
+    )
 
     username = Column(
         String(50),
         unique=True,
-        nullable=False
+        nullable=False,
+        index=True
     )
 
     password_hash = Column(
@@ -32,11 +35,64 @@ class User(Base):
         default="user"
     )
 
-    invitation_code = Column(
-        String(100)
+    invitation_code_id = Column(
+        Integer,
+        ForeignKey("invitation_codes.id"),
+        nullable=True
     )
 
     created_at = Column(
         DateTime,
         default=datetime.utcnow
+    )
+
+
+class InvitationCode(Base):
+
+    __tablename__ = "invitation_codes"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    code = Column(
+        String(100),
+        unique=True,
+        nullable=False,
+        index=True
+    )
+
+    assigned_to = Column(
+        String(100),
+        nullable=True
+    )
+
+    role = Column(
+        String(30),
+        nullable=False,
+        default="user"
+    )
+
+    is_used = Column(
+        Integer,
+        nullable=False,
+        default=0
+    )
+
+    used_by_user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
+    used_at = Column(
+        DateTime,
+        nullable=True
     )

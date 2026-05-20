@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from database import engine
 from database import Base
-from models import User
+from models import User, InvitationCode
 
 
 app = FastAPI()
