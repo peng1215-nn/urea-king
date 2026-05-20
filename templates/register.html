@@ -123,6 +123,14 @@
             font-size: 14px;
         }
 
+        #message-box {
+            min-height: 22px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: -4px;
+        }
+
         .register-button {
             height: 46px;
             border: none;
@@ -196,6 +204,8 @@
             <input type="text" id="invite-code" placeholder="请输入邀请码">
         </div>
 
+        <div id="message-box"></div>
+
         <button class="register-button" onclick="register()">
             注册账号
         </button>
@@ -209,6 +219,18 @@
 </div>
 
 <script>
+    function showMessage(message, success = false) {
+        const box = document.getElementById("message-box");
+
+        box.innerText = message;
+
+        if (success) {
+            box.style.color = "#5CFFB2";
+        } else {
+            box.style.color = "#FF6B6B";
+        }
+    }
+
     async function register() {
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value;
@@ -218,26 +240,27 @@
         const usernamePattern = /^[A-Za-z][A-Za-z0-9_]{4,}$/;
 
         if (!usernamePattern.test(username)) {
-            alert("用户名必须以字母开头，且至少 5 位，只能包含字母、数字和下划线。");
+            showMessage("用户名必须以字母开头，且至少 5 位，只能包含字母、数字和下划线。");
             return;
         }
 
         if (password.length < 6) {
-            alert("密码长度必须大于等于 6 位。");
+            showMessage("密码长度必须大于等于 6 位。");
             return;
         }
 
         if (password !== confirmPassword) {
-            alert("两次输入的密码不一致。");
+            showMessage("两次输入的密码不一致。");
             return;
         }
 
         if (inviteCode.length === 0) {
-            alert("请输入邀请码。");
+            showMessage("请输入邀请码。");
             return;
         }
 
         const formData = new FormData();
+
         formData.append("username", username);
         formData.append("password", password);
         formData.append("confirm_password", confirmPassword);
@@ -250,10 +273,12 @@
 
         const data = await response.json();
 
-        alert(data.message);
+        showMessage(data.message, data.success);
 
         if (data.success) {
-            window.location.href = "/login";
+            setTimeout(() => {
+                window.location.href = "/login";
+            }, 1200);
         }
     }
 </script>
