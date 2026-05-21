@@ -141,7 +141,6 @@ def login_user(
     request: Request,
     username: str = Form(...),
     password: str = Form(...),
-    role: str = Form(...)
 ):
 
     username = username.strip()
@@ -168,29 +167,16 @@ def login_user(
                 "message": "密码错误。"
             }
 
-        if user.role != role:
-
-            return {
-                "success": False,
-                "message": "身份权限选择错误。"
-            }
-
-        if user.role != "admin":
-
-            return {
-                "success": False,
-                "message": "当前仅开放管理员登录。"
-            }
-
         request.session["user_id"] = user.id
         request.session["username"] = user.username
         request.session["role"] = user.role
 
         display_name = user.nickname or user.username
+        display_role = user.role
 
         return {
             "success": True,
-            "message": f"管理员 {display_name} 登录成功，3秒后跳转。",
+            "message": f"{display_role}-{display_name} 登录成功，3秒后跳转。",
             "role": user.role
         }
 

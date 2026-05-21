@@ -312,30 +312,6 @@
 
         <div class="form-group">
 
-            <label for="role">
-                身份权限
-            </label>
-
-            <select id="role">
-
-                <option value="user">
-                    普通用户
-                </option>
-
-                <option value="organizer">
-                    局头
-                </option>
-
-                <option value="admin">
-                    管理员
-                </option>
-
-            </select>
-
-        </div>
-
-        <div class="form-group">
-
             <label for="username">
                 用户名
             </label>
@@ -408,9 +384,6 @@
 
     async function login() {
 
-        const role =
-            document.getElementById("role").value;
-
         const username =
             document.getElementById("username")
                 .value
@@ -419,15 +392,6 @@
         const password =
             document.getElementById("password")
                 .value;
-
-        if (!role) {
-
-            showMessage(
-                "请选择身份权限。"
-            );
-
-            return;
-        }
 
         if (username.length === 0) {
 
@@ -448,11 +412,6 @@
         }
 
         const formData = new FormData();
-
-        formData.append(
-            "role",
-            role
-        );
 
         formData.append(
             "username",
@@ -483,10 +442,7 @@
                 data.success
             );
 
-            if (
-                data.success &&
-                data.role === "admin"
-            ) {
+            if (data.success && data.role === "admin") {
 
                 setTimeout(() => {
 
