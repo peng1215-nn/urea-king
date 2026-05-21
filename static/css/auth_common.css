@@ -1,0 +1,101 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background-image: url("/static/images/login_background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+    overflow: hidden;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 0;
+}
+
+.page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+input,
+select {
+    height: 42px;
+    border: none;
+    border-radius: 10px;
+    padding: 0 14px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.92);
+    color: #111;
+    font-size: 14px;
+}
+
+.sidebar {
+    position: fixed;
+    left: -190px;
+    top: 0;
+    width: 220px;
+    height: 100vh;
+    background: rgba(15, 15, 25, 0.88);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: left 0.3s ease;
+    z-index: 2;
+    border-right: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.sidebar:hover {
+    left: 0;
+ }
+
+.sidebar-title {
+    font-size: 26px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    writing-mode: vertical-rl;
+}
+
+.sidebar:hover .sidebar-title {
+    writing-mode: horizontal-tb;
+}
+
+.title-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.title-area p {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.75);
+    letter-spacing: 1px;
+}

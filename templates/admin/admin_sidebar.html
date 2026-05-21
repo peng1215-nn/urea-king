@@ -1,0 +1,50 @@
+<div class="sidebar">
+    <div class="logo">UREAKING</div>
+
+    <div class="menu">
+
+        <div class="menu-item {% if current_page == 'dashboard' %}active{% endif %}"
+             onclick="window.location.href='/admin-dashboard'">
+            <i class="fa-solid fa-house"></i>
+            <span>控制台</span>
+        </div>
+
+        <div class="menu-item {% if current_page == 'system_monitor' %}active{% endif %}"
+             onclick="window.location.href='/system-monitor'">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>系统监控</span>
+        </div>
+
+        <div class="menu-item {% if current_page == 'user_management' %}active{% endif %}"
+             onclick="window.location.href='/user-management'">
+            <i class="fa-regular fa-user"></i>
+            <span>用户管理</span>
+        </div>
+
+        <div class="menu-item">
+            <i class="fa-solid fa-ticket"></i>
+            <span>邀请码管理</span>
+        </div>
+
+        <div class="menu-item">
+            <i class="fa-regular fa-file-lines"></i>
+            <span>系统日志</span>
+        </div>
+
+        <div class="menu-item">
+            <i class="fa-solid fa-bullhorn"></i>
+            <span>公告管理</span>
+        </div>
+
+        <div class="menu-item">
+            <i class="fa-solid fa-lock"></i>
+            <span>修改密码</span>
+        </div>
+
+        <div class="menu-item" onclick="logout()">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>退出登录</span>
+        </div>
+
+    </div>
+</div>

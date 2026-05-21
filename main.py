@@ -80,7 +80,10 @@ def admin_dashboard(request: Request):
 
     response = templates.TemplateResponse(
         request=request,
-        name="admin/admin_dashboard.html"
+        name="admin/admin_dashboard.html",
+        context = {
+            "current_page": "dashboard"
+        }
     )
 
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -101,7 +104,10 @@ def system_monitor(request: Request):
 
     response = templates.TemplateResponse(
         request=request,
-        name="admin/system_monitor.html"
+        name="admin/system_monitor.html",
+        context={
+            "current_page": "system_monitor"
+        }
     )
 
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
@@ -123,7 +129,10 @@ def user_management(request: Request):
 
     response = templates.TemplateResponse(
         request=request,
-        name="admin/user_management.html"
+        name="admin/user_management.html",
+        context = {
+            "current_page": "user_management"
+        }
     )
 
     response.headers["Cache-Control"] = \
