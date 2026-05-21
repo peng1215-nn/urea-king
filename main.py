@@ -77,16 +77,18 @@ def register_page(request: Request):
 def admin_dashboard(request: Request):
 
     if request.session.get("role") != "admin":
+        return RedirectResponse(url="/login", status_code=302)
 
-        return RedirectResponse(
-            url="/login",
-            status_code=302
-        )
-
-    return templates.TemplateResponse(
+    response = templates.TemplateResponse(
         request=request,
         name="admin_dashboard.html"
     )
+
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
 
 
 @app.post("/login")
@@ -174,7 +176,13 @@ def logout(request: Request):
 
     request.session.clear()
 
-    return RedirectResponse(
+    response = RedirectResponse(
         url="/login",
         status_code=302
     )
+
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
