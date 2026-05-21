@@ -1,26 +1,21 @@
 from fastapi import FastAPI
 from fastapi import Request
 from fastapi import Form
-
 from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
-
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
 from passlib.context import CryptContext
 from starlette.middleware.sessions import SessionMiddleware
-
 from database import SessionLocal
-
 from models import User
 from models import InvitationCode
-
 from routes.register import router as register_router
 from routes.admin import router as admin_router
 
 
 app = FastAPI()
+
 
 app.add_middleware(
     SessionMiddleware,
@@ -81,7 +76,28 @@ def admin_dashboard(request: Request):
 
     response = templates.TemplateResponse(
         request=request,
-        name="admin_dashboard.html"
+        name="admin/admin_dashboard.html"
+    )
+
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
+
+
+@app.get("/system-monitor", response_class=HTMLResponse)
+def system_monitor(request: Request):
+
+    if request.session.get("role") != "admin":
+        return RedirectResponse(
+            url="/login",
+            status_code=302
+        )
+
+    response = templates.TemplateResponse(
+        request=request,
+        name="admin/system_monitor.html"
     )
 
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"

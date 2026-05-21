@@ -490,8 +490,7 @@
 
                 setTimeout(() => {
 
-                    window.location.href =
-                        "/admin-dashboard";
+                    window.location.replace("/admin-dashboard");
 
                 }, 3000);
             }
@@ -515,6 +514,15 @@
         );
     }
 
+    window.addEventListener("pageshow", function () {
+
+    const box =
+        document.getElementById("message-box");
+
+    box.innerText = "";
+    box.style.display = "none";
+    box.className = "message-box";
+});
 </script>
 
 </body>

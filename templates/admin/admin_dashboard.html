@@ -170,7 +170,7 @@
     <div class="logo">UREAKING</div>
 
     <div class="menu">
-        <div class="menu-item">系统监控</div>
+        <div class="menu-item" onclick="window.location.href='/system-monitor'">系统监控</div>
         <div class="menu-item">用户管理</div>
         <div class="menu-item">邀请码管理</div>
         <div class="menu-item">系统日志</div>
@@ -213,6 +213,11 @@
     </div>
 
     <div class="stat-card">
+        <div class="stat-title">普通用户数量</div>
+        <div class="stat-value" id="user-count">--</div>
+    </div>
+
+    <div class="stat-card">
         <div class="stat-title">未使用邀请码</div>
         <div class="stat-value" id="unused-invite-count">--</div>
     </div>
@@ -223,7 +228,7 @@
 
 <div class="modules">
 
-    <div class="module-card">
+    <div class="module-card" onclick="window.location.href='/system-monitor'">
         <h2>系统监控</h2>
         <p>查看系统运行状态、用户活跃情况与整体生态数据。</p>
     </div>
@@ -273,6 +278,9 @@
 
             document.getElementById("organizer-count").innerText =
                 data.organizer_count;
+
+            document.getElementById("user-count").innerText =
+                data.user_count;
 
             document.getElementById("unused-invite-count").innerText =
                 data.unused_invitation_codes;
