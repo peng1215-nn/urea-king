@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>系统监控</title>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
         * {
             margin: 0;
@@ -25,8 +27,6 @@
             padding: 28px 18px;
             background: rgba(10, 10, 18, 0.96);
             border-right: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            flex-direction: column;
         }
 
         .logo {
@@ -50,12 +50,26 @@
             color: rgba(255, 255, 255, 0.82);
             cursor: pointer;
             transition: 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .menu-item i {
+            width: 20px;
+            font-size: 17px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.72);
         }
 
         .menu-item:hover,
         .menu-item.active {
             background: rgba(255, 255, 255, 0.1);
             color: white;
+        }
+
+        .menu-item.active i {
+            color: #5C8DFF;
         }
 
         .main {
@@ -80,12 +94,29 @@
             letter-spacing: 1px;
         }
 
+        .admin-area {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .avatar {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(255, 255, 255, 0.82);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 18px rgba(255, 255, 255, 0.16);
+        }
+
         .admin-tag {
-            padding: 10px 18px;
+            padding: 12px 22px;
             border-radius: 999px;
             background: rgba(92, 255, 178, 0.15);
             color: #5CFFB2;
             font-weight: bold;
+            font-size: 15px;
         }
 
         .status-dot {
@@ -98,35 +129,69 @@
         }
 
         .monitor-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
             gap: 24px;
         }
 
         .monitor-card {
-            min-height: 170px;
-            padding: 26px;
+            width: 285px;
+            min-height: 165px;
+            padding: 24px;
             border-radius: 18px;
-            background: rgba(255, 255, 255, 0.055);
+            background: rgba(255, 255, 255, 0.045);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(8px);
+            position: relative;
+        }
+
+        .monitor-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .monitor-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(92, 141, 255, 0.16);
+            color: #5C8DFF;
+            font-size: 18px;
+        }
+
+        .monitor-icon.green {
+            background: rgba(92, 255, 178, 0.14);
+            color: #5CFFB2;
+        }
+
+        .monitor-icon.orange {
+            background: rgba(255, 160, 80, 0.14);
+            color: #FFA050;
+        }
+
+        .monitor-icon.purple {
+            background: rgba(180, 100, 255, 0.14);
+            color: #B464FF;
         }
 
         .monitor-card h2 {
-            font-size: 20px;
-            margin-bottom: 18px;
+            font-size: 21px;
         }
 
         .monitor-value {
-            font-size: 28px;
+            font-size: 30px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 14px;
         }
 
         .monitor-description {
-            font-size: 14px;
             line-height: 1.6;
-            color: rgba(255, 255, 255, 0.68);
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
         }
     </style>
 </head>
@@ -134,41 +199,51 @@
 <body>
 
 <div class="sidebar">
-
     <div class="logo">UREAKING</div>
 
     <div class="menu">
 
+        <div class="menu-item" onclick="window.location.href='/admin-dashboard'">
+            <i class="fa-solid fa-house"></i>
+            <span>控制台</span>
+        </div>
+
         <div class="menu-item active" onclick="window.location.href='/admin-dashboard'">
-            系统监控
+            <i class="fa-solid fa-chart-line"></i>
+            <span>系统监控</span>
         </div>
 
         <div class="menu-item">
-            用户管理
+            <i class="fa-regular fa-user"></i>
+            <span>用户管理</span>
         </div>
 
         <div class="menu-item">
-            邀请码管理
+            <i class="fa-solid fa-ticket"></i>
+            <span>邀请码管理</span>
         </div>
 
         <div class="menu-item">
-            系统日志
+            <i class="fa-regular fa-file-lines"></i>
+            <span>系统日志</span>
         </div>
 
         <div class="menu-item">
-            公告管理
+            <i class="fa-solid fa-bullhorn"></i>
+            <span>公告管理</span>
         </div>
 
         <div class="menu-item">
-            修改密码
+            <i class="fa-solid fa-lock"></i>
+            <span>修改密码</span>
         </div>
 
         <div class="menu-item" onclick="logout()">
-            退出登录
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>退出登录</span>
         </div>
 
     </div>
-
 </div>
 
 <div class="main">
@@ -180,42 +255,81 @@
             <p>8th-Ecosystem</p>
         </div>
 
-        <div class="admin-tag">
-            <span class="status-dot"></span>
-            管理员
+        <div class="admin-area">
+
+            <img
+                id="avatar-preview"
+                class="avatar"
+                src="https://via.placeholder.com/96"
+                alt="头像"
+            >
+
+            <div class="admin-tag">
+                <span class="status-dot"></span>
+                管理员
+            </div>
+
         </div>
 
     </div>
 
     <div class="monitor-grid">
 
-        <div class="monitor-card" >
-            <h2>服务运行总时长</h2>
+        <div class="monitor-card">
+            <div class="monitor-title">
+                <div class="monitor-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <h2>服务运行总时长</h2>
+            </div>
+
             <div class="monitor-value" id="service-uptime">--</div>
+
             <p class="monitor-description">
-                显示当前后端服务自最近一次启动以来的持续运行时间。
+                显示网站自设定上线时间以来的总运行时长。
             </p>
         </div>
 
         <div class="monitor-card">
-            <h2>数据库连接状态</h2>
+            <div class="monitor-title">
+                <div class="monitor-icon green">
+                    <i class="fa-solid fa-database"></i>
+                </div>
+                <h2>数据库连接状态</h2>
+            </div>
+
             <div class="monitor-value" id="database-status">--</div>
+
             <p class="monitor-description">
                 显示系统当前是否能够正常连接并访问数据库。
             </p>
         </div>
 
         <div class="monitor-card">
-            <h2>部署环境</h2>
+            <div class="monitor-title">
+                <div class="monitor-icon orange">
+                    <i class="fa-solid fa-cloud"></i>
+                </div>
+                <h2>部署环境</h2>
+            </div>
+
             <div class="monitor-value" id="deploy-environment">--</div>
+
             <p class="monitor-description">
                 显示当前系统运行环境，例如 Development 或 Production。
             </p>
         </div>
 
         <div class="monitor-card">
-            <h2>系统版本</h2>
-            <div class="monitor-value" id="system-version">v0.1.0</div>
+            <div class="monitor-title">
+                <div class="monitor-icon purple">
+                    <i class="fa-solid fa-code-branch"></i>
+                </div>
+                <h2>系统版本</h2>
+            </div>
+
+            <div class="monitor-value" id="system-version">--</div>
+
             <p class="monitor-description">
                 当前后台系统版本，用于后续功能迭代和版本管理。
             </p>
@@ -236,31 +350,58 @@
     }
 
     async function loadSystemMonitor() {
-        const response = await fetch("/admin/system-monitor");
-        const data = await response.json();
+        try {
+            const response = await fetch("/admin/system-monitor");
+            const data = await response.json();
 
-        if (!data.success) {
-            return;
+            if (!data.success) {
+                return;
+            }
+
+            document.getElementById("service-uptime").innerText =
+                formatRuntime(data.total_runtime_seconds);
+
+            document.getElementById("database-status").innerText =
+                data.database_status;
+
+            document.getElementById("deploy-environment").innerText =
+                data.deploy_environment;
+
+            document.getElementById("system-version").innerText =
+                data.system_version;
+
+        } catch (error) {
+            console.error("加载系统监控数据失败：", error);
         }
+    }
 
-        document.getElementById("service-uptime").innerText =
-            formatRuntime(data.total_runtime_seconds);
+    async function loadCurrentUser() {
+        try {
+            const response = await fetch("/current-user");
+            const data = await response.json();
 
-        document.getElementById("database-status").innerText =
-            data.database_status;
+            if (!data.success) {
+                return;
+            }
 
-        document.getElementById("deploy-environment").innerText =
-            data.deploy_environment;
+            if (data.avatar_url) {
+                document.getElementById("avatar-preview").src =
+                    data.avatar_url;
+            }
 
-        document.getElementById("system-version").innerText =
-            data.system_version;
+        } catch (error) {
+            console.error("加载当前用户失败：", error);
+        }
     }
 
     function logout() {
         window.location.href = "/logout";
     }
 
-    loadSystemMonitor();
+    window.addEventListener("pageshow", function () {
+        loadSystemMonitor();
+        loadCurrentUser();
+    });
 
     setInterval(loadSystemMonitor, 1000);
 </script>

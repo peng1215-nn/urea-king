@@ -12,9 +12,12 @@ from models import User
 from models import InvitationCode
 from routes.register import router as register_router
 from routes.admin import router as admin_router
+from routes.avatar import router as avatar_router
 
 
 app = FastAPI()
+
+app.include_router(avatar_router)
 
 
 app.add_middleware(

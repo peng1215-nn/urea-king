@@ -5,6 +5,7 @@ from datetime import datetime
 from app_state import PROJECT_LAUNCH_TIME
 from app_state import SYSTEM_VERSION
 from app_state import DEPLOY_ENVIRONMENT
+from fastapi import Request
 
 
 router = APIRouter()
@@ -70,3 +71,38 @@ def system_monitor_data():
         "deploy_environment": DEPLOY_ENVIRONMENT,
         "system_version": SYSTEM_VERSION
     }
+
+
+@router.get("/current-user")
+def current_user(request: Request):
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return {
+            "success": False,
+            "message": "未登录。"
+        }
+
+    db = SessionLocal()
+
+    try:
+        user = db.query(User).filter(
+            User.id == user_id
+        ).first()
+
+        if not user:
+            return {
+                "success": False,
+                "message": "用户不存在。"
+            }
+
+        return {
+            "success": True,
+            "username": user.username,
+            "nickname": user.nickname,
+            "role": user.role,
+            "avatar_url": user.avatar_url
+        }
+
+    finally:
+        db.close()

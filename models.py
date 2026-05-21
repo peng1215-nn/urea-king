@@ -22,6 +22,8 @@ class User(Base):
 
     group_id = Column(String(30), nullable=True)
 
+    avatar_url = Column(String(255), nullable=True)
+
     invitation_code = Column(String(100), nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
