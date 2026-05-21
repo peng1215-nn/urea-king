@@ -151,7 +151,7 @@ def login_user(
 
         return {
             "success": True,
-            "message": f"管理员 {display_name} 登录成功，5秒后跳转。",
+            "message": f"管理员 {display_name} 登录成功，3秒后跳转。",
             "role": user.role
         }
 
