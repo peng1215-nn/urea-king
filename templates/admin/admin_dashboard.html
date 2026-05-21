@@ -368,7 +368,7 @@
             <input
                 type="file"
                 id="avatar-input"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 onchange="uploadAvatar()"
                 hidden
             >
@@ -541,36 +541,69 @@
     }
 
     async function uploadAvatar() {
-        const fileInput = document.getElementById("avatar-input");
-        const file = fileInput.files[0];
+        const fileInput =
+        document.getElementById("avatar-input");
+
+        const file =
+        fileInput.files[0];
 
         if (!file) {
             return;
         }
 
+        const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            alert(
+                "请上传 JPG、PNG 或 WebP 格式头像。苹果手机请不要直接上传 HEIC 图片。"
+            );
+
+            return;
+        }
+
         const formData = new FormData();
-        formData.append("avatar", file);
+
+        formData.append(
+            "avatar", file
+        );
 
         try {
-            const response = await fetch("/upload-avatar", {
+            const response = await fetch(
+                "/upload-avatar",
+            {
                 method: "POST",
                 body: formData
-            });
-
-            const data = await response.json();
-
-            if (!data.success) {
-                console.error(data.message || "头像上传失败。");
-                return;
             }
+        );
 
-            document.getElementById("avatar-preview").src =
-                data.avatar_url;
+        const data =
+            await response.json();
+
+        if (!data.success) {
+
+            alert(
+                data.message || "头像上传失败。"
+            );
+
+            return;
+        }
+
+        document.getElementById(
+            "avatar-preview"
+        ).src = data.avatar_url;
 
         } catch (error) {
-            console.error("头像上传失败：", error);
+
+        console.error(error);
+
+        alert("头像上传失败。");
         }
     }
+
 
     async function loadCurrentUser() {
         try {
