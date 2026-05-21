@@ -8,6 +8,7 @@ from app_state import DEPLOY_ENVIRONMENT
 from fastapi import Request
 
 
+
 router = APIRouter()
 
 
@@ -102,6 +103,45 @@ def current_user(request: Request):
             "nickname": user.nickname,
             "role": user.role,
             "avatar_url": user.avatar_url
+        }
+
+    finally:
+        db.close()
+
+
+@router.get("/admin/users")
+def get_users(request: Request):
+
+    if request.session.get("role") != "admin":
+        return {
+            "success": False,
+            "message": "无权限访问。"
+        }
+
+    db = SessionLocal()
+
+    try:
+        users = db.query(User).order_by(
+            User.id.asc()
+        ).all()
+
+        user_list = []
+
+        for user in users:
+            user_list.append({
+                "id": user.id,
+                "username": user.username,
+                "nickname": user.nickname,
+                "role": user.role,
+                "group_id": user.group_id,
+                "avatar_url": user.avatar_url,
+                "created_at": user.created_at.strftime("%Y-%m-%d %H:%M")
+                if user.created_at else ""
+            })
+
+        return {
+            "success": True,
+            "users": user_list
         }
 
     finally:

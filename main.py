@@ -17,8 +17,8 @@ from routes.avatar import router as avatar_router
 
 app = FastAPI()
 
-app.include_router(avatar_router)
 
+app.include_router(avatar_router)
 
 app.add_middleware(
     SessionMiddleware,
@@ -34,6 +34,7 @@ app.mount(
 templates = Jinja2Templates(
     directory="templates"
 )
+
 
 app.include_router(register_router)
 app.include_router(admin_router)
@@ -110,29 +111,46 @@ def system_monitor(request: Request):
     return response
 
 
+@app.get("/user-management", response_class=HTMLResponse)
+def user_management(request: Request):
+
+    if request.session.get("role") != "admin":
+
+        return RedirectResponse(
+            url="/login",
+            status_code=302
+        )
+
+    response = templates.TemplateResponse(
+        request=request,
+        name="admin/user_management.html"
+    )
+
+    response.headers["Cache-Control"] = \
+        "no-store, no-cache, must-revalidate, max-age=0"
+
+    response.headers["Pragma"] = "no-cache"
+
+    response.headers["Expires"] = "0"
+
+    return response
+
+
 @app.post("/login")
 def login_user(
-
     request: Request,
-
     username: str = Form(...),
-
     password: str = Form(...),
-
     role: str = Form(...)
-
 ):
 
     username = username.strip()
-
     db = SessionLocal()
 
     try:
-
         user = db.query(User).filter(
             User.username == username
         ).first()
-
         if not user:
 
             return {
@@ -177,7 +195,6 @@ def login_user(
         }
 
     except Exception as e:
-
         print(e)
 
         return {
@@ -186,7 +203,6 @@ def login_user(
         }
 
     finally:
-
         db.close()
 
 

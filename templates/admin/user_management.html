@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            color: white;
+            background:
+                    linear-gradient(
+                            135deg,
+                            #0f0f16,
+                            #151928,
+                            #1a2033
+                    );
+
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            padding: 28px 18px;
+            background:
+                    rgba(10,10,18,0.96);
+
+            border-right:
+                    1px solid rgba(255,255,255,0.08);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-align: center;
+            margin-bottom: 42px;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .menu-item {
+            padding: 14px 18px;
+            border-radius: 12px;
+
+            background:
+                    rgba(255,255,255,0.03);
+
+            color:
+                    rgba(255,255,255,0.82);
+
+            cursor: pointer;
+
+            transition: 0.25s;
+
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .menu-item i {
+            width: 20px;
+            font-size: 17px;
+            text-align: center;
+
+            color:
+                    rgba(255,255,255,0.72);
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+
+            background:
+                    rgba(255,255,255,0.1);
+
+            color: white;
+        }
+
+        .menu-item.active i {
+            color: #5C8DFF;
+        }
+
+        .main {
+            flex: 1;
+            padding: 38px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 34px;
+        }
+
+        .title-area h1 {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .title-area p {
+            color:
+                    rgba(255,255,255,0.68);
+
+            letter-spacing: 1px;
+        }
+
+        .admin-area {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .avatar {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+
+            border:
+                    4px solid rgba(255,255,255,0.82);
+
+            background:
+                    rgba(255,255,255,0.08);
+
+            box-shadow:
+                    0 0 18px rgba(255,255,255,0.16);
+        }
+
+        .admin-tag {
+            padding: 12px 22px;
+            border-radius: 999px;
+
+            background:
+                    rgba(92,255,178,0.15);
+
+            color: #5CFFB2;
+
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+
+            background: #5CFFB2;
+
+            margin-right: 8px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 24px;
+
+            gap: 20px;
+        }
+
+        .search-box {
+            width: 360px;
+            height: 44px;
+
+            border: none;
+            border-radius: 12px;
+
+            padding: 0 16px;
+
+            outline: none;
+
+            background:
+                    rgba(255,255,255,0.92);
+
+            color: #111;
+            font-size: 14px;
+        }
+
+        .toolbar-hint {
+            color:
+                    rgba(255,255,255,0.62);
+
+            font-size: 14px;
+        }
+
+        .table-card {
+            border-radius: 18px;
+
+            background:
+                    rgba(255,255,255,0.045);
+
+            border:
+                    1px solid rgba(255,255,255,0.08);
+
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        thead {
+            background:
+                    rgba(255,255,255,0.06);
+        }
+
+        th,
+        td {
+            padding: 18px 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        th {
+            color:
+                    rgba(255,255,255,0.72);
+
+            font-weight: normal;
+        }
+
+        tbody tr {
+            border-top:
+                    1px solid rgba(255,255,255,0.07);
+
+            transition: 0.25s;
+
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background:
+                    rgba(255,255,255,0.055);
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+
+            border-radius: 50%;
+
+            object-fit: cover;
+
+            border:
+                    2px solid rgba(255,255,255,0.28);
+        }
+
+        .role-badge {
+            display: inline-block;
+
+            padding: 6px 12px;
+
+            border-radius: 999px;
+
+            font-size: 13px;
+
+            background:
+                    rgba(92,141,255,0.16);
+
+            color: #7EA2FF;
+        }
+
+        .role-badge.admin {
+            background:
+                    rgba(92,255,178,0.14);
+
+            color: #5CFFB2;
+        }
+
+        .role-badge.organizer {
+            background:
+                    rgba(180,100,255,0.14);
+
+            color: #B464FF;
+        }
+
+        .detail-panel {
+            margin-top: 24px;
+
+            padding: 24px;
+
+            border-radius: 18px;
+
+            background:
+                    rgba(255,255,255,0.045);
+
+            border:
+                    1px solid rgba(255,255,255,0.08);
+        }
+
+        .detail-panel h2 {
+            font-size: 22px;
+            margin-bottom: 18px;
+        }
+
+        .detail-grid {
+            display: grid;
+
+            grid-template-columns:
+                    repeat(
+                            3,
+                            minmax(180px,1fr)
+                    );
+
+            gap: 18px;
+        }
+
+        .detail-item {
+            padding: 16px;
+            border-radius: 14px;
+
+            background:
+                    rgba(255,255,255,0.04);
+        }
+
+        .detail-label {
+            font-size: 13px;
+
+            color:
+                    rgba(255,255,255,0.58);
+
+            margin-bottom: 8px;
+        }
+
+        .detail-value {
+            font-size: 15px;
+            color: white;
+        }
+
+        .management-actions {
+            display: grid;
+
+            grid-template-columns:
+                    repeat(3, 1fr);
+
+            gap: 24px;
+
+            margin-top: 24px;
+        }
+
+        .action-panel {
+            min-height: 320px;
+
+            padding: 24px;
+
+            border-radius: 18px;
+
+            background:
+                    rgba(255,255,255,0.045);
+
+            border:
+                    1px solid rgba(255,255,255,0.08);
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            margin-bottom: 14px;
+        }
+
+        .panel-title i {
+            width: 38px;
+            height: 38px;
+
+            border-radius: 12px;
+
+            background:
+                    rgba(92,141,255,0.16);
+
+            color: #5C8DFF;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-size: 17px;
+        }
+
+        .panel-title h2 {
+            font-size: 20px;
+        }
+
+        .panel-description {
+            font-size: 14px;
+
+            line-height: 1.6;
+
+            color:
+                    rgba(255,255,255,0.68);
+
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: flex;
+            flex-direction: column;
+
+            gap: 14px;
+
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+
+            color:
+                    rgba(255,255,255,0.7);
+        }
+
+        .form-group input,
+        .form-group select {
+            height: 40px;
+
+            border: none;
+            border-radius: 10px;
+
+            padding: 0 12px;
+
+            outline: none;
+
+            background:
+                    rgba(255,255,255,0.92);
+
+            color: #111;
+
+            font-size: 14px;
+        }
+
+        .panel-button {
+            width: 100%;
+            height: 42px;
+
+            border: none;
+            border-radius: 10px;
+
+            background:
+                    rgba(92,141,255,0.22);
+
+            color: white;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.25s;
+        }
+
+        .panel-button:hover {
+            background:
+                    rgba(92,141,255,0.34);
+        }
+
+        .panel-button.warning {
+            background:
+                    rgba(255,160,80,0.2);
+        }
+
+        .panel-button.warning:hover {
+            background:
+                    rgba(255,160,80,0.34);
+        }
+
+        .panel-button.danger {
+            background:
+                    rgba(255,100,130,0.2);
+        }
+
+        .panel-button.danger:hover {
+            background:
+                    rgba(255,100,130,0.34);
+        }
+
+        .status-preview {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 18px;
+
+            border-radius: 14px;
+
+            background:
+                    rgba(255,255,255,0.04);
+
+            margin: 24px 0;
+        }
+
+        .status-label {
+            color:
+                    rgba(255,255,255,0.68);
+
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+
+            border-radius: 999px;
+
+            font-size: 13px;
+        }
+
+        .status-badge.active {
+            background:
+                    rgba(92,255,178,0.14);
+
+            color: #5CFFB2;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <div class="logo">
+        UREAKING
+    </div>
+
+    <div class="menu">
+
+        <div class="menu-item"
+             onclick="window.location.href='/admin-dashboard'">
+
+            <i class="fa-solid fa-house"></i>
+
+            <span>控制台</span>
+
+        </div>
+
+        <div class="menu-item"
+             onclick="window.location.href='/system-monitor'">
+
+            <i class="fa-solid fa-desktop"></i>
+
+            <span>系统监控</span>
+
+        </div>
+
+        <div class="menu-item active">
+
+            <i class="fa-regular fa-user"></i>
+
+            <span>用户管理</span>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="main">
+
+    <div class="top-bar">
+
+        <div class="title-area">
+
+            <h1>用户管理</h1>
+
+            <p>8th-Ecosystem</p>
+
+        </div>
+
+        <div class="admin-area">
+
+            <img
+                id="avatar-preview"
+                class="avatar"
+                src="https://via.placeholder.com/96"
+                alt="头像"
+            >
+
+            <div class="admin-tag">
+
+                <span class="status-dot"></span>
+
+                管理员
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="toolbar">
+
+        <input
+            type="text"
+            id="user-search"
+            class="search-box"
+            placeholder="搜索用户名或昵称"
+        >
+
+        <div class="toolbar-hint">
+            点击用户行可查看详情。
+        </div>
+
+    </div>
+
+    <div class="table-card">
+
+        <table>
+
+            <thead>
+
+            <tr>
+
+                <th>用户</th>
+
+                <th>昵称</th>
+
+                <th>身份</th>
+
+                <th>组别</th>
+
+                <th>注册时间</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody id="user-table-body"></tbody>
+
+        </table>
+
+    </div>
+
+    <div class="detail-panel">
+
+        <h2>用户详情</h2>
+
+        <div class="detail-grid">
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    用户名
+                </div>
+
+                <div class="detail-value"
+                     id="detail-username">
+                    --
+                </div>
+
+            </div>
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    昵称
+                </div>
+
+                <div class="detail-value"
+                     id="detail-nickname">
+                    --
+                </div>
+
+            </div>
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    身份
+                </div>
+
+                <div class="detail-value"
+                     id="detail-role">
+                    --
+                </div>
+
+            </div>
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    组别
+                </div>
+
+                <div class="detail-value"
+                     id="detail-group">
+                    --
+                </div>
+
+            </div>
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    注册时间
+                </div>
+
+                <div class="detail-value"
+                     id="detail-created-at">
+                    --
+                </div>
+
+            </div>
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    账号状态
+                </div>
+
+                <div class="detail-value"
+                     id="detail-status">
+                    正常
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    let selectedUser = null;
+
+    async function loadCurrentUser() {
+
+        try {
+
+            const response =
+                await fetch("/current-user");
+
+            const data =
+                await response.json();
+
+            if (!data.success) {
+                return;
+            }
+
+            if (data.avatar_url) {
+
+                document.getElementById(
+                    "avatar-preview"
+                ).src =
+                    data.avatar_url;
+            }
+
+        }
+
+        catch(error) {
+
+            console.error(error);
+        }
+    }
+
+    async function loadUsers() {
+
+        try {
+
+            const response =
+                await fetch("/admin/users");
+
+            const data =
+                await response.json();
+
+            if (!data.success) {
+                return;
+            }
+
+            const tableBody =
+                document.getElementById(
+                    "user-table-body"
+                );
+
+            tableBody.innerHTML = "";
+
+            data.users.forEach(user => {
+
+                const avatarUrl =
+                    user.avatar_url ||
+                    "https://via.placeholder.com/48";
+
+                const groupId =
+                    user.group_id || "--";
+
+                const roleClass =
+                    user.role === "admin"
+                        ? "admin"
+                        : user.role === "organizer"
+                            ? "organizer"
+                            : "";
+
+                const row = `
+
+                    <tr onclick='selectUser(${JSON.stringify(user)})'>
+
+                        <td>
+
+                            <img
+                                class="user-avatar"
+                                src="${avatarUrl}"
+                                alt="头像"
+                            >
+
+                        </td>
+
+                        <td>
+                            ${user.nickname || "--"}
+                        </td>
+
+                        <td>
+
+                            <span class="role-badge ${roleClass}">
+
+                                ${user.role}
+
+                            </span>
+
+                        </td>
+
+                        <td>
+                            ${groupId}
+                        </td>
+
+                        <td>
+                            ${user.created_at}
+                        </td>
+
+                    </tr>
+
+                `;
+
+                tableBody.innerHTML += row;
+            });
+
+        }
+
+        catch(error) {
+
+            console.error(error);
+        }
+    }
+
+    function selectUser(user) {
+
+        selectedUser = user;
+
+        document.getElementById(
+            "detail-username"
+        ).innerText =
+            user.username;
+
+        document.getElementById(
+            "detail-nickname"
+        ).innerText =
+            user.nickname || "--";
+
+        document.getElementById(
+            "detail-role"
+        ).innerText =
+            user.role;
+
+        document.getElementById(
+            "detail-group"
+        ).innerText =
+            user.group_id || "--";
+
+        document.getElementById(
+            "detail-created-at"
+        ).innerText =
+            user.created_at;
+    }
+
+    window.addEventListener(
+        "pageshow",
+        function () {
+
+            loadCurrentUser();
+
+            loadUsers();
+        }
+    );
+
+</script>
+
+</body>
+</html>
