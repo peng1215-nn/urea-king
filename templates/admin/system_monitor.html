@@ -190,7 +190,7 @@
     <div class="monitor-grid">
 
         <div class="monitor-card" >
-            <h2>服务运行时长</h2>
+            <h2>服务运行总时长</h2>
             <div class="monitor-value" id="service-uptime">--</div>
             <p class="monitor-description">
                 显示当前后端服务自最近一次启动以来的持续运行时间。
@@ -226,7 +226,7 @@
 </div>
 
 <script>
-    function formatUptime(seconds) {
+    function formatRuntime(seconds) {
         const days = Math.floor(seconds / 86400);
         const hours = Math.floor((seconds % 86400) / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
@@ -234,7 +234,6 @@
 
         return `${days}天 ${hours}小时 ${minutes}分钟 ${secs}秒`;
     }
-
 
     async function loadSystemMonitor() {
         const response = await fetch("/admin/system-monitor");
@@ -245,15 +244,24 @@
         }
 
         document.getElementById("service-uptime").innerText =
-            formatUptime(data.uptime_seconds);
-    }
+            formatRuntime(data.total_runtime_seconds);
 
+        document.getElementById("database-status").innerText =
+            data.database_status;
+
+        document.getElementById("deploy-environment").innerText =
+            data.deploy_environment;
+
+        document.getElementById("system-version").innerText =
+            data.system_version;
+    }
 
     function logout() {
         window.location.href = "/logout";
     }
 
     loadSystemMonitor();
+
     setInterval(loadSystemMonitor, 1000);
 </script>
 

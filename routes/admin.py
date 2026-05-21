@@ -2,7 +2,9 @@ from fastapi import APIRouter
 from database import SessionLocal
 from models import User, InvitationCode
 from datetime import datetime
-from app_state import APP_START_TIME
+from app_state import PROJECT_LAUNCH_TIME
+from app_state import SYSTEM_VERSION
+from app_state import DEPLOY_ENVIRONMENT
 
 
 router = APIRouter()
@@ -53,11 +55,18 @@ def admin_stats():
 @router.get("/admin/system-monitor")
 def system_monitor_data():
 
-    uptime_seconds = int(
-        (datetime.utcnow() - APP_START_TIME).total_seconds()
+    total_runtime_seconds = int(
+        (
+            datetime.utcnow()
+            -
+            PROJECT_LAUNCH_TIME
+        ).total_seconds()
     )
 
     return {
         "success": True,
-        "uptime_seconds": uptime_seconds
+        "total_runtime_seconds": total_runtime_seconds,
+        "database_status": "正常",
+        "deploy_environment": DEPLOY_ENVIRONMENT,
+        "system_version": SYSTEM_VERSION
     }
