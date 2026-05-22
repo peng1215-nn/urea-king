@@ -6,10 +6,91 @@ from app_state import PROJECT_LAUNCH_TIME
 from app_state import SYSTEM_VERSION
 from app_state import DEPLOY_ENVIRONMENT
 from fastapi import Request
-
+from fastapi.responses import HTMLResponse
+from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
 
 
 router = APIRouter()
+
+templates = Jinja2Templates(
+    directory="templates"
+)
+
+
+@router.get("/admin-dashboard", response_class=HTMLResponse)
+def admin_dashboard(request: Request):
+    if request.session.get("role") != "admin":
+        return RedirectResponse(
+            url="/login",
+            status_code=302
+        )
+
+    response = templates.TemplateResponse(
+        request=request,
+        name="admin/dashboard.html",
+        context={
+            "current_page": "dashboard"
+        }
+    )
+
+    response.headers["Cache-Control"] = \
+        "no-store, no-cache, must-revalidate, max-age=0"
+
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
+
+
+@router.get("/system-monitor", response_class=HTMLResponse)
+def system_monitor_page(request: Request):
+    if request.session.get("role") != "admin":
+        return RedirectResponse(
+            url="/login",
+            status_code=302
+        )
+
+    response = templates.TemplateResponse(
+        request=request,
+        name="admin/system_monitor.html",
+        context={
+            "current_page": "system_monitor"
+        }
+    )
+
+    response.headers["Cache-Control"] = \
+        "no-store, no-cache, must-revalidate, max-age=0"
+
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
+
+
+@router.get("/user-management", response_class=HTMLResponse)
+def user_management_page(request: Request):
+    if request.session.get("role") != "admin":
+        return RedirectResponse(
+            url="/login",
+            status_code=302
+        )
+
+    response = templates.TemplateResponse(
+        request=request,
+        name="admin/user_management.html",
+        context={
+            "current_page": "user_management"
+        }
+    )
+
+    response.headers["Cache-Control"] = \
+        "no-store, no-cache, must-revalidate, max-age=0"
+
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
 
 
 @router.get("/admin/stats")
@@ -72,41 +153,6 @@ def system_monitor_data():
         "deploy_environment": DEPLOY_ENVIRONMENT,
         "system_version": SYSTEM_VERSION
     }
-
-
-@router.get("/current-user")
-def current_user(request: Request):
-    user_id = request.session.get("user_id")
-
-    if not user_id:
-        return {
-            "success": False,
-            "message": "未登录。"
-        }
-
-    db = SessionLocal()
-
-    try:
-        user = db.query(User).filter(
-            User.id == user_id
-        ).first()
-
-        if not user:
-            return {
-                "success": False,
-                "message": "用户不存在。"
-            }
-
-        return {
-            "success": True,
-            "username": user.username,
-            "nickname": user.nickname,
-            "role": user.role,
-            "avatar_url": user.avatar_url
-        }
-
-    finally:
-        db.close()
 
 
 @router.get("/admin/users")

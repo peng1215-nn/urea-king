@@ -7,7 +7,7 @@
 
 body {
     min-height: 100vh;
-    background-image: url("/static/images/login_background.jpg");
+    background-image: url("/static/images/auth_background.jpg");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

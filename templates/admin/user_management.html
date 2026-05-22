@@ -1,284 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
+
     <meta charset="UTF-8">
     <title>用户管理</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/admin_common.css">
+    <link rel="stylesheet" href="/static/css/admin/common.css">
+    <link rel="stylesheet" href="/static/css/admin/user_management.css">
 
-    <style>
-
-        .toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            gap: 20px;
-        }
-
-        .search-box {
-            width: 360px;
-            height: 44px;
-            border: none;
-            border-radius: 12px;
-            padding: 0 16px;
-            outline: none;
-            background: rgba(255, 255, 255, 0.92);
-            color: #111;
-            font-size: 14px;
-        }
-
-        .toolbar-hint {
-            color: rgba(255, 255, 255, 0.62);
-            font-size: 14px;
-        }
-
-        .table-card {
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 0.045);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            overflow: hidden;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-
-        thead {
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        th,
-        td {
-            padding: 18px 20px;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        th {
-            color: rgba(255, 255, 255, 0.72);
-            font-weight: normal;
-        }
-
-        tbody tr {
-            border-top: 1px solid rgba(255, 255, 255, 0.07);
-            transition: 0.25s;
-            cursor: pointer;
-        }
-
-        tbody tr:hover {
-            background: rgba(255, 255, 255, 0.055);
-        }
-
-        tbody tr.active {
-            background: rgba(92, 141, 255, 0.18);
-            box-shadow: inset 4px 0 0 #5C8DFF;
-        }
-
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(255, 255, 255, 0.28);
-        }
-
-        .role-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 13px;
-            background: rgba(92, 141, 255, 0.16);
-            color: #7EA2FF;
-        }
-
-        .role-badge.admin {
-            background: rgba(92, 255, 178, 0.14);
-            color: #5CFFB2;
-        }
-
-        .role-badge.organizer {
-            background: rgba(180, 100, 255, 0.14);
-            color: #B464FF;
-        }
-
-        .detail-panel {
-            margin-top: 24px;
-            padding: 24px;
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 0.045);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .detail-panel h2 {
-            font-size: 22px;
-            margin-bottom: 18px;
-        }
-
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(180px, 1fr));
-            gap: 18px;
-        }
-
-        .detail-item {
-            padding: 16px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        .detail-label {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.58);
-            margin-bottom: 8px;
-        }
-
-        .detail-value {
-            font-size: 15px;
-            color: white;
-        }
-
-        .management-actions {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            margin-top: 24px;
-        }
-
-        .action-panel {
-            min-height: 320px;
-            padding: 24px;
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 0.045);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .panel-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 14px;
-        }
-
-        .panel-title i {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            background: rgba(92, 141, 255, 0.16);
-            color: #5C8DFF;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 17px;
-        }
-
-        .panel-title h2 {
-            font-size: 20px;
-        }
-
-        .panel-description {
-            font-size: 14px;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.68);
-            margin-bottom: 20px;
-        }
-
-        .form-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-group label {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .form-group input,
-        .form-group select {
-            height: 40px;
-            border: none;
-            border-radius: 10px;
-            padding: 0 12px;
-            outline: none;
-            background: rgba(255, 255, 255, 0.92);
-            color: #111;
-            font-size: 14px;
-        }
-
-        .panel-button {
-            width: 100%;
-            height: 42px;
-            border: none;
-            border-radius: 10px;
-            background: rgba(92, 141, 255, 0.22);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.25s;
-        }
-
-        .panel-button:hover {
-            background: rgba(92, 141, 255, 0.34);
-        }
-
-        .panel-button.warning {
-            background: rgba(255, 160, 80, 0.2);
-        }
-
-        .panel-button.warning:hover {
-            background: rgba(255, 160, 80, 0.34);
-        }
-
-        .panel-button.danger {
-            background: rgba(255, 100, 130, 0.2);
-        }
-
-        .panel-button.danger:hover {
-            background: rgba(255, 100, 130, 0.34);
-        }
-
-        .status-preview {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.04);
-            margin: 24px 0;
-        }
-
-        .status-label {
-            color: rgba(255, 255, 255, 0.68);
-            font-size: 14px;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 999px;
-            font-size: 13px;
-        }
-
-        .status-badge.active {
-            background: rgba(92, 255, 178, 0.14);
-            color: #5CFFB2;
-        }
-    </style>
 </head>
 
 <body>
 
-{% include "admin/admin_sidebar.html" %}
+{% include "admin/sidebar.html" %}
 
 <div class="main">
 
@@ -290,35 +25,63 @@
         </div>
 
         <div class="admin-area">
-            <img id="avatar-preview" class="avatar" src="https://via.placeholder.com/96" alt="头像">
+
+            <img
+                id="avatar-preview"
+                class="avatar"
+                src="https://via.placeholder.com/96"
+                alt="头像"
+            >
 
             <div class="admin-tag">
                 <span class="status-dot"></span>
                 管理员
             </div>
+
         </div>
 
     </div>
 
     <div class="toolbar">
 
-        <input
-            type="text"
-            id="user-search"
-            class="search-box"
-            placeholder="搜索用户名或昵称"
-        >
+        <div class="search-area">
 
-        <div class="toolbar-hint">
-            点击用户行可查看详情。
+            <input
+                type="text"
+                id="user-search"
+                class="search-box"
+                placeholder="输入完整 username 或 nickname"
+            >
+
+            <button
+                class="search-button"
+                onclick="searchUsers()"
+            >
+                搜索
+            </button>
+
+            <button
+                class="clear-button"
+                onclick="clearSearch()"
+            >
+                清除
+            </button>
+
         </div>
+
+        <div
+            id="search-message"
+            class="search-message"
+        ></div>
 
     </div>
 
     <div class="table-card">
 
         <table>
+
             <thead>
+
                 <tr>
                     <th>用户</th>
                     <th>昵称</th>
@@ -326,9 +89,11 @@
                     <th>组别</th>
                     <th>注册时间</th>
                 </tr>
+
             </thead>
 
             <tbody id="user-table-body"></tbody>
+
         </table>
 
     </div>
@@ -459,7 +224,7 @@
                     当前状态
                 </span>
 
-                <span class="status-badge active">
+                <span class="status-badge active" id="selected-user-status">
                     正常
                 </span>
 
@@ -475,140 +240,16 @@
 
 </div>
 
-<script>
-    let selectedUser = null;
+<script src="/static/js/common/current_user.js"></script>
+<script src="/static/js/common/logout.js"></script>
+<script src="/static/js/admin/user_management/state.js"></script>
+<script src="/static/js/admin/user_management/user_api.js"></script>
+<script src="/static/js/admin/user_management/user_render.js"></script>
+<script src="/static/js/admin/user_management/user_search.js"></script>
+<script src="/static/js/admin/user_management/user_detail.js"></script>
+<script src="/static/js/admin/user_management/init.js"></script>
 
-   async function loadCurrentUser() {
-        const avatar = document.getElementById("avatar-preview");
-
-        try {
-            const response = await fetch("/current-user");
-
-            const data = await response.json();
-
-            if (
-                data.success && data.avatar_url)
-            {
-                avatar.src = data.avatar_url;
-            }
-
-            avatar.classList.add("loaded");
-        }
-
-        catch (error) {
-
-            console.error("加载当前用户失败：", error);
-
-            avatar.classList.add("loaded");
-        }
-    }
-
-    async function loadUsers() {
-        try {
-            const response = await fetch("/admin/users");
-            const data = await response.json();
-
-            if (!data.success) {
-                console.error(data.message);
-                return;
-            }
-
-            const tableBody = document.getElementById("user-table-body");
-
-            tableBody.innerHTML = "";
-
-            data.users.forEach(user => {
-                const avatarUrl =
-                    user.avatar_url || "https://via.placeholder.com/48";
-
-                const groupId =
-                    user.group_id || "--";
-
-                const roleClass =
-                    user.role === "admin"
-                        ? "admin"
-                        : user.role === "organizer"
-                            ? "organizer"
-                            : "";
-
-                const row = `
-                    <tr onclick='selectUser(${JSON.stringify(user)}, this)'>
-                        <td>
-                            <img
-                                class="user-avatar"
-                                src="${avatarUrl}"
-                                alt="头像"
-                            >
-                        </td>
-
-                        <td>${user.nickname || "--"}</td>
-
-                        <td>
-                            <span class="role-badge ${roleClass}">
-                                ${user.role}
-                            </span>
-                        </td>
-
-                        <td>${groupId}</td>
-
-                        <td>${user.created_at}</td>
-                    </tr>
-                `;
-
-                tableBody.innerHTML += row;
-            });
-
-        } catch (error) {
-            console.error("加载用户列表失败：", error);
-        }
-    }
-
-    function selectUser(user, rowElement) {
-        selectedUser = user;
-
-        document.querySelectorAll("#user-table-body tr").forEach(row => {
-            row.classList.remove("active");
-        });
-
-        rowElement.classList.add("active");
-
-        document.getElementById("detail-username").innerText =
-            user.username;
-
-        document.getElementById("detail-nickname").innerText =
-            user.nickname || "--";
-
-        document.getElementById("detail-role").innerText =
-            user.role;
-
-        document.getElementById("detail-group").innerText =
-            user.group_id || "--";
-
-        document.getElementById("detail-created-at").innerText =
-            user.created_at;
-
-        document.getElementById("detail-status").innerText =
-            "正常";
-
-        document.getElementById("edit-nickname").value =
-            user.nickname || "";
-
-        document.getElementById("edit-role").value =
-            user.role;
-
-        document.getElementById("edit-group-id").value =
-            user.group_id || "";
-    }
-
-    function logout() {
-        window.location.href = "/logout";
-    }
-
-    window.addEventListener("pageshow", function () {
-        loadCurrentUser();
-        loadUsers();
-    });
-</script>
 
 </body>
+
 </html>

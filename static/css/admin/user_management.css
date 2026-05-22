@@ -1,0 +1,317 @@
+.toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.search-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-box {
+    width: 360px;
+    height: 44px;
+    border: none;
+    border-radius: 12px;
+    padding: 0 16px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.92);
+    color: #111;
+    font-size: 14px;
+}
+
+.search-button,
+.clear-button {
+    height: 44px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    transition: 0.25s;
+    font-weight: bold;
+}
+
+.search-button {
+    background: rgba(92, 141, 255, 0.28);
+}
+
+.search-button:hover {
+    background: rgba(92, 141, 255, 0.42);
+}
+
+.clear-button {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.clear-button:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.search-message {
+    min-height: 20px;
+    color: #ff8a8a;
+    font-size: 14px;
+}
+
+.table-card {
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+
+    background: rgba(255, 255, 255, 0.06);
+}
+
+tbody {
+    display: block;
+
+    height: 260px;
+
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+
+    transition: 0.25s;
+
+    cursor: pointer;
+}
+
+th,
+td {
+    padding: 18px 20px;
+    text-align: center;
+    font-size: 14px;
+}
+
+th {
+    color: rgba(255, 255, 255, 0.72);
+    font-weight: normal;
+}
+
+tbody tr:hover {
+    background: rgba(255, 255, 255, 0.055);
+}
+
+tbody tr.active {
+    background: rgba(92, 141, 255, 0.18);
+    box-shadow: inset 4px 0 0 #5C8DFF;
+}
+
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.28);
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    background: rgba(92, 141, 255, 0.16);
+    color: #7EA2FF;
+}
+
+.role-badge.admin {
+    background: rgba(92, 255, 178, 0.14);
+    color: #5CFFB2;
+}
+
+.role-badge.organizer {
+    background: rgba(180, 100, 255, 0.14);
+    color: #B464FF;
+}
+
+.detail-panel {
+    margin-top: 24px;
+    padding: 24px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.detail-panel h2 {
+    font-size: 22px;
+    margin-bottom: 18px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 18px;
+}
+
+.detail-item {
+    padding: 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.detail-label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.58);
+    margin-bottom: 8px;
+}
+
+.detail-value {
+    font-size: 15px;
+    color: white;
+}
+
+.management-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.action-panel {
+    min-height: 320px;
+    padding: 24px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.panel-title i {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: rgba(92, 141, 255, 0.16);
+    color: #5C8DFF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 17px;
+}
+
+.panel-title h2 {
+    font-size: 20px;
+}
+
+.panel-description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.68);
+    margin-bottom: 20px;
+}
+
+.form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.form-group input,
+.form-group select {
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    padding: 0 12px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.92);
+    color: #111;
+    font-size: 14px;
+}
+
+.panel-button {
+    width: 100%;
+    height: 42px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(92, 141, 255, 0.22);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.panel-button:hover {
+    background: rgba(92, 141, 255, 0.34);
+}
+
+.panel-button.warning {
+    background: rgba(255, 160, 80, 0.2);
+}
+
+.panel-button.warning:hover {
+    background: rgba(255, 160, 80, 0.34);
+}
+
+.panel-button.danger {
+    background: rgba(255, 100, 130, 0.2);
+}
+
+.panel-button.danger:hover {
+    background: rgba(255, 100, 130, 0.34);
+}
+
+.status-preview {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    margin: 24px 0;
+}
+
+.status-label {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 14px;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+}
+
+.status-badge.active {
+    background: rgba(92, 255, 178, 0.14);
+    color: #5CFFB2;
+}
