@@ -13,16 +13,25 @@ from models import InvitationCode
 from routes.register import router as register_router
 from routes.admin import router as admin_router
 from routes.avatar import router as avatar_router
+from dotenv import load_dotenv
+import os
 
+
+load_dotenv()
 
 app = FastAPI()
 
 
 app.include_router(avatar_router)
 
+SESSION_SECRET_KEY = os.getenv(
+    "SESSION_SECRET_KEY",
+    "local-dev-secret-key"
+)
+
 app.add_middleware(
     SessionMiddleware,
-    secret_key="change-this-secret-key-later"
+    secret_key=SESSION_SECRET_KEY
 )
 
 app.mount(
