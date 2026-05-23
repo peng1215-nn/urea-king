@@ -5,19 +5,21 @@ function getLoginFormData() {
     };
 }
 
+
 function validateLoginForm(username, password) {
     if (username.length === 0) {
-        showMessage("请输入用户名。");
+        showMessage(t("loginUsernameRequired"), false);
         return false;
     }
 
     if (password.length === 0) {
-        showMessage("请输入密码。");
+        showMessage(t("loginPasswordRequired"), false);
         return false;
     }
 
     return true;
 }
+
 
 function buildLoginFormData(username, password) {
     const formData = new FormData();

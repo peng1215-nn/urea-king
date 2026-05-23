@@ -40,6 +40,7 @@ function selectUser(user, rowElement) {
         "正常";
 }
 
+
 function logout() {
     window.location.href = "/logout";
 }

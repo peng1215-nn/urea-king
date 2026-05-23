@@ -5,24 +5,39 @@ async function login() {
         return;
     }
 
-    const formData = buildLoginFormData(username, password);
+    const formData =
+        buildLoginFormData(username, password);
 
     try {
         const response = await fetch("/login", {
             method: "POST",
-            body: formData
+            body: formData,
         });
 
         const data = await response.json();
 
-        showMessage(data.message, data.success);
+        if (data.success === true) {
+            showMessage(
+                `${data.role} - ${data.display_name} ${t("loginSuccess")}`,
+                true
+            );
 
-        if (data.success) {
             redirectByRole(data.role);
+
+            return;
         }
+
+        showMessage(
+            t(data.error_code || "loginFailed"),
+            false,
+        );
 
     } catch (error) {
         console.error(error);
-        showMessage("登录请求失败。");
+
+        showMessage(
+            t("loginFailed"),
+            false,
+        );
     }
 }

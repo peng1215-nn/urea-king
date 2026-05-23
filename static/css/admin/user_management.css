@@ -5,11 +5,13 @@
     margin-bottom: 24px;
 }
 
+
 .search-area {
     display: flex;
     align-items: center;
     gap: 12px;
 }
+
 
 .search-box {
     width: 360px;
@@ -23,6 +25,7 @@
     font-size: 14px;
 }
 
+
 .search-button,
 .clear-button {
     height: 44px;
@@ -35,27 +38,33 @@
     font-weight: bold;
 }
 
+
 .search-button {
     background: rgba(92, 141, 255, 0.28);
 }
+
 
 .search-button:hover {
     background: rgba(92, 141, 255, 0.42);
 }
 
+
 .clear-button {
     background: rgba(255, 255, 255, 0.08);
 }
 
+
 .clear-button:hover {
     background: rgba(255, 255, 255, 0.16);
 }
+
 
 .search-message {
     min-height: 20px;
     color: #ff8a8a;
     font-size: 14px;
 }
+
 
 .table-card {
     border-radius: 18px;
@@ -64,40 +73,39 @@
     overflow: hidden;
 }
 
+
 table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
 }
 
+
 thead {
     display: table;
     width: 100%;
     table-layout: fixed;
-
     background: rgba(255, 255, 255, 0.06);
 }
 
+
 tbody {
     display: block;
-
     height: 260px;
-
     overflow-y: scroll;
     overflow-x: hidden;
 }
+
 
 tbody tr {
     display: table;
     width: 100%;
     table-layout: fixed;
-
     border-top: 1px solid rgba(255, 255, 255, 0.07);
-
     transition: 0.25s;
-
     cursor: pointer;
 }
+
 
 th,
 td {
@@ -106,19 +114,23 @@ td {
     font-size: 14px;
 }
 
+
 th {
     color: rgba(255, 255, 255, 0.72);
     font-weight: normal;
 }
 
+
 tbody tr:hover {
     background: rgba(255, 255, 255, 0.055);
 }
+
 
 tbody tr.active {
     background: rgba(92, 141, 255, 0.18);
     box-shadow: inset 4px 0 0 #5C8DFF;
 }
+
 
 .user-avatar {
     width: 48px;
@@ -127,6 +139,7 @@ tbody tr.active {
     object-fit: cover;
     border: 2px solid rgba(255, 255, 255, 0.28);
 }
+
 
 .role-badge {
     display: inline-block;
@@ -137,15 +150,18 @@ tbody tr.active {
     color: #7EA2FF;
 }
 
+
 .role-badge.admin {
     background: rgba(92, 255, 178, 0.14);
     color: #5CFFB2;
 }
 
+
 .role-badge.organizer {
     background: rgba(180, 100, 255, 0.14);
     color: #B464FF;
 }
+
 
 .detail-panel {
     margin-top: 24px;
@@ -155,10 +171,12 @@ tbody tr.active {
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+
 .detail-panel h2 {
     font-size: 22px;
     margin-bottom: 18px;
 }
+
 
 .detail-grid {
     display: grid;
@@ -166,11 +184,13 @@ tbody tr.active {
     gap: 18px;
 }
 
+
 .detail-item {
     padding: 16px;
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.04);
 }
+
 
 .detail-label {
     font-size: 13px;
@@ -178,10 +198,12 @@ tbody tr.active {
     margin-bottom: 8px;
 }
 
+
 .detail-value {
     font-size: 15px;
     color: white;
 }
+
 
 .management-actions {
     display: grid;
@@ -189,6 +211,7 @@ tbody tr.active {
     gap: 24px;
     margin-top: 24px;
 }
+
 
 .action-panel {
     min-height: 320px;
@@ -198,12 +221,14 @@ tbody tr.active {
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+
 .panel-title {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 14px;
 }
+
 
 .panel-title i {
     width: 38px;
@@ -217,9 +242,11 @@ tbody tr.active {
     font-size: 17px;
 }
 
+
 .panel-title h2 {
     font-size: 20px;
 }
+
 
 .panel-description {
     font-size: 14px;
@@ -228,6 +255,7 @@ tbody tr.active {
     margin-bottom: 20px;
 }
 
+
 .form-grid {
     display: flex;
     flex-direction: column;
@@ -235,16 +263,19 @@ tbody tr.active {
     margin-bottom: 20px;
 }
 
+
 .form-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
+
 .form-group label {
     font-size: 13px;
     color: rgba(255, 255, 255, 0.7);
 }
+
 
 .form-group input,
 .form-group select {
@@ -258,6 +289,7 @@ tbody tr.active {
     font-size: 14px;
 }
 
+
 .panel-button {
     width: 100%;
     height: 42px;
@@ -270,25 +302,31 @@ tbody tr.active {
     transition: 0.25s;
 }
 
+
 .panel-button:hover {
     background: rgba(92, 141, 255, 0.34);
 }
+
 
 .panel-button.warning {
     background: rgba(255, 160, 80, 0.2);
 }
 
+
 .panel-button.warning:hover {
     background: rgba(255, 160, 80, 0.34);
 }
+
 
 .panel-button.danger {
     background: rgba(255, 100, 130, 0.2);
 }
 
+
 .panel-button.danger:hover {
     background: rgba(255, 100, 130, 0.34);
 }
+
 
 .status-preview {
     display: flex;
@@ -300,16 +338,19 @@ tbody tr.active {
     margin: 24px 0;
 }
 
+
 .status-label {
     color: rgba(255, 255, 255, 0.68);
     font-size: 14px;
 }
+
 
 .status-badge {
     padding: 6px 12px;
     border-radius: 999px;
     font-size: 13px;
 }
+
 
 .status-badge.active {
     background: rgba(92, 255, 178, 0.14);

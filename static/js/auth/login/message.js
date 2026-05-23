@@ -6,10 +6,12 @@ function showMessage(message, success = false) {
 
     if (success) {
         box.className = "message-box success-message";
+
     } else {
         box.className = "message-box error-message";
     }
 }
+
 
 function resetMessage() {
     const box = document.getElementById("message-box");

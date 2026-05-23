@@ -5,9 +5,25 @@
     <meta charset="UTF-8">
     <title>系统监控</title>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/admin/common.css">
-    <link rel="stylesheet" href="/static/css/admin/system_monitor.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/admin/common.css?v={{ static_version }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/admin/language.css?v={{ static_version }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/admin/system_monitor.css?v={{ static_version }}"
+    >
 
 </head>
 
@@ -20,7 +36,7 @@
     <div class="top-bar">
 
         <div class="title-area">
-            <h1>系统监控</h1>
+            <h1 data-i18n="systemMonitor">系统监控</h1>
             <p>8th-Ecosystem</p>
         </div>
 
@@ -29,90 +45,153 @@
             <img
                 id="avatar-preview"
                 class="avatar"
-                src="https://via.placeholder.com/96"
+                src="/static/images/default_avatar.jpg"
                 alt="头像"
             >
 
             <div class="admin-tag">
                 <span class="status-dot"></span>
-                管理员
+                <span data-i18n="admin">管理员</span>
             </div>
 
         </div>
 
     </div>
 
+
     <div class="monitor-grid">
 
         <div class="monitor-card">
+
             <div class="monitor-title">
+
                 <div class="monitor-icon">
                     <i class="fa-solid fa-clock"></i>
                 </div>
-                <h2>服务运行总时长</h2>
+
+                <h2 data-i18n="serviceTotalUptime">
+                    服务运行总时长
+                </h2>
+
             </div>
 
-            <div class="monitor-value" id="service-uptime">--</div>
+            <div
+                class="monitor-value"
+                id="service-uptime"
+            >
+                --
+            </div>
 
-            <p class="monitor-description">
+            <p
+                class="monitor-description"
+                data-i18n="serviceTotalUptimeDesc"
+            >
                 显示网站自设定上线时间以来的总运行时长。
             </p>
+
         </div>
 
         <div class="monitor-card">
+
             <div class="monitor-title">
+
                 <div class="monitor-icon green">
                     <i class="fa-solid fa-database"></i>
                 </div>
-                <h2>数据库连接状态</h2>
+
+                <h2 data-i18n="databaseConnectionStatus">
+                    数据库连接状态
+                </h2>
+
             </div>
 
-            <div class="monitor-value" id="database-status">--</div>
+            <div
+                class="monitor-value"
+                id="database-status"
+            >
+                --
+            </div>
 
-            <p class="monitor-description">
+            <p
+                class="monitor-description"
+                data-i18n="databaseConnectionStatusDesc"
+            >
                 显示系统当前是否能够正常连接并访问数据库。
             </p>
+
         </div>
 
         <div class="monitor-card">
+
             <div class="monitor-title">
+
                 <div class="monitor-icon orange">
                     <i class="fa-solid fa-cloud"></i>
                 </div>
-                <h2>部署环境</h2>
+
+                <h2 data-i18n="deployEnvironment">
+                    部署环境
+                </h2>
+
             </div>
 
-            <div class="monitor-value" id="deploy-environment">--</div>
+            <div
+                class="monitor-value"
+                id="deploy-environment"
+            >
+                --
+            </div>
 
-            <p class="monitor-description">
+            <p
+                class="monitor-description"
+                data-i18n="deployEnvironmentDesc"
+            >
                 显示当前系统运行环境，例如 Development 或 Production。
             </p>
+
         </div>
 
         <div class="monitor-card">
+
             <div class="monitor-title">
+
                 <div class="monitor-icon purple">
                     <i class="fa-solid fa-code-branch"></i>
                 </div>
-                <h2>系统版本</h2>
+
+                <h2 data-i18n="systemVersion">
+                    系统版本
+                </h2>
+
             </div>
 
-            <div class="monitor-value" id="system-version">--</div>
+            <div
+                class="monitor-value"
+                id="system-version"
+            >
+                --
+            </div>
 
-            <p class="monitor-description">
+            <p
+                class="monitor-description"
+                data-i18n="systemVersionDesc"
+            >
                 当前后台系统版本，用于后续功能迭代和版本管理。
             </p>
+
         </div>
 
     </div>
 
 </div>
 
-<script src="/static/js/common/current_user.js"></script>
-<script src="/static/js/common/logout.js"></script>
-<script src="/static/js/admin/system_monitor/runtime.js"></script>
-<script src="/static/js/admin/system_monitor/monitor_data.js"></script>
-<script src="/static/js/admin/system_monitor/init.js"></script>
+<script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/system_monitor/runtime.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/system_monitor/monitor_data.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/system_monitor/init.js?v={{ static_version }}"></script>
 
 </body>
 </html>

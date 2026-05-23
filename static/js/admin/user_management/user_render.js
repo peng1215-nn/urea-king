@@ -3,7 +3,7 @@ function renderUsers(users) {
 
     tableBody.innerHTML = "";
 
-    users.forEach(user => {
+    users.forEach((user) => {
         const avatarUrl =
             user.avatar_url || "/static/images/default_avatar.jpg";
 

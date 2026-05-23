@@ -11,6 +11,7 @@ async function loadUsers() {
         allUsers = data.users;
 
         renderUsers(allUsers);
+
     } catch (error) {
         console.error("加载用户列表失败：", error);
     }

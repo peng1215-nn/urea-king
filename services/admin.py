@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from database import SessionLocal
-from models import User, InvitationCode
+from app_state import DEPLOY_ENVIRONMENT
 from app_state import PROJECT_LAUNCH_TIME
 from app_state import SYSTEM_VERSION
-from app_state import DEPLOY_ENVIRONMENT
+from database import SessionLocal
+from models import InvitationCode
+from models import User
 
 
 def get_admin_stats_service():
@@ -12,19 +13,15 @@ def get_admin_stats_service():
 
     try:
         total_users = db.query(User).count()
-
         admin_count = db.query(User).filter(
             User.role == "admin"
         ).count()
-
         organizer_count = db.query(User).filter(
             User.role == "organizer"
         ).count()
-
         user_count = db.query(User).filter(
             User.role == "user"
         ).count()
-
         unused_invitation_codes = db.query(InvitationCode).filter(
             InvitationCode.is_used == 0
         ).count()
@@ -50,16 +47,13 @@ def get_admin_stats_service():
 
 def get_system_monitor_service():
     total_runtime_seconds = int(
-        (
-            datetime.utcnow()
-            - PROJECT_LAUNCH_TIME
-        ).total_seconds()
+        (datetime.utcnow() - PROJECT_LAUNCH_TIME).total_seconds()
     )
 
     return {
         "success": True,
         "total_runtime_seconds": total_runtime_seconds,
-        "database_status": "正常",
+        "database_status": "normal",
         "deploy_environment": DEPLOY_ENVIRONMENT,
         "system_version": SYSTEM_VERSION
     }
@@ -83,8 +77,11 @@ def get_admin_users_service():
                 "role": user.role,
                 "group_id": user.group_id,
                 "avatar_url": user.avatar_url,
-                "created_at": user.created_at.strftime("%Y-%m-%d %H:%M")
-                if user.created_at else ""
+                "created_at": (
+                    user.created_at.strftime("%Y-%m-%d %H:%M")
+                    if user.created_at
+                    else ""
+                )
             })
 
         return {

@@ -2,9 +2,11 @@ body::before {
     background: rgba(0, 0, 0, 0.72);
 }
 
+
 .page {
     padding: 24px;
 }
+
 
 .register-card {
     width: 420px;
@@ -20,27 +22,33 @@ body::before {
     overflow-y: auto;
 }
 
+
 .register-card::-webkit-scrollbar {
     width: 6px;
 }
+
 
 .register-card::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.35);
     border-radius: 10px;
 }
 
+
 .register-card::-webkit-scrollbar-track {
     background: transparent;
 }
+
 
 .title-area h1 {
     font-size: 40px;
     letter-spacing: 4px;
 }
 
+
 input {
     height: 44px;
 }
+
 
 #message-box {
     min-height: 22px;
@@ -49,6 +57,7 @@ input {
     font-weight: bold;
     margin-top: -4px;
 }
+
 
 .register-button {
     height: 46px;
@@ -63,10 +72,12 @@ input {
     transition: 0.25s;
 }
 
+
 .register-button:hover {
     background: #dcdcdc;
     transform: translateY(-1px);
 }
+
 
 .bottom-links {
     display: flex;
@@ -75,11 +86,13 @@ input {
     font-size: 13px;
 }
 
+
 .bottom-links a {
     color: rgba(255, 255, 255, 0.78);
     text-decoration: none;
     cursor: pointer;
 }
+
 
 .bottom-links a:hover {
     color: white;

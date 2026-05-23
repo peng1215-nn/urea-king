@@ -1,8 +1,10 @@
 function formatRuntime(seconds) {
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+    const totalSeconds = Number(seconds || 0);
 
-    return `${days}天 ${hours}小时 ${minutes}分钟 ${secs}秒`;
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+
+    return `${days}${t("days")} ${hours}${t("hours")} ${minutes}${t("minutes")} ${secs}${t("seconds")}`;
 }

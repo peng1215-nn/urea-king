@@ -5,10 +5,12 @@ function showMessage(message, success = false) {
 
     if (success) {
         box.style.color = "#5CFFB2";
+
     } else {
         box.style.color = "#FF6B6B";
     }
 }
+
 
 function resetMessage() {
     const box = document.getElementById("message-box");

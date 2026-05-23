@@ -5,24 +5,39 @@ async function register() {
         return;
     }
 
-    const formData = buildRegisterFormData(form);
+    const formData =
+        buildRegisterFormData(form);
 
     try {
         const response = await fetch("/register", {
             method: "POST",
-            body: formData
+            body: formData,
         });
 
         const data = await response.json();
 
-        showMessage(data.message, data.success);
+        if (data.success === true) {
+            showMessage(
+                `${t(data.error_code || "registerSuccess")} ${data.nickname}。`,
+                true,
+            );
 
-        if (data.success) {
             redirectToLogin();
+
+            return;
         }
+
+        showMessage(
+            t(data.error_code || "registerFailed"),
+            false,
+        );
 
     } catch (error) {
         console.error(error);
-        showMessage("注册请求失败。");
+
+        showMessage(
+            t("registerFailed"),
+            false,
+        );
     }
 }

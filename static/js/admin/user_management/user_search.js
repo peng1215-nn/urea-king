@@ -15,9 +15,12 @@ function searchUsers() {
         return;
     }
 
-    const filteredUsers = allUsers.filter(user => {
-        const username = String(user.username || "").toLowerCase();
-        const nickname = String(user.nickname || "").toLowerCase();
+    const filteredUsers = allUsers.filter((user) => {
+        const username =
+            String(user.username || "").toLowerCase();
+
+        const nickname =
+            String(user.nickname || "").toLowerCase();
 
         return username === keyword || nickname === keyword;
     });
@@ -28,15 +31,19 @@ function searchUsers() {
     }
 
     messageBox.style.color = "#5CFFB2";
-    messageBox.innerText = `找到 ${filteredUsers.length} 个匹配用户。`;
+
+    messageBox.innerText =
+        `找到 ${filteredUsers.length} 个匹配用户。`;
 
     renderUsers(filteredUsers);
 }
 
+
 function clearSearch() {
     document.getElementById("user-search").value = "";
 
-    const messageBox = document.getElementById("search-message");
+    const messageBox =
+        document.getElementById("search-message");
 
     messageBox.innerText = "";
     messageBox.style.color = "#ff8a8a";

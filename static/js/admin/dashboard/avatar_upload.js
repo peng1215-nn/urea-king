@@ -16,7 +16,7 @@ async function uploadAvatar() {
     try {
         const response = await fetch("/upload-avatar", {
             method: "POST",
-            body: formData
+            body: formData,
         });
 
         const data = await response.json();

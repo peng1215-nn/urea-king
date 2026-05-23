@@ -11,15 +11,15 @@ async function loadSystemMonitor() {
             formatRuntime(data.total_runtime_seconds);
 
         document.getElementById("database-status").innerText =
-            data.database_status;
+            t(data.database_status || "unknown");
 
         document.getElementById("deploy-environment").innerText =
-            data.deploy_environment;
+            data.deploy_environment || t("unknown");
 
         document.getElementById("system-version").innerText =
-            data.system_version;
+            data.system_version || t("unknown");
 
     } catch (error) {
-        console.error("加载系统监控数据失败：", error);
+        console.error(t("systemMonitorLoadFailed"), error);
     }
 }

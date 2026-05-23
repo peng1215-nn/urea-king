@@ -1,33 +1,28 @@
-from fastapi import APIRouter
-from fastapi import Request
-from fastapi import Form
+from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse
-from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
+from template_config import templates
+
 from services.login import login_user_service
 
 
 router = APIRouter()
 
-templates = Jinja2Templates(
-    directory="templates"
-)
+
+def render_login_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="auth/login.html",
+    )
 
 
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="auth/login.html"
-    )
+    return render_login_page(request)
 
 
 @router.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="auth/login.html"
-    )
+    return render_login_page(request)
 
 
 @router.post("/login")
@@ -39,5 +34,5 @@ def login_user(
     return login_user_service(
         request=request,
         username=username,
-        password=password
+        password=password,
     )

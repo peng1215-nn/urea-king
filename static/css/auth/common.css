@@ -5,6 +5,7 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
+
 body {
     min-height: 100vh;
     background-image: url("/static/images/auth_background.jpg");
@@ -15,6 +16,7 @@ body {
     overflow: hidden;
 }
 
+
 body::before {
     content: "";
     position: fixed;
@@ -22,6 +24,7 @@ body::before {
     background: rgba(0, 0, 0, 0.55);
     z-index: 0;
 }
+
 
 .page {
     position: relative;
@@ -32,16 +35,19 @@ body::before {
     align-items: center;
 }
 
+
 .form-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
+
 label {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.82);
 }
+
 
 input,
 select {
@@ -54,6 +60,7 @@ select {
     color: #111;
     font-size: 14px;
 }
+
 
 .sidebar {
     position: fixed;
@@ -71,9 +78,11 @@ select {
     border-right: 1px solid rgba(255, 255, 255, 0.18);
 }
 
+
 .sidebar:hover {
     left: 0;
  }
+
 
 .sidebar-title {
     font-size: 26px;
@@ -82,9 +91,11 @@ select {
     writing-mode: vertical-rl;
 }
 
+
 .sidebar:hover .sidebar-title {
     writing-mode: horizontal-tb;
 }
+
 
 .title-area {
     display: flex;
@@ -93,6 +104,7 @@ select {
     gap: 8px;
     margin-bottom: 12px;
 }
+
 
 .title-area p {
     font-size: 15px;
