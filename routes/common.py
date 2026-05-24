@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
+from fastapi import Request
 from fastapi.responses import RedirectResponse
-
-from services.common import (
-    add_no_cache_headers,
-    get_current_user_service,
-)
+from services.common import add_no_cache_headers
+from services.common import get_current_user_service
 
 
 router = APIRouter()
@@ -19,6 +17,9 @@ def current_user(request: Request):
 def logout(request: Request):
     request.session.clear()
 
-    response = RedirectResponse(url="/login", status_code=302)
+    response = RedirectResponse(
+        url="/login",
+        status_code=302,
+    )
 
     return add_no_cache_headers(response)

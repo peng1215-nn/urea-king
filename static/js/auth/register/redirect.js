@@ -1,5 +1,5 @@
 function redirectToLogin() {
     setTimeout(() => {
-        window.location.href = "/login";
+        window.location.replace("/login");
     }, 1200);
 }

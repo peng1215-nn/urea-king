@@ -1,7 +1,13 @@
 from datetime import datetime
-from sqlalchemy import Column, DateTime, Integer, String
-from database import Base
+
+from sqlalchemy import Column
+from sqlalchemy import DateTime
+from sqlalchemy import ForeignKey
+from sqlalchemy import Integer
+from sqlalchemy import String
 from sqlalchemy import Text
+
+from database import Base
 
 
 class User(Base):
@@ -31,17 +37,6 @@ class User(Base):
         nullable=True,
     )
 
-    role = Column(
-        String(30),
-        nullable=False,
-        default="user",
-    )
-
-    group_id = Column(
-        String(30),
-        nullable=True,
-    )
-
     avatar_url = Column(
         String(255),
         nullable=True,
@@ -50,6 +45,73 @@ class User(Base):
     invitation_code = Column(
         String(100),
         nullable=True,
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+    )
+
+
+class Group(Base):
+
+    __tablename__ = "groups"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
+
+    group_code = Column(
+        String(50),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+
+    group_name = Column(
+        String(100),
+        nullable=True,
+    )
+
+    description = Column(
+        Text,
+        nullable=True,
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+    )
+
+
+class UserGroupRole(Base):
+
+    __tablename__ = "user_group_roles"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True,
+    )
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False,
+    )
+
+    group_id = Column(
+        Integer,
+        ForeignKey("groups.id"),
+        nullable=False,
+    )
+
+    role = Column(
+        String(30),
+        nullable=False,
+        default="user",
     )
 
     created_at = Column(
@@ -80,15 +142,15 @@ class InvitationCode(Base):
         nullable=True,
     )
 
+    group_code = Column(
+        String(50),
+        nullable=False,
+    )
+
     role = Column(
         String(30),
         nullable=False,
         default="user",
-    )
-
-    group_id = Column(
-        String(30),
-        nullable=True,
     )
 
     is_used = Column(

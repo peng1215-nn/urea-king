@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter
+from fastapi import Form
+from fastapi import Request
 from fastapi.responses import HTMLResponse
-from template_config import templates
-
 from services.register import register_user_service
+from template_config import templates
 
 
 router = APIRouter()

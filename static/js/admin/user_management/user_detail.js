@@ -9,35 +9,59 @@ function selectUser(user, rowElement) {
 
     rowElement.classList.add("active");
 
-    document.getElementById("detail-username").innerText =
-        user.username;
+    setDetailText(
+        "detail-username",
+        user.username || "--"
+    );
 
-    document.getElementById("detail-nickname").innerText =
-        user.nickname || "--";
+    setDetailText(
+        "detail-nickname",
+        user.nickname || "--"
+    );
 
-    document.getElementById("detail-role").innerText =
-        user.role;
+    setDetailText(
+        "detail-role",
+        user.role || "--"
+    );
 
-    document.getElementById("detail-group").innerText =
-        user.group_id || "--";
+    setDetailText(
+        "detail-group",
+        user.group_name || user.group_id || "--"
+    );
 
-    document.getElementById("detail-created-at").innerText =
-        user.created_at;
+    setDetailText(
+        "detail-created-at",
+        user.created_at || "--"
+    );
 
-    document.getElementById("detail-status").innerText =
-        "正常";
-
-    document.getElementById("edit-nickname").value =
-        user.nickname || "";
+    setDetailText(
+        "detail-status",
+        "正常"
+    );
 
     document.getElementById("edit-role").value =
-        user.role;
-
-    document.getElementById("edit-group-id").value =
-        user.group_id || "";
+        user.role || "";
 
     document.getElementById("selected-user-status").innerText =
         "正常";
+}
+
+
+function setDetailText(elementId, value) {
+    const element = document.getElementById(elementId);
+
+    if (!element) {
+        return;
+    }
+
+    element.innerHTML = `
+        <span
+            class="truncate-text detail-truncate"
+            title="${value}"
+        >
+            ${value}
+        </span>
+    `;
 }
 
 

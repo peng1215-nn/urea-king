@@ -6,8 +6,8 @@
     <title>用户管理</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/admin/common.css">
-    <link rel="stylesheet" href="/static/css/admin/user_management.css">
+    <link rel="stylesheet" href="/static/css/admin/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/admin/user_management.css?v={{ static_version }}">
 
 </head>
 
@@ -20,8 +20,8 @@
     <div class="top-bar">
 
         <div class="title-area">
-            <h1>用户管理</h1>
-            <p>8th-Ecosystem</p>
+            <h1 data-i18n="userManagement">用户管理</h1>
+            <p id="current-group-text"></p>
         </div>
 
         <div class="admin-area">
@@ -29,13 +29,13 @@
             <img
                 id="avatar-preview"
                 class="avatar"
-                src="https://via.placeholder.com/96"
+                src="/static/images/default_avatar.jpg"
                 alt="头像"
             >
 
             <div class="admin-tag">
                 <span class="status-dot"></span>
-                管理员
+                <span data-i18n="admin">管理员</span>
             </div>
 
         </div>
@@ -50,29 +50,20 @@
                 type="text"
                 id="user-search"
                 class="search-box"
-                placeholder="输入完整 username 或 nickname"
+                placeholder="输入用户名、昵称、身份或组名"
             >
 
-            <button
-                class="search-button"
-                onclick="searchUsers()"
-            >
+            <button class="search-button" onclick="searchUsers()">
                 搜索
             </button>
 
-            <button
-                class="clear-button"
-                onclick="clearSearch()"
-            >
+            <button class="clear-button" onclick="clearSearch()">
                 清除
             </button>
 
         </div>
 
-        <div
-            id="search-message"
-            class="search-message"
-        ></div>
+        <div id="search-message" class="search-message"></div>
 
     </div>
 
@@ -81,7 +72,6 @@
         <table>
 
             <thead>
-
                 <tr>
                     <th>用户</th>
                     <th>昵称</th>
@@ -89,7 +79,6 @@
                     <th>组别</th>
                     <th>注册时间</th>
                 </tr>
-
             </thead>
 
             <tbody id="user-table-body"></tbody>
@@ -148,7 +137,7 @@
             </div>
 
             <p class="panel-description">
-                第一版支持修改 nickname、role、group_id。
+                支持修改当前组别下的用户身份。管理员账号信息不可在此页面修改，用户身份只能修改为 organizer 或 user。
             </p>
 
             <div class="form-grid">
@@ -162,15 +151,9 @@
                     <label>身份</label>
                     <select id="edit-role">
                         <option value="">选择身份</option>
-                        <option value="admin">admin</option>
                         <option value="organizer">organizer</option>
                         <option value="user">user</option>
                     </select>
-                </div>
-
-                <div class="form-group">
-                    <label>组别</label>
-                    <input type="text" id="edit-group-id" placeholder="例如 G1">
                 </div>
 
             </div>
@@ -185,24 +168,15 @@
 
             <div class="panel-title">
                 <i class="fa-solid fa-key"></i>
-                <h2>重置密码</h2>
+                <h2 data-i18n="resetPassword">重置密码</h2>
             </div>
 
-            <p class="panel-description">
-                管理员可以为用户设置新的登录密码。
+            <p class="panel-description" data-i18n="resetPasswordDesc">
+                点击确认后，系统会将所选用户的登录密码重置为默认密码 123456。
             </p>
 
-            <div class="form-grid">
-
-                <div class="form-group">
-                    <label>新密码</label>
-                    <input type="password" id="reset-password" placeholder="输入新密码">
-                </div>
-
-            </div>
-
-            <button class="panel-button warning">
-                重置密码
+            <button class="panel-button warning" data-i18n="confirmResetPassword">
+                确认重置密码
             </button>
 
         </div>
@@ -240,16 +214,16 @@
 
 </div>
 
-<script src="/static/js/common/current_user.js"></script>
-<script src="/static/js/common/logout.js"></script>
-<script src="/static/js/admin/user_management/state.js"></script>
-<script src="/static/js/admin/user_management/user_api.js"></script>
-<script src="/static/js/admin/user_management/user_render.js"></script>
-<script src="/static/js/admin/user_management/user_search.js"></script>
-<script src="/static/js/admin/user_management/user_detail.js"></script>
-<script src="/static/js/admin/user_management/init.js"></script>
-
+<script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/state.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_api.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_render.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_search.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_detail.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/init.js?v={{ static_version }}"></script>
 
 </body>
-
 </html>

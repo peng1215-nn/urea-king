@@ -1,0 +1,33 @@
+.group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+
+.group-card {
+    padding: 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+
+.group-card:hover {
+    background: rgba(92, 141, 255, 0.24);
+}
+
+
+.group-name {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+
+.group-role {
+    margin-top: 6px;
+    font-size: 14px;
+    opacity: 0.72;
+}

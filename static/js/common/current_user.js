@@ -1,14 +1,4 @@
 async function loadCurrentUser() {
-    const avatar =
-        document.getElementById("avatar-preview");
-
-    if (!avatar) {
-        return;
-    }
-
-    const defaultAvatar =
-        "/static/images/default_avatar.jpg";
-
     try {
         const response =
             await fetch("/current-user");
@@ -16,21 +6,47 @@ async function loadCurrentUser() {
         const data =
             await response.json();
 
-        if (data.success) {
-            avatar.src =
-                data.avatar_url || defaultAvatar;
-
-        } else {
-            avatar.src = defaultAvatar;
+        if (!data.success) {
+            return;
         }
 
-        avatar.classList.add("loaded");
+        const avatarPreview =
+            document.getElementById(
+                "avatar-preview"
+            );
+
+        if (avatarPreview) {
+
+            avatarPreview.src =
+                data.avatar_url ||
+                "/static/images/default_avatar.jpg";
+
+            avatarPreview.classList.add(
+                "loaded"
+            );
+        }
+
+        const currentGroupText =
+            document.getElementById(
+                "current-group-text"
+            );
+
+        if (currentGroupText) {
+            currentGroupText.innerText =
+                data.current_group_name ||
+                "8th-Ecosystem";
+        }
 
     } catch (error) {
-        console.error("加载当前用户失败：", error);
-
-        avatar.src = defaultAvatar;
-
-        avatar.classList.add("loaded");
+        console.error(
+            "加载当前用户失败：",
+            error
+        );
     }
 }
+
+
+window.addEventListener(
+    "DOMContentLoaded",
+    loadCurrentUser
+);

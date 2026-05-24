@@ -11,39 +11,79 @@ function searchUsers() {
     messageBox.innerText = "";
 
     if (keyword.length === 0) {
-        messageBox.innerText = "请输入要搜索的用户名或昵称。";
+        messageBox.innerText =
+            "请输入用户名、昵称、身份或组名。";
+
+        renderUsers(allUsers);
+
         return;
     }
 
-    const filteredUsers = allUsers.filter((user) => {
-        const username =
-            String(user.username || "").toLowerCase();
+    const matchedUsers = allUsers
+        .map(user => {
+            const matchedFields = getMatchedFields(user, keyword);
 
-        const nickname =
-            String(user.nickname || "").toLowerCase();
+            return {
+                ...user,
+                matched_fields: matchedFields,
+            };
+        })
+        .filter(user => user.matched_fields.length > 0);
 
-        return username === keyword || nickname === keyword;
-    });
-
-    if (filteredUsers.length === 0) {
+    if (matchedUsers.length === 0) {
         messageBox.innerText = "未找到匹配的用户。";
+        renderUsers([]);
+
         return;
     }
 
     messageBox.style.color = "#5CFFB2";
-
     messageBox.innerText =
-        `找到 ${filteredUsers.length} 个匹配用户。`;
+        `找到 ${matchedUsers.length} 个匹配用户。`;
 
-    renderUsers(filteredUsers);
+    renderUsers(matchedUsers);
+}
+
+
+function getMatchedFields(user, keyword) {
+    const matchedFields = [];
+
+    const username =
+        String(user.username || "").toLowerCase();
+
+    const nickname =
+        String(user.nickname || "").toLowerCase();
+
+    const role =
+        String(user.role || "").toLowerCase();
+
+    const groupName =
+        String(user.group_name || "").toLowerCase();
+
+    if (username === keyword) {
+        matchedFields.push("username");
+    }
+
+    if (nickname === keyword) {
+        matchedFields.push("nickname");
+    }
+
+    if (role === keyword) {
+        matchedFields.push("role");
+    }
+
+    if (groupName === keyword) {
+        matchedFields.push("group_name");
+    }
+
+    return matchedFields;
 }
 
 
 function clearSearch() {
     document.getElementById("user-search").value = "";
 
-    const messageBox =
-        document.getElementById("search-message");
+    const messageBox = document.getElementById("search-message");
 
     messageBox.innerText = "";
     messageBox.style.color = "#ff8a8a";

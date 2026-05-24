@@ -1,5 +1,6 @@
 async function login() {
-    const { username, password } = getLoginFormData();
+    const { username, password } =
+        getLoginFormData();
 
     if (!validateLoginForm(username, password)) {
         return;
@@ -18,11 +19,18 @@ async function login() {
 
         if (data.success === true) {
             showMessage(
-                `${data.role} - ${data.display_name} ${t("loginSuccess")}`,
+                `${data.display_name}·${t("loginSuccess")}`,
                 true
             );
 
-            redirectByRole(data.role);
+            sessionStorage.setItem(
+                "available_groups",
+                JSON.stringify(data.groups || [])
+            );
+
+            setTimeout(() => {
+                window.location.href = "/group-select";
+                }, 3000);
 
             return;
         }
