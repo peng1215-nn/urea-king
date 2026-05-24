@@ -52,6 +52,12 @@ class User(Base):
         default=datetime.utcnow,
     )
 
+    is_active = Column(
+        Integer,
+        nullable=False,
+        default=1,
+    )
+
 
 class Group(Base):
 

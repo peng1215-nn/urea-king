@@ -81,12 +81,54 @@ function getMatchedFields(user, keyword) {
 
 
 function clearSearch() {
+
     document.getElementById("user-search").value = "";
 
-    const messageBox = document.getElementById("search-message");
+    const messageBox =
+        document.getElementById("search-message");
 
     messageBox.innerText = "";
     messageBox.style.color = "#ff8a8a";
 
     renderUsers(allUsers);
+
+    selectedUser = null;
+
+    document
+        .querySelectorAll("#user-table-body tr")
+        .forEach(row => {
+            row.classList.remove("active");
+        });
+
+    document.getElementById("detail-username").innerText = "--";
+    document.getElementById("detail-nickname").innerText = "--";
+    document.getElementById("detail-role").innerText = "--";
+    document.getElementById("detail-group").innerText = "--";
+    document.getElementById("detail-created-at").innerText = "--";
+    document.getElementById("detail-status").innerText = "--";
+    document.getElementById("selected-user-status").innerText = "正常";
+
+    const groupSelect = document.getElementById("edit-group-id");
+    const roleSelect = document.getElementById("edit-role");
+    const updateButton = document.getElementById("update-user-button");
+    const resetButton = document.getElementById("reset-password-button");
+
+    groupSelect.innerHTML = `
+        <option value="">请先选择用户</option>
+    `;
+
+    groupSelect.disabled = false;
+    roleSelect.value = "";
+    roleSelect.disabled = false;
+
+    if (updateButton) {
+        updateButton.disabled = false;
+    }
+
+    if (resetButton) {
+        resetButton.disabled = false;
+    }
+
+    document.getElementById("update-user-message").innerText = "";
+    document.getElementById("reset-password-message").innerText = "";
 }

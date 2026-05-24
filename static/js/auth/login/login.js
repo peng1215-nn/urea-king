@@ -19,7 +19,7 @@ async function login() {
 
         if (data.success === true) {
             showMessage(
-                `${data.display_name}·${t("loginSuccess")}`,
+                `${data.display_name} ${t("loginSuccess")}`,
                 true
             );
 

@@ -120,7 +120,7 @@
 
             <div class="detail-item">
                 <div class="detail-label">账号状态</div>
-                <div class="detail-value" id="detail-status">正常</div>
+                <div class="detail-value" id="detail-status">--</div>
             </div>
 
         </div>
@@ -137,14 +137,16 @@
             </div>
 
             <p class="panel-description">
-                支持修改当前组别下的用户身份。管理员账号信息不可在此页面修改，用户身份只能修改为 organizer 或 user。
+                仅支持修改所选用户在指定所属组下的身份。组别不可修改，身份相同则无需保存。
             </p>
 
             <div class="form-grid">
 
                 <div class="form-group">
-                    <label>昵称</label>
-                    <input type="text" id="edit-nickname" placeholder="输入新的昵称">
+                    <label>所属组</label>
+                    <select id="edit-group-id">
+                        <option value="">请先选择用户</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -158,9 +160,18 @@
 
             </div>
 
-            <button class="panel-button">
+            <button
+                id="update-user-button"
+                class="panel-button"
+                onclick="updateUserRole()"
+            >
                 保存修改
             </button>
+
+            <div
+                id="update-user-message"
+                class="operation-message"
+            ></div>
 
         </div>
 
@@ -172,12 +183,22 @@
             </div>
 
             <p class="panel-description" data-i18n="resetPasswordDesc">
-                点击确认后，系统会将所选用户的登录密码重置为默认密码 123456。
+                点击确认后，系统会将所选用户的登录密码重置为默认密码 000000。
             </p>
 
-            <button class="panel-button warning" data-i18n="confirmResetPassword">
+            <button
+                id="reset-password-button"
+                class="panel-button warning"
+                data-i18n="confirmResetPassword"
+                onclick="openResetPasswordModal()"
+            >
                 确认重置密码
             </button>
+
+            <div
+                id="reset-password-message"
+                class="operation-message"
+            ></div>
 
         </div>
 
@@ -214,6 +235,41 @@
 
 </div>
 
+<div
+    id="password-reset-modal"
+    class="custom-modal hidden"
+>
+
+    <div class="custom-modal-content">
+
+        <h3>确认重置密码</h3>
+
+        <p id="password-reset-text">
+            确认重置该用户的密码？
+        </p>
+
+        <div class="custom-modal-actions">
+
+            <button
+                class="modal-confirm-button"
+                onclick="confirmResetPassword()"
+            >
+                确认
+            </button>
+
+            <button
+                class="modal-cancel-button"
+                onclick="closeResetPasswordModal()"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 <script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>
 <script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
@@ -223,6 +279,8 @@
 <script src="/static/js/admin/user_management/user_render.js?v={{ static_version }}"></script>
 <script src="/static/js/admin/user_management/user_search.js?v={{ static_version }}"></script>
 <script src="/static/js/admin/user_management/user_detail.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_update.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_password.js?v={{ static_version }}"></script>
 <script src="/static/js/admin/user_management/init.js?v={{ static_version }}"></script>
 
 </body>
