@@ -14,14 +14,14 @@ function selectUser(user, rowElement) {
     setDetailText("detail-role", user.role || "--");
     setDetailText("detail-group", user.group_name || "--");
     setDetailText("detail-created-at", user.created_at || "--");
-    setDetailText("detail-status", "正常");
+    setDetailText("detail-status", isUserActive(user)
+        ? t("accountEnabled") : t("accountDisabled")
+);
 
     loadUserGroupsToSelect(user);
     loadRoleToSelect(user);
     updateResetPasswordState(user);
-
-    document.getElementById("selected-user-status").innerText =
-        "正常";
+    updateUserStatusPanel(user);
 }
 
 
@@ -77,7 +77,7 @@ function loadRoleToSelect(user) {
 
         if (messageBox) {
             messageBox.innerText =
-                "管理员身份不可在此页面修改。";
+                t("adminModifyForbidden");
         }
 
         return;
@@ -116,7 +116,7 @@ function updateResetPasswordState(user) {
 
         if (messageBox) {
             messageBox.innerText =
-                "不允许重置管理员密码。";
+                t("adminResetForbidden");
         }
 
         return;
@@ -161,9 +161,26 @@ function resetSelectedUserState() {
     setDetailText("detail-created-at", "--");
     setDetailText("detail-status", "--");
 
-    document.getElementById("selected-user-status").innerText =
-        "正常";
-
     resetUserEditForm();
     resetPasswordPanelState();
+    resetUserStatusPanel();
+}
+
+
+function refreshSelectedUserLanguage() {
+    if (!selectedUser) {
+        resetSelectedUserState();
+        return;
+    }
+
+    setDetailText(
+        "detail-status",
+        isUserActive(selectedUser)
+            ? t("accountEnabled")
+            : t("accountDisabled")
+    );
+
+    loadRoleToSelect(selectedUser);
+    updateResetPasswordState(selectedUser);
+    updateUserStatusPanel(selectedUser);
 }

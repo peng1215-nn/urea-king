@@ -10,6 +10,7 @@ from template_config import templates
 from fastapi import Form
 from services.admin import update_user_role_service
 from services.admin import reset_user_password_service
+from services.admin import toggle_user_active_service
 
 
 router = APIRouter()
@@ -133,5 +134,21 @@ def reset_user_password(
         }
 
     return reset_user_password_service(
+        target_user_id=target_user_id,
+    )
+
+
+@router.post("/admin/toggle-user-active")
+def toggle_user_active(
+    request: Request,
+    target_user_id: int = Form(...),
+):
+    if not require_admin(request):
+        return {
+            "success": False,
+            "message": "无权限访问。",
+        }
+
+    return toggle_user_active_service(
         target_user_id=target_user_id,
     )

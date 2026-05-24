@@ -14,7 +14,8 @@ window.loginTranslations = {
         loginPasswordIncorrect: "密码错误。",
         loginSuccess: "登录成功，3秒后跳转。",
         loginFailed: "登录请求失败。",
-        forgotPasswordTip: "密码找回功能暂未开放。"
+        forgotPasswordTip: "密码找回功能暂未开放。",
+        loginAccountDisabled: "账号已被禁用，请联系管理员。",
     },
 
     en: {
@@ -32,6 +33,7 @@ window.loginTranslations = {
         loginPasswordIncorrect: "Incorrect password.",
         loginSuccess: "login success. Redirecting in 3 seconds.",
         loginFailed: "Login request failed.",
-        forgotPasswordTip: "Password recovery is not available yet."
+        forgotPasswordTip: "Password recovery is not available yet.",
+        loginAccountDisabled: "This account has been disabled. Please contact an administrator.",
     }
 };

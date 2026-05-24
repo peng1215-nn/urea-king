@@ -98,6 +98,7 @@ def register_user_service(
             password_hash=pwd_context.hash(password),
             invitation_code=invite_code,
             avatar_url="/static/images/default_avatar.jpg",
+            is_active=1,
         )
 
         db.add(new_user)

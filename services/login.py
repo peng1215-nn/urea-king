@@ -37,6 +37,12 @@ def login_user_service(request, username, password):
                 "error_code": "loginPasswordIncorrect",
             }
 
+        if user.is_active == 0:
+            return {
+                "success": False,
+                "error_code": "loginAccountDisabled",
+            }
+
         group_roles = db.query(
             UserGroupRole,
             Group,

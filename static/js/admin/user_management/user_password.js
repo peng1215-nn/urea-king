@@ -10,14 +10,14 @@ function openResetPasswordModal() {
 
     if (!selectedUser) {
         messageBox.innerText =
-            "请先选择一个用户。";
+            t("pleaseSelectUser");
 
         return;
     }
 
     if (selectedUser.role === "admin") {
         messageBox.innerText =
-            "不允许重置管理员密码。";
+            t("adminResetForbidden");
 
         return;
     }
@@ -31,7 +31,8 @@ function openResetPasswordModal() {
         document.getElementById("password-reset-text");
 
     text.innerText =
-        `确认重置 ${selectedUser.username} 的密码？`;
+        t("passwordResetConfirmText").replace("{username}", selectedUser.username
+);
 
     modal.classList.remove("hidden");
 }
@@ -61,7 +62,7 @@ async function confirmResetPassword() {
 
     if (pendingResetUser.role === "admin") {
         messageBox.innerText =
-            "不允许重置管理员密码。";
+            t("adminResetForbidden");
 
         closeResetPasswordModal();
 
@@ -90,7 +91,7 @@ async function confirmResetPassword() {
 
         if (!data.success) {
             messageBox.innerText =
-                data.message || "密码重置失败。";
+                data.message || t("passwordResetFailed");
 
             closeResetPasswordModal();
 
@@ -101,7 +102,7 @@ async function confirmResetPassword() {
             "#5CFFB2";
 
         messageBox.innerText =
-            "密码已重置为 000000。";
+            t("passwordResetSuccess");
 
         closeResetPasswordModal();
 
@@ -113,7 +114,7 @@ async function confirmResetPassword() {
         console.error(error);
 
         messageBox.innerText =
-            "密码重置失败。";
+             t("passwordResetFailed");
 
         closeResetPasswordModal();
     }

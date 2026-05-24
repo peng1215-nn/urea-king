@@ -3,7 +3,7 @@
 <head>
 
     <meta charset="UTF-8">
-    <title>用户管理</title>
+    <title data-i18n="userManagementTitle">用户管理</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="/static/css/admin/common.css?v={{ static_version }}">
@@ -20,7 +20,7 @@
     <div class="top-bar">
 
         <div class="title-area">
-            <h1 data-i18n="userManagement">用户管理</h1>
+            <h1 data-i18n="userManagementTitle">用户管理</h1>
             <p id="current-group-text"></p>
         </div>
 
@@ -50,14 +50,23 @@
                 type="text"
                 id="user-search"
                 class="search-box"
+                data-i18n-placeholder="searchUserPlaceholder"
                 placeholder="输入用户名、昵称、身份或组名"
             >
 
-            <button class="search-button" onclick="searchUsers()">
+            <button
+                class="search-button"
+                data-i18n="search"
+                onclick="searchUsers()"
+            >
                 搜索
             </button>
 
-            <button class="clear-button" onclick="clearSearch()">
+            <button
+                class="clear-button"
+                data-i18n="clear"
+                onclick="clearSearch()"
+            >
                 清除
             </button>
 
@@ -73,11 +82,11 @@
 
             <thead>
                 <tr>
-                    <th>用户</th>
-                    <th>昵称</th>
-                    <th>身份</th>
-                    <th>组别</th>
-                    <th>注册时间</th>
+                    <th data-i18n="user">用户</th>
+                    <th data-i18n="nickname">昵称</th>
+                    <th data-i18n="role">身份</th>
+                    <th data-i18n="group">组别</th>
+                    <th data-i18n="registerTime">注册时间</th>
                 </tr>
             </thead>
 
@@ -89,37 +98,37 @@
 
     <div class="detail-panel">
 
-        <h2>用户详情</h2>
+        <h2 data-i18n="userDetails">用户详情</h2>
 
         <div class="detail-grid">
 
             <div class="detail-item">
-                <div class="detail-label">用户名</div>
+                <div class="detail-label" data-i18n="username">用户名</div>
                 <div class="detail-value" id="detail-username">--</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">昵称</div>
+                <div class="detail-label" data-i18n="nickname">昵称</div>
                 <div class="detail-value" id="detail-nickname">--</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">身份</div>
+                <div class="detail-label" data-i18n="role">身份</div>
                 <div class="detail-value" id="detail-role">--</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">组别</div>
+                <div class="detail-label" data-i18n="group">组别</div>
                 <div class="detail-value" id="detail-group">--</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">注册时间</div>
+                <div class="detail-label" data-i18n="registerTime">注册时间</div>
                 <div class="detail-value" id="detail-created-at">--</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">账号状态</div>
+                <div class="detail-label" data-i18n="accountStatus">账号状态</div>
                 <div class="detail-value" id="detail-status">--</div>
             </div>
 
@@ -133,26 +142,26 @@
 
             <div class="panel-title">
                 <i class="fa-solid fa-pen-to-square"></i>
-                <h2>修改用户信息</h2>
+                <h2 data-i18n="editUserInfo">修改用户信息</h2>
             </div>
 
-            <p class="panel-description">
+            <p class="panel-description" data-i18n="editUserInfoDesc">
                 仅支持修改所选用户在指定所属组下的身份。组别不可修改，身份相同则无需保存。
             </p>
 
             <div class="form-grid">
 
                 <div class="form-group">
-                    <label>所属组</label>
+                    <label data-i18n="group">所属组</label>
                     <select id="edit-group-id">
-                        <option value="">请先选择用户</option>
+                        <option value="" data-i18n="pleaseSelectUser">请先选择用户</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label>身份</label>
+                    <label data-i18n="role">身份</label>
                     <select id="edit-role">
-                        <option value="">选择身份</option>
+                        <option value="" data-i18n="pleaseSelectRole">选择身份</option>
                         <option value="organizer">organizer</option>
                         <option value="user">user</option>
                     </select>
@@ -163,6 +172,7 @@
             <button
                 id="update-user-button"
                 class="panel-button"
+                data-i18n="saveChanges"
                 onclick="updateUserRole()"
             >
                 保存修改
@@ -206,28 +216,41 @@
 
             <div class="panel-title">
                 <i class="fa-solid fa-user-slash"></i>
-                <h2>禁用 / 启用账号</h2>
+                <h2 data-i18n="toggleAccountStatus">禁用 / 启用账号</h2>
             </div>
 
-            <p class="panel-description">
-                后续通过 is_active 字段控制账号状态。
+            <p class="panel-description" data-i18n="toggleAccountStatusDesc">
+                通过 is_active 字段控制账号是否允许登录。
             </p>
 
             <div class="status-preview">
 
-                <span class="status-label">
+                <span class="status-label" data-i18n="currentStatus">
                     当前状态
                 </span>
 
-                <span class="status-badge active" id="selected-user-status">
-                    正常
+                <span
+                    class="status-badge active"
+                    id="selected-user-status"
+                >
+                    --
                 </span>
 
             </div>
 
-            <button class="panel-button danger">
+            <button
+                id="toggle-user-status-button"
+                class="panel-button danger"
+                data-i18n="disableAccount"
+                onclick="openToggleUserStatusModal()"
+            >
                 禁用账号
             </button>
+
+            <div
+                id="user-status-message"
+                class="operation-message"
+            ></div>
 
         </div>
 
@@ -242,7 +265,7 @@
 
     <div class="custom-modal-content">
 
-        <h3>确认重置密码</h3>
+        <h3 data-i18n="confirmResetPassword">确认重置密码</h3>
 
         <p id="password-reset-text">
             确认重置该用户的密码？
@@ -252,6 +275,7 @@
 
             <button
                 class="modal-confirm-button"
+                data-i18n="confirm"
                 onclick="confirmResetPassword()"
             >
                 确认
@@ -259,7 +283,45 @@
 
             <button
                 class="modal-cancel-button"
+                data-i18n="cancel"
                 onclick="closeResetPasswordModal()"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div
+    id="user-status-modal"
+    class="custom-modal hidden"
+>
+
+    <div class="custom-modal-content">
+
+        <h3 data-i18n="confirmAction">确认账号状态操作</h3>
+
+        <p id="user-status-text">
+            确认修改该用户账号状态？
+        </p>
+
+        <div class="custom-modal-actions">
+
+            <button
+                class="modal-confirm-button"
+                data-i18n="confirm"
+                onclick="confirmToggleUserStatus()"
+            >
+                确认
+            </button>
+
+            <button
+                class="modal-cancel-button"
+                data-i18n="cancel"
+                onclick="closeUserStatusModal()"
             >
                 取消
             </button>
@@ -281,6 +343,7 @@
 <script src="/static/js/admin/user_management/user_detail.js?v={{ static_version }}"></script>
 <script src="/static/js/admin/user_management/user_update.js?v={{ static_version }}"></script>
 <script src="/static/js/admin/user_management/user_password.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_status.js?v={{ static_version }}"></script>
 <script src="/static/js/admin/user_management/init.js?v={{ static_version }}"></script>
 
 </body>

@@ -7,14 +7,14 @@ async function updateUserRole() {
 
     if (!selectedUser) {
         messageBox.innerText =
-            "请先选择一个用户。";
+            t("pleaseSelectUser")
 
         return;
     }
 
     if (selectedUser.role === "admin") {
         messageBox.innerText =
-            "管理员身份不可在此页面修改。";
+           t("adminModifyForbidden")
 
         return;
     }
@@ -27,21 +27,21 @@ async function updateUserRole() {
 
     if (!groupId) {
         messageBox.innerText =
-            "请选择所属组。";
+            t("pleaseSelectGroup")
 
         return;
     }
 
     if (!role) {
         messageBox.innerText =
-            "请选择身份。";
+            t("pleaseSelectRole")
 
         return;
     }
 
     if (role === selectedUser.role) {
         messageBox.innerText =
-            "身份无需更改。";
+            t("roleNoChange")
 
         return;
     }
@@ -65,7 +65,7 @@ async function updateUserRole() {
 
         if (!data.success) {
             messageBox.innerText =
-                data.message || "修改失败。";
+                data.message || t("updateFailed");
 
             return;
         }
@@ -76,7 +76,7 @@ async function updateUserRole() {
 
         messageBox.style.color = "#5CFFB2";
         messageBox.innerText =
-            "用户身份修改成功。";
+            t("updateSuccess");
 
     } catch (error) {
         console.error(error);
@@ -99,7 +99,7 @@ function resetUserEditForm() {
         document.getElementById("update-user-button");
 
     groupSelect.innerHTML = `
-        <option value="">请先选择用户</option>
+        <option value="">${t("pleaseSelectUser")}</option>
     `;
 
     groupSelect.disabled = false;

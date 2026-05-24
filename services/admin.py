@@ -102,10 +102,12 @@ def get_admin_users_service():
                 "group_code": group.group_code,
                 "group_name": group.group_name,
                 "avatar_url": user.avatar_url,
+                "is_active": user.is_active,
                 "created_at": (
                     user.created_at.strftime("%Y-%m-%d %H:%M")
                     if user.created_at
                     else ""
+
                 ),
             })
 
@@ -217,6 +219,57 @@ def reset_user_password_service(target_user_id):
         return {
             "success": True,
             "message": "密码已重置为 000000。",
+        }
+
+    except Exception as e:
+        db.rollback()
+
+        return {
+            "success": False,
+            "message": str(e),
+        }
+
+    finally:
+        db.close()
+
+
+def toggle_user_active_service(target_user_id):
+    db = SessionLocal()
+
+    try:
+        user = db.query(User).filter(
+            User.id == target_user_id
+        ).first()
+
+        if not user:
+            return {
+                "success": False,
+                "message": "用户不存在。",
+            }
+
+        admin_role = db.query(UserGroupRole).filter(
+            UserGroupRole.user_id == target_user_id,
+            UserGroupRole.role == "admin",
+        ).first()
+
+        if admin_role:
+            return {
+                "success": False,
+                "message": "不允许禁用管理员账号。",
+            }
+
+        user.is_active = 0 if user.is_active == 1 else 1
+
+        db.commit()
+
+        return {
+            "success": True,
+            "is_active": user.is_active,
+            "message": (
+                "accountDisabled"
+                if user.is_active == 0
+                else "accountEnabled"
+            ),
         }
 
     except Exception as e:

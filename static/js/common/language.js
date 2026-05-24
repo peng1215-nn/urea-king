@@ -1,75 +1,132 @@
 function getCurrentLanguage() {
-    return localStorage.getItem("language") || "zh";
+    return (
+        localStorage.getItem("language")
+        || "zh"
+    );
 }
 
 
-function getTranslations() {
-    return {
-        zh: {
-            ...(window.loginTranslations?.zh || {}),
-            ...(window.registerTranslations?.zh || {}),
-            ...(window.adminTranslations?.zh || {})
-        },
+function getTranslations(language) {
 
-        en: {
-            ...(window.loginTranslations?.en || {}),
-            ...(window.registerTranslations?.en || {}),
-            ...(window.adminTranslations?.en || {})
-        }
-    };
-}
-
-
-function setLanguage(language) {
-    localStorage.setItem("language", language);
-    applyLanguage();
-}
-
-
-function toggleLanguage() {
-    const currentLanguage = getCurrentLanguage();
-
-    if (currentLanguage === "zh") {
-        setLanguage("en");
-    } else {
-        setLanguage("zh");
+    if (window.adminTranslations) {
+        return window.adminTranslations[language];
     }
+
+    if (window.loginTranslations) {
+        return window.loginTranslations[language];
+    }
+
+    if (window.registerTranslations) {
+        return window.registerTranslations[language];
+    }
+
+    if (window.groupSelectTranslations) {
+        return window.groupSelectTranslations[language];
+    }
+
+    return {};
 }
 
 
 function t(key) {
-    const language = getCurrentLanguage();
-    const translations = getTranslations();
+    const language =
+        getCurrentLanguage();
 
-    if (!key) {
-        return "";
+    const translations =
+        getTranslations(language);
+
+    if (
+        !translations
+        || !translations[key]
+    ) {
+        return key;
     }
 
-    return translations[language][key] || key;
+    return translations[key];
 }
 
 
-function applyLanguage() {
-    const language = getCurrentLanguage();
-    const translations = getTranslations();
-    const dict = translations[language];
+function setLanguage(language) {
+    localStorage.setItem(
+        "language",
+        language
+    );
 
-    document.querySelectorAll("[data-i18n]").forEach(element => {
-        const key = element.getAttribute("data-i18n");
-        element.innerText = dict[key] || key;
-    });
+    applyLanguage(language);
+}
 
-    document.querySelectorAll("[data-i18n-placeholder]").forEach(element => {
-        const key = element.getAttribute("data-i18n-placeholder");
-        element.placeholder = dict[key] || key;
-    });
 
-    const toggleButton = document.getElementById("language-toggle");
+function toggleLanguage() {
+    const currentLanguage =
+        getCurrentLanguage();
+
+    const nextLanguage =
+        currentLanguage === "zh"
+            ? "en"
+            : "zh";
+
+    setLanguage(nextLanguage);
+}
+
+
+function applyLanguage(language = getCurrentLanguage()) {
+    const translations =
+        getTranslations(language);
+
+    if (!translations) {
+        return;
+    }
+
+    document.documentElement.lang =
+        language;
+
+    document
+        .querySelectorAll("[data-i18n]")
+        .forEach(element => {
+            const key =
+                element.getAttribute("data-i18n");
+
+            if (key && translations[key]) {
+                element.innerText =
+                    translations[key];
+            }
+        });
+
+    document
+        .querySelectorAll("[data-i18n-placeholder]")
+        .forEach(element => {
+            const key =
+                element.getAttribute("data-i18n-placeholder");
+
+            if (key && translations[key]) {
+                element.placeholder =
+                    translations[key];
+            }
+        });
+
+    const toggleButton =
+        document.getElementById("language-toggle");
 
     if (toggleButton) {
-        toggleButton.innerText = language === "zh" ? "ENGLISH" : "中文";
+        toggleButton.innerText =
+            language === "zh"
+                ? "ENGLISH"
+                : "中文";
+    }
+
+    if (typeof renderUsers === "function" && Array.isArray(allUsers)) {
+        renderUsers(allUsers);
+    }
+
+    if (typeof refreshSelectedUserLanguage === "function") {
+        refreshSelectedUserLanguage();
     }
 }
 
 
-document.addEventListener("DOMContentLoaded", applyLanguage);
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+        applyLanguage();
+    }
+);

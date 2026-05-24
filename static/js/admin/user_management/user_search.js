@@ -12,7 +12,7 @@ function searchUsers() {
 
     if (keyword.length === 0) {
         messageBox.innerText =
-            "请输入用户名、昵称、身份或组名。";
+            t("searchEmpty");
 
         renderUsers(allUsers);
 
@@ -31,7 +31,7 @@ function searchUsers() {
         .filter(user => user.matched_fields.length > 0);
 
     if (matchedUsers.length === 0) {
-        messageBox.innerText = "未找到匹配的用户。";
+        messageBox.innerText = t("searchNoResult");
         renderUsers([]);
 
         return;
@@ -39,7 +39,7 @@ function searchUsers() {
 
     messageBox.style.color = "#5CFFB2";
     messageBox.innerText =
-        `找到 ${matchedUsers.length} 个匹配用户。`;
+        `${t("searchResultPrefix")} ${matchedUsers.length} ${t("searchResultSuffix")}`;
 
     renderUsers(matchedUsers);
 }
@@ -81,7 +81,6 @@ function getMatchedFields(user, keyword) {
 
 
 function clearSearch() {
-
     document.getElementById("user-search").value = "";
 
     const messageBox =
@@ -92,43 +91,9 @@ function clearSearch() {
 
     renderUsers(allUsers);
 
-    selectedUser = null;
-
-    document
-        .querySelectorAll("#user-table-body tr")
-        .forEach(row => {
-            row.classList.remove("active");
-        });
-
-    document.getElementById("detail-username").innerText = "--";
-    document.getElementById("detail-nickname").innerText = "--";
-    document.getElementById("detail-role").innerText = "--";
-    document.getElementById("detail-group").innerText = "--";
-    document.getElementById("detail-created-at").innerText = "--";
-    document.getElementById("detail-status").innerText = "--";
-    document.getElementById("selected-user-status").innerText = "正常";
-
-    const groupSelect = document.getElementById("edit-group-id");
-    const roleSelect = document.getElementById("edit-role");
-    const updateButton = document.getElementById("update-user-button");
-    const resetButton = document.getElementById("reset-password-button");
-
-    groupSelect.innerHTML = `
-        <option value="">请先选择用户</option>
-    `;
-
-    groupSelect.disabled = false;
-    roleSelect.value = "";
-    roleSelect.disabled = false;
-
-    if (updateButton) {
-        updateButton.disabled = false;
-    }
-
-    if (resetButton) {
-        resetButton.disabled = false;
-    }
+    resetSelectedUserState();
 
     document.getElementById("update-user-message").innerText = "";
     document.getElementById("reset-password-message").innerText = "";
+    document.getElementById("user-status-message").innerText = "";
 }

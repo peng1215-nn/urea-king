@@ -13,7 +13,7 @@ function renderGroups() {
 
     if (groups.length === 0) {
         groupList.innerHTML =
-            `<div class="group-card">没有可进入的组别。</div>`;
+            `<div class="group-card">${t("noAvailableGroup")}</div>`;
 
         return;
     }
@@ -35,8 +35,7 @@ function renderGroups() {
                 ${group.group_code} - ${group.group_name || ""}
             </div>
 
-            <div class="group-role">
-                身份：${group.role}
+            <div class="group-role">${t("role")}：${group.role}
             </div>
         `;
 
@@ -65,7 +64,7 @@ async function selectGroup(groupId) {
 
         if (!data.success) {
             showMessage(
-                data.error_code || "组别选择失败。"
+                t(data.error_code || "groupSelectFailed")
             );
 
             return;
@@ -79,7 +78,7 @@ async function selectGroup(groupId) {
         console.error(error);
 
         showMessage(
-            "组别选择失败。"
+            t("groupSelectFailed")
         );
     }
 }
@@ -87,11 +86,6 @@ async function selectGroup(groupId) {
 
 function redirectByRole(role) {
     if (role === "admin") {
-        window.location.replace("/admin-dashboard");
-        return;
-    }
-
-    if (role === "organizer") {
         window.location.replace("/admin-dashboard");
         return;
     }
