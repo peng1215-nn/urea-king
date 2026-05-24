@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
