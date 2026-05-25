@@ -23,6 +23,7 @@ def register_page(request: Request):
 
 @router.post("/register")
 def register_user(
+    request: Request,
     username: str = Form(...),
     nickname: str = Form(...),
     password: str = Form(...),
@@ -30,6 +31,7 @@ def register_user(
     invite_code: str = Form(...),
 ):
     return register_user_service(
+        request=request,
         username=username,
         nickname=nickname,
         password=password,

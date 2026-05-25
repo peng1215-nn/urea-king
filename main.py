@@ -9,6 +9,7 @@ from routes.avatar import router as avatar_router
 from routes.common import router as common_router
 from routes.login import router as login_router
 from routes.register import router as register_router
+from routes import invite_management
 
 
 load_dotenv()
@@ -20,6 +21,7 @@ app.include_router(login_router)
 app.include_router(admin_router)
 app.include_router(avatar_router)
 app.include_router(common_router)
+app.include_router(invite_management.router)
 
 SESSION_SECRET_KEY = os.getenv(
     "SESSION_SECRET_KEY",

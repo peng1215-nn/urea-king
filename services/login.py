@@ -1,9 +1,9 @@
 from passlib.context import CryptContext
-
 from database import SessionLocal
 from models import Group
 from models import User
 from models import UserGroupRole
+from services.audit_log import write_audit_log
 
 
 pwd_context = CryptContext(
@@ -61,10 +61,20 @@ def login_user_service(request, username, password):
 
         request.session["user_id"] = user.id
         request.session["username"] = user.username
-
         request.session.pop("current_group_id", None)
         request.session.pop("current_group_code", None)
         request.session.pop("current_role", None)
+
+        write_audit_log(
+            request=request,
+            action="LOGIN_SUCCESS",
+            target_type="user",
+            target_id=user.id,
+            old_value=None,
+            new_value="login_verified",
+            operator_id=user.id,
+            operator_username=user.username,
+        )
 
         return {
             "success": True,

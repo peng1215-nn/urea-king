@@ -179,7 +179,9 @@ async function confirmToggleUserStatus() {
             "#5CFFB2";
 
         messageBox.innerText =
-            data.message || t("operationSuccess");
+            Number(data.is_active) === 1
+                ? t("accountEnabledSuccess")
+                : t("accountDisabledSuccess");
 
         closeUserStatusModal();
 

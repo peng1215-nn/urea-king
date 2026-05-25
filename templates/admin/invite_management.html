@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+
+    <meta charset="UTF-8">
+    <title data-i18n="inviteManagement">邀请码管理</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/admin/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/admin/invite_management.css?v={{ static_version }}">
+
+</head>
+
+<body>
+
+{% include "admin/sidebar.html" %}
+
+<div class="main">
+
+    <div class="top-bar">
+
+        <div class="title-area">
+            <h1 data-i18n="inviteManagement">邀请码管理</h1>
+            <p
+                id="current-group-text"
+                class="page-subtitle"
+            ></p>
+        </div>
+
+        <div class="admin-area">
+
+            <img
+                id="avatar-preview"
+                class="avatar"
+                src="/static/images/default_avatar.jpg"
+                alt="头像"
+            >
+
+            <div class="admin-tag">
+                <span class="status-dot"></span>
+                <span data-i18n="admin">管理员</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="invite-management-grid">
+
+        <div class="action-panel">
+
+            <div class="panel-title">
+                <i class="fa-solid fa-layer-group"></i>
+                <h2 data-i18n="createGroup">创建组</h2>
+            </div>
+
+            <p
+                class="panel-description"
+                data-i18n="createGroupDesc"
+            >
+                创建新的普通组别。开发与维护组系统默认组。
+            </p>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label
+                        for="create-group-code"
+                        data-i18n="groupCode"
+                    >
+                        组编号
+                    </label>
+
+                    <input
+                        type="text"
+                        id="create-group-code"
+                        data-i18n-placeholder="groupCodePlaceholder"
+                        placeholder="请输入组编号"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label
+                        for="create-group-name"
+                        data-i18n="groupName"
+                    >
+                        组名
+                    </label>
+
+                    <input
+                        type="text"
+                        id="create-group-name"
+                        data-i18n-placeholder="groupNamePlaceholder"
+                        placeholder="请输入组名"
+                    >
+                </div>
+
+            </div>
+
+            <button
+                id="create-group-button"
+                class="panel-button"
+                data-i18n="createGroup"
+                onclick="createGroup()"
+            >
+                创建组
+            </button>
+
+            <div
+                id="create-group-message"
+                class="operation-message"
+            ></div>
+
+        </div>
+
+        <div class="action-panel">
+
+            <div class="panel-title">
+                <i class="fa-solid fa-trash-can"></i>
+                <h2 data-i18n="deleteGroup">删除组</h2>
+            </div>
+
+            <p
+                class="panel-description"
+                data-i18n="deleteGroupDesc"
+            >
+                只能删除没有任何成员的普通组。管理员组不会出现在下拉框中。
+            </p>
+
+            <div class="form-grid">
+
+                <div class="form-group full-width">
+                    <label
+                        for="delete-group-id"
+                        data-i18n="selectGroup"
+                    >
+                        选择组
+                    </label>
+
+                    <select id="delete-group-id">
+                        <option
+                            value=""
+                            data-i18n="pleaseSelectGroup"
+                        >
+                            请选择组别
+                        </option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button
+                id="delete-group-button"
+                class="panel-button danger"
+                data-i18n="deleteGroup"
+                onclick="openDeleteGroupModal()"
+            >
+                删除组
+            </button>
+
+            <div
+                id="delete-group-message"
+                class="operation-message"
+            ></div>
+
+        </div>
+
+        <div class="action-panel">
+
+            <div class="panel-title">
+                <i class="fa-solid fa-ticket"></i>
+                <h2 data-i18n="createInviteCode">创建邀请码</h2>
+            </div>
+
+            <p
+                class="panel-description"
+                data-i18n="createInviteCodeDesc"
+            >
+                为指定组别创建 organizer 或 user 身份的邀请码。
+            </p>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label
+                        for="create-invite-code"
+                        data-i18n="inviteCode"
+                    >
+                        邀请码
+                    </label>
+
+                    <input
+                        type="text"
+                        id="create-invite-code"
+                        data-i18n-placeholder="inviteCodePlaceholder"
+                        placeholder="请输入邀请码"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label
+                        for="create-invite-group-id"
+                        data-i18n="selectGroup"
+                    >
+                        选择组
+                    </label>
+
+                    <select id="create-invite-group-id">
+                        <option
+                            value=""
+                            data-i18n="pleaseSelectGroup"
+                        >
+                            请选择组别
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label
+                        for="create-invite-role"
+                        data-i18n="role"
+                    >
+                        身份
+                    </label>
+
+                    <select id="create-invite-role">
+                        <option
+                            value=""
+                            data-i18n="pleaseSelectRole"
+                        >
+                            请选择身份
+                        </option>
+
+                        <option value="organizer">organizer</option>
+                        <option value="user">user</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button
+                id="create-invite-button"
+                class="panel-button"
+                data-i18n="createInviteCode"
+                onclick="createInvitationCode()"
+            >
+                创建邀请码
+            </button>
+
+            <div
+                id="create-invite-message"
+                class="operation-message"
+            ></div>
+
+        </div>
+
+        <div class="action-panel">
+
+            <div class="panel-title">
+                <i class="fa-solid fa-ticket-simple"></i>
+                <h2 data-i18n="deleteInviteCode">删除邀请码</h2>
+            </div>
+
+            <p
+                class="panel-description"
+                data-i18n="deleteInviteCodeDesc"
+            >
+                输入邀请码后删除对应记录。只允许删除未使用的邀请码。
+            </p>
+
+            <div class="form-grid">
+
+                <div class="form-group full-width">
+                    <label
+                        for="delete-invite-code"
+                        data-i18n="inviteCode"
+                    >
+                        邀请码
+                    </label>
+
+                    <select id="delete-invite-code">
+                        <option
+                            value=""
+                            data-i18n="pleaseSelectInviteCode"
+                        >
+                            请选择邀请码
+                        </option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button
+                id="delete-invite-button"
+                class="panel-button danger"
+                data-i18n="deleteInviteCode"
+                onclick="openDeleteInviteModal()"
+            >
+                删除邀请码
+            </button>
+
+            <div
+                id="delete-invite-message"
+                class="operation-message"
+            ></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div
+    id="delete-group-modal"
+    class="custom-modal hidden"
+>
+
+    <div class="custom-modal-content">
+
+        <h3 data-i18n="confirmDeleteGroup">确认删除组</h3>
+
+        <p id="delete-group-text">
+            确认删除该组？
+        </p>
+
+        <div class="custom-modal-actions">
+
+            <button
+                class="modal-confirm-button"
+                data-i18n="confirm"
+                onclick="confirmDeleteGroup()"
+            >
+                确认
+            </button>
+
+            <button
+                class="modal-cancel-button"
+                data-i18n="cancel"
+                onclick="closeDeleteGroupModal()"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div
+    id="delete-invite-modal"
+    class="custom-modal hidden"
+>
+
+    <div class="custom-modal-content">
+
+        <h3 data-i18n="confirmDeleteInviteCode">确认删除邀请码</h3>
+
+        <p id="delete-invite-text">
+            确认删除该邀请码？
+        </p>
+
+        <div class="custom-modal-actions">
+
+            <button
+                class="modal-confirm-button"
+                data-i18n="confirm"
+                onclick="confirmDeleteInvitationCode()"
+            >
+                确认
+            </button>
+
+            <button
+                class="modal-cancel-button"
+                data-i18n="cancel"
+                onclick="closeDeleteInviteModal()"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/invite_management/invite_state.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/invite_management/invite_api.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/invite_management/group_actions.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/invite_management/invite_actions.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/invite_management/invite_init.js?v={{ static_version }}"></script>
+
+</body>
+</html>

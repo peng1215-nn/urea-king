@@ -11,6 +11,7 @@ from fastapi import Form
 from services.admin import update_user_role_service
 from services.admin import reset_user_password_service
 from services.admin import toggle_user_active_service
+from services.audit_log import write_audit_log
 
 
 router = APIRouter()
@@ -115,11 +116,28 @@ def update_user_role(
             "message": "无权限访问。",
         }
 
-    return update_user_role_service(
+    result = update_user_role_service(
         target_user_id=target_user_id,
         group_id=group_id,
         new_role=role,
     )
+
+    if result.get("success"):
+
+        write_audit_log(
+            request=request,
+            action="UPDATE_USER_ROLE",
+            target_type="user",
+            target_id=target_user_id,
+            old_value=result.get("old_role"),
+            new_value=result.get("new_role"),
+            operator_id=request.session.get("user_id"),
+            operator_username=request.session.get(
+                "username"
+            ),
+        )
+
+    return result
 
 
 @router.post("/admin/reset-user-password")
@@ -133,9 +151,23 @@ def reset_user_password(
             "message": "无权限访问。",
         }
 
-    return reset_user_password_service(
+    result = reset_user_password_service(
         target_user_id=target_user_id,
     )
+
+    if result.get("success"):
+        write_audit_log(
+            request=request,
+            action="RESET_USER_PASSWORD",
+            target_type="user",
+            target_id=target_user_id,
+            old_value=None,
+            new_value="password_reset_to_default",
+            operator_id=request.session.get("user_id"),
+            operator_username=request.session.get("username"),
+        )
+
+    return result
 
 
 @router.post("/admin/toggle-user-active")
@@ -149,6 +181,34 @@ def toggle_user_active(
             "message": "无权限访问。",
         }
 
-    return toggle_user_active_service(
+    result = toggle_user_active_service(
         target_user_id=target_user_id,
     )
+
+    if result.get("success"):
+        is_active = result.get("is_active")
+
+        action = (
+            "ENABLE_USER"
+            if int(is_active) == 1
+            else "DISABLE_USER"
+        )
+
+        new_value = (
+            "active"
+            if int(is_active) == 1
+            else "disabled"
+        )
+
+        write_audit_log(
+            request=request,
+            action=action,
+            target_type="user",
+            target_id=target_user_id,
+            old_value=None,
+            new_value=new_value,
+            operator_id=request.session.get("user_id"),
+            operator_username=request.session.get("username"),
+        )
+
+    return result

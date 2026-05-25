@@ -166,6 +166,8 @@ def update_user_role_service(
                 "message": "身份无需更改。",
             }
 
+        old_role = user_group_role.role
+
         user_group_role.role = new_role
 
         db.commit()
@@ -173,6 +175,8 @@ def update_user_role_service(
         return {
             "success": True,
             "message": "用户身份修改成功。",
+            "old_role": old_role,
+            "new_role": new_role,
         }
 
     except Exception as e:

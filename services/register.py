@@ -1,13 +1,12 @@
 from datetime import datetime
 import re
-
 from passlib.context import CryptContext
-
 from database import SessionLocal
 from models import Group
 from models import InvitationCode
 from models import User
 from models import UserGroupRole
+from services.audit_log import write_audit_log
 
 
 pwd_context = CryptContext(
@@ -17,6 +16,7 @@ pwd_context = CryptContext(
 
 
 def register_user_service(
+    request,
     username,
     nickname,
     password,
@@ -117,6 +117,20 @@ def register_user_service(
         invitation.used_at = datetime.utcnow()
 
         db.commit()
+
+        write_audit_log(
+            request=request,
+            action="REGISTER_SUCCESS",
+            target_type="user",
+            target_id=new_user.id,
+            old_value=invite_code,
+            new_value=(
+                f"group_code={invitation.group_code}, "
+                f"role={invitation.role}"
+            ),
+            operator_id=new_user.id,
+            operator_username=new_user.username,
+        )
 
         return {
             "success": True,
