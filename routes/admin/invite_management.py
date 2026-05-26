@@ -2,16 +2,17 @@ from fastapi import APIRouter
 from fastapi import Form
 from fastapi import Request
 from fastapi.responses import HTMLResponse
-
-from services.audit_log import write_audit_log
-from services.invite_management import create_group_service
-from services.invite_management import create_invitation_code_service
-from services.invite_management import delete_group_service
-from services.invite_management import delete_invitation_code_service
-from services.invite_management import get_deletable_group_options_service
-from services.invite_management import get_group_options_service
-from services.invite_management import get_unused_invitation_options_service
+from fastapi.responses import RedirectResponse
+from services.admin.audit_log import write_audit_log
+from services.admin.invite_management import create_group_service
+from services.admin.invite_management import create_invitation_code_service
+from services.admin.invite_management import delete_group_service
+from services.admin.invite_management import delete_invitation_code_service
+from services.admin.invite_management import get_deletable_group_options_service
+from services.admin.invite_management import get_group_options_service
+from services.admin.invite_management import get_unused_invitation_options_service
 from template_config import templates
+from services.common.common import add_no_cache_headers
 
 
 router = APIRouter()
@@ -27,18 +28,20 @@ def require_admin(request: Request):
 )
 def invite_management_page(request: Request):
     if not require_admin(request):
-        return templates.TemplateResponse(
-            request=request,
-            name="auth/login.html",
+        return RedirectResponse(
+            url="/login",
+            status_code=302,
         )
 
-    return templates.TemplateResponse(
+    response = templates.TemplateResponse(
         request=request,
         name="admin/invite_management.html",
         context={
             "current_page": "invite_management",
         },
     )
+
+    return add_no_cache_headers(response)
 
 
 @router.get("/admin/groups/options")

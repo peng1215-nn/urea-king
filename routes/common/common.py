@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from fastapi import Request
 from fastapi.responses import RedirectResponse
-from services.common import add_no_cache_headers
-from services.common import get_current_user_service
+from services.common.common import add_no_cache_headers
+from services.common.common import get_current_user_service
 
 
 router = APIRouter()

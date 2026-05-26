@@ -4,18 +4,18 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
 
-from services.change_password import get_current_account_service
-from services.change_password import update_nickname_service
-from services.change_password import update_password_service
-from services.common import add_no_cache_headers
+from services.admin.change_password import get_current_account_service
+from services.admin.change_password import update_nickname_service
+from services.admin.change_password import update_password_service
+from services.common.common import add_no_cache_headers
 from template_config import templates
 
 
 router = APIRouter()
 
 
-def require_login(request: Request):
-    return request.session.get("user_id") is not None
+def require_admin(request: Request):
+    return request.session.get("current_role") == "admin"
 
 
 @router.get(
@@ -23,7 +23,7 @@ def require_login(request: Request):
     response_class=HTMLResponse,
 )
 def change_password_page(request: Request):
-    if not require_login(request):
+    if not require_admin(request):
         return RedirectResponse(
             url="/login",
             status_code=302,
@@ -31,7 +31,7 @@ def change_password_page(request: Request):
 
     response = templates.TemplateResponse(
         request=request,
-        name="common/change_password.html",
+        name="admin/change_password.html",
         context={
             "current_page": "change_password",
         },
@@ -42,13 +42,13 @@ def change_password_page(request: Request):
 
 @router.get("/change-password/current")
 def get_current_account(request: Request):
-    user_id = request.session.get("user_id")
-
-    if not user_id:
+    if not require_admin(request):
         return {
             "success": False,
-            "message": "notLoggedIn",
+            "message": "permissionDenied",
         }
+
+    user_id = request.session.get("user_id")
 
     return get_current_account_service(
         user_id=user_id,
@@ -60,13 +60,13 @@ def update_nickname(
     request: Request,
     nickname: str = Form(...),
 ):
-    user_id = request.session.get("user_id")
-
-    if not user_id:
+    if not require_admin(request):
         return {
             "success": False,
-            "message": "notLoggedIn",
+            "message": "permissionDenied",
         }
+
+    user_id = request.session.get("user_id")
 
     result = update_nickname_service(
         user_id=user_id,
@@ -86,13 +86,13 @@ def update_password(
     new_password: str = Form(...),
     confirm_password: str = Form(...),
 ):
-    user_id = request.session.get("user_id")
-
-    if not user_id:
+    if not require_admin(request):
         return {
             "success": False,
-            "message": "notLoggedIn",
+            "message": "permissionDenied",
         }
+
+    user_id = request.session.get("user_id")
 
     result = update_password_service(
         user_id=user_id,

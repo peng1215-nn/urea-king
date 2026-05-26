@@ -4,15 +4,15 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
-from routes.admin import router as admin_router
-from routes.avatar import router as avatar_router
-from routes.common import router as common_router
-from routes.login import router as login_router
-from routes.register import router as register_router
-from routes import invite_management
-from routes import system_logs
-from routes import announcement
-from routes import change_password
+from routes.admin.admin import router as admin_router
+from routes.admin import system_logs
+from routes.admin import invite_management
+from routes.admin import announcement
+from routes.common.avatar import router as avatar_router
+from routes.common.common import router as common_router
+from routes.auth.login import router as login_router
+from routes.auth.register import router as register_router
+from routes.admin.change_password import router as admin_change_password_router
 
 
 load_dotenv()
@@ -21,13 +21,15 @@ app = FastAPI()
 
 app.include_router(register_router)
 app.include_router(login_router)
+
 app.include_router(admin_router)
 app.include_router(avatar_router)
 app.include_router(common_router)
+
 app.include_router(invite_management.router)
 app.include_router(system_logs.router)
 app.include_router(announcement.router)
-app.include_router(change_password.router)
+app.include_router(admin_change_password_router)
 
 SESSION_SECRET_KEY = os.getenv(
     "SESSION_SECRET_KEY",

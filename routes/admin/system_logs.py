@@ -2,9 +2,10 @@ from fastapi import APIRouter
 from fastapi import Query
 from fastapi import Request
 from fastapi.responses import HTMLResponse
-
-from services.system_logs import get_audit_logs_service
+from fastapi.responses import RedirectResponse
+from services.admin.system_logs import get_audit_logs_service
 from template_config import templates
+from services.common.common import add_no_cache_headers
 
 
 router = APIRouter()
@@ -20,18 +21,20 @@ def require_admin(request: Request):
 )
 def system_logs_page(request: Request):
     if not require_admin(request):
-        return templates.TemplateResponse(
-            request=request,
-            name="auth/login.html",
+        return RedirectResponse(
+            url="/login",
+            status_code=302,
         )
 
-    return templates.TemplateResponse(
+    response = templates.TemplateResponse(
         request=request,
         name="admin/system_logs.html",
         context={
             "current_page": "system_logs",
         },
     )
+
+    return add_no_cache_headers(response)
 
 
 @router.get("/admin/audit-logs")

@@ -2,16 +2,16 @@ from fastapi import APIRouter
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
-from services.admin import get_admin_stats_service
-from services.admin import get_admin_users_service
-from services.admin import get_system_monitor_service
-from services.common import add_no_cache_headers
+from services.admin.admin import get_admin_stats_service
+from services.admin.admin import get_admin_users_service
+from services.admin.admin import get_system_monitor_service
+from services.common.common import add_no_cache_headers
 from template_config import templates
 from fastapi import Form
-from services.admin import update_user_role_service
-from services.admin import reset_user_password_service
-from services.admin import toggle_user_active_service
-from services.audit_log import write_audit_log
+from services.admin.admin import update_user_role_service
+from services.admin.admin import reset_user_password_service
+from services.admin.admin import toggle_user_active_service
+from services.admin.audit_log import write_audit_log
 
 
 router = APIRouter()

@@ -6,7 +6,7 @@ from models import Group
 from models import InvitationCode
 from models import User
 from models import UserGroupRole
-from services.audit_log import write_audit_log
+from services.admin.audit_log import write_audit_log
 
 
 pwd_context = CryptContext(

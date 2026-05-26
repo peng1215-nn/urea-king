@@ -4,11 +4,11 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
 
-from services.announcement import create_announcement_service
-from services.announcement import delete_announcement_service
-from services.announcement import get_announcements_service
-from services.announcement import update_announcement_service
-from services.common import add_no_cache_headers
+from services.admin.announcement import create_announcement_service
+from services.admin.announcement import delete_announcement_service
+from services.admin.announcement import get_announcements_service
+from services.admin.announcement import update_announcement_service
+from services.common.common import add_no_cache_headers
 from template_config import templates
 
 

@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse
 from database import SessionLocal
 from models import Group
 from models import UserGroupRole
-from services.login import login_user_service
+from services.auth.login import login_user_service
 from template_config import templates
 
 
@@ -99,9 +99,18 @@ def select_group(
         request.session["current_group_code"] = group.group_code
         request.session["current_role"] = user_group_role.role
 
+        redirect_url = "/user-dashboard"
+
+        if user_group_role.role == "admin":
+            redirect_url = "/admin-dashboard"
+
+        elif user_group_role.role == "organizer":
+            redirect_url = "/organizer-dashboard"
+
         return {
             "success": True,
             "role": user_group_role.role,
+            "redirect_url": redirect_url,
         }
 
     finally:

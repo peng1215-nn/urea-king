@@ -54,25 +54,37 @@ async function selectGroup(groupId) {
     );
 
     try {
-        const response = await fetch("/select-group", {
-            method: "POST",
-            body: formData,
-        });
+        const response = await fetch(
+            "/select-group",
+            {
+                method: "POST",
+                body: formData,
+            }
+        );
 
         const data =
             await response.json();
 
         if (!data.success) {
             showMessage(
-                t(data.error_code || "groupSelectFailed")
+                t(
+                    data.error_code ||
+                    "groupSelectFailed"
+                )
             );
 
             return;
         }
 
-        redirectByRole(
-            data.role
-        );
+        if (data.redirect_url) {
+            window.location.replace(
+                data.redirect_url
+            );
+
+            return;
+        }
+
+        window.location.replace("/login");
 
     } catch (error) {
         console.error(error);
@@ -81,16 +93,6 @@ async function selectGroup(groupId) {
             t("groupSelectFailed")
         );
     }
-}
-
-
-function redirectByRole(role) {
-    if (role === "admin") {
-        window.location.replace("/admin-dashboard");
-        return;
-    }
-
-    window.location.replace("/login");
 }
 
 
