@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+
+    <meta charset="UTF-8">
+    <title data-i18n="announcementManagement">公告管理</title>
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/admin/common.css?v={{ static_version }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/admin/announcement_management.css?v={{ static_version }}"
+    >
+
+</head>
+
+<body>
+
+{% include "admin/sidebar.html" %}
+
+<div class="main">
+
+    <div class="top-bar">
+
+        <div class="title-area">
+            <h1 data-i18n="announcementManagement">公告管理</h1>
+
+            <p
+                id="current-group-text"
+                class="page-subtitle"
+            ></p>
+        </div>
+
+        <div class="admin-area">
+
+            <img
+                id="avatar-preview"
+                class="avatar"
+                src="/static/images/default_avatar.jpg"
+                alt="avatar"
+            >
+
+            <div class="admin-tag">
+                <span class="status-dot"></span>
+
+                <span data-i18n="admin">
+                    管理员
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="announcement-layout">
+
+        <div class="announcement-form-card">
+
+            <div class="panel-title">
+
+                <i class="fa-solid fa-bullhorn"></i>
+
+                <h2
+                    id="announcement-form-title"
+                    data-i18n="createAnnouncement"
+                >
+                    创建公告
+                </h2>
+
+            </div>
+
+            <p
+                class="panel-description"
+                data-i18n="announcementFormDesc"
+            >
+                填写公告标题与内容后发布，公告将显示在公告列表中。
+            </p>
+
+            <input
+                type="hidden"
+                id="announcement-id"
+            >
+
+            <div class="form-group">
+
+                <label
+                    for="announcement-title"
+                    data-i18n="announcementTitle"
+                >
+                    公告标题
+                </label>
+
+                <input
+                    type="text"
+                    id="announcement-title"
+                    maxlength="200"
+                    data-i18n-placeholder="announcementTitlePlaceholder"
+                    placeholder="请输入公告标题"
+                >
+
+            </div>
+
+            <div class="form-group">
+
+                <label
+                    for="announcement-content"
+                    data-i18n="announcementContent"
+                >
+                    公告内容
+                </label>
+
+                <textarea
+                    id="announcement-content"
+                    rows="12"
+                    data-i18n-placeholder="announcementContentPlaceholder"
+                    placeholder="请输入公告内容"
+                ></textarea>
+
+            </div>
+
+            <div class="form-actions">
+
+                <button
+                    id="save-announcement-button"
+                    class="panel-button"
+                    data-i18n="publishAnnouncement"
+                    onclick="saveAnnouncement()"
+                >
+                    发布公告
+                </button>
+
+                <button
+                    id="cancel-edit-button"
+                    class="panel-button secondary hidden"
+                    data-i18n="cancelEdit"
+                    onclick="cancelEditAnnouncement()"
+                >
+                    取消编辑
+                </button>
+
+            </div>
+
+            <div
+                id="announcement-form-message"
+                class="operation-message"
+            ></div>
+
+        </div>
+
+        <div class="announcement-list-card">
+
+            <div class="panel-title">
+
+                <i class="fa-regular fa-file-lines"></i>
+
+                <h2 data-i18n="announcementList">
+                    公告列表
+                </h2>
+
+            </div>
+
+            <p
+                class="panel-description"
+                data-i18n="announcementListDesc"
+            >
+                查看、编辑或删除已经发布的公告。
+            </p>
+
+            <div
+                id="announcement-list-message"
+                class="operation-message"
+            ></div>
+
+            <div
+                id="announcement-list"
+                class="announcement-list"
+            >
+
+                <div
+                    class="empty-announcement"
+                    data-i18n="loading"
+                >
+                    加载中...
+                </div>
+
+            </div>
+
+            <div class="announcement-pagination-bar">
+
+                <button
+                    id="announcement-previous-button"
+                    class="announcement-pagination-button"
+                    data-i18n="previousPage"
+                    onclick="goToPreviousAnnouncementPage()"
+                >
+                    上一页
+                </button>
+
+                <span
+                    id="announcement-pagination-info"
+                    class="announcement-pagination-info"
+                >
+                    1 / 1
+                </span>
+
+                <button
+                    id="announcement-next-button"
+                    class="announcement-pagination-button"
+                    data-i18n="nextPage"
+                    onclick="goToNextAnnouncementPage()"
+                >
+                    下一页
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div
+    id="delete-announcement-modal"
+    class="custom-modal hidden"
+>
+
+    <div class="custom-modal-content">
+
+        <h3 data-i18n="confirmDeleteAnnouncement">
+            确认删除公告
+        </h3>
+
+        <p
+            id="delete-announcement-text"
+            data-i18n="deleteAnnouncementConfirmText"
+        >
+            确认删除该公告？
+        </p>
+
+        <div class="custom-modal-actions">
+
+            <button
+                class="modal-confirm-button"
+                data-i18n="confirm"
+                onclick="confirmDeleteAnnouncement()"
+            >
+                确认
+            </button>
+
+            <button
+                class="modal-cancel-button"
+                data-i18n="cancel"
+                onclick="closeDeleteAnnouncementModal()"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/announcement_management/announcement_state.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/announcement_management/announcement_api.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/announcement_management/announcement_render.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/announcement_management/announcement_actions.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/announcement_management/announcement_init.js?v={{ static_version }}"></script>
+
+</body>
+</html>

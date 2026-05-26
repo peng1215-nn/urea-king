@@ -1,19 +1,16 @@
 from logging.config import fileConfig
 import os
-
 from dotenv import load_dotenv
-
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
 from alembic import context
-
 from database import Base
 from models import User
 from models import Group
 from models import UserGroupRole
 from models import InvitationCode
 from models import AuditLog
+from models import Announcement
 
 
 load_dotenv()

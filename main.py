@@ -10,6 +10,9 @@ from routes.common import router as common_router
 from routes.login import router as login_router
 from routes.register import router as register_router
 from routes import invite_management
+from routes import system_logs
+from routes import announcement
+from routes import change_password
 
 
 load_dotenv()
@@ -22,6 +25,9 @@ app.include_router(admin_router)
 app.include_router(avatar_router)
 app.include_router(common_router)
 app.include_router(invite_management.router)
+app.include_router(system_logs.router)
+app.include_router(announcement.router)
+app.include_router(change_password.router)
 
 SESSION_SECRET_KEY = os.getenv(
     "SESSION_SECRET_KEY",
@@ -30,7 +36,8 @@ SESSION_SECRET_KEY = os.getenv(
 
 app.add_middleware(
     SessionMiddleware,
-    secret_key=SESSION_SECRET_KEY
+    secret_key=SESSION_SECRET_KEY,
+    max_age=60 * 60 * 24,
 )
 
 app.mount(

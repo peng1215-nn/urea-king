@@ -38,9 +38,12 @@ def get_admin_stats_service():
             InvitationCode.is_used == 0
         ).count()
 
+        total_groups = db.query(Group).count()
+
         return {
             "success": True,
             "total_users": total_users,
+            "total_groups": total_groups,
             "admin_count": admin_count,
             "organizer_count": organizer_count,
             "user_count": user_count,

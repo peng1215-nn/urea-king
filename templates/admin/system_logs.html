@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+
+    <meta charset="UTF-8">
+    <title data-i18n="systemLogs">系统日志</title>
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/admin/common.css?v={{ static_version }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="/static/css/admin/system_logs.css?v={{ static_version }}"
+    >
+
+</head>
+
+<body>
+
+{% include "admin/sidebar.html" %}
+
+<div class="main">
+
+    <div class="top-bar">
+
+        <div class="title-area">
+            <h1 data-i18n="systemLogs">系统日志</h1>
+            <p
+                id="current-group-text"
+                class="page-subtitle"
+            ></p>
+        </div>
+
+        <div class="admin-area">
+
+            <img
+                id="avatar-preview"
+                class="avatar"
+                src="/static/images/default_avatar.jpg"
+                alt="头像"
+            >
+
+            <div class="admin-tag">
+                <span class="status-dot"></span>
+                <span data-i18n="admin">管理员</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="logs-filter-card">
+
+        <div class="filter-grid">
+
+            <div class="filter-group">
+                <label
+                    for="log-action-filter"
+                    data-i18n="logAction"
+                >
+                    操作类型
+                </label>
+
+                <select id="log-action-filter">
+                    <option
+                        value=""
+                        data-i18n="allActions"
+                    >
+                        全部操作
+                    </option>
+
+                    <option
+                            value="LOGIN_SUCCESS"
+                            data-i18n="LOGIN_SUCCESS"
+                    >
+                        登录成功
+                    </option>
+
+                    <option
+                            value="REGISTER_SUCCESS"
+                            data-i18n="REGISTER_SUCCESS"
+                    >
+                        注册成功
+                    </option>
+
+                    <option
+                            value="UPDATE_USER_ROLE"
+                            data-i18n="UPDATE_USER_ROLE"
+                    >
+                        修改用户身份
+                    </option>
+
+                    <option
+                            value="RESET_USER_PASSWORD"
+                            data-i18n="RESET_USER_PASSWORD"
+                    >
+                        重置密码
+                    </option>
+
+                    <option
+                            value="DISABLE_USER"
+                            data-i18n="DISABLE_USER"
+                    >
+                        禁用用户
+                    </option>
+
+                    <option
+                            value="ENABLE_USER"
+                            data-i18n="ENABLE_USER"
+                    >
+                        启用用户
+                    </option>
+
+                    <option
+                            value="CREATE_GROUP"
+                            data-i18n="CREATE_GROUP"
+                    >
+                        创建组
+                    </option>
+
+                    <option
+                            value="DELETE_GROUP"
+                            data-i18n="DELETE_GROUP"
+                    >
+                        删除组
+                    </option>
+
+                    <option
+                            value="CREATE_INVITATION_CODE"
+                            data-i18n="CREATE_INVITATION_CODE"
+                    >
+                        创建邀请码
+                    </option>
+
+                    <option
+                            value="DELETE_INVITATION_CODE"
+                            data-i18n="DELETE_INVITATION_CODE"
+                    >
+                        删除邀请码
+                    </option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label
+                    for="log-username-filter"
+                    data-i18n="username"
+                >
+                    用户名
+                </label>
+
+                <input
+                    type="text"
+                    id="log-username-filter"
+                    data-i18n-placeholder="logUsernamePlaceholder"
+                    placeholder="输入操作者用户名或昵称"
+                >
+            </div>
+
+            <div class="filter-group">
+                <label
+                    for="log-page-size"
+                    data-i18n="pageSize"
+                >
+                    每页数量
+                </label>
+
+                <select id="log-page-size">
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                </select>
+            </div>
+
+            <div class="filter-actions">
+
+                <button
+                    class="filter-button"
+                    data-i18n="search"
+                    onclick="searchLogs()"
+                >
+                    查询
+                </button>
+
+                <button
+                    class="filter-button secondary"
+                    data-i18n="clear"
+                    onclick="clearLogFilters()"
+                >
+                    清除
+                </button>
+
+            </div>
+
+        </div>
+
+        <div
+            id="logs-message"
+            class="logs-message"
+        ></div>
+
+    </div>
+
+    <div class="logs-table-card">
+
+        <table class="logs-table">
+
+            <thead>
+                <tr>
+                    <th data-i18n="operator">操作者</th>
+                    <th data-i18n="nickname">昵称</th>
+                    <th data-i18n="logAction">动作</th>
+                    <th data-i18n="targetType">目标类型</th>
+                    <th data-i18n="targetId">目标ID</th>
+                    <th data-i18n="oldValue">旧值</th>
+                    <th data-i18n="newValue">新值</th>
+                    <th data-i18n="createdAt">时间</th>
+                    <th data-i18n="ipAddress">IP</th>
+                </tr>
+            </thead>
+
+            <tbody id="logs-table-body">
+
+                <tr>
+                    <td
+                        colspan="9"
+                        class="empty-row"
+                        data-i18n="loading"
+                    >
+                        加载中...
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="pagination-bar">
+
+        <button
+            id="previous-page-button"
+            class="pagination-button"
+            data-i18n="previousPage"
+            onclick="goToPreviousPage()"
+        >
+            上一页
+        </button>
+
+        <span
+            id="pagination-info"
+            class="pagination-info"
+        >
+            1 / 1
+        </span>
+
+        <button
+            id="next-page-button"
+            class="pagination-button"
+            data-i18n="nextPage"
+            onclick="goToNextPage()"
+        >
+            下一页
+        </button>
+
+    </div>
+
+</div>
+
+<script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+
+<script src="/static/js/admin/system_logs/logs_state.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/system_logs/logs_api.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/system_logs/logs_render.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/system_logs/logs_actions.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/system_logs/logs_init.js?v={{ static_version }}"></script>
+
+</body>
+</html>

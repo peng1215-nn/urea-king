@@ -10,6 +10,9 @@ async function loadAdminStats() {
         document.getElementById("total-users").innerText =
             data.total_users;
 
+        document.getElementById("total-groups").innerText =
+            data.total_groups;
+
         document.getElementById("admin-count").innerText =
             data.admin_count;
 

@@ -82,6 +82,16 @@
 
         <div class="stat-card">
             <div class="stat-header">
+                <div class="stat-icon blue">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div class="stat-title" data-i18n="totalGroups">总组数</div>
+            </div>
+            <div class="stat-value" id="total-groups">--</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
                 <div class="stat-icon green">
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
@@ -165,7 +175,7 @@
             </p>
         </div>
 
-        <div class="module-card">
+        <div class="module-card" onclick="window.location.href='/system-logs'">
             <div class="module-title">
                 <div class="module-icon purple">
                     <i class="fa-regular fa-file-lines"></i>
@@ -178,7 +188,7 @@
             </p>
         </div>
 
-        <div class="module-card">
+        <div class="module-card" onclick="window.location.href='/announcement-management'">
             <div class="module-title">
                 <div class="module-icon yellow">
                     <i class="fa-solid fa-bullhorn"></i>
@@ -191,7 +201,7 @@
             </p>
         </div>
 
-        <div class="module-card">
+        <div class="module-card" onclick="window.location.href='/change-password'">
             <div class="module-title">
                 <div class="module-icon red">
                     <i class="fa-solid fa-lock"></i>
