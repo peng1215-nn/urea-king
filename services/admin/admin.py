@@ -20,7 +20,7 @@ def get_admin_stats_service():
     db = SessionLocal()
 
     try:
-        total_users = db.query(UserGroupRole).count()
+        total_users = db.query(User).count()
 
         admin_count = db.query(UserGroupRole).filter(
             UserGroupRole.role == "admin"

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+
+    <meta charset="UTF-8">
+    <title data-i18n="organizerDashboard">局头控制台</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/organizer/language.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/organizer/dashboard.css?v={{ static_version }}">
+
+</head>
+
+<body>
+
+{% include "organizer/sidebar.html" %}
+
+<div class="main">
+
+    <div class="top-bar">
+
+        <div class="title-area">
+            <h1 data-i18n="organizerDashboard">局头控制台</h1>
+            <p id="current-group-text"></p>
+        </div>
+
+        <div class="topbar-actions">
+
+            <button
+                    id="language-toggle"
+                    class="dashboard-language-toggle"
+                    type="button"
+                    onclick="toggleLanguage()"
+            >
+                ENGLISH
+            </button>
+
+            <img
+                    id="avatar-preview"
+                    class="avatar"
+                    src="/static/images/default_avatar.jpg"
+                    alt="avatar"
+            >
+
+            <label
+                for="avatar-input"
+                class="upload-avatar-button"
+                data-i18n="uploadAvatar"
+            >
+                更换头像
+            </label>
+
+            <input
+                    type="file"
+                    id="avatar-input"
+                    accept="image/jpeg,image/png,image/webp"
+                    hidden
+            >
+
+            <div class="role-tag">
+                <span class="status-dot"></span>
+                <span data-i18n="organizer">局头</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="organizer-hero-card">
+
+        <div class="hero-icon">
+            <i class="fa-solid fa-crown"></i>
+        </div>
+
+        <div>
+            <h2 data-i18n="welcomeOrganizer">欢迎进入局头控制台</h2>
+
+            <p data-i18n="organizerDashboardDesc">
+                你可以在这里管理本组成员、处理筹码请求、开局、结束局并查看牌局记录。
+            </p>
+        </div>
+
+    </div>
+
+    <h2 class="section-title" data-i18n="organizerModules">
+        局头功能模块
+    </h2>
+
+    <div class="modules">
+
+    <div class="module-card">
+        <div class="module-title">
+            <div class="module-icon">
+                <i class="fa-solid fa-users"></i>
+            </div>
+
+            <h2 data-i18n="memberManagement">
+                成员管理
+            </h2>
+        </div>
+
+        <i class="fa-solid fa-chevron-right module-arrow"></i>
+
+        <p data-i18n="memberManagementDesc">
+            查看本组成员、生成本组邀请码，并移除组内成员。
+        </p>
+    </div>
+
+    <div class="module-card">
+        <div class="module-title">
+            <div class="module-icon green">
+                <i class="fa-solid fa-dice"></i>
+            </div>
+
+            <h2 data-i18n="gameManagement">
+                牌局管理
+            </h2>
+
+        </div>
+
+        <i class="fa-solid fa-chevron-right module-arrow"></i>
+
+        <p data-i18n="gameManagementDesc">
+            开局、结束局，并管理当前牌局的参与人员与筹码变化。
+        </p>
+    </div>
+
+    <div class="module-card">
+        <div class="module-title">
+            <div class="module-icon orange">
+                <i class="fa-solid fa-coins"></i>
+            </div>
+
+            <h2 data-i18n="chipRequests">
+                筹码请求
+            </h2>
+        </div>
+
+        <i class="fa-solid fa-chevron-right module-arrow"></i>
+
+        <p data-i18n="chipRequestsDesc">
+            批准或拒绝组内成员的买入与回收筹码请求。
+        </p>
+    </div>
+
+    <div class="module-card">
+        <div class="module-title">
+            <div class="module-icon purple">
+                <i class="fa-regular fa-file-lines"></i>
+            </div>
+
+            <h2 data-i18n="gameLogs">
+                牌局日志
+            </h2>
+        </div>
+
+        <i class="fa-solid fa-chevron-right module-arrow"></i>
+
+        <p data-i18n="gameLogsDesc">
+            查看每局的开始时间、结束时间、总筹码、参与者盈亏与统计结果。
+        </p>
+    </div>
+
+    <div class="module-card">
+        <div class="module-title">
+            <div class="module-icon cyan">
+                <i class="fa-solid fa-plus"></i>
+            </div>
+
+            <h2 data-i18n="joinOtherGroup">
+                加入其他组
+            </h2>
+        </div>
+
+        <i class="fa-solid fa-chevron-right module-arrow"></i>
+
+        <p data-i18n="joinOtherGroupDesc">
+            使用新的邀请码加入其他组，并在登录后选择不同组别身份。
+        </p>
+    </div>
+
+</div>
+
+</div>
+
+<script src="/static/js/i18n/organizer.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+<script>window.addEventListener("pageshow", function () {applyLanguage();loadCurrentUser();});</script>
+
+</body>
+</html>
