@@ -150,18 +150,15 @@ async function loadStats() {
     const data = await fetchStats();
     if (!data.success || !data.stats) { panel.innerHTML = `<div class="log-loading">${t("noGameLogs")}</div>`; return; }
     const s = data.stats;
-
-    // 列表式布局，彻底解决对齐问题
     const rows = [
-        { color: "green",  icon: "fa-arrow-trend-up",   label: t("statMostWins"),   value: s.most_wins.names.join("、"),   sub: s.most_wins.count + " " + t("times") },
-        { color: "red",    icon: "fa-arrow-trend-down",  label: t("statMostLoses"),  value: s.most_loses.names.join("、"),  sub: s.most_loses.count + " " + t("times") },
-        { color: "yellow", icon: "fa-trophy",            label: t("statMostProfit"), value: s.most_profit.names.join("、"), sub: "+" + s.most_profit.amount },
-        { color: "purple", icon: "fa-face-sad-tear",     label: t("statMostLoss"),   value: s.most_loss.names.join("、"),   sub: (s.most_loss.amount < 0 ? "" : "-") + Math.abs(s.most_loss.amount) },
+        { color: "green",  icon: "fa-arrow-trend-up",   label: t("statMostWins"),   value: s.most_wins.names.length ? s.most_wins.names.join("、") : "-",   sub: s.most_wins.names.length ? s.most_wins.count + " " + t("times") : "" },
+        { color: "red",    icon: "fa-arrow-trend-down",  label: t("statMostLoses"),  value: s.most_loses.names.length ? s.most_loses.names.join("、") : "-",  sub: s.most_loses.names.length ? s.most_loses.count + " " + t("times") : "" },
+        { color: "yellow", icon: "fa-trophy",            label: t("statMostProfit"), value: s.most_profit.names.length ? s.most_profit.names.join("、") : "-", sub: s.most_profit.names.length ? "+" + s.most_profit.amount : "" },
+        { color: "purple", icon: "fa-face-sad-tear",     label: t("statMostLoss"),   value: s.most_loss.names.length ? s.most_loss.names.join("、") : "-",   sub: s.most_loss.names.length ? (s.most_loss.amount < 0 ? "" : "-") + Math.abs(s.most_loss.amount) : "" },
         { color: "blue",   icon: "fa-users",             label: t("statMostGames"),  value: s.most_games.names.join("、"),  sub: s.most_games.count + " " + t("times") },
         { color: "cyan",   icon: "fa-clock",             label: t("statLongestGame"),value: s.longest_game.duration,        sub: s.longest_game.name },
         { color: "orange", icon: "fa-coins",             label: t("statMaxChips"),   value: s.max_chips.amount,             sub: s.max_chips.name },
     ];
-
     panel.innerHTML = `<div class="stats-list">` +
         rows.map(r => `
             <div class="stats-row">

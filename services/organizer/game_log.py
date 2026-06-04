@@ -160,9 +160,12 @@ def get_stats_service(group_id: int):
         if not user_stats:
             return {"success": True, "stats": None}
 
-        # 水上次数最多
+        # 水上次数最多（至少有1次才显示）
         most_wins = max(user_stats.values(), key=lambda x: x["win_count"])
-        most_wins_name = [v["nickname"] for v in user_stats.values() if v["win_count"] == most_wins["win_count"]]
+        if most_wins["win_count"] == 0:
+            most_wins_name = []
+        else:
+            most_wins_name = [v["nickname"] for v in user_stats.values() if v["win_count"] == most_wins["win_count"]]
 
         # 水下次数最多（至少有1次才显示）
         most_loses = max(user_stats.values(), key=lambda x: x["lose_count"])
@@ -171,9 +174,12 @@ def get_stats_service(group_id: int):
         else:
             most_loses_name = [v["nickname"] for v in user_stats.values() if v["lose_count"] == most_loses["lose_count"]]
 
-        # 总体盈利最多
+        # 总体盈利最多（net > 0 才显示）
         most_profit = max(user_stats.values(), key=lambda x: x["total_net"])
-        most_profit_name = [v["nickname"] for v in user_stats.values() if v["total_net"] == most_profit["total_net"]]
+        if most_profit["total_net"] <= 0:
+            most_profit_name = []
+        else:
+            most_profit_name = [v["nickname"] for v in user_stats.values() if v["total_net"] == most_profit["total_net"]]
 
         # 总体亏损最多（net < 0 才显示）
         most_loss = min(user_stats.values(), key=lambda x: x["total_net"])
