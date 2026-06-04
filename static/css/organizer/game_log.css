@@ -215,3 +215,52 @@ body {
 .detail-amount { font-weight: 600; color: rgba(255,255,255,0.7); min-width: 50px; }
 .detail-type { color: rgba(255,255,255,0.4); min-width: 70px; }
 .detail-time { color: rgba(255,255,255,0.3); }
+
+/* Player rates section */
+.player-rates-section {
+    margin-top: 20px;
+}
+
+.player-rates-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 12px;
+    padding-left: 4px;
+}
+
+.player-rates-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.player-rate-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.player-rate-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    min-width: 80px;
+}
+
+.player-rate-stats {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.rate-games { color: rgba(255,255,255,0.4); }
+.rate-win { color: #5CFFB2; }
+.rate-lose { color: #ff6b6b; }

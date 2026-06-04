@@ -65,6 +65,14 @@ window.userTranslations = {
         statMostGames: "参与次数最多",
         statLongestGame: "最长牌局",
         statMaxChips: "最大总筹码",
+        statBestSingle: "最高单局盈利",
+        statWorstSingle: "最惨单局亏损",
+        statPlayerRates: "玩家水上/水下率",
+        winRate: "水上率",
+        loseRate: "水下率",
+        participated: "参与",
+        games: "局",
+        noRecord: "暂无记录",
         times: "次",
 
         // 修改密码
@@ -174,6 +182,14 @@ window.userTranslations = {
         statMostGames: "Most Participated",
         statLongestGame: "Longest Game",
         statMaxChips: "Max Total Chips",
+        statBestSingle: "Best Single Game",
+        statWorstSingle: "Worst Single Game",
+        statPlayerRates: "Player Win/Loss Rate",
+        winRate: "Win Rate",
+        loseRate: "Loss Rate",
+        participated: "Played",
+        games: "games",
+        noRecord: "No record",
         times: "times",
 
         // Change Password

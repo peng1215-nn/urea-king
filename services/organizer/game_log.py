@@ -192,6 +192,51 @@ def get_stats_service(group_id: int):
         most_games = max(user_stats.values(), key=lambda x: x["game_count"])
         most_games_name = [v["nickname"] for v in user_stats.values() if v["game_count"] == most_games["game_count"]]
 
+        # 最高单局盈利
+        best_single = None
+        best_single_net = 0
+        best_single_nickname = ""
+        for p, u in all_players:
+            if p.user_id in organizer_ids:
+                continue
+            net = p.net if p.net is not None else 0
+            if net > best_single_net:
+                best_single_net = net
+                best_single_nickname = p.nickname or u.username
+                game_obj = db.query(PokerGame).filter(PokerGame.id == p.game_id).first()
+                best_single = game_obj.name or (game_obj.started_at.strftime("%Y-%m-%d") if game_obj and game_obj.started_at else "")
+
+        # 最惨单局亏损
+        worst_single = None
+        worst_single_net = 0
+        worst_single_nickname = ""
+        for p, u in all_players:
+            if p.user_id in organizer_ids:
+                continue
+            net = p.net if p.net is not None else 0
+            if net < worst_single_net:
+                worst_single_net = net
+                worst_single_nickname = p.nickname or u.username
+                game_obj = db.query(PokerGame).filter(PokerGame.id == p.game_id).first()
+                worst_single = game_obj.name or (game_obj.started_at.strftime("%Y-%m-%d") if game_obj and game_obj.started_at else "")
+
+        # 每个玩家水上率水下率
+        player_rates = []
+        for uid, stats in user_stats.items():
+            gc = stats["game_count"]
+            win_rate = round(stats["win_count"] / gc * 100) if gc > 0 else 0
+            lose_rate = round(stats["lose_count"] / gc * 100) if gc > 0 else 0
+            player_rates.append({
+                "nickname": stats["nickname"],
+                "game_count": gc,
+                "win_count": stats["win_count"],
+                "lose_count": stats["lose_count"],
+                "win_rate": win_rate,
+                "lose_rate": lose_rate,
+                "total_net": stats["total_net"],
+            })
+        player_rates.sort(key=lambda x: x["win_rate"], reverse=True)
+
         # 最长牌局
         longest_game = None
         longest_duration = 0
@@ -221,6 +266,9 @@ def get_stats_service(group_id: int):
                 "most_games": {"names": most_games_name, "count": most_games["game_count"]},
                 "longest_game": {"duration": longest_str, "name": longest_game.name or longest_game.started_at.strftime("%Y-%m-%d") if longest_game else ""},
                 "max_chips": {"amount": max_chips_game.total_buy_in or 0, "name": max_chips_game.name or max_chips_game.started_at.strftime("%Y-%m-%d") if max_chips_game else ""},
+                "best_single": {"nickname": best_single_nickname, "amount": best_single_net, "game": best_single or ""},
+                "worst_single": {"nickname": worst_single_nickname, "amount": worst_single_net, "game": worst_single or ""},
+                "player_rates": player_rates,
             },
         }
     except Exception as e:

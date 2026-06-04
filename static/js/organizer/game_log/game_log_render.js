@@ -158,7 +158,28 @@ async function loadStats() {
         { color: "blue",   icon: "fa-users",             label: t("statMostGames"),  value: s.most_games.names.join("、"),  sub: s.most_games.count + " " + t("times") },
         { color: "cyan",   icon: "fa-clock",             label: t("statLongestGame"),value: s.longest_game.duration,        sub: s.longest_game.name },
         { color: "orange", icon: "fa-coins",             label: t("statMaxChips"),   value: s.max_chips.amount,             sub: s.max_chips.name },
+        { color: "green",  icon: "fa-star",               label: t("statBestSingle"),  value: s.best_single.nickname || "-",   sub: s.best_single.nickname ? "+" + s.best_single.amount + (s.best_single.game ? " · " + s.best_single.game : "") : "" },
+        { color: "red",    icon: "fa-skull",               label: t("statWorstSingle"), value: s.worst_single.nickname || "-",  sub: s.worst_single.nickname ? s.worst_single.amount + (s.worst_single.game ? " · " + s.worst_single.game : "") : "" },
     ];
+    let playerRatesHtml = "";
+    if (s.player_rates && s.player_rates.length > 0) {
+        playerRatesHtml = `<div class="player-rates-section">
+            <div class="player-rates-title">${t("statPlayerRates")}</div>
+            <div class="player-rates-list">` +
+            s.player_rates.map(p => `
+                <div class="player-rate-row">
+                    <div class="player-rate-name">${p.nickname}</div>
+                    <div class="player-rate-stats">
+                        <span class="rate-games">${t("participated")} ${p.game_count} ${t("games")}</span>
+                        <span class="rate-win">${t("winRate")} ${p.win_rate}%（${p.win_count}次）</span>
+                        <span class="rate-lose">${t("loseRate")} ${p.lose_rate}%（${p.lose_count}次）</span>
+                        <span class="rate-net ${p.total_net > 0 ? "net-positive" : p.total_net < 0 ? "net-negative" : "net-zero"}">${p.total_net > 0 ? "+" : ""}${p.total_net}</span>
+                    </div>
+                </div>
+            `).join("") +
+            `</div></div>`;
+    }
+
     panel.innerHTML = `<div class="stats-list">` +
         rows.map(r => `
             <div class="stats-row">
@@ -168,5 +189,5 @@ async function loadStats() {
                 <div class="stats-row-sub">${r.sub}</div>
             </div>
         `).join("") +
-    `</div>`;
+    `</div>` + playerRatesHtml;
 }
