@@ -173,7 +173,7 @@ async function loadStats() {
                         <span class="rate-games">${t("participated")} ${p.game_count} ${t("games")}</span>
                         <span class="rate-win">${t("winRate")} ${p.win_rate}%（${p.win_count}次）</span>
                         <span class="rate-lose">${t("loseRate")} ${p.lose_rate}%（${p.lose_count}次）</span>
-                        <span class="rate-net ${p.total_net > 0 ? "net-positive" : p.total_net < 0 ? "net-negative" : "net-zero"}">${p.total_net > 0 ? "+" : ""}${p.total_net}</span>
+
                     </div>
                 </div>
             `).join("") +

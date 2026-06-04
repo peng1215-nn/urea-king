@@ -3,7 +3,7 @@ body {
     min-height: 100vh;
     background:
         linear-gradient(135deg, rgba(15,15,22,0.82), rgba(21,25,40,0.82), rgba(26,32,51,0.82)),
-        url("/static/images/organizer_background.png") center center / cover no-repeat fixed;
+        url("/static/images/user_background.png") center center / cover no-repeat fixed;
 }
 
 .announcement-overview-card {

@@ -136,6 +136,25 @@ async function loadStats() {
         { color: "cyan",   icon: "fa-clock",            label: t("statLongestGame"),value: s.longest_game.duration,        sub: s.longest_game.name },
         { color: "orange", icon: "fa-coins",            label: t("statMaxChips"),   value: s.max_chips.amount,             sub: s.max_chips.name },
     ];
+    let playerRatesHtml = "";
+    if (s.player_rates && s.player_rates.length > 0) {
+        playerRatesHtml = `<div class="player-rates-section">
+            <div class="player-rates-title">${t("statPlayerRates")}</div>
+            <div class="player-rates-list">` +
+            s.player_rates.map(p => `
+                <div class="player-rate-row">
+                    <div class="player-rate-name">${p.nickname}</div>
+                    <div class="player-rate-stats">
+                        <span class="rate-games">${t("participated")} ${p.game_count} ${t("games")}</span>
+                        <span class="rate-win">${t("winRate")} ${p.win_rate}%（${p.win_count}次）</span>
+                        <span class="rate-lose">${t("loseRate")} ${p.lose_rate}%（${p.lose_count}次）</span>
+
+                    </div>
+                </div>
+            `).join("") +
+            `</div></div>`;
+    }
+
     panel.innerHTML = `<div class="stats-list">` +
         rows.map(r => `
             <div class="stats-row">
@@ -145,5 +164,5 @@ async function loadStats() {
                 <div class="stats-row-sub">${r.sub}</div>
             </div>
         `).join("") +
-    `</div>`;
+    `</div>` + playerRatesHtml;
 }

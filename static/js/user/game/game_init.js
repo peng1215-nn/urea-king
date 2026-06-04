@@ -1,3 +1,30 @@
+let pollingTimer = null;
+
+function startPolling() {
+    stopPolling();
+    pollingTimer = setInterval(() => {
+        if (!document.hidden) {
+            loadUserGames();
+        }
+    }, 5000);
+}
+
+function stopPolling() {
+    if (pollingTimer) {
+        clearInterval(pollingTimer);
+        pollingTimer = null;
+    }
+}
+
+document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+        stopPolling();
+    } else {
+        loadUserGames();
+        startPolling();
+    }
+});
+
 window.addEventListener("pageshow", function (e) {
     if (e.persisted) {
         window.location.reload();
@@ -7,4 +34,9 @@ window.addEventListener("pageshow", function (e) {
     applyLanguage();
     loadCurrentUser();
     loadUserGames();
+    startPolling();
+});
+
+window.addEventListener("pagehide", function () {
+    stopPolling();
 });
