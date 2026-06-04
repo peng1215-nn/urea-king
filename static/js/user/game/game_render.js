@@ -1,13 +1,15 @@
 let currentBuyinGameId = null;
 
-async function loadUserGames() {
+async function loadUserGames(silent = false) {
     const list = document.getElementById("game-list");
-    list.innerHTML = `<div class="game-loading">${t("loading")}</div>`;
+    if (!silent) {
+        list.innerHTML = `<div class="game-loading">${t("loading")}</div>`;
+    }
 
     const data = await fetchUserOngoingGames();
 
     if (!data.success) {
-        list.innerHTML = `<div class="game-loading">${t("operationFailed")}</div>`;
+        if (!silent) list.innerHTML = `<div class="game-loading">${t("operationFailed")}</div>`;
         return;
     }
 

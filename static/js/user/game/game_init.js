@@ -4,7 +4,7 @@ function startPolling() {
     stopPolling();
     pollingTimer = setInterval(() => {
         if (!document.hidden) {
-            loadUserGames();
+            loadUserGames(true);
         }
     }, 5000);
 }
@@ -20,7 +20,7 @@ document.addEventListener("visibilitychange", function () {
     if (document.hidden) {
         stopPolling();
     } else {
-        loadUserGames();
+        loadUserGames(true);
         startPolling();
     }
 });
@@ -33,7 +33,7 @@ window.addEventListener("pageshow", function (e) {
     closeJoinGroupModal();
     applyLanguage();
     loadCurrentUser();
-    loadUserGames();
+    loadUserGames(false);
     startPolling();
 });
 
