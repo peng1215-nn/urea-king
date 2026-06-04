@@ -9,7 +9,7 @@ from models import UserGroupRole
 PAGE_SIZE = 5
 
 
-def get_game_logs_service(group_id: int, page: int = 1):
+def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = None):
     db = SessionLocal()
     try:
         total = db.query(PokerGame).filter(
@@ -34,16 +34,35 @@ def get_game_logs_service(group_id: int, page: int = 1):
 
             for p, u in players:
                 net = p.net if p.net is not None else 0
+                is_org = p.user_id == game.organizer_id
                 pd = {
                     "user_id": p.user_id,
                     "nickname": p.nickname or u.username,
-                    "is_organizer": p.user_id == game.organizer_id,
+                    "is_organizer": is_org,
                     "total_buy_in": p.total_buy_in,
                     "cash_out": p.cash_out or 0,
                     "net": net,
                 }
 
-                if p.user_id == game.organizer_id:
+                # 每笔买入明细
+                all_requests = db.query(ChipRequest).filter(
+                    ChipRequest.game_id == game.id,
+                    ChipRequest.user_id == p.user_id,
+                    ChipRequest.status == "approved",
+                ).order_by(ChipRequest.requested_at.asc()).all()
+
+                # 局头看所有人明细，普通用户只看自己
+                show_details = (viewer_user_id is None) or (p.user_id == viewer_user_id)
+                pd["buyin_details"] = [
+                    {
+                        "amount": r.amount,
+                        "type": r.type,
+                        "time": r.requested_at.strftime("%Y-%m-%d %H:%M") if r.requested_at else "",
+                    }
+                    for r in all_requests
+                ] if show_details else []
+
+                if is_org:
                     breakdown = _get_buyin_breakdown(db, game.id, p.user_id)
                     pd["buy_in_normal"] = breakdown["normal"]
                     pd["buy_in_insurance"] = breakdown["insurance"]
@@ -145,17 +164,23 @@ def get_stats_service(group_id: int):
         most_wins = max(user_stats.values(), key=lambda x: x["win_count"])
         most_wins_name = [v["nickname"] for v in user_stats.values() if v["win_count"] == most_wins["win_count"]]
 
-        # 水下次数最多
+        # 水下次数最多（至少有1次才显示）
         most_loses = max(user_stats.values(), key=lambda x: x["lose_count"])
-        most_loses_name = [v["nickname"] for v in user_stats.values() if v["lose_count"] == most_loses["lose_count"]]
+        if most_loses["lose_count"] == 0:
+            most_loses_name = []
+        else:
+            most_loses_name = [v["nickname"] for v in user_stats.values() if v["lose_count"] == most_loses["lose_count"]]
 
         # 总体盈利最多
         most_profit = max(user_stats.values(), key=lambda x: x["total_net"])
         most_profit_name = [v["nickname"] for v in user_stats.values() if v["total_net"] == most_profit["total_net"]]
 
-        # 总体亏损最多
+        # 总体亏损最多（net < 0 才显示）
         most_loss = min(user_stats.values(), key=lambda x: x["total_net"])
-        most_loss_name = [v["nickname"] for v in user_stats.values() if v["total_net"] == most_loss["total_net"]]
+        if most_loss["total_net"] >= 0:
+            most_loss_name = []
+        else:
+            most_loss_name = [v["nickname"] for v in user_stats.values() if v["total_net"] == most_loss["total_net"]]
 
         # 参与次数最多
         most_games = max(user_stats.values(), key=lambda x: x["game_count"])

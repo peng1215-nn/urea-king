@@ -128,3 +128,24 @@ body {
 .modal-confirm-button:hover { background: rgba(92,141,255,1); }
 .modal-cancel-button { background: rgba(255,255,255,0.08); color: white; }
 .modal-cancel-button:hover { background: rgba(255,255,255,0.14); }
+
+.buyin-details-list {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.buyin-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    padding: 3px 0;
+}
+
+.detail-index { color: rgba(255,255,255,0.25); min-width: 24px; }
+.detail-amount { font-weight: 600; color: rgba(255,255,255,0.7); min-width: 50px; }
+.detail-type { color: rgba(255,255,255,0.4); min-width: 70px; }
+.detail-time { color: rgba(255,255,255,0.3); }

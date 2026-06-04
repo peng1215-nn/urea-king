@@ -25,6 +25,8 @@ window.userTranslations = {
         announcements: "公告",
         announcementsDesc: "查看管理员发布的最新公告。",
 
+        me: "我",
+
         // 加入牌局
         joinGame: "加入牌局",
         gameManagementUserDesc: "查看当前进行中的牌局，提交筹码买入申请。",
@@ -131,6 +133,8 @@ window.userTranslations = {
         // Announcements
         announcements: "Announcements",
         announcementsDesc: "View the latest announcements from the admin.",
+
+        me: "Me",
 
         // Join Game
         joinGame: "Join Game",

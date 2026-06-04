@@ -62,6 +62,19 @@ function renderPlayers(game) {
                 <span>${t("buyInAnti")}：${p.buy_in_anti||0}</span>
             </div>`;
         }
+        let detailsHtml = "";
+        if (p.buyin_details && p.buyin_details.length > 0) {
+            detailsHtml = '<div class="buyin-details-list">' +
+                p.buyin_details.map((d, i) =>
+                    '<div class="buyin-detail-row">' +
+                    '<span class="detail-index">#' + (i+1) + '</span>' +
+                    '<span class="detail-amount">' + d.amount + '</span>' +
+                    '<span class="detail-type">' + (d.type === "insurance" ? t("buyInInsurance") : d.type === "anti" ? t("buyInAnti") : t("buyInNormal")) + '</span>' +
+                    '<span class="detail-time">' + d.time + '</span>' +
+                    '</div>'
+                ).join("") +
+            '</div>';
+        }
         html += `<div class="log-player-row ${isWinner?"winner":""}">
             <div class="log-player-name">${p.nickname} ${organizerBadge} ${winnerBadge}</div>
             <div class="log-player-stats">
@@ -70,6 +83,7 @@ function renderPlayers(game) {
                 <span class="${netClass}">${t("net")}：${p.net>0?"+":""}${p.net}</span>
             </div>
             ${buyinDetail}
+            ${detailsHtml}
         </div>`;
     });
     html += `</div>`;
@@ -115,9 +129,9 @@ async function loadStats() {
     const s = data.stats;
     const rows = [
         { color: "green",  icon: "fa-arrow-trend-up",  label: t("statMostWins"),   value: s.most_wins.names.join("、"),   sub: s.most_wins.count + " " + t("times") },
-        { color: "red",    icon: "fa-arrow-trend-down", label: t("statMostLoses"),  value: s.most_loses.names.join("、"),  sub: s.most_loses.count + " " + t("times") },
+        { color: "red",    icon: "fa-arrow-trend-down", label: t("statMostLoses"),  value: s.most_loses.names.length ? s.most_loses.names.join("、") : "-",  sub: s.most_loses.names.length ? s.most_loses.count + " " + t("times") : "-" },
         { color: "yellow", icon: "fa-trophy",           label: t("statMostProfit"), value: s.most_profit.names.join("、"), sub: "+" + s.most_profit.amount },
-        { color: "purple", icon: "fa-face-sad-tear",    label: t("statMostLoss"),   value: s.most_loss.names.join("、"),   sub: (s.most_loss.amount < 0 ? "" : "-") + Math.abs(s.most_loss.amount) },
+        { color: "purple", icon: "fa-face-sad-tear",    label: t("statMostLoss"),   value: s.most_loss.names.length ? s.most_loss.names.join("、") : "-",   sub: s.most_loss.names.length ? (s.most_loss.amount < 0 ? "" : "-") + Math.abs(s.most_loss.amount) : "-" },
         { color: "blue",   icon: "fa-users",            label: t("statMostGames"),  value: s.most_games.names.join("、"),  sub: s.most_games.count + " " + t("times") },
         { color: "cyan",   icon: "fa-clock",            label: t("statLongestGame"),value: s.longest_game.duration,        sub: s.longest_game.name },
         { color: "orange", icon: "fa-coins",            label: t("statMaxChips"),   value: s.max_chips.amount,             sub: s.max_chips.name },

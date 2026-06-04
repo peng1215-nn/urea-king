@@ -119,7 +119,8 @@ def get_game_logs(request: Request, page: int = 1):
     group_id = get_group_id(request)
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
-    return get_game_logs_service(group_id=int(group_id), page=page)
+    user_id = get_user_id(request)
+    return get_game_logs_service(group_id=int(group_id), page=page, viewer_user_id=int(user_id) if user_id else None)
 
 
 @router.get("/user/game-log/stats")
