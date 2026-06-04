@@ -1,4 +1,5 @@
 from datetime import datetime
+from utils.time import now_columbus_naive
 from database import SessionLocal
 from models import ChipRequest
 from models import PokerGame
@@ -150,7 +151,7 @@ def start_game_service(group_id: int, organizer_id: int, name: str, preselected_
             organizer_id=organizer_id,
             name=name.strip() if name else None,
             status="ongoing",
-            started_at=datetime.utcnow(),
+            started_at=now_columbus_naive(),
         )
         db.add(game)
         db.flush()
@@ -170,7 +171,7 @@ def start_game_service(group_id: int, organizer_id: int, name: str, preselected_
                 user_id=uid,
                 nickname=user.nickname or user.username,
                 is_active=1,
-                joined_at=datetime.utcnow(),
+                joined_at=now_columbus_naive(),
             )
             db.add(player)
 
@@ -248,7 +249,7 @@ def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organi
             user_id=user_id,
             nickname=user.nickname or user.username,
             is_active=1,
-            joined_at=datetime.utcnow(),
+            joined_at=now_columbus_naive(),
         )
         db.add(player)
         db.commit()
@@ -320,7 +321,7 @@ def approve_chip_request_service(request_id: int, game_id: int, group_id: int, r
             return {"success": False, "message": "playerNotInGame"}
 
         req.status = "approved"
-        req.resolved_at = datetime.utcnow()
+        req.resolved_at = now_columbus_naive()
         req.resolved_by = resolver_id
         player.total_buy_in += req.amount
 
@@ -355,7 +356,7 @@ def reject_chip_request_service(request_id: int, game_id: int, group_id: int, re
             return {"success": False, "message": "requestNotFound"}
 
         req.status = "rejected"
-        req.resolved_at = datetime.utcnow()
+        req.resolved_at = now_columbus_naive()
         req.resolved_by = resolver_id
 
         db.commit()
@@ -404,8 +405,8 @@ def organizer_buyin_service(game_id: int, group_id: int, user_id: int, amount: i
             type=buy_type,
             amount=amount,
             status="approved",
-            requested_at=datetime.utcnow(),
-            resolved_at=datetime.utcnow(),
+            requested_at=now_columbus_naive(),
+            resolved_at=now_columbus_naive(),
             resolved_by=user_id,
         )
         db.add(req)
@@ -467,7 +468,7 @@ def finish_game_service(
             }
 
         game.status = "finished"
-        game.ended_at = datetime.utcnow()
+        game.ended_at = now_columbus_naive()
         game.total_buy_in = total_buy_in
         game.total_cash_out = total_cash_out
         game.is_balanced = is_balanced

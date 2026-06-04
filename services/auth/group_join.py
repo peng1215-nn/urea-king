@@ -1,4 +1,5 @@
 from datetime import datetime
+from utils.time import now_columbus_naive
 from passlib.context import CryptContext
 
 from database import SessionLocal
@@ -115,7 +116,7 @@ def group_join_service(
 
         invitation.is_used = 1
         invitation.used_by_username = user.username
-        invitation.used_at = datetime.utcnow()
+        invitation.used_at = now_columbus_naive()
 
         db.commit()
 

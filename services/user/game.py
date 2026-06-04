@@ -1,4 +1,5 @@
 from datetime import datetime
+from utils.time import now_columbus_naive
 from database import SessionLocal
 from models import ChipRequest
 from models import PokerGame
@@ -129,7 +130,7 @@ def submit_buyin_request_service(game_id: int, group_id: int, user_id: int, amou
             type="normal",
             amount=amount,
             status="pending",
-            requested_at=datetime.utcnow(),
+            requested_at=now_columbus_naive(),
         )
         db.add(req)
         db.commit()

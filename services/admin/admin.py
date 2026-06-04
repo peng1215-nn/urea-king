@@ -1,4 +1,5 @@
 from datetime import datetime
+from utils.time import now_columbus_naive
 from app_state import DEPLOY_ENVIRONMENT
 from app_state import PROJECT_LAUNCH_TIME
 from app_state import SYSTEM_VERSION
@@ -62,7 +63,7 @@ def get_admin_stats_service():
 
 def get_system_monitor_service():
     total_runtime_seconds = int(
-        (datetime.utcnow() - PROJECT_LAUNCH_TIME).total_seconds()
+        (now_columbus_naive() - PROJECT_LAUNCH_TIME).total_seconds()
     )
 
     return {

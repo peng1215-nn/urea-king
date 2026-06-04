@@ -1,4 +1,5 @@
 from datetime import datetime
+from utils.time import now_columbus_naive
 
 from database import SessionLocal
 from models import AuditLog
@@ -40,7 +41,7 @@ def write_audit_log(
             old_value=old_value,
             new_value=new_value,
             ip_address=get_client_ip(request),
-            created_at=datetime.utcnow(),
+            created_at=now_columbus_naive(),
         )
 
         db.add(log)

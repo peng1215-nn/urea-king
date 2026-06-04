@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from utils.time import now_columbus_naive
 
 from database import SessionLocal
 from models import Group
@@ -68,7 +69,7 @@ def create_invite_code_service(group_id: int, code: str):
             role="user",
             is_used=0,
             used_by_username=None,
-            created_at=datetime.utcnow(),
+            created_at=now_columbus_naive(),
             used_at=None,
         )
 

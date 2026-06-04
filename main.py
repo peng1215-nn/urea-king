@@ -1,4 +1,5 @@
 from datetime import datetime
+from utils.time import now_columbus_naive
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -68,4 +69,4 @@ app.mount(
     name="static"
 )
 
-STATIC_VERSION = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+STATIC_VERSION = now_columbus_naive().strftime("%Y%m%d%H%M%S")

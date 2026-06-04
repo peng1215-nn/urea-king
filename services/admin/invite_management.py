@@ -1,4 +1,5 @@
 from datetime import datetime
+from utils.time import now_columbus_naive
 
 from database import SessionLocal
 from models import Group
@@ -155,7 +156,7 @@ def create_group_service(
             group_code=group_code,
             group_name=group_name,
             description=None,
-            created_at=datetime.utcnow(),
+            created_at=now_columbus_naive(),
         )
 
         db.add(group)
@@ -327,7 +328,7 @@ def create_invitation_code_service(
             role=role,
             is_used=0,
             used_by_username=None,
-            created_at=datetime.utcnow(),
+            created_at=now_columbus_naive(),
             used_at=None,
         )
 

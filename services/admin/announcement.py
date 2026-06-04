@@ -1,4 +1,5 @@
 from datetime import datetime
+from utils.time import now_columbus_naive
 
 from database import SessionLocal
 from models import Announcement
@@ -66,8 +67,8 @@ def create_announcement_service(title, content):
         announcement = Announcement(
             title=title,
             content=content,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
+            created_at=now_columbus_naive(),
+            updated_at=now_columbus_naive(),
         )
 
         db.add(announcement)
@@ -127,7 +128,7 @@ def update_announcement_service(
 
         announcement.title = title
         announcement.content = content
-        announcement.updated_at = datetime.utcnow()
+        announcement.updated_at = now_columbus_naive()
 
         db.commit()
 
