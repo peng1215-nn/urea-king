@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title data-i18n="gameLogs">牌局日志</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/user/game_log.css?v={{ static_version }}">
+</head>
+<body>
+
+{% include "user/sidebar.html" %}
+
+<div class="main">
+
+    <div class="top-bar">
+        <div class="title-area">
+            <h1 data-i18n="gameLogs">牌局日志</h1>
+            <p class="page-subtitle" data-i18n="gameLogsDesc">查看每局的开始时间、结束时间、总筹码、参与者盈亏与统计结果。</p>
+        </div>
+        <div class="topbar-actions">
+            <img id="avatar-preview" class="avatar" src="/static/images/default_avatar.jpg" alt="avatar">
+            <div class="role-tag">
+                <span class="status-dot"></span>
+                <span data-i18n="roleUser">用户</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="log-view-tabs">
+        <button id="btn-logs" class="log-view-tab active" onclick="switchView('logs')" data-i18n="gameLogList">牌局记录</button>
+        <button id="btn-stats" class="log-view-tab" onclick="switchView('stats')" data-i18n="statsPanel">统计面板</button>
+    </div>
+
+    <div id="view-logs">
+        <div id="game-log-list" class="game-log-list">
+            <div class="log-loading" data-i18n="loading">加载中...</div>
+        </div>
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <div id="view-stats" style="display:none;">
+        <div id="stats-panel" class="stats-panel">
+            <div class="log-loading" data-i18n="loading">加载中...</div>
+        </div>
+    </div>
+
+</div>
+
+<div id="join-group-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content">
+        <h3 data-i18n="joinOtherGroup">加入其他组</h3>
+        <p data-i18n="joinGroupLogoutConfirm">此操作会退出当前登录，是否确认？</p>
+        <div class="custom-modal-actions">
+            <button class="modal-confirm-button" onclick="confirmJoinGroup()" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" onclick="closeJoinGroupModal()" data-i18n="cancel">取消</button>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/user/dashboard/group_join.js?v={{ static_version }}"></script>
+<script src="/static/js/i18n/user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+<script src="/static/js/user/game_log/game_log_api.js?v={{ static_version }}"></script>
+<script src="/static/js/user/game_log/game_log_render.js?v={{ static_version }}"></script>
+<script src="/static/js/user/game_log/game_log_init.js?v={{ static_version }}"></script>
+
+</body>
+</html>

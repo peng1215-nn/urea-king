@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+
+    <meta charset="UTF-8">
+    <title data-i18n="memberManagementTitle">成员管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/admin/user_management.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/organizer/member_management.css?v={{ static_version }}">
+
+</head>
+
+<body>
+
+{% include "organizer/sidebar.html" %}
+
+<div class="main">
+
+    <div class="top-bar">
+
+        <div class="title-area">
+            <h1 data-i18n="memberManagementTitle">成员管理</h1>
+            <p id="current-group-text"></p>
+        </div>
+
+        <div class="topbar-actions">
+
+            <img
+                id="avatar-preview"
+                class="avatar"
+                src="/static/images/default_avatar.jpg"
+                alt="头像"
+            >
+
+            <div class="role-tag">
+                <span class="status-dot"></span>
+                <span data-i18n="organizer">局头</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="toolbar">
+
+        <div class="search-area">
+
+            <input
+                type="text"
+                id="user-search"
+                class="search-box"
+                data-i18n-placeholder="searchMemberPlaceholder"
+                placeholder="输入用户名、昵称或身份"
+            >
+
+            <button
+                class="search-button"
+                data-i18n="search"
+                onclick="searchMembers()"
+            >
+                搜索
+            </button>
+
+            <button
+                class="clear-button"
+                data-i18n="clear"
+                onclick="clearSearch()"
+            >
+                清除
+            </button>
+
+        </div>
+
+        <div id="search-message" class="search-message"></div>
+
+    </div>
+
+    <div class="table-card">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th data-i18n="avatar">头像</th>
+                    <th data-i18n="nickname">昵称</th>
+                    <th data-i18n="role">身份</th>
+                    <th data-i18n="accountStatus">账号状态</th>
+                    <th data-i18n="registerTime">注册时间</th>
+                </tr>
+            </thead>
+
+            <tbody id="user-table-body"></tbody>
+
+        </table>
+
+    </div>
+
+    <div class="detail-panel">
+
+        <h2 data-i18n="memberDetails">成员详情</h2>
+
+        <div class="detail-grid">
+
+            <div class="detail-item">
+                <div class="detail-label" data-i18n="username">用户名</div>
+                <div class="detail-value" id="detail-username">--</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label" data-i18n="nickname">昵称</div>
+                <div class="detail-value" id="detail-nickname">--</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label" data-i18n="role">身份</div>
+                <div class="detail-value" id="detail-role">--</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label" data-i18n="group">所属组</div>
+                <div class="detail-value" id="detail-group">--</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label" data-i18n="registerTime">注册时间</div>
+                <div class="detail-value" id="detail-created-at">--</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label" data-i18n="accountStatus">账号状态</div>
+                <div class="detail-value" id="detail-status">--</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="management-actions">
+
+        <div class="action-panel">
+
+            <div class="panel-title">
+                <i class="fa-solid fa-user-minus"></i>
+                <h2 data-i18n="removeMember">移除成员</h2>
+            </div>
+
+            <p class="panel-description" data-i18n="removeMemberDesc">
+                将所选成员移出本组。此操作仅删除该成员在本组的关系，不影响其账号及其他组的身份。局头不可被移除。
+            </p>
+
+            <button
+                id="remove-member-button"
+                class="panel-button danger"
+                data-i18n="confirmRemoveMember"
+                onclick="openRemoveMemberModal()"
+            >
+                移除成员
+            </button>
+
+            <div
+                id="remove-member-message"
+                class="operation-message"
+            ></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div
+    id="remove-member-modal"
+    class="custom-modal"
+    style="display: none;"
+>
+
+    <div class="custom-modal-content">
+
+        <h3 data-i18n="confirmRemoveMember">确认移除成员</h3>
+
+        <p id="remove-member-text">
+            确认移除该成员？
+        </p>
+
+        <div class="custom-modal-actions">
+
+            <button
+                class="modal-confirm-button"
+                data-i18n="confirm"
+                onclick="confirmRemoveMember()"
+            >
+                确认
+            </button>
+
+            <button
+                class="modal-cancel-button"
+                data-i18n="cancel"
+                onclick="closeRemoveMemberModal()"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="/static/js/i18n/organizer.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+<script src="/static/js/organizer/member_management/state.js?v={{ static_version }}"></script>
+<script src="/static/js/organizer/member_management/member_api.js?v={{ static_version }}"></script>
+<script src="/static/js/organizer/member_management/member_render.js?v={{ static_version }}"></script>
+<script src="/static/js/organizer/member_management/member_search.js?v={{ static_version }}"></script>
+<script src="/static/js/organizer/member_management/member_detail.js?v={{ static_version }}"></script>
+<script src="/static/js/organizer/member_management/member_remove.js?v={{ static_version }}"></script>
+
+<div
+    id="join-group-modal"
+    class="custom-modal"
+    style="display: none;"
+>
+
+    <div class="custom-modal-content">
+
+        <h3 data-i18n="joinOtherGroup">加入其他组</h3>
+
+        <p data-i18n="joinGroupLogoutConfirm">
+            此操作会退出当前登录，是否确认？
+        </p>
+
+        <div class="custom-modal-actions">
+
+            <button
+                class="modal-confirm-button"
+                data-i18n="confirm"
+                onclick="confirmJoinGroup()"
+            >
+                确认
+            </button>
+
+            <button
+                class="modal-cancel-button"
+                data-i18n="cancel"
+                onclick="closeJoinGroupModal()"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="/static/js/organizer/dashboard/group_join.js?v={{ static_version }}"></script>
+<script src="/static/js/organizer/member_management/init.js?v={{ static_version }}"></script>
+
+</body>
+</html>

@@ -159,6 +159,8 @@ window.adminTranslations = {
         adminGroupInviteForbidden: "管理员组不允许创建邀请码。",
         groupNameExists: "该组名已存在。",
         groupHasUnusedInvites: "该组仍有未使用的邀请码，无法删除。",
+        organizerAlreadyExists: "该组已有局头，无法再创建局头邀请码。",
+        organizerInvitePending: "该组已有一张待使用的局头邀请码，无法重复创建。",
 
         logAction: "操作类型",
         allActions: "全部操作",
@@ -403,6 +405,8 @@ window.adminTranslations = {
         adminGroupInviteForbidden: "Invitation codes cannot be created for the admin group.",
         groupNameExists: "This group name already exists.",
         groupHasUnusedInvites: "This group still has unused invitation codes and cannot be deleted.",
+        organizerAlreadyExists: "This group already has an organizer. Cannot create another organizer invitation code.",
+        organizerInvitePending: "This group already has a pending organizer invitation code. Cannot create a duplicate.",
 
         logAction: "Action",
         allActions: "All Actions",
@@ -486,6 +490,6 @@ window.adminTranslations = {
         userNotFound: "User not found.",
         nicknameNoChange: "Nickname does not need to be changed.",
         nicknameExists: "This nickname is already in use.",
-        passwordNoChange: "新密码不能与当前密码相同。",
+        passwordNoChange: "The new password cannot be the same as the current password.",
     },
 };

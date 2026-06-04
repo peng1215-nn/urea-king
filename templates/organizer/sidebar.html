@@ -14,30 +14,56 @@
             <span data-i18n="console">控制台</span>
         </div>
 
-        <div class="menu-item">
+        <div
+            class="menu-item {% if current_page == 'member_management' %}active{% endif %}"
+            onclick="window.location.href='/organizer-members'"
+        >
             <i class="fa-solid fa-users"></i>
             <span data-i18n="memberManagement">成员管理</span>
         </div>
 
-        <div class="menu-item">
+        <div
+            class="menu-item {% if current_page == 'game_management' %}active{% endif %}"
+            onclick="window.location.href='/organizer-games'"
+        >
             <i class="fa-solid fa-dice"></i>
             <span data-i18n="gameManagement">牌局管理</span>
         </div>
 
-        <div class="menu-item">
-            <i class="fa-solid fa-coins"></i>
-            <span data-i18n="chipRequests">筹码请求</span>
-        </div>
+        <a
+            href="/organizer-invite-management"
+            class="menu-item {% if current_page == 'invite_management' %}active{% endif %}"
+            style="text-decoration: none; color: inherit;"
+        >
+            <i class="fa-solid fa-ticket"></i>
+            <span data-i18n="inviteManagement">邀请码管理</span>
+        </a>
 
-        <div class="menu-item">
+        <a
+            href="/organizer-game-logs"
+            class="menu-item {% if current_page == 'game_logs' %}active{% endif %}"
+            style="text-decoration: none; color: inherit;"
+        >
             <i class="fa-regular fa-file-lines"></i>
             <span data-i18n="gameLogs">牌局日志</span>
-        </div>
+        </a>
 
-        <div class="menu-item">
+        <div
+            class="menu-item"
+            onclick="openJoinGroupModal()"
+        >
             <i class="fa-solid fa-plus"></i>
             <span data-i18n="joinOtherGroup">加入其他组</span>
         </div>
+
+        <a
+            href="/organizer-change-password"
+            class="menu-item {% if current_page == 'change_password' %}active{% endif %}"
+            style="text-decoration: none; color: inherit;"
+        >
+            <i class="fa-solid fa-lock"></i>
+            <span data-i18n="changePassword">修改密码</span>
+        </a>
 
         <div
             class="menu-item"

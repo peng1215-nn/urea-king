@@ -1,0 +1,43 @@
+<div class="sidebar">
+
+    <div class="logo">UREAKING</div>
+
+    <div class="menu">
+
+        <div class="menu-item {% if current_page == 'dashboard' %}active{% endif %}"
+             onclick="window.location.href='/user-dashboard'">
+            <i class="fa-solid fa-house"></i>
+            <span data-i18n="dashboard">控制台</span>
+        </div>
+
+        <div class="menu-item {% if current_page == 'game' %}active{% endif %}"
+             onclick="window.location.href='/user-game'">
+            <i class="fa-solid fa-chess-board"></i>
+            <span data-i18n="joinGame">加入牌局</span>
+        </div>
+
+        <div class="menu-item {% if current_page == 'game_logs' %}active{% endif %}"
+             onclick="window.location.href='/user-game-logs'">
+            <i class="fa-regular fa-file-lines"></i>
+            <span data-i18n="gameLogs">牌局日志</span>
+        </div>
+
+        <div class="menu-item" onclick="openJoinGroupModal()">
+            <i class="fa-solid fa-plus"></i>
+            <span data-i18n="joinOtherGroup">加入其他组</span>
+        </div>
+
+        <div class="menu-item {% if current_page == 'change_password' %}active{% endif %}"
+             onclick="window.location.href='/user-change-password'">
+            <i class="fa-solid fa-lock"></i>
+            <span data-i18n="changePassword">修改密码</span>
+        </div>
+
+        <div class="menu-item" onclick="logout()">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span data-i18n="logout">退出登录</span>
+        </div>
+
+    </div>
+
+</div>

@@ -24,7 +24,11 @@ function getTranslations(language) {
         return window.groupSelectTranslations[language];
     }
 
-     if (window.organizerTranslations) {
+     if (window.userTranslations) {
+        return window.userTranslations[language];
+    }
+
+    if (window.organizerTranslations) {
         return window.organizerTranslations[language];
     }
 

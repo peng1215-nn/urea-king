@@ -23,11 +23,13 @@ def group_join_page(request: Request):
 
 @router.post("/group-join")
 def group_join(
+    request: Request,
     username: str = Form(...),
     password: str = Form(...),
     invite_code: str = Form(...),
 ):
     return group_join_service(
+        request=request,
         username=username,
         password=password,
         invite_code=invite_code,

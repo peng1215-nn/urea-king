@@ -264,10 +264,7 @@ def create_invitation_code_service(
                 "message": "inviteCodeRequired",
             }
 
-        if role not in [
-            "organizer",
-            "user",
-        ]:
+        if role not in ["organizer", "user"]:
             return {
                 "success": False,
                 "message": "inviteRoleInvalid",
@@ -288,6 +285,30 @@ def create_invitation_code_service(
                 "success": False,
                 "message": "adminGroupInviteForbidden",
             }
+
+        if role == "organizer":
+            existing_organizer = db.query(UserGroupRole).filter(
+                UserGroupRole.group_id == group.id,
+                UserGroupRole.role == "organizer",
+            ).first()
+
+            if existing_organizer:
+                return {
+                    "success": False,
+                    "message": "organizerAlreadyExists",
+                }
+
+            pending_organizer_invite = db.query(InvitationCode).filter(
+                InvitationCode.group_code == group.group_code,
+                InvitationCode.role == "organizer",
+                InvitationCode.is_used == 0,
+            ).first()
+
+            if pending_organizer_invite:
+                return {
+                    "success": False,
+                    "message": "organizerInvitePending",
+                }
 
         existing_code = db.query(InvitationCode).filter(
             InvitationCode.code == code

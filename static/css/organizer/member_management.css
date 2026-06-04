@@ -1,0 +1,38 @@
+thead tr,
+tbody tr {
+    grid-template-columns:
+        120px
+        1fr
+        1fr
+        1fr
+        1.3fr;
+}
+
+.status-active {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    background: rgba(92, 255, 178, 0.14);
+    color: #5CFFB2;
+}
+
+.status-disabled {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    background: rgba(255, 100, 130, 0.14);
+    color: #FF6482;
+}
+
+.status-badge.disabled {
+    background: rgba(255, 100, 130, 0.14);
+    color: #FF6482;
+}
+
+body {
+    background:
+        linear-gradient(135deg, rgba(15,15,22,0.82), rgba(21,25,40,0.82), rgba(26,32,51,0.82)),
+        url("/static/images/organizer_background.png") center center / cover no-repeat fixed;
+}

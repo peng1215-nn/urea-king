@@ -6,6 +6,7 @@ from models import Group
 from models import InvitationCode
 from models import User
 from models import UserGroupRole
+from services.admin.audit_log import write_audit_log
 
 
 pwd_context = CryptContext(
@@ -17,6 +18,7 @@ ADMIN_GROUP_CODE = "0"
 
 
 def group_join_service(
+    request,
     username,
     password,
     invite_code,
@@ -116,6 +118,17 @@ def group_join_service(
         invitation.used_at = datetime.utcnow()
 
         db.commit()
+
+        write_audit_log(
+            request=request,
+            action="GROUP_JOIN",
+            target_type="user_group_role",
+            target_id=user.id,
+            old_value=invite_code,
+            new_value=f"group_code={invitation.group_code}, role={invitation.role}",
+            operator_id=user.id,
+            operator_username=user.username,
+        )
 
         return {
             "success": True,

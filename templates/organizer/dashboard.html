@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
     <link rel="stylesheet" href="/static/css/organizer/language.css?v={{ static_version }}">
     <link rel="stylesheet" href="/static/css/organizer/dashboard.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/organizer/announcement.css?v={{ static_version }}">
 
 </head>
 
@@ -55,6 +56,7 @@
                     type="file"
                     id="avatar-input"
                     accept="image/jpeg,image/png,image/webp"
+                    onchange="uploadAvatar()"
                     hidden
             >
 
@@ -67,18 +69,17 @@
 
     </div>
 
-    <div class="organizer-hero-card">
+    <div class="announcement-overview-card" onclick="window.location.href='/organizer-announcements'">
 
-        <div class="hero-icon">
-            <i class="fa-solid fa-crown"></i>
+        <div class="announcement-overview-header">
+            <div class="announcement-icon">
+                <i class="fa-solid fa-bullhorn"></i>
+            </div>
+            <h2 data-i18n="announcements">公告</h2>
         </div>
 
-        <div>
-            <h2 data-i18n="welcomeOrganizer">欢迎进入局头控制台</h2>
-
-            <p data-i18n="organizerDashboardDesc">
-                你可以在这里管理本组成员、处理筹码请求、开局、结束局并查看牌局记录。
-            </p>
+        <div id="announcement-preview-list" class="announcement-preview-list">
+            <div class="announcement-loading" data-i18n="loading">加载中...</div>
         </div>
 
     </div>
@@ -89,106 +90,204 @@
 
     <div class="modules">
 
-    <div class="module-card">
-        <div class="module-title">
-            <div class="module-icon">
-                <i class="fa-solid fa-users"></i>
+        <div class="module-card" onclick="window.location.href='/organizer-members'">
+            <div class="module-title">
+                <div class="module-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+
+                <h2 data-i18n="memberManagement">
+                    成员管理
+                </h2>
             </div>
 
-            <h2 data-i18n="memberManagement">
-                成员管理
-            </h2>
+            <i class="fa-solid fa-chevron-right module-arrow"></i>
+
+            <p data-i18n="memberManagementDesc">
+                查看/管理本组成员
+            </p>
         </div>
 
-        <i class="fa-solid fa-chevron-right module-arrow"></i>
+        <div class="module-card" onclick="window.location.href='/organizer-games'">
+            <div class="module-title">
+                <div class="module-icon green">
+                    <i class="fa-solid fa-dice"></i>
+                </div>
 
-        <p data-i18n="memberManagementDesc">
-            查看本组成员、生成本组邀请码，并移除组内成员。
-        </p>
-    </div>
-
-    <div class="module-card">
-        <div class="module-title">
-            <div class="module-icon green">
-                <i class="fa-solid fa-dice"></i>
+                <h2 data-i18n="gameManagement">
+                    牌局管理
+                </h2>
             </div>
 
-            <h2 data-i18n="gameManagement">
-                牌局管理
-            </h2>
+            <i class="fa-solid fa-chevron-right module-arrow"></i>
 
+            <p data-i18n="gameManagementDesc">
+                开局、结束局并管理当前牌局的参与人员
+            </p>
         </div>
 
-        <i class="fa-solid fa-chevron-right module-arrow"></i>
+        <div class="module-card" onclick="window.location.href='/organizer-invite-management'">
+            <div class="module-title">
+                <div class="module-icon yellow">
+                    <i class="fa-solid fa-ticket"></i>
+                </div>
 
-        <p data-i18n="gameManagementDesc">
-            开局、结束局，并管理当前牌局的参与人员与筹码变化。
-        </p>
-    </div>
-
-    <div class="module-card">
-        <div class="module-title">
-            <div class="module-icon orange">
-                <i class="fa-solid fa-coins"></i>
+                <h2 data-i18n="inviteManagement">
+                    邀请码管理
+                </h2>
             </div>
 
-            <h2 data-i18n="chipRequests">
-                筹码请求
-            </h2>
+            <i class="fa-solid fa-chevron-right module-arrow"></i>
+
+            <p data-i18n="inviteManagementDesc">
+                生成本组邀请码，查看使用状态，并撤销未使用的邀请码。
+            </p>
         </div>
 
-        <i class="fa-solid fa-chevron-right module-arrow"></i>
+        <div class="module-card" onclick="window.location.href='/organizer-game-logs'">
+            <div class="module-title">
+                <div class="module-icon purple">
+                    <i class="fa-regular fa-file-lines"></i>
+                </div>
 
-        <p data-i18n="chipRequestsDesc">
-            批准或拒绝组内成员的买入与回收筹码请求。
-        </p>
-    </div>
-
-    <div class="module-card">
-        <div class="module-title">
-            <div class="module-icon purple">
-                <i class="fa-regular fa-file-lines"></i>
+                <h2 data-i18n="gameLogs">
+                    牌局日志
+                </h2>
             </div>
 
-            <h2 data-i18n="gameLogs">
-                牌局日志
-            </h2>
+            <i class="fa-solid fa-chevron-right module-arrow"></i>
+
+            <p data-i18n="gameLogsDesc">
+                查看每局的开始时间、结束时间、总筹码、参与者盈亏与统计结果。
+            </p>
         </div>
 
-        <i class="fa-solid fa-chevron-right module-arrow"></i>
+        <div class="module-card" onclick="openJoinGroupModal()">
+            <div class="module-title">
+                <div class="module-icon cyan">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
 
-        <p data-i18n="gameLogsDesc">
-            查看每局的开始时间、结束时间、总筹码、参与者盈亏与统计结果。
-        </p>
-    </div>
-
-    <div class="module-card">
-        <div class="module-title">
-            <div class="module-icon cyan">
-                <i class="fa-solid fa-plus"></i>
+                <h2 data-i18n="joinOtherGroup">
+                    加入其他组
+                </h2>
             </div>
 
-            <h2 data-i18n="joinOtherGroup">
-                加入其他组
-            </h2>
+            <i class="fa-solid fa-chevron-right module-arrow"></i>
+
+            <p data-i18n="joinOtherGroupDesc">
+                使用新的邀请码加入其他组，并在登录后选择不同组别身份。
+            </p>
         </div>
 
-        <i class="fa-solid fa-chevron-right module-arrow"></i>
+        <div class="module-card" onclick="window.location.href='/organizer-change-password'">
+            <div class="module-title">
+                <div class="module-icon red">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
 
-        <p data-i18n="joinOtherGroupDesc">
-            使用新的邀请码加入其他组，并在登录后选择不同组别身份。
-        </p>
+                <h2 data-i18n="changePassword">
+                    修改密码
+                </h2>
+            </div>
+
+            <i class="fa-solid fa-chevron-right module-arrow"></i>
+
+            <p data-i18n="changePasswordOrganizerDesc">
+                修改当前局头账户的昵称与密码。
+            </p>
+        </div>
+
     </div>
 
 </div>
 
+<div
+    id="join-group-modal"
+    class="custom-modal"
+    style="display: none;"
+>
+
+    <div class="custom-modal-content">
+
+        <h3 data-i18n="joinOtherGroup">加入其他组</h3>
+
+        <p data-i18n="joinGroupLogoutConfirm">
+            此操作会退出当前登录，是否确认？
+        </p>
+
+        <div class="custom-modal-actions">
+
+            <button
+                class="modal-confirm-button"
+                data-i18n="confirm"
+                onclick="confirmJoinGroup()"
+            >
+                确认
+            </button>
+
+            <button
+                class="modal-cancel-button"
+                data-i18n="cancel"
+                onclick="closeJoinGroupModal()"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
 </div>
 
+<script src="/static/js/organizer/dashboard/group_join.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/organizer.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>
 <script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
 <script src="/static/js/common/logout.js?v={{ static_version }}"></script>
-<script>window.addEventListener("pageshow", function () {applyLanguage();loadCurrentUser();});</script>
+<script src="/static/js/common/avatar_validation.js?v={{ static_version }}"></script>
+<script src="/static/js/common/avatar_upload.js?v={{ static_version }}"></script>
+<script>
+    async function loadAnnouncementPreview() {
+        const res = await fetch("/organizer/announcements");
+        const data = await res.json();
+        const list = document.getElementById("announcement-preview-list");
+
+        if (!data.success || !data.announcements || data.announcements.length === 0) {
+            list.innerHTML = `<div class="announcement-empty">${t("noAnnouncements")}</div>`;
+            return;
+        }
+
+        list.innerHTML = "";
+        const a = data.announcements[0];
+        const item = document.createElement("div");
+        item.className = "announcement-preview-item";
+        const titleText = a.title.length > 30 ? a.title.slice(0, 30) + "..." : a.title;
+        const contentText = a.content.length > 50 ? a.content.slice(0, 50) + "..." : a.content;
+        item.innerHTML = `
+            <div class="announcement-preview-title">${titleText}</div>
+            <div class="announcement-preview-content">${contentText}</div>
+            <div class="announcement-preview-date">${a.updated_at || a.created_at}</div>
+        `;
+        list.appendChild(item);
+    }
+
+    window.addEventListener("pageshow", function () {
+        closeJoinGroupModal();
+        applyLanguage();
+        loadCurrentUser();
+        loadAnnouncementPreview();
+    });
+
+    // 语言切换后重新渲染公告预览
+    const origApplyLanguage = window.applyLanguage;
+    if (typeof origApplyLanguage === "function") {
+        window.applyLanguage = function(lang) {
+            origApplyLanguage(lang);
+            loadAnnouncementPreview();
+        };
+    }
+</script>
 
 </body>
 </html>
