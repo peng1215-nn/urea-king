@@ -12,11 +12,9 @@ function updateRemoveMemberPanel(member) {
 
     if (member.role === "organizer") {
         button.disabled = true;
-
         if (messageBox) {
             messageBox.innerText = t("organizerRemoveForbidden");
         }
-
         return;
     }
 
@@ -60,15 +58,13 @@ function openRemoveMemberModal() {
 
     text.innerText = t("removeMemberConfirmPrefix") + " " + selectedMember.username + t("removeMemberConfirmSuffix");
 
-    modal.classList.remove("hidden");
+    modal.style.display = "flex";
 }
 
 
 function closeRemoveMemberModal() {
     const modal = document.getElementById("remove-member-modal");
-
-    modal.classList.add("hidden");
-
+    modal.style.display = "none";
     pendingRemoveMember = null;
 }
 
@@ -85,30 +81,23 @@ async function confirmRemoveMember() {
     }
 
     const formData = new FormData();
-
     formData.append("target_user_id", pendingRemoveMember.id);
 
     try {
-        const response = await fetch(
-            "/organizer/remove-member",
-            {
-                method: "POST",
-                body: formData,
-            }
-        );
+        const response = await fetch("/organizer/remove-member", {
+            method: "POST",
+            body: formData,
+        });
 
         const data = await response.json();
 
         if (!data.success) {
             messageBox.innerText = data.message || t("operationFailed");
-
             closeRemoveMemberModal();
-
             return;
         }
 
         await loadMembers();
-
         resetSelectedMemberState();
 
         messageBox.style.color = "#5CFFB2";
@@ -118,9 +107,7 @@ async function confirmRemoveMember() {
 
     } catch (error) {
         console.error(error);
-
         messageBox.innerText = t("operationFailed");
-
         closeRemoveMemberModal();
     }
 }
