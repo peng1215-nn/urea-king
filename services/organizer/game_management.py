@@ -291,6 +291,42 @@ def remove_player_from_game_service(game_id: int, group_id: int, user_id: int):
         db.close()
 
 
+def exit_player_from_game_service(game_id: int, group_id: int, user_id: int, cash_out: int):
+    """玩家退出：记录 cash_out 并移出"""
+    db = SessionLocal()
+    try:
+        game = db.query(PokerGame).filter(
+            PokerGame.id == game_id,
+            PokerGame.group_id == group_id,
+            PokerGame.status == "ongoing",
+        ).first()
+
+        if not game:
+            return {"success": False, "message": "gameNotFound"}
+
+        player = db.query(PokerGamePlayer).filter(
+            PokerGamePlayer.game_id == game_id,
+            PokerGamePlayer.user_id == user_id,
+        ).first()
+
+        if not player:
+            return {"success": False, "message": "playerNotInGame"}
+
+        if cash_out < 0:
+            return {"success": False, "message": "invalidAmount"}
+
+        player.cash_out = cash_out
+        player.net = cash_out - (player.total_buy_in or 0)
+        player.is_active = 0
+        db.commit()
+        return {"success": True}
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "message": str(e)}
+    finally:
+        db.close()
+
+
 def approve_chip_request_service(request_id: int, game_id: int, group_id: int, resolver_id: int):
     db = SessionLocal()
     try:

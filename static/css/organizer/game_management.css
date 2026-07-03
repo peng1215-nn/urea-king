@@ -883,3 +883,39 @@ body {
 .member-select-item.forced:hover {
     background: rgba(255,255,255,0.06);
 }
+
+.remove-type-btns {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.remove-type-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.6);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.remove-type-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #ffffff;
+}
+
+.remove-type-btn.active[data-type="away"] {
+    background: rgba(251,191,36,0.15);
+    border-color: rgba(251,191,36,0.4);
+    color: #fbbf24;
+}
+
+.remove-type-btn.active[data-type="exit"] {
+    background: rgba(255,100,100,0.15);
+    border-color: rgba(255,100,100,0.4);
+    color: #ff6b6b;
+}

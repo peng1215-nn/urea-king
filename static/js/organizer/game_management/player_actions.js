@@ -1,19 +1,84 @@
-async function removePlayer(userId) {
-    if (!currentGame) return;
+let pendingRemoveUserId = null;
 
-    const data = await apiRemovePlayer(currentGame.id, userId);
+function openRemovePlayerModal(userId) {
+    pendingRemoveUserId = userId;
+    document.getElementById("remove-player-cashout").value = "";
+    document.getElementById("remove-player-message").innerText = "";
+    document.getElementById("remove-player-exit-section").style.display = "none";
+    document.getElementById("remove-player-modal").style.display = "flex";
+}
 
-    const messageBox = document.getElementById("game-message");
+function closeRemovePlayerModal() {
+    document.getElementById("remove-player-modal").style.display = "none";
+    pendingRemoveUserId = null;
+}
+
+function selectRemoveType(type) {
+    const exitSection = document.getElementById("remove-player-exit-section");
+    if (type === "exit") {
+        exitSection.style.display = "block";
+    } else {
+        exitSection.style.display = "none";
+    }
+    document.querySelectorAll(".remove-type-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.type === type);
+    });
+}
+
+async function confirmRemovePlayer() {
+    const messageBox = document.getElementById("remove-player-message");
     messageBox.style.color = "#ff8a8a";
+    messageBox.innerText = "";
 
-    if (!data.success) {
-        messageBox.innerText = t(data.message || "operationFailed");
+    if (!pendingRemoveUserId || !currentGame) return;
+
+    const activeBtn = document.querySelector(".remove-type-btn.active");
+    if (!activeBtn) {
+        messageBox.innerText = t("pleaseSelectRemoveType");
         return;
     }
 
-    messageBox.style.color = "#5CFFB2";
-    messageBox.innerText = t("playerRemoved");
-    await loadGamePage();
+    const type = activeBtn.dataset.type;
+
+    if (type === "away") {
+        const data = await apiRemovePlayer(currentGame.id, pendingRemoveUserId);
+        const gameMsg = document.getElementById("game-message");
+        gameMsg.style.color = "#ff8a8a";
+        if (!data.success) {
+            messageBox.innerText = t(data.message || "operationFailed");
+            return;
+        }
+        closeRemovePlayerModal();
+        gameMsg.style.color = "#5CFFB2";
+        gameMsg.innerText = t("playerAway");
+        await loadGamePage();
+    } else {
+        const cashOut = parseInt(document.getElementById("remove-player-cashout").value);
+        if (isNaN(cashOut) || cashOut < 0) {
+            messageBox.innerText = t("invalidAmount");
+            return;
+        }
+        const fd = new FormData();
+        fd.append("game_id", currentGame.id);
+        fd.append("user_id", pendingRemoveUserId);
+        fd.append("cash_out", cashOut);
+        const res = await fetch("/organizer/game/exit-player", { method: "POST", body: fd });
+        const data = await res.json();
+        const gameMsg = document.getElementById("game-message");
+        gameMsg.style.color = "#ff8a8a";
+        if (!data.success) {
+            messageBox.innerText = t(data.message || "operationFailed");
+            return;
+        }
+        closeRemovePlayerModal();
+        gameMsg.style.color = "#5CFFB2";
+        gameMsg.innerText = t("playerExited");
+        await loadGamePage();
+    }
+}
+
+async function removePlayer(userId) {
+    openRemovePlayerModal(userId);
 }
 
 async function rejoinPlayer(userId) {

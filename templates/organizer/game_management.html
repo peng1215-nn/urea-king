@@ -172,7 +172,7 @@
                 class="modal-input"
                 maxlength="50"
                 data-i18n-placeholder="gameNamePlaceholder"
-                placeholder="请输入牌局名称"
+                placeholder="请输入牌局名称（可选）"
             >
         </div>
 
@@ -319,6 +319,28 @@
 <script src="/static/js/organizer/game_management/player_actions.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/game_management/finish_game.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/game_management/init.js?v={{ static_version }}"></script>
+
+
+<!-- 移出玩家弹窗 -->
+<div id="remove-player-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content">
+        <h3 data-i18n="removePlayer">移出玩家</h3>
+        <p data-i18n="removePlayerDesc">请选择操作类型：</p>
+        <div class="remove-type-btns">
+            <button class="remove-type-btn" data-type="away" onclick="selectRemoveType('away')" data-i18n="playerAway">暂离</button>
+            <button class="remove-type-btn" data-type="exit" onclick="selectRemoveType('exit')" data-i18n="playerExit">退出</button>
+        </div>
+        <div id="remove-player-exit-section" style="display:none; margin-top:16px;">
+            <label style="font-size:13px; color:rgba(255,255,255,0.5); display:block; margin-bottom:8px;" data-i18n="playerExitCashout">该玩家剩余筹码（卖出金额）</label>
+            <input type="number" id="remove-player-cashout" class="modal-input" min="0" placeholder="0">
+        </div>
+        <div id="remove-player-message" class="operation-message" style="margin-top:12px;"></div>
+        <div class="custom-modal-actions" style="margin-top:16px;">
+            <button class="modal-confirm-button" onclick="confirmRemovePlayer()" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" onclick="closeRemovePlayerModal()" data-i18n="cancel">取消</button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

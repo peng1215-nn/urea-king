@@ -17,6 +17,7 @@ from services.organizer.game_management import get_ongoing_games_service
 from services.organizer.game_management import organizer_buyin_service
 from services.organizer.game_management import reject_chip_request_service
 from services.organizer.game_management import remove_player_from_game_service
+from services.organizer.game_management import exit_player_from_game_service
 from services.organizer.game_management import start_game_service
 from services.organizer.game_management import update_cash_out_service
 from template_config import templates
@@ -164,6 +165,28 @@ def remove_player(
         game_id=game_id,
         group_id=int(group_id),
         user_id=user_id,
+    )
+
+
+@router.post("/organizer/game/exit-player")
+def exit_player(
+    request: Request,
+    game_id: int = Form(...),
+    user_id: int = Form(...),
+    cash_out: int = Form(...),
+):
+    if not require_organizer(request):
+        return {"success": False, "message": "permissionDenied"}
+
+    group_id = get_group_id(request)
+    if not group_id:
+        return {"success": False, "message": "noGroupSelected"}
+
+    return exit_player_from_game_service(
+        game_id=game_id,
+        group_id=int(group_id),
+        user_id=user_id,
+        cash_out=cash_out,
     )
 
 
