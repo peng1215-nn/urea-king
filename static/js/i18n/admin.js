@@ -68,6 +68,7 @@ window.adminTranslations = {
 
         pleaseSelectUser: "请先选择用户。",
         pleaseSelectGroup: "请选择所属组。",
+        selectGroup: "选择组",
         pleaseSelectRole: "请选择身份。",
         roleNoChange: "身份无需更改。",
         updateSuccess: "用户身份修改成功。",
@@ -327,6 +328,7 @@ window.adminTranslations = {
 
         pleaseSelectUser: "Please select a user first.",
         pleaseSelectGroup: "Please select a group.",
+        selectGroup: "Select Group",
         pleaseSelectRole: "Please select a role.",
         roleNoChange: "The role does not need to be changed.",
         updateSuccess: "User role updated successfully.",
