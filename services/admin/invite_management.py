@@ -5,6 +5,7 @@ from database import SessionLocal
 from models import Group
 from models import InvitationCode
 from models import UserGroupRole
+from models import PokerGame, PokerGamePlayer, ChipRequest
 
 
 ADMIN_GROUP_CODE = "0"
@@ -401,5 +402,38 @@ def delete_invitation_code_service(invitation_id):
             "message": str(e),
         }
 
+    finally:
+        db.close()
+
+def force_delete_group_service(group_id, expected_group_code):
+    db = SessionLocal()
+    try:
+        # Lock target group to prevent concurrent deletion of the same group.
+        group = db.query(Group).filter(Group.id == group_id).with_for_update().first()
+        if group is None:
+            return {"success": False, "message": "groupNotFound"}
+        if group.group_code == ADMIN_GROUP_CODE:
+            return {"success": False, "message": "adminGroupDeleteForbidden"}
+        if expected_group_code != group.group_code:
+            return {"success": False, "message": "forceGroupCodeMismatch"}
+
+        game_ids = [item[0] for item in db.query(PokerGame.id).filter(PokerGame.group_id == group.id).all()]
+        counts = {"games": len(game_ids)}
+        if game_ids:
+            counts["chip_requests"] = db.query(ChipRequest).filter(ChipRequest.game_id.in_(game_ids)).delete(synchronize_session=False)
+            counts["players"] = db.query(PokerGamePlayer).filter(PokerGamePlayer.game_id.in_(game_ids)).delete(synchronize_session=False)
+            db.query(PokerGame).filter(PokerGame.id.in_(game_ids)).delete(synchronize_session=False)
+        else:
+            counts["chip_requests"] = 0
+            counts["players"] = 0
+        counts["members"] = db.query(UserGroupRole).filter(UserGroupRole.group_id == group.id).delete(synchronize_session=False)
+        counts["invites"] = db.query(InvitationCode).filter(InvitationCode.group_code == group.group_code).delete(synchronize_session=False)
+        code, name = group.group_code, group.group_name
+        db.delete(group)
+        db.commit()
+        return {"success": True, "message": "forceGroupDeleteSuccess", "group_code": code, "group_name": name, "counts": counts}
+    except Exception:
+        db.rollback()
+        return {"success": False, "message": "operationFailed"}
     finally:
         db.close()

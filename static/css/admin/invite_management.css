@@ -239,3 +239,13 @@
         grid-template-columns: 1fr;
     }
 }
+
+#force-delete-group-modal .custom-modal-actions {
+    position: relative;
+    top: 18px;
+    margin-top: 8px;
+}
+
+#force-delete-group-modal .custom-modal-content {
+    padding-bottom: 42px;
+}

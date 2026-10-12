@@ -40,6 +40,8 @@ window.loginTranslations = {
         inviteCode: "邀请码",
         enterInviteCode: "请输入邀请码",
         groupJoinAdminForbidden: "管理员账号不能加入其他组。",
+
+        loginNoGroupAvailable: "当前账号已不属于任何组，请使用邀请码加入新组。",
     },
 
     en: {
@@ -82,5 +84,7 @@ window.loginTranslations = {
         inviteCode: "Invitation Code",
         enterInviteCode: "Enter invitation code",
         groupJoinAdminForbidden: "Administrator accounts cannot join other groups.",
+
+        loginNoGroupAvailable: "Your account is not associated with any group. Please use an invitation code to join a new group.",
     }
 };

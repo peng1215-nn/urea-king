@@ -7,6 +7,7 @@ from services.admin.audit_log import write_audit_log
 from services.admin.invite_management import create_group_service
 from services.admin.invite_management import create_invitation_code_service
 from services.admin.invite_management import delete_group_service
+from services.admin.invite_management import force_delete_group_service
 from services.admin.invite_management import delete_invitation_code_service
 from services.admin.invite_management import get_deletable_group_options_service
 from services.admin.invite_management import get_group_options_service
@@ -142,6 +143,23 @@ def delete_group(
             operator_username=request.session.get("username"),
         )
 
+    return result
+
+
+@router.post("/admin/groups/force-delete")
+def force_delete_group(request: Request, group_id: int = Form(...), group_code: str = Form(...)):
+    if not require_admin(request):
+        return {"success": False, "message": "permissionDenied"}
+    result = force_delete_group_service(group_id, group_code.strip())
+    if result.get("success"):
+        write_audit_log(
+            request=request, action="FORCE_DELETE_GROUP", target_type="group",
+            target_id=group_id,
+            old_value=f"group_code={result['group_code']}, group_name={result['group_name']}, counts={result['counts']}",
+            new_value=None,
+            operator_id=request.session.get("user_id"),
+            operator_username=request.session.get("username"),
+        )
     return result
 
 

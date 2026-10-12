@@ -22,6 +22,9 @@ async function loadGroupOptions() {
         </option>
     `;
 
+    const forceDeleteSelect = document.getElementById("force-delete-group-id");
+    forceDeleteSelect.innerHTML = `<option value="">${t("pleaseSelectGroup")}</option>`;
+
     const groupResult =
         await fetchGroupOptions();
 
@@ -42,6 +45,7 @@ async function loadGroupOptions() {
                 `${group.group_name} (${group.group_code})`;
 
             createGroupSelect.appendChild(option);
+            forceDeleteSelect.appendChild(option.cloneNode(true));
         });
     }
 
@@ -274,4 +278,41 @@ async function confirmDeleteGroup() {
 
         closeDeleteGroupModal();
     }
+}
+let forceDeleteTarget = null;
+function openForceDeleteGroupModal() {
+    const select = document.getElementById("force-delete-group-id");
+    const message = document.getElementById("force-delete-group-message");
+    message.textContent = "";
+    forceDeleteTarget = window.inviteManagementState.groups.find(g => String(g.id) === select.value);
+    if (!forceDeleteTarget) { message.textContent = t("pleaseSelectGroup"); return; }
+    document.getElementById("force-delete-group-text").textContent =
+        `${t("forceDeleteWarning")} ${forceDeleteTarget.group_name} (${forceDeleteTarget.group_code})`;
+    document.getElementById("force-delete-confirm-code").value = "";
+    document.getElementById("force-delete-group-modal").classList.remove("hidden");
+}
+function closeForceDeleteGroupModal() {
+    document.getElementById("force-delete-group-modal").classList.add("hidden");
+    forceDeleteTarget = null;
+}
+async function confirmForceDeleteGroup() {
+    if (!forceDeleteTarget) return;
+    const message = document.getElementById("force-delete-group-message");
+    const code = document.getElementById("force-delete-confirm-code").value.trim();
+    if (code !== forceDeleteTarget.group_code) { message.textContent = t("forceGroupCodeMismatch"); return; }
+    const button = document.getElementById("force-delete-confirm-button");
+    button.disabled = true;
+    try {
+        const data = await forceDeleteGroupRequest(forceDeleteTarget.id, code);
+        message.style.color = data.success ? "#5CFFB2" : "#ff8a8a";
+        message.textContent = t(data.message || "operationFailed");
+        if (data.success) {
+            closeForceDeleteGroupModal();
+            await loadGroupOptions();
+            await loadUnusedInvitationOptions();
+        }
+    } catch (error) {
+        console.error(error);
+        message.textContent = t("operationFailed");
+    } finally { button.disabled = false; }
 }
