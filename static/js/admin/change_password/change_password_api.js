@@ -1,38 +1,42 @@
 async function fetchCurrentAccount() {
-    const response = await fetch(
-        "/change-password/current"
-    );
+    const response =
+        await fetch(
+            "/change-password/current"
+        );
 
     return await response.json();
 }
 
 
-async function updateNicknameApi(nickname) {
-    const formData = new FormData();
+async function apiUpdateNickname(nickname) {
+    const formData =
+        new FormData();
 
     formData.append(
         "nickname",
         nickname
     );
 
-    const response = await fetch(
-        "/change-password/update-nickname",
-        {
-            method: "POST",
-            body: formData,
-        }
-    );
+    const response =
+        await fetch(
+            "/change-password/update-nickname",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
 
     return await response.json();
 }
 
 
-async function updatePasswordApi(
+async function apiUpdatePassword(
     currentPassword,
     newPassword,
-    confirmPassword,
+    confirmPassword
 ) {
-    const formData = new FormData();
+    const formData =
+        new FormData();
 
     formData.append(
         "current_password",
@@ -49,13 +53,14 @@ async function updatePasswordApi(
         confirmPassword
     );
 
-    const response = await fetch(
-        "/change-password/update-password",
-        {
-            method: "POST",
-            body: formData,
-        }
-    );
+    const response =
+        await fetch(
+            "/change-password/update-password",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
 
     return await response.json();
 }

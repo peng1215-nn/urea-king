@@ -1,50 +1,14 @@
-async function loadCurrentAccount() {
+async function saveNickname() {
     const messageBox =
         document.getElementById("nickname-message");
 
-    try {
-        const data =
-            await fetchCurrentAccount();
-
-        if (!data.success) {
-            messageBox.innerText =
-                t(data.message || "operationFailed");
-
-            return;
-        }
-
-        const nickname =
-            data.user.nickname || "--";
-
-        document.getElementById(
-            "current-nickname"
-        ).innerText = nickname;
-
-        document.getElementById(
-            "new-nickname"
-        ).value = "";
-
-    } catch (error) {
-        console.error(error);
-
-        messageBox.innerText =
-            t("operationFailed");
-    }
-}
-
-
-async function updateNickname() {
-    const nicknameInput =
-        document.getElementById("new-nickname");
-
-    const messageBox =
-        document.getElementById("nickname-message");
+    messageBox.style.color = "#ff8a8a";
+    messageBox.innerText = "";
 
     const nickname =
-        nicknameInput.value.trim();
-
-    messageBox.innerText = "";
-    messageBox.style.color = "#ff8a8a";
+        document.getElementById(
+            "new-nickname"
+        ).value.trim();
 
     if (!nickname) {
         messageBox.innerText =
@@ -53,9 +17,16 @@ async function updateNickname() {
         return;
     }
 
+    if (nickname.length > 50) {
+        messageBox.innerText =
+            t("nicknameTooLong");
+
+        return;
+    }
+
     try {
         const data =
-            await updateNicknameApi(nickname);
+            await apiUpdateNickname(nickname);
 
         if (!data.success) {
             messageBox.innerText =
@@ -72,7 +43,7 @@ async function updateNickname() {
 
         document.getElementById(
             "current-nickname"
-        ).innerText = data.nickname;
+        ).value = data.nickname || nickname;
 
         document.getElementById(
             "new-nickname"
@@ -87,55 +58,62 @@ async function updateNickname() {
 }
 
 
-async function updatePassword() {
-    const currentPassword =
+async function savePassword() {
+    const messageBox =
+        document.getElementById("password-message");
+
+    messageBox.style.color = "#ff8a8a";
+    messageBox.innerText = "";
+
+    const current =
         document.getElementById(
             "current-password"
         ).value;
 
-    const newPassword =
+    const newPwd =
         document.getElementById(
             "new-password"
         ).value;
 
-    const confirmPassword =
+    const confirm =
         document.getElementById(
             "confirm-password"
         ).value;
 
-    const messageBox =
-        document.getElementById("password-message");
-
-    messageBox.innerText = "";
-    messageBox.style.color = "#ff8a8a";
-
-    if (!currentPassword) {
+    if (!current) {
         messageBox.innerText =
             t("currentPasswordRequired");
 
         return;
     }
 
-    if (!newPassword) {
+    if (!newPwd) {
         messageBox.innerText =
             t("newPasswordRequired");
 
         return;
     }
 
-    if (!confirmPassword) {
+    if (newPwd.length < 6) {
         messageBox.innerText =
-            t("confirmNewPasswordRequired");
+            t("newPasswordTooShort");
+
+        return;
+    }
+
+    if (newPwd !== confirm) {
+        messageBox.innerText =
+            t("newPasswordMismatch");
 
         return;
     }
 
     try {
         const data =
-            await updatePasswordApi(
-                currentPassword,
-                newPassword,
-                confirmPassword
+            await apiUpdatePassword(
+                current,
+                newPwd,
+                confirm
             );
 
         if (!data.success) {
@@ -155,7 +133,7 @@ async function updatePassword() {
             () => {
                 window.location.href = "/login";
             },
-            1000
+            1500
         );
 
     } catch (error) {
