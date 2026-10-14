@@ -18,19 +18,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        "users",
-        sa.Column(
-            "is_active",
-            sa.Integer(),
-            nullable=False,
-            server_default="1",
-        ),
-    )
+    pass
 
 
 def downgrade() -> None:
-    op.drop_column(
-        "users",
-        "is_active",
-    )
+    pass

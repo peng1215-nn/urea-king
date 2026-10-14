@@ -28,6 +28,7 @@ window.registerTranslations = {
         registerInviteCodeNotFound: "邀请码不存在。",
         registerInviteCodeUsed: "邀请码已被使用。",
         registerInviteCodeNoGroup: "该邀请码未绑定组别，无法注册。",
+        registerInviteCodeGroupNotFound: "邀请码对应的组不存在，请联系管理员。",
         registerFailed: "注册失败。",
         registerSuccess: "注册成功，欢迎"
     },
@@ -61,6 +62,7 @@ window.registerTranslations = {
         registerInviteCodeNotFound: "Invitation code does not exist.",
         registerInviteCodeUsed: "Invitation code has already been used.",
         registerInviteCodeNoGroup: "This invitation code is not bound to a group.",
+        registerInviteCodeGroupNotFound: "The group associated with this invitation code does not exist. Please contact an administrator.",
         registerFailed: "Registration failed.",
         registerSuccess: "Registration successful. Welcome"
     }
