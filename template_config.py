@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 
 
 templates = Jinja2Templates(
-    directory="poker/templates"
+    directory=["platform/templates", "poker/templates"]
 )
 
 templates.env.globals["static_version"] = now_columbus_naive().strftime(

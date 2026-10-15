@@ -84,6 +84,7 @@ app.add_middleware(
     max_age=60 * 60 * 24,
 )
 
-app.mount("/static", StaticFiles(directory="poker/static"), name="static")
+app.mount("/static/platform", StaticFiles(directory="platform/static"), name="static-platform")
+app.mount("/static/poker", StaticFiles(directory="poker/static"), name="static-poker")
 
 STATIC_VERSION = now_columbus_naive().strftime("%Y%m%d%H%M%S")
