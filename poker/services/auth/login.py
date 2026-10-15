@@ -2,7 +2,7 @@ from database import SessionLocal
 from core.models import PlatformUser, PlatformUserGroupRole
 from core.utils.security import verify_password
 from poker.models import PokerGroup, PokerUserGroupRole
-from poker.services.admin.audit_log import write_audit_log
+from core.services.admin.audit_log import write_audit_log
 
 
 def login_user_service(request, username: str, password: str):

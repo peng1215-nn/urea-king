@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from poker.services.admin.system_logs import get_audit_logs_service
+from core.services.admin.system_logs import get_audit_logs_service
 from poker.services.common.common import add_no_cache_headers
 from template_config import templates
 

@@ -7,7 +7,7 @@ import re
 from database import SessionLocal
 from core.models import PlatformUser
 from core.utils.security import hash_password
-from poker.services.admin.audit_log import write_audit_log
+from core.services.admin.audit_log import write_audit_log
 from poker.services.auth.group_join import poker_group_join_service
 
 

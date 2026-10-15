@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from poker.services.admin.audit_log import write_audit_log
+from core.services.admin.audit_log import write_audit_log
 from poker.services.common.common import add_no_cache_headers
 from poker.services.organizer.member_management import (
     get_organizer_members_service,

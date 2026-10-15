@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from poker.services.admin.announcement import (
+from core.services.admin.announcement import (
     create_announcement_service,
     delete_announcement_service,
     get_announcements_service,

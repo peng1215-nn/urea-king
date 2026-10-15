@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from poker.services.admin.change_password import (
+from core.services.admin.change_password import (
     get_current_account_service,
     update_nickname_service,
     update_password_service,

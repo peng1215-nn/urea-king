@@ -14,12 +14,12 @@ from poker.routes.auth.login import router as login_router
 from poker.routes.auth.register import router as register_router
 from poker.routes.auth.group_join import router as group_join_router
 
-# Poker web routes — admin
-from poker.routes.admin.admin import router as admin_router
-from poker.routes.admin.system_logs import router as system_logs_router
-from poker.routes.admin.invite_management import router as admin_invite_router
-from poker.routes.admin.announcement import router as admin_announcement_router
-from poker.routes.admin.change_password import router as admin_change_password_router
+# Platform admin routes
+from core.routes.admin.admin import router as admin_router
+from core.routes.admin.system_logs import router as system_logs_router
+from core.routes.admin.invite_management import router as admin_invite_router
+from core.routes.admin.announcement import router as admin_announcement_router
+from core.routes.admin.change_password import router as admin_change_password_router
 
 # Poker web routes — organizer
 from poker.routes.organizer.organizer import router as organizer_router

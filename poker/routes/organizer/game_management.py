@@ -4,7 +4,7 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
-from poker.services.admin.audit_log import write_audit_log
+from core.services.admin.audit_log import write_audit_log
 from poker.services.common.common import add_no_cache_headers
 from poker.services.organizer.game_management import (
     add_player_to_game_service,

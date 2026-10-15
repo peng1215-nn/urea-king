@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from poker.services.admin.audit_log import write_audit_log
-from poker.services.admin.invite_management import (
+from core.services.admin.audit_log import write_audit_log
+from core.services.admin.invite_management import (
     create_group_service,
     create_invitation_code_service,
     delete_group_service,

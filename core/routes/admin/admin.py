@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from poker.services.admin.admin import (
+from core.services.admin.admin import (
     get_admin_stats_service,
     get_admin_users_service,
     get_system_monitor_service,
@@ -9,7 +9,7 @@ from poker.services.admin.admin import (
     toggle_user_active_service,
     update_user_role_service,
 )
-from poker.services.admin.audit_log import write_audit_log
+from core.services.admin.audit_log import write_audit_log
 from poker.services.common.common import add_no_cache_headers
 from template_config import templates
 
