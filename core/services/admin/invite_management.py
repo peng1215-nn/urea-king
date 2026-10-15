@@ -12,20 +12,26 @@ from poker.models import (
 from poker.utils.invite import generate_invite_code
 
 
-def get_group_options_service(module: str = "poker"):
-    """Return groups for a given module, sourced from platform_groups registry."""
+def get_group_options_service(module: str = None):
+    """Return groups from platform_groups registry.
+    If module is given, filter by that module.
+    If module is None, return ALL module groups (for admin use).
+    """
     db = SessionLocal()
     try:
-        groups = (
-            db.query(PlatformGroup)
-            .filter(PlatformGroup.module == module)
-            .order_by(PlatformGroup.id)
-            .all()
-        )
+        q = db.query(PlatformGroup).filter(PlatformGroup.module.isnot(None))
+        if module:
+            q = q.filter(PlatformGroup.module == module)
+        groups = q.order_by(PlatformGroup.module, PlatformGroup.id).all()
         return {
             "success": True,
             "groups": [
-                {"id": g.id, "group_code": g.group_code, "group_name": g.group_name}
+                {
+                    "id": g.id,
+                    "group_code": g.group_code,
+                    "group_name": g.group_name,
+                    "module": g.module,
+                }
                 for g in groups
             ],
         }
@@ -36,7 +42,7 @@ def get_group_options_service(module: str = "poker"):
 
 
 def get_deletable_group_options_service():
-    return get_group_options_service()
+    return get_group_options_service()  # all modules
 
 
 def get_unused_invitation_options_service():

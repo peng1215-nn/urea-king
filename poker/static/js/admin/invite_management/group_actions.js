@@ -41,8 +41,9 @@ async function loadGroupOptions() {
             option.value =
                 group.id;
 
+            const moduleLabel = group.module ? `[${group.module.toUpperCase()}] ` : "";
             option.textContent =
-                `${group.group_name} (${group.group_code})`;
+                `${moduleLabel}${group.group_name} (${group.group_code})`;
 
             createGroupSelect.appendChild(option);
             forceDeleteSelect.appendChild(option.cloneNode(true));
@@ -65,8 +66,9 @@ async function loadGroupOptions() {
             option.value =
                 group.id;
 
+            const moduleLabel = group.module ? `[${group.module.toUpperCase()}] ` : "";
             option.textContent =
-                `${group.group_name} (${group.group_code})`;
+                `${moduleLabel}${group.group_name} (${group.group_code})`;
 
             deleteGroupSelect.appendChild(option);
         });
