@@ -9,17 +9,21 @@ from utils.time import now_columbus_naive
 # Platform REST API
 from core.routes.auth import router as platform_auth_router
 
-# Poker web routes — auth
-from poker.routes.auth.login import router as login_router
-from poker.routes.auth.register import router as register_router
-from poker.routes.auth.group_join import router as group_join_router
+# Welcome page
+from core.routes.welcome import router as welcome_router
 
-# Platform admin routes
+# Platform admin web routes
+from core.routes.admin.login import router as admin_login_router
 from core.routes.admin.admin import router as admin_router
 from core.routes.admin.system_logs import router as system_logs_router
 from core.routes.admin.invite_management import router as admin_invite_router
 from core.routes.admin.announcement import router as admin_announcement_router
 from core.routes.admin.change_password import router as admin_change_password_router
+
+# Poker web routes — auth
+from poker.routes.auth.login import router as login_router
+from poker.routes.auth.register import router as register_router
+from poker.routes.auth.group_join import router as group_join_router
 
 # Poker web routes — organizer
 from poker.routes.organizer.organizer import router as organizer_router
@@ -46,17 +50,21 @@ app = FastAPI()
 # Platform REST API (prefix /platform)
 app.include_router(platform_auth_router)
 
-# Auth / registration
-app.include_router(login_router)
-app.include_router(register_router)
-app.include_router(group_join_router)
+# Welcome page
+app.include_router(welcome_router)
 
-# Admin
+# Platform admin web
+app.include_router(admin_login_router)
 app.include_router(admin_router)
 app.include_router(system_logs_router)
 app.include_router(admin_invite_router)
 app.include_router(admin_announcement_router)
 app.include_router(admin_change_password_router)
+
+# Poker auth
+app.include_router(login_router)
+app.include_router(register_router)
+app.include_router(group_join_router)
 
 # Organizer
 app.include_router(organizer_router)

@@ -43,5 +43,5 @@ async function savePassword() {
 
     messageBox.style.color = "#5CFFB2";
     messageBox.innerText = t("passwordUpdateSuccessLogout");
-    setTimeout(() => { window.location.href = "/login"; }, 1500);
+    setTimeout(() => { window.location.href = "/poker/login"; }, 1500);
 }

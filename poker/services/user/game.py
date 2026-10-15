@@ -1,7 +1,7 @@
 from utils.time import now_columbus_naive
 from database import SessionLocal
 from poker.models import PokerChipRequest, PokerGame, PokerGamePlayer, PokerUserGroupRole
-from core.models import PlatformUser
+from poker.models import PokerUser
 
 
 def get_user_ongoing_games_service(group_id: int, user_id: int):
@@ -26,8 +26,8 @@ def get_user_ongoing_games_service(group_id: int, user_id: int):
                 PokerGamePlayer.user_id == user_id,
             ).first()
 
-            all_players_q = db.query(PokerGamePlayer, PlatformUser).join(
-                PlatformUser, PokerGamePlayer.user_id == PlatformUser.id
+            all_players_q = db.query(PokerGamePlayer, PokerUser).join(
+                PokerUser, PokerGamePlayer.user_id == PokerUser.id
             ).filter(
                 PokerGamePlayer.game_id == game.id,
                 PokerGamePlayer.is_active == 1,
@@ -103,7 +103,7 @@ def submit_buyin_request_service(game_id: int, group_id: int, user_id: int, amou
         if amount <= 0:
             return {"success": False, "message": "invalidAmount"}
 
-        user = db.query(PlatformUser).filter(PlatformUser.id == user_id).first()
+        user = db.query(PokerUser).filter(PokerUser.id == user_id).first()
         req = PokerChipRequest(
             game_id=game_id, user_id=user_id,
             nickname=user.nickname or user.username if user else "",

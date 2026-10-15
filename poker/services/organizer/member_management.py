@@ -1,6 +1,6 @@
 from database import SessionLocal
 from poker.models import PokerGroup, PokerUserGroupRole
-from core.models import PlatformUser
+from poker.models import PokerUser
 
 
 def get_organizer_members_service(group_id: int):
@@ -11,10 +11,10 @@ def get_organizer_members_service(group_id: int):
             return {"success": False, "message": "组别不存在。"}
 
         rows = (
-            db.query(PokerUserGroupRole, PlatformUser)
-            .join(PlatformUser, PokerUserGroupRole.user_id == PlatformUser.id)
+            db.query(PokerUserGroupRole, PokerUser)
+            .join(PokerUser, PokerUserGroupRole.user_id == PokerUser.id)
             .filter(PokerUserGroupRole.group_id == group_id)
-            .order_by(PokerUserGroupRole.role.asc(), PlatformUser.id.asc())
+            .order_by(PokerUserGroupRole.role.asc(), PokerUser.id.asc())
             .all()
         )
 

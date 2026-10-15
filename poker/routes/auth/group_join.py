@@ -2,7 +2,7 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse
 
 from database import SessionLocal
-from core.models import PlatformUser
+from poker.models import PokerUser
 from core.utils.security import verify_password
 from poker.services.auth.group_join import poker_group_join_service
 from template_config import templates
@@ -25,7 +25,7 @@ def group_join(
     """Verify credentials then join a group via invite code."""
     db = SessionLocal()
     try:
-        user = db.query(PlatformUser).filter(PlatformUser.username == username.strip()).first()
+        user = db.query(PokerUser).filter(PokerUser.username == username.strip()).first()
         if not user:
             return {"success": False, "error_code": "loginUserNotFound"}
         if not verify_password(password, user.password_hash):

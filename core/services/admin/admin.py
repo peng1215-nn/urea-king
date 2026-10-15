@@ -2,7 +2,7 @@ from app_state import DEPLOY_ENVIRONMENT, PROJECT_LAUNCH_TIME, SYSTEM_VERSION
 from utils.time import now_columbus_naive
 from database import SessionLocal
 from poker.models import (
-    PokerGroup, PokerInvitationCode, PokerUserGroupRole, PokerGame
+    PokerUser, PokerGroup, PokerInvitationCode, PokerUserGroupRole, PokerGame
 )
 from core.models import PlatformUser, PlatformUserGroupRole
 from passlib.context import CryptContext
@@ -13,7 +13,7 @@ pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 def get_admin_stats_service():
     db = SessionLocal()
     try:
-        total_users = db.query(PlatformUser).count()
+        total_users = db.query(PokerUser).count()
         admin_count = db.query(PlatformUserGroupRole).count()  # platform-level admin/dev accounts
         organizer_count = db.query(PokerUserGroupRole).filter(PokerUserGroupRole.role == "organizer").count()
         user_count = db.query(PokerUserGroupRole).filter(PokerUserGroupRole.role == "user").count()
@@ -51,10 +51,10 @@ def get_admin_users_service():
     db = SessionLocal()
     try:
         group_roles = (
-            db.query(PokerUserGroupRole, PlatformUser, PokerGroup)
-            .join(PlatformUser, PokerUserGroupRole.user_id == PlatformUser.id)
+            db.query(PokerUserGroupRole, PokerUser, PokerGroup)
+            .join(PokerUser, PokerUserGroupRole.user_id == PokerUser.id)
             .join(PokerGroup, PokerUserGroupRole.group_id == PokerGroup.id)
-            .order_by(PokerGroup.group_name.asc(), PlatformUser.id.asc())
+            .order_by(PokerGroup.group_name.asc(), PokerUser.id.asc())
             .all()
         )
         users = []
@@ -107,7 +107,7 @@ def update_user_role_service(target_user_id, group_id, new_role):
 def reset_user_password_service(target_user_id):
     db = SessionLocal()
     try:
-        user = db.query(PlatformUser).filter(PlatformUser.id == target_user_id).first()
+        user = db.query(PokerUser).filter(PokerUser.id == target_user_id).first()
         if not user:
             return {"success": False, "message": "用户不存在。"}
         user.password_hash = pwd_context.hash("000000")
@@ -123,7 +123,7 @@ def reset_user_password_service(target_user_id):
 def toggle_user_active_service(target_user_id):
     db = SessionLocal()
     try:
-        user = db.query(PlatformUser).filter(PlatformUser.id == target_user_id).first()
+        user = db.query(PokerUser).filter(PokerUser.id == target_user_id).first()
         if not user:
             return {"success": False, "message": "用户不存在。"}
         user.is_active = 0 if user.is_active == 1 else 1

@@ -21,6 +21,7 @@ from core.models import (  # noqa: F401
     PlatformAnnouncement,
 )
 from poker.models import (  # noqa: F401
+    PokerUser,
     PokerChipRequest,
     PokerGame,
     PokerGamePlayer,

@@ -74,7 +74,7 @@ async function groupJoin() {
 
         setTimeout(
             function () {
-                window.location.href = "/login";
+                window.location.href = "/poker/login";
             },
             1400
         );

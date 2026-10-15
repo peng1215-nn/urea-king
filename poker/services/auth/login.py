@@ -1,7 +1,6 @@
 from database import SessionLocal
-from core.models import PlatformUser, PlatformUserGroupRole
+from poker.models import PokerUser, PokerUserGroupRole, PokerGroup
 from core.utils.security import verify_password
-from poker.models import PokerGroup, PokerUserGroupRole
 from core.services.admin.audit_log import write_audit_log
 
 
@@ -10,7 +9,7 @@ def login_user_service(request, username: str, password: str):
     try:
         username = username.strip()
 
-        user = db.query(PlatformUser).filter(PlatformUser.username == username).first()
+        user = db.query(PokerUser).filter(PokerUser.username == username).first()
         if not user:
             return {"success": False, "error_code": "loginUserNotFound"}
 
@@ -20,11 +19,7 @@ def login_user_service(request, username: str, password: str):
         if user.is_active == 0:
             return {"success": False, "error_code": "loginAccountDisabled"}
 
-        # Check if this user is a platform-level admin (platform_user_group_roles)
-        platform_role = db.query(PlatformUserGroupRole).filter(
-            PlatformUserGroupRole.user_id == user.id
-        ).first()
-
+        # Set session
         request.session["user_id"] = user.id
         request.session["username"] = user.username
         request.session.pop("current_group_id", None)
@@ -35,7 +30,7 @@ def login_user_service(request, username: str, password: str):
         write_audit_log(
             request=request,
             action="LOGIN_SUCCESS",
-            target_type="user",
+            target_type="poker_user",
             target_id=user.id,
             old_value=None,
             new_value="login_verified",
@@ -43,19 +38,7 @@ def login_user_service(request, username: str, password: str):
             operator_username=user.username,
         )
 
-        # Platform admin: skip group selection, go directly to admin dashboard
-        if platform_role:
-            request.session["is_platform_admin"] = True
-            request.session["current_role"] = "admin"
-            return {
-                "success": True,
-                "display_name": user.nickname or user.username,
-                "is_platform_admin": True,
-                "redirect_url": "/admin-dashboard",
-                "groups": [],
-            }
-
-        # Regular poker user: show group selection
+        # Show group selection
         group_roles = (
             db.query(PokerUserGroupRole, PokerGroup)
             .join(PokerGroup, PokerUserGroupRole.group_id == PokerGroup.id)
@@ -66,7 +49,6 @@ def login_user_service(request, username: str, password: str):
         return {
             "success": True,
             "display_name": user.nickname or user.username,
-            "is_platform_admin": False,
             "groups": [
                 {
                     "group_id": group.id,

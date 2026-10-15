@@ -1,11 +1,11 @@
 """
 Registration service for Poker module.
-Flow: validate inputs → create PlatformUser → join group via invite code
+Flow: validate inputs → create PokerUser → join group via invite code
 """
 import re
 
 from database import SessionLocal
-from core.models import PlatformUser
+from poker.models import PokerUser
 from core.utils.security import hash_password
 from core.services.admin.audit_log import write_audit_log
 from poker.services.auth.group_join import poker_group_join_service
@@ -41,11 +41,11 @@ def register_user_service(
 
     db = SessionLocal()
     try:
-        existing = db.query(PlatformUser).filter(PlatformUser.username == username).first()
+        existing = db.query(PokerUser).filter(PokerUser.username == username).first()
         if existing:
             return {"success": False, "error_code": "registerUsernameExists"}
 
-        new_user = PlatformUser(
+        new_user = PokerUser(
             username=username,
             nickname=nickname,
             password_hash=hash_password(password),

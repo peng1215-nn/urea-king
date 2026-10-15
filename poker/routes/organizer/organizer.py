@@ -23,7 +23,7 @@ def get_current_group_id(request: Request):
 @router.get("/organizer-dashboard", response_class=HTMLResponse)
 def organizer_dashboard(request: Request):
     if not require_organizer(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/poker/login", status_code=302)
     response = templates.TemplateResponse(
         request=request, name="organizer/dashboard.html", context={"current_page": "dashboard"}
     )
@@ -33,7 +33,7 @@ def organizer_dashboard(request: Request):
 @router.get("/organizer-members", response_class=HTMLResponse)
 def organizer_members_page(request: Request):
     if not require_organizer(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/poker/login", status_code=302)
     response = templates.TemplateResponse(
         request=request, name="organizer/member_management.html", context={"current_page": "member_management"}
     )

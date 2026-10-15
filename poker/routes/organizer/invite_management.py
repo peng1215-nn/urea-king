@@ -23,7 +23,7 @@ def get_group_id(request: Request):
 @router.get("/organizer-invite-management", response_class=HTMLResponse)
 def invite_management_page(request: Request):
     if not require_organizer(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/poker/login", status_code=302)
     response = templates.TemplateResponse(
         request=request, name="organizer/invite_management.html", context={"current_page": "invite_management"}
     )

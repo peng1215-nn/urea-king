@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Admin — Login</title>
+    <link rel="stylesheet" href="/static/platform/css/auth/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/platform/css/auth/login.css?v={{ static_version }}">
+    <style>
+        .admin-badge {
+            display: inline-block;
+            background: #2a1f4a;
+            border: 1px solid #5b3fa0;
+            color: #a78bfa;
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            padding: 0.25rem 0.7rem;
+            border-radius: 20px;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-title">Ureaking</div>
+</div>
+
+<div class="page">
+    <div class="login-card">
+
+        <div class="title-area">
+            <h1>UREAKING</h1>
+            <p>Platform Console</p>
+        </div>
+
+        <div style="text-align:center;">
+            <span class="admin-badge">Platform Admin</span>
+        </div>
+
+        <div id="message-box" class="message-box"></div>
+
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input type="text" id="username" placeholder="请输入管理员账号">
+        </div>
+
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" id="password" placeholder="请输入密码">
+        </div>
+
+        <button class="login-button" onclick="adminLogin()">登录</button>
+
+        <div class="text-links" style="text-align:center; margin-top:1rem;">
+            <a href="/" style="color:#666; font-size:0.8rem;">← 返回首页</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+async function adminLogin() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const msgBox = document.getElementById('message-box');
+    msgBox.textContent = '';
+    msgBox.className = 'message-box';
+
+    if (!username || !password) {
+        msgBox.textContent = '请输入用户名和密码';
+        msgBox.classList.add('error');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('password', password);
+
+    try {
+        const resp = await fetch('/admin/login', { method: 'POST', body: formData });
+        const data = await resp.json();
+
+        if (data.success) {
+            window.location.href = data.redirect_url || '/admin-dashboard';
+        } else {
+            const msgs = {
+                loginUserNotFound: '账号不存在',
+                loginPasswordIncorrect: '密码错误',
+                loginAccountDisabled: '账号已被禁用',
+                loginNotPlatformAdmin: '该账号无平台管理员权限',
+                loginFailed: '登录失败，请重试',
+            };
+            msgBox.textContent = msgs[data.error_code] || data.message || '登录失败';
+            msgBox.classList.add('error');
+        }
+    } catch (e) {
+        msgBox.textContent = '网络错误，请重试';
+        msgBox.classList.add('error');
+    }
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') adminLogin();
+});
+</script>
+
+</body>
+</html>

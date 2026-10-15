@@ -1,7 +1,7 @@
 from utils.time import now_columbus_naive
 from database import SessionLocal
 from poker.models import PokerChipRequest, PokerGame, PokerGamePlayer, PokerUserGroupRole
-from core.models import PlatformUser
+from poker.models import PokerUser
 
 
 MAX_PLAYERS = 10
@@ -20,12 +20,12 @@ def get_ongoing_games_service(group_id: int):
 
         result = []
         for game in games:
-            players = db.query(PokerGamePlayer, PlatformUser).join(
-                PlatformUser, PokerGamePlayer.user_id == PlatformUser.id
+            players = db.query(PokerGamePlayer, PokerUser).join(
+                PokerUser, PokerGamePlayer.user_id == PokerUser.id
             ).filter(PokerGamePlayer.game_id == game.id).all()
 
-            requests = db.query(PokerChipRequest, PlatformUser).join(
-                PlatformUser, PokerChipRequest.user_id == PlatformUser.id
+            requests = db.query(PokerChipRequest, PokerUser).join(
+                PokerUser, PokerChipRequest.user_id == PokerUser.id
             ).filter(
                 PokerChipRequest.game_id == game.id,
                 PokerChipRequest.status == "pending",
@@ -64,8 +64,8 @@ def get_game_history_service(group_id: int):
 
         result = []
         for game in games:
-            players = db.query(PokerGamePlayer, PlatformUser).join(
-                PlatformUser, PokerGamePlayer.user_id == PlatformUser.id
+            players = db.query(PokerGamePlayer, PokerUser).join(
+                PokerUser, PokerGamePlayer.user_id == PokerUser.id
             ).filter(PokerGamePlayer.game_id == game.id).all()
 
             players_data = []
@@ -88,8 +88,8 @@ def get_game_history_service(group_id: int):
 def get_group_members_for_game_service(group_id: int):
     db = SessionLocal()
     try:
-        rows = db.query(PokerUserGroupRole, PlatformUser).join(
-            PlatformUser, PokerUserGroupRole.user_id == PlatformUser.id
+        rows = db.query(PokerUserGroupRole, PokerUser).join(
+            PokerUser, PokerUserGroupRole.user_id == PokerUser.id
         ).filter(PokerUserGroupRole.group_id == group_id).all()
 
         members = [
@@ -129,7 +129,7 @@ def start_game_service(group_id: int, organizer_id: int, name: str, preselected_
                 PokerGamePlayer.is_active == 1,
             ).first()
             if already_in:
-                user = db.query(PlatformUser).filter(PlatformUser.id == uid).first()
+                user = db.query(PokerUser).filter(PokerUser.id == uid).first()
                 name_str = user.nickname or user.username if user else str(uid)
                 return {"success": False, "message": f"playerAlreadyInGame:{name_str}"}
 
@@ -142,7 +142,7 @@ def start_game_service(group_id: int, organizer_id: int, name: str, preselected_
         db.flush()
 
         for uid in preselected_user_ids:
-            user = db.query(PlatformUser).filter(PlatformUser.id == uid).first()
+            user = db.query(PokerUser).filter(PokerUser.id == uid).first()
             if not user:
                 continue
             member = db.query(PokerUserGroupRole).filter(
@@ -214,7 +214,7 @@ def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organi
         if active_count >= MAX_PLAYERS:
             return {"success": False, "message": "gameFull"}
 
-        user = db.query(PlatformUser).filter(PlatformUser.id == user_id).first()
+        user = db.query(PokerUser).filter(PokerUser.id == user_id).first()
         player = PokerGamePlayer(
             game_id=game_id, user_id=user_id,
             nickname=user.nickname or user.username,
@@ -368,7 +368,7 @@ def organizer_buyin_service(game_id: int, group_id: int, user_id: int, amount: i
         if not player:
             return {"success": False, "message": "playerNotInGame"}
 
-        user = db.query(PlatformUser).filter(PlatformUser.id == user_id).first()
+        user = db.query(PokerUser).filter(PokerUser.id == user_id).first()
         player.total_buy_in += amount
 
         req = PokerChipRequest(
@@ -427,8 +427,8 @@ def finish_game_service(game_id: int, group_id: int, organizer_id: int, player_c
         game.player_count = len([p for p in players if p.total_buy_in > 0 or (p.cash_out or 0) > 0])
         db.commit()
 
-        players_refreshed = db.query(PokerGamePlayer, PlatformUser).join(
-            PlatformUser, PokerGamePlayer.user_id == PlatformUser.id
+        players_refreshed = db.query(PokerGamePlayer, PokerUser).join(
+            PokerUser, PokerGamePlayer.user_id == PokerUser.id
         ).filter(PokerGamePlayer.game_id == game_id).all()
 
         players_data = []

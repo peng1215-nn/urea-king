@@ -14,7 +14,7 @@ def require_user(request: Request):
 @router.get("/user-dashboard", response_class=HTMLResponse)
 def user_dashboard(request: Request):
     if not require_user(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/poker/login", status_code=302)
     response = templates.TemplateResponse(
         request=request, name="user/dashboard.html", context={"current_page": "dashboard"}
     )

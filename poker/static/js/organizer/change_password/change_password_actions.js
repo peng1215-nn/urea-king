@@ -131,7 +131,7 @@ async function savePassword() {
 
         setTimeout(
             () => {
-                window.location.href = "/login";
+                window.location.href = "/poker/login";
             },
             1500
         );

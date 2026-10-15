@@ -22,7 +22,7 @@ def get_announcements(request: Request):
 @router.get("/organizer-announcements", response_class=HTMLResponse)
 def announcements_page(request: Request):
     if not require_organizer(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/poker/login", status_code=302)
     response = templates.TemplateResponse(
         request=request, name="organizer/announcement.html", context={"current_page": "announcements"}
     )

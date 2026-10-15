@@ -15,7 +15,7 @@ def require_admin(request: Request):
 @router.get("/system-logs", response_class=HTMLResponse)
 def system_logs_page(request: Request):
     if not require_admin(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/admin/login", status_code=302)
     response = templates.TemplateResponse(
         request=request,
         name="admin/system_logs.html",

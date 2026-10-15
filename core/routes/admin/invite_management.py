@@ -25,7 +25,7 @@ def require_admin(request: Request):
 @router.get("/invite-management", response_class=HTMLResponse)
 def invite_management_page(request: Request):
     if not require_admin(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/admin/login", status_code=302)
     response = templates.TemplateResponse(
         request=request,
         name="admin/invite_management.html",

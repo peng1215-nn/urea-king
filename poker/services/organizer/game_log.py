@@ -1,6 +1,6 @@
 from database import SessionLocal
 from poker.models import PokerGame, PokerGamePlayer, PokerChipRequest, PokerUserGroupRole
-from core.models import PlatformUser
+from poker.models import PokerUser
 
 
 PAGE_SIZE = 5
@@ -21,8 +21,8 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
 
         result = []
         for game in games:
-            players = db.query(PokerGamePlayer, PlatformUser).join(
-                PlatformUser, PokerGamePlayer.user_id == PlatformUser.id
+            players = db.query(PokerGamePlayer, PokerUser).join(
+                PokerUser, PokerGamePlayer.user_id == PokerUser.id
             ).filter(PokerGamePlayer.game_id == game.id).all()
 
             players_data = []
@@ -122,8 +122,8 @@ def get_stats_service(group_id: int):
         if not game_ids:
             return {"success": True, "stats": None}
 
-        all_players = db.query(PokerGamePlayer, PlatformUser).join(
-            PlatformUser, PokerGamePlayer.user_id == PlatformUser.id
+        all_players = db.query(PokerGamePlayer, PokerUser).join(
+            PokerUser, PokerGamePlayer.user_id == PokerUser.id
         ).filter(PokerGamePlayer.game_id.in_(game_ids)).all()
 
         user_stats = {}

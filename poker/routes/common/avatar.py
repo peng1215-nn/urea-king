@@ -5,7 +5,7 @@ import cloudinary.uploader
 from fastapi import APIRouter, File, Request, UploadFile
 
 from database import SessionLocal
-from core.models import PlatformUser
+from poker.models import PokerUser
 
 router = APIRouter()
 
@@ -27,7 +27,7 @@ async def upload_avatar(request: Request, avatar: UploadFile = File(...)):
         upload_result = cloudinary.uploader.upload(avatar.file, folder="urea_king_avatars")
         avatar_url = upload_result["secure_url"]
 
-        user = db.query(PlatformUser).filter(PlatformUser.id == user_id).first()
+        user = db.query(PokerUser).filter(PokerUser.id == user_id).first()
         if not user:
             return {"success": False, "message": "用户不存在。"}
 

@@ -23,7 +23,7 @@ def get_user_id(request: Request):
 @router.get("/user-game", response_class=HTMLResponse)
 def user_game_page(request: Request):
     if not require_user(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/poker/login", status_code=302)
     response = templates.TemplateResponse(
         request=request, name="user/game.html", context={"current_page": "game"}
     )

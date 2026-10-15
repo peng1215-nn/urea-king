@@ -23,7 +23,7 @@ def get_group_id(request: Request):
 @router.get("/organizer-game-logs", response_class=HTMLResponse)
 def game_logs_page(request: Request):
     if not require_organizer(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/poker/login", status_code=302)
     response = templates.TemplateResponse(
         request=request, name="organizer/game_log.html", context={"current_page": "game_logs"}
     )

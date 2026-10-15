@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UREAKING</title>
+    <link rel="stylesheet" href="/static/platform/css/auth/common.css?v={{ static_version }}">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f0f13;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .welcome-container {
+            text-align: center;
+            color: #e8e8e8;
+        }
+
+        .logo-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: #ffffff;
+            margin-bottom: 0.3rem;
+        }
+
+        .logo-subtitle {
+            font-size: 0.95rem;
+            color: #888;
+            letter-spacing: 0.1em;
+            margin-bottom: 3rem;
+        }
+
+        .module-grid {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .module-card {
+            background: #1a1a22;
+            border: 1px solid #2a2a38;
+            border-radius: 12px;
+            padding: 2rem 2.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+            min-width: 180px;
+        }
+
+        .module-card:hover {
+            border-color: #5b6af0;
+            background: #1e1e2e;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(91, 106, 240, 0.15);
+        }
+
+        .module-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .module-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 0.4rem;
+        }
+
+        .module-desc {
+            font-size: 0.8rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div class="welcome-container">
+    <div class="logo-title">UREAKING</div>
+    <div class="logo-subtitle">8th-Ecosystem</div>
+
+    <div class="module-grid">
+        <a href="/poker/login" class="module-card">
+            <div class="module-icon">🃏</div>
+            <div class="module-name">Poker</div>
+            <div class="module-desc">德州扑克记账系统</div>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

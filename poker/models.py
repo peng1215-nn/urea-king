@@ -6,6 +6,20 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from database import Base
 
 
+class PokerUser(Base):
+    """Poker module user account — completely separate from platform_users."""
+
+    __tablename__ = "poker_users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
+    nickname = Column(String(50), nullable=True)
+    avatar_url = Column(String(255), nullable=True)
+    is_active = Column(Integer, nullable=False, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class PokerGroup(Base):
     """A poker group (game circle). Replaces the old 'groups' table."""
 

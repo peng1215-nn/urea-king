@@ -37,7 +37,7 @@ def get_announcements(request: Request):
 @router.get("/user-announcements", response_class=HTMLResponse)
 def announcements_page(request: Request):
     if not require_user(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/poker/login", status_code=302)
     response = templates.TemplateResponse(
         request=request, name="user/announcement.html", context={"current_page": "announcements"}
     )
@@ -48,7 +48,7 @@ def announcements_page(request: Request):
 @router.get("/user-change-password", response_class=HTMLResponse)
 def change_password_page(request: Request):
     if not require_user(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/poker/login", status_code=302)
     response = templates.TemplateResponse(
         request=request, name="user/change_password.html", context={"current_page": "change_password"}
     )
@@ -96,7 +96,7 @@ def update_password(
 @router.get("/user-game-logs", response_class=HTMLResponse)
 def game_logs_page(request: Request):
     if not require_user(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/poker/login", status_code=302)
     response = templates.TemplateResponse(
         request=request, name="user/game_log.html", context={"current_page": "game_logs"}
     )

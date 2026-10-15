@@ -1,6 +1,6 @@
 from database import SessionLocal
 from poker.models import PokerGroup, PokerUserGroupRole
-from core.models import PlatformUser
+from poker.models import PokerUser
 
 
 def add_no_cache_headers(response):
@@ -17,7 +17,7 @@ def get_current_user_service(request):
 
     db = SessionLocal()
     try:
-        user = db.query(PlatformUser).filter(PlatformUser.id == user_id).first()
+        user = db.query(PokerUser).filter(PokerUser.id == user_id).first()
         if not user:
             return {"success": False, "message": "用户不存在。"}
 

@@ -10,7 +10,7 @@ async function login() {
         buildLoginFormData(username, password);
 
     try {
-        const response = await fetch("/login", {
+        const response = await fetch("/poker/login", {
             method: "POST",
             body: formData,
         });

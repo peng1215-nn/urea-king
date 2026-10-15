@@ -19,7 +19,7 @@ def require_organizer(request: Request):
 @router.get("/organizer-change-password", response_class=HTMLResponse)
 def organizer_change_password_page(request: Request):
     if not require_organizer(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/poker/login", status_code=302)
     response = templates.TemplateResponse(
         request=request, name="organizer/change_password.html", context={"current_page": "change_password"}
     )

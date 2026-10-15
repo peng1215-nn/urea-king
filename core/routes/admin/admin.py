@@ -22,7 +22,7 @@ def require_admin(request: Request):
 
 def render_admin_page(request: Request, template_name: str, current_page: str):
     if not require_admin(request):
-        return RedirectResponse(url="/login", status_code=302)
+        return RedirectResponse(url="/admin/login", status_code=302)
     response = templates.TemplateResponse(
         request=request, name=template_name, context={"current_page": current_page}
     )

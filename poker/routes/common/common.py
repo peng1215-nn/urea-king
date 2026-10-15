@@ -14,5 +14,5 @@ def current_user(request: Request):
 @router.get("/logout")
 def logout(request: Request):
     request.session.clear()
-    response = RedirectResponse(url="/login", status_code=302)
+    response = RedirectResponse(url="/poker/login", status_code=302)
     return add_no_cache_headers(response)

@@ -84,7 +84,7 @@ async function selectGroup(groupId) {
             return;
         }
 
-        window.location.replace("/login");
+        window.location.replace("/poker/login");
 
     } catch (error) {
         console.error(error);

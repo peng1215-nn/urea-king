@@ -1,5 +1,5 @@
 function redirectToLogin() {
     setTimeout(() => {
-        window.location.replace("/login");
+        window.location.replace("/poker/login");
     }, 1200);
 }
