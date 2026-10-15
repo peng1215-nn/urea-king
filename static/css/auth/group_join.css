@@ -1,0 +1,72 @@
+body::before {
+    background: rgba(0, 0, 0, 0.72);
+}
+
+.page {
+    padding: 24px;
+}
+
+.group-join-card {
+    width: 420px;
+    padding: 38px;
+    border-radius: 18px;
+    background: rgba(10, 10, 18, 0.88);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.title-area h1 {
+    font-size: 40px;
+    letter-spacing: 4px;
+}
+
+input {
+    height: 44px;
+}
+
+#message-box {
+    min-height: 22px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: -4px;
+}
+
+.group-join-button {
+    height: 46px;
+    border: none;
+    border-radius: 10px;
+    margin-top: 8px;
+    background: white;
+    color: #111;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.group-join-button:hover {
+    background: #dcdcdc;
+    transform: translateY(-1px);
+}
+
+.bottom-links {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.bottom-links a {
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.bottom-links a:hover {
+    color: white;
+    text-decoration: underline;
+}

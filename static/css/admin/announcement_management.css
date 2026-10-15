@@ -1,0 +1,439 @@
+.main {
+    padding: 32px;
+}
+
+.page-subtitle {
+    margin-top: 6px;
+    color: #9aa4b2;
+    font-size: 14px;
+}
+
+.announcement-layout {
+    margin-top: 28px;
+
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 24px;
+
+    align-items: start;
+}
+
+.announcement-form-card,
+.announcement-list-card {
+    background: #161b22;
+
+    border: 1px solid #2b313c;
+
+    border-radius: 18px;
+
+    padding: 24px;
+
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.02),
+        0 12px 24px rgba(0,0,0,0.22);
+}
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-bottom: 10px;
+}
+
+.panel-title i {
+    color: #58a6ff;
+    font-size: 20px;
+}
+
+.panel-title h2 {
+    font-size: 22px;
+    color: #f0f6fc;
+}
+
+.panel-description {
+    color: #9aa4b2;
+    font-size: 14px;
+    line-height: 1.7;
+
+    margin-bottom: 24px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    color: #c9d1d9;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+
+    border: 1px solid #30363d;
+
+    background: #0d1117;
+
+    color: #f0f6fc;
+
+    border-radius: 12px;
+
+    padding: 14px 16px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.form-group textarea {
+    resize: vertical;
+
+    min-height: 220px;
+
+    line-height: 1.7;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #58a6ff;
+
+    box-shadow:
+        0 0 0 3px rgba(88,166,255,0.15);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #6e7681;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+
+    margin-top: 8px;
+}
+
+.panel-button {
+    border: none;
+
+    border-radius: 12px;
+
+    padding: 12px 18px;
+
+    background: linear-gradient(
+        135deg,
+        #238636,
+        #2ea043
+    );
+
+    color: white;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.18s ease,
+        opacity 0.18s ease;
+}
+
+.panel-button:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+}
+
+.panel-button:active {
+    transform: scale(0.98);
+}
+
+.panel-button.secondary {
+    background: #30363d;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.operation-message {
+    margin-top: 18px;
+
+    min-height: 20px;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    color: #ff8a8a;
+}
+
+.announcement-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 18px;
+
+    max-height: 720px;
+
+    overflow-y: auto;
+
+    padding-right: 6px;
+}
+
+.announcement-item {
+    background: #0d1117;
+
+    border: 1px solid #2b313c;
+
+    border-radius: 16px;
+
+    padding: 18px;
+
+    transition:
+        border-color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.announcement-item:hover {
+    border-color: #58a6ff;
+
+    transform: translateY(-2px);
+}
+
+.announcement-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: 16px;
+
+    margin-bottom: 12px;
+}
+
+.announcement-title {
+    color: #f0f6fc;
+
+    font-size: 18px;
+    font-weight: 700;
+
+    line-height: 1.5;
+
+    word-break: break-word;
+}
+
+.announcement-time {
+    color: #8b949e;
+
+    font-size: 12px;
+
+    white-space: nowrap;
+}
+
+.announcement-content {
+    color: #c9d1d9;
+
+    font-size: 14px;
+
+    line-height: 1.8;
+
+    white-space: pre-wrap;
+
+    word-break: break-word;
+}
+
+.announcement-actions {
+    display: flex;
+    gap: 10px;
+
+    margin-top: 18px;
+}
+
+.announcement-action-button {
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 8px 14px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease;
+}
+
+.announcement-action-button:hover {
+    opacity: 0.92;
+}
+
+.announcement-action-button:active {
+    transform: scale(0.98);
+}
+
+.announcement-action-button.edit {
+    background: rgba(88,166,255,0.16);
+    color: #58a6ff;
+}
+
+.announcement-action-button.delete {
+    background: rgba(248,81,73,0.16);
+    color: #ff7b72;
+}
+
+.empty-announcement {
+    padding: 40px 20px;
+
+    text-align: center;
+
+    color: #8b949e;
+
+    font-size: 14px;
+}
+
+.custom-modal {
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,0.55);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 9999;
+}
+
+.custom-modal-content {
+    width: 420px;
+
+    background: #161b22;
+
+    border: 1px solid #30363d;
+
+    border-radius: 18px;
+
+    padding: 28px;
+}
+
+.custom-modal-content h3 {
+    color: #f0f6fc;
+
+    font-size: 22px;
+
+    margin-bottom: 14px;
+}
+
+.custom-modal-content p {
+    color: #c9d1d9;
+
+    line-height: 1.7;
+
+    margin-bottom: 24px;
+}
+
+.custom-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 12px;
+}
+
+.modal-confirm-button,
+.modal-cancel-button {
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 10px 18px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.modal-confirm-button {
+    background: #da3633;
+    color: white;
+}
+
+.modal-cancel-button {
+    background: #30363d;
+    color: #f0f6fc;
+}
+
+@media (max-width: 1100px) {
+
+    .announcement-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .main {
+        padding: 20px;
+    }
+
+    .announcement-header {
+        flex-direction: column;
+    }
+
+    .announcement-actions {
+        flex-wrap: wrap;
+    }
+}
+
+.announcement-pagination-bar {
+    margin-top: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 16px;
+}
+
+.announcement-pagination-button {
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 10px 18px;
+
+    background: #30363d;
+
+    color: #f0f6fc;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.announcement-pagination-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.announcement-pagination-info {
+    color: #c9d1d9;
+
+    font-size: 14px;
+    font-weight: 700;
+}

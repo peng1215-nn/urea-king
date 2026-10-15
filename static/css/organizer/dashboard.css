@@ -1,0 +1,278 @@
+.organizer-hero-card {
+    margin-top: 28px;
+
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    background: #161b22;
+
+    border: 1px solid #2b313c;
+    border-radius: 22px;
+
+    padding: 28px;
+
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.02),
+        0 12px 24px rgba(0,0,0,0.22);
+}
+
+.hero-icon {
+    width: 72px;
+    height: 72px;
+
+    border-radius: 20px;
+
+    background: rgba(163,113,247,0.16);
+    color: #a371f7;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 30px;
+
+    flex-shrink: 0;
+}
+
+.organizer-hero-card h2 {
+    color: #f0f6fc;
+
+    font-size: 34px;
+    font-weight: 800;
+
+    margin-bottom: 8px;
+}
+
+.organizer-hero-card p {
+    color: #9aa4b2;
+
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+.section-title {
+    margin-top: 42px;
+    margin-bottom: 26px;
+
+    color: #ffffff;
+
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.modules {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.module-card {
+    position: relative;
+
+    width: 285px;
+    min-height: 165px;
+
+    padding: 24px;
+    border-radius: 18px;
+
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.module-card:hover {
+    transform: translateY(-4px);
+
+    background: rgba(255, 255, 255, 0.075);
+}
+
+.module-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-bottom: 14px;
+}
+
+.module-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+
+    background: rgba(92, 141, 255, 0.16);
+    color: #5c8dff;
+
+    font-size: 18px;
+}
+
+.module-icon.green {
+    background: rgba(92, 255, 178, 0.14);
+    color: #5cffb2;
+}
+
+.module-icon.yellow {
+    background: rgba(255, 215, 64, 0.14);
+    color: #FFD740;
+}
+
+.module-icon.orange {
+    background: rgba(255, 160, 80, 0.14);
+    color: #ffa050;
+}
+
+.module-icon.purple {
+    background: rgba(180, 100, 255, 0.14);
+    color: #b464ff;
+}
+
+.module-icon.cyan {
+    background: rgba(86, 211, 255, 0.16);
+    color: #56d3ff;
+}
+
+.module-card h2 {
+    font-size: 21px;
+}
+
+.module-card p {
+    line-height: 1.6;
+
+    font-size: 14px;
+
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.module-arrow {
+    position: absolute;
+
+    top: 30px;
+    right: 22px;
+
+    color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+
+    .organizer-hero-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .section-title {
+        font-size: 24px;
+    }
+}
+
+.hidden {
+    display: none;
+}
+
+.custom-modal {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0, 0, 0, 0.62);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 9999;
+}
+
+.custom-modal-content {
+    width: 420px;
+
+    padding: 32px;
+
+    border-radius: 24px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(35, 40, 70, 0.96),
+        rgba(22, 27, 50, 0.96)
+    );
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.custom-modal-content h3 {
+    margin-bottom: 20px;
+
+    font-size: 26px;
+    font-weight: 700;
+
+    color: #ffffff;
+}
+
+.custom-modal-content p {
+    margin-bottom: 28px;
+
+    font-size: 16px;
+    line-height: 1.7;
+
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.custom-modal-actions {
+    display: flex;
+
+    gap: 16px;
+}
+
+.modal-confirm-button,
+.modal-cancel-button {
+    flex: 1;
+
+    height: 48px;
+
+    border: none;
+    border-radius: 14px;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.modal-confirm-button {
+    background: rgba(92, 141, 255, 0.85);
+
+    color: white;
+}
+
+.modal-confirm-button:hover {
+    background: rgba(92, 141, 255, 1);
+}
+
+.modal-cancel-button {
+    background: rgba(255, 255, 255, 0.08);
+
+    color: white;
+}
+
+.modal-cancel-button:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+body {
+    background:
+        linear-gradient(135deg, rgba(15,15,22,0.82), rgba(21,25,40,0.82), rgba(26,32,51,0.82)),
+        url("/static/images/organizer_background.png") center center / cover no-repeat fixed;
+}

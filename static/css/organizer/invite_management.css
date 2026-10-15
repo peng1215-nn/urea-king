@@ -1,0 +1,201 @@
+body {
+    background:
+        linear-gradient(135deg, rgba(15,15,22,0.82), rgba(21,25,40,0.82), rgba(26,32,51,0.82)),
+        url("/static/images/organizer_background.png") center center / cover no-repeat fixed;
+}
+
+.invite-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.invite-code-input {
+    height: 42px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: #ffffff;
+    font-size: 14px;
+    width: 240px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.invite-code-input:focus {
+    border-color: rgba(92,141,255,0.5);
+    background: rgba(255,255,255,0.09);
+}
+
+.invite-code-input::placeholder {
+    color: rgba(255,255,255,0.3);
+}
+
+.btn-create-invite {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 14px;
+    border: none;
+    background: rgba(92,255,178,0.12);
+    color: #5CFFB2;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-create-invite:hover {
+    background: rgba(92,255,178,0.22);
+}
+
+.invite-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.invite-loading {
+    color: rgba(255,255,255,0.35);
+    font-size: 14px;
+}
+
+.invite-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    gap: 16px;
+}
+
+.invite-card.used {
+    opacity: 0.5;
+}
+
+.invite-code {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    font-family: monospace;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+}
+
+.invite-meta {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+}
+
+.invite-status-badge {
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.invite-status-badge.unused {
+    background: rgba(92,255,178,0.12);
+    color: #5CFFB2;
+}
+
+.invite-status-badge.used {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.4);
+}
+
+.btn-delete-invite {
+    padding: 6px 14px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255,100,100,0.12);
+    color: #ff6b6b;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-delete-invite:hover {
+    background: rgba(255,100,100,0.22);
+}
+
+.custom-modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.62);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.custom-modal-content {
+    width: 420px;
+    max-width: 90vw;
+    padding: 32px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(35,40,70,0.96), rgba(22,27,50,0.96));
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+}
+
+.custom-modal-content h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 12px;
+}
+
+.custom-modal-content p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 28px;
+    line-height: 1.6;
+}
+
+.custom-modal-actions {
+    display: flex;
+    gap: 16px;
+}
+
+.modal-confirm-button,
+.modal-cancel-button {
+    flex: 1;
+    height: 48px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.modal-confirm-button {
+    background: rgba(92,141,255,0.85);
+    color: white;
+}
+
+.modal-confirm-button:hover {
+    background: rgba(92,141,255,1);
+}
+
+.modal-cancel-button {
+    background: rgba(255,255,255,0.08);
+    color: white;
+}
+
+.modal-cancel-button:hover {
+    background: rgba(255,255,255,0.14);
+}

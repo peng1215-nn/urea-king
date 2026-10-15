@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+
+    <meta charset="UTF-8">
+    <title data-i18n="userManagementTitle">用户管理</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/admin/user_management.css?v={{ static_version }}">
+
+</head>
+
+<body>
+
+{% include "admin/sidebar.html" %}
+
+<div class="main">
+
+    <div class="top-bar">
+
+        <div class="title-area">
+            <h1 data-i18n="userManagementTitle">用户管理</h1>
+            <p id="current-group-text"></p>
+        </div>
+
+        <div class="topbar-actions">
+
+            <img
+                id="avatar-preview"
+                class="avatar"
+                src="/static/images/default_avatar.jpg"
+                alt="头像"
+            >
+
+            <div class="role-tag">
+                <span class="status-dot"></span>
+                <span data-i18n="admin">管理员</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="toolbar">
+
+        <div class="search-area">
+
+            <input
+                type="text"
+                id="user-search"
+                class="search-box"
+                data-i18n-placeholder="searchUserPlaceholder"
+                placeholder="输入用户名、昵称、身份或组名"
+            >
+
+            <button
+                class="search-button"
+                data-i18n="search"
+                onclick="searchUsers()"
+            >
+                搜索
+            </button>
+
+            <button
+                class="clear-button"
+                data-i18n="clear"
+                onclick="clearSearch()"
+            >
+                清除
+            </button>
+
+        </div>
+
+        <div id="search-message" class="search-message"></div>
+
+    </div>
+
+    <div class="table-card">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th data-i18n="avatar">头像</th>
+                    <th data-i18n="nickname">昵称</th>
+                    <th data-i18n="role">身份</th>
+                    <th data-i18n="group">组别</th>
+                    <th data-i18n="registerTime">注册时间</th>
+                </tr>
+            </thead>
+
+            <tbody id="user-table-body"></tbody>
+
+        </table>
+
+    </div>
+
+    <div class="detail-panel">
+
+        <h2 data-i18n="userDetails">用户详情</h2>
+
+        <div class="detail-grid">
+
+            <div class="detail-item">
+                <div class="detail-label" data-i18n="username">用户名</div>
+                <div class="detail-value" id="detail-username">--</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label" data-i18n="nickname">昵称</div>
+                <div class="detail-value" id="detail-nickname">--</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label" data-i18n="role">身份</div>
+                <div class="detail-value" id="detail-role">--</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label" data-i18n="group">组别</div>
+                <div class="detail-value" id="detail-group">--</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label" data-i18n="registerTime">注册时间</div>
+                <div class="detail-value" id="detail-created-at">--</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label" data-i18n="accountStatus">账号状态</div>
+                <div class="detail-value" id="detail-status">--</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="management-actions">
+
+        <div class="action-panel">
+
+            <div class="panel-title">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <h2 data-i18n="editUserInfo">修改用户信息</h2>
+            </div>
+
+            <p class="panel-description" data-i18n="editUserInfoDesc">
+                仅支持修改所选用户在指定所属组下的身份。组别不可修改，身份相同则无需保存。
+            </p>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label data-i18n="group">所属组</label>
+                    <select id="edit-group-id">
+                        <option value="" data-i18n="pleaseSelectUser">请先选择用户</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="role">身份</label>
+                    <select id="edit-role">
+                        <option value="" data-i18n="pleaseSelectRole">选择身份</option>
+                        <option value="organizer">organizer</option>
+                        <option value="user">user</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button
+                id="update-user-button"
+                class="panel-button"
+                data-i18n="saveChanges"
+                onclick="updateUserRole()"
+            >
+                保存修改
+            </button>
+
+            <div
+                id="update-user-message"
+                class="operation-message"
+            ></div>
+
+        </div>
+
+        <div class="action-panel">
+
+            <div class="panel-title">
+                <i class="fa-solid fa-key"></i>
+                <h2 data-i18n="resetPassword">重置密码</h2>
+            </div>
+
+            <p class="panel-description" data-i18n="resetPasswordDesc">
+                点击确认后，系统会将所选用户的登录密码重置为默认密码 000000。
+            </p>
+
+            <button
+                id="reset-password-button"
+                class="panel-button warning"
+                data-i18n="confirmResetPassword"
+                onclick="openResetPasswordModal()"
+            >
+                确认重置密码
+            </button>
+
+            <div
+                id="reset-password-message"
+                class="operation-message"
+            ></div>
+
+        </div>
+
+        <div class="action-panel">
+
+            <div class="panel-title">
+                <i class="fa-solid fa-user-slash"></i>
+                <h2 data-i18n="toggleAccountStatus">禁用 / 启用账号</h2>
+            </div>
+
+            <p class="panel-description" data-i18n="toggleAccountStatusDesc">
+                通过 is_active 字段控制账号是否允许登录。
+            </p>
+
+            <div class="status-preview">
+
+                <span class="status-label" data-i18n="currentStatus">
+                    当前状态
+                </span>
+
+                <span
+                    class="status-badge active"
+                    id="selected-user-status"
+                >
+                    --
+                </span>
+
+            </div>
+
+            <button
+                id="toggle-user-status-button"
+                class="panel-button danger"
+                data-i18n="disableAccount"
+                onclick="openToggleUserStatusModal()"
+            >
+                禁用账号
+            </button>
+
+            <div
+                id="user-status-message"
+                class="operation-message"
+            ></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div
+    id="password-reset-modal"
+    class="custom-modal hidden"
+>
+
+    <div class="custom-modal-content">
+
+        <h3 data-i18n="confirmResetPassword">确认重置密码</h3>
+
+        <p id="password-reset-text">
+            确认重置该用户的密码？
+        </p>
+
+        <div class="custom-modal-actions">
+
+            <button
+                class="modal-confirm-button"
+                data-i18n="confirm"
+                onclick="confirmResetPassword()"
+            >
+                确认
+            </button>
+
+            <button
+                class="modal-cancel-button"
+                data-i18n="cancel"
+                onclick="closeResetPasswordModal()"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div
+    id="user-status-modal"
+    class="custom-modal hidden"
+>
+
+    <div class="custom-modal-content">
+
+        <h3 data-i18n="confirmAction">确认账号状态操作</h3>
+
+        <p id="user-status-text">
+            确认修改该用户账号状态？
+        </p>
+
+        <div class="custom-modal-actions">
+
+            <button
+                class="modal-confirm-button"
+                data-i18n="confirm"
+                onclick="confirmToggleUserStatus()"
+            >
+                确认
+            </button>
+
+            <button
+                class="modal-cancel-button"
+                data-i18n="cancel"
+                onclick="closeUserStatusModal()"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/state.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_api.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_render.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_search.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_detail.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_update.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_password.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/user_status.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/user_management/init.js?v={{ static_version }}"></script>
+
+</body>
+</html>

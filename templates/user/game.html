@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title data-i18n="joinGame">加入牌局</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/user/game.css?v={{ static_version }}">
+</head>
+<body>
+
+{% include "user/sidebar.html" %}
+
+<div class="main">
+
+    <div class="top-bar">
+        <div class="title-area">
+            <h1 data-i18n="joinGame">加入牌局</h1>
+            <p class="page-subtitle" data-i18n="gameManagementUserDesc">查看当前进行中的牌局，提交筹码买入申请。</p>
+        </div>
+        <div class="topbar-actions">
+            <img id="avatar-preview" class="avatar" src="/static/images/default_avatar.jpg" alt="avatar">
+            <div class="role-tag">
+                <span class="status-dot"></span>
+                <span data-i18n="roleUser">用户</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-list" class="game-list">
+        <div class="game-loading" data-i18n="loading">加载中...</div>
+    </div>
+
+</div>
+
+<!-- 买入申请 Modal -->
+<div id="buyin-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content">
+        <h3 data-i18n="submitBuyinRequest">提交买入申请</h3>
+        <p class="modal-desc" data-i18n="buyinRequestDesc">填写买入数额，由局头审批后生效。</p>
+        <div class="form-group">
+            <label data-i18n="buyinRequestAmount">申请数额</label>
+            <input type="number" id="buyin-amount" class="modal-input" min="1" placeholder="请输入数额">
+        </div>
+        <div id="buyin-message" class="operation-message"></div>
+        <div class="custom-modal-actions">
+            <button class="modal-confirm-button" onclick="confirmBuyin()" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" onclick="closeBuyinModal()" data-i18n="cancel">取消</button>
+        </div>
+    </div>
+</div>
+
+<div id="join-group-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content">
+        <h3 data-i18n="joinOtherGroup">加入其他组</h3>
+        <p data-i18n="joinGroupLogoutConfirm">此操作会退出当前登录，是否确认？</p>
+        <div class="custom-modal-actions">
+            <button class="modal-confirm-button" onclick="confirmJoinGroup()" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" onclick="closeJoinGroupModal()" data-i18n="cancel">取消</button>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/user/dashboard/group_join.js?v={{ static_version }}"></script>
+<script src="/static/js/i18n/user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+<script src="/static/js/user/game/game_api.js?v={{ static_version }}"></script>
+<script src="/static/js/user/game/game_render.js?v={{ static_version }}"></script>
+<script src="/static/js/user/game/game_init.js?v={{ static_version }}"></script>
+
+</body>
+</html>

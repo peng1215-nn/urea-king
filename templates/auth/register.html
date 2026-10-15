@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+
+    <meta charset="UTF-8">
+    <title>UREAKING Register</title>
+
+    <link rel="stylesheet" href="/static/css/auth/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/auth/register.css?v={{ static_version }}">
+
+</head>
+
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-title">Ureaking</div>
+</div>
+
+<div class="page">
+
+    <div class="register-card">
+
+        <div class="title-area">
+            <h1>UREAKING</h1>
+            <p>8th-Ecosystem</p>
+        </div>
+
+        <div class="form-group">
+            <label for="username" data-i18n="username">用户名</label>
+
+            <input
+                type="text"
+                id="username"
+                placeholder="请输入用户名"
+                data-i18n-placeholder="enterUsername"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="nickname" data-i18n="nickname">昵称</label>
+
+            <input
+                type="text"
+                id="nickname"
+                placeholder="请输入昵称"
+                data-i18n-placeholder="enterNickname"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="password" data-i18n="password">密码</label>
+
+            <input
+                type="password"
+                id="password"
+                placeholder="请输入密码"
+                data-i18n-placeholder="enterPassword"
+            >
+        </div>
+
+        <div class="form-group">
+            <label
+                for="confirm-password"
+                data-i18n="confirmPassword"
+            >
+                确认密码
+            </label>
+
+            <input
+                type="password"
+                id="confirm-password"
+                placeholder="请再次输入密码"
+                data-i18n-placeholder="reEnterPassword"
+            >
+        </div>
+
+        <div id="message-box"></div>
+
+        <button
+            class="register-button"
+            onclick="register()"
+            data-i18n="registerAccount"
+        >
+            注册账号
+        </button>
+
+        <div class="bottom-links">
+            <a href="/login" data-i18n="backToLogin">
+                返回登录
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="/static/js/i18n/register.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/register/message.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/register/form.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/register/redirect.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/register/register.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/register/init.js?v={{ static_version }}"></script>
+
+</body>
+</html>

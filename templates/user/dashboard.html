@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title data-i18n="userDashboard">用户控制台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/organizer/language.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/user/dashboard.css?v={{ static_version }}">
+</head>
+<body>
+
+{% include "user/sidebar.html" %}
+
+<div class="main">
+
+    <div class="top-bar">
+        <div class="title-area">
+            <h1 data-i18n="userDashboard">用户控制台</h1>
+            <p id="current-group-text"></p>
+        </div>
+        <div class="topbar-actions">
+            <button id="language-toggle" class="dashboard-language-toggle" type="button" onclick="toggleLanguage()">
+                ENGLISH
+            </button>
+            <img id="avatar-preview" class="avatar" src="/static/images/default_avatar.jpg" alt="avatar">
+            <label for="avatar-input" class="upload-avatar-button" data-i18n="uploadAvatar">更换头像</label>
+            <input type="file" id="avatar-input" accept="image/jpeg,image/png,image/webp" onchange="uploadAvatar()" hidden>
+            <div class="role-tag">
+                <span class="status-dot"></span>
+                <span data-i18n="roleUser">用户</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="announcement-overview-card">
+        <div class="announcement-overview-header">
+            <div class="announcement-icon"><i class="fa-solid fa-bullhorn"></i></div>
+            <h2 data-i18n="announcements">公告</h2>
+        </div>
+        <div id="announcement-preview-list" class="announcement-preview-list">
+            <div id="announcement-empty-msg" class="announcement-loading" data-i18n="loading">加载中...</div>
+        </div>
+    </div>
+
+    <h2 class="section-title" data-i18n="userModules">用户功能模块</h2>
+
+    <div class="modules">
+
+        <div class="module-card" onclick="window.location.href='/user-game'">
+            <div class="module-title">
+                <div class="module-icon teal"><i class="fa-solid fa-chess-board"></i></div>
+                <h2 data-i18n="joinGame">加入牌局</h2>
+            </div>
+            <i class="fa-solid fa-chevron-right module-arrow"></i>
+            <p data-i18n="gameManagementUserDesc">查看当前进行中的牌局，提交筹码买入申请。</p>
+        </div>
+
+        <div class="module-card" onclick="window.location.href='/user-game-logs'">
+            <div class="module-title">
+                <div class="module-icon purple"><i class="fa-regular fa-file-lines"></i></div>
+                <h2 data-i18n="gameLogs">牌局日志</h2>
+            </div>
+            <i class="fa-solid fa-chevron-right module-arrow"></i>
+            <p data-i18n="gameLogsDesc">查看每局的开始时间、结束时间、总筹码、参与者盈亏与统计结果。</p>
+        </div>
+
+        <div class="module-card" onclick="openJoinGroupModal()">
+            <div class="module-title">
+                <div class="module-icon cyan"><i class="fa-solid fa-plus"></i></div>
+                <h2 data-i18n="joinOtherGroup">加入其他组</h2>
+            </div>
+            <i class="fa-solid fa-chevron-right module-arrow"></i>
+            <p data-i18n="joinOtherGroupDesc">使用新的邀请码加入其他组，并在登录后选择不同组别身份。</p>
+        </div>
+
+        <div class="module-card" onclick="window.location.href='/user-change-password'">
+            <div class="module-title">
+                <div class="module-icon red"><i class="fa-solid fa-lock"></i></div>
+                <h2 data-i18n="changePassword">修改密码</h2>
+            </div>
+            <i class="fa-solid fa-chevron-right module-arrow"></i>
+            <p data-i18n="changePasswordOrganizerDesc">修改当前账户的昵称与密码。</p>
+        </div>
+
+    </div>
+
+</div>
+
+<div id="join-group-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content">
+        <h3 data-i18n="joinOtherGroup">加入其他组</h3>
+        <p data-i18n="joinGroupLogoutConfirm">此操作会退出当前登录，是否确认？</p>
+        <div class="custom-modal-actions">
+            <button class="modal-confirm-button" onclick="confirmJoinGroup()" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" onclick="closeJoinGroupModal()" data-i18n="cancel">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- 先加载 i18n 和 language，保证 t() 可用 -->
+<script src="/static/js/user/dashboard/group_join.js?v={{ static_version }}"></script>
+<script src="/static/js/i18n/user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+<script src="/static/js/common/avatar_upload.js?v={{ static_version }}"></script>
+<script src="/static/js/common/avatar_validation.js?v={{ static_version }}"></script>
+<script>
+async function loadAnnouncementPreview() {
+    const res = await fetch("/user/announcements");
+    const data = await res.json();
+    const list = document.getElementById("announcement-preview-list");
+    if (!data.success || !data.announcements || data.announcements.length === 0) {
+        list.innerHTML = `<div class="announcement-empty" data-i18n="noAnnouncements">${t("noAnnouncements")}</div>`;
+        return;
+    }
+    list.innerHTML = "";
+    const a = data.announcements[0];
+    const item = document.createElement("div");
+    item.className = "announcement-preview-item";
+    const titleText = a.title.length > 30 ? a.title.slice(0, 30) + "..." : a.title;
+    const contentText = a.content.length > 50 ? a.content.slice(0, 50) + "..." : a.content;
+    item.innerHTML = `
+        <div class="announcement-preview-title">${titleText}</div>
+        <div class="announcement-preview-content">${contentText}</div>
+        <div class="announcement-preview-date">${a.updated_at || a.created_at}</div>
+    `;
+    list.appendChild(item);
+}
+
+window.addEventListener("pageshow", function (e) {
+    if (e.persisted) {
+        window.location.reload();
+        return;
+    }
+    closeJoinGroupModal();
+    applyLanguage();
+    loadCurrentUser();
+    loadAnnouncementPreview();
+});
+
+// 语言切换后重新渲染公告
+const _origApplyLanguage = window.applyLanguage;
+window.applyLanguage = function(lang) {
+    _origApplyLanguage(lang);
+    loadAnnouncementPreview();
+};
+</script>
+
+</body>
+</html>

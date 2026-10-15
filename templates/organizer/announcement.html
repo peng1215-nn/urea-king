@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+
+    <meta charset="UTF-8">
+    <title data-i18n="announcements">公告</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/organizer/announcement.css?v={{ static_version }}">
+
+</head>
+
+<body>
+
+{% include "organizer/sidebar.html" %}
+
+<div class="main">
+
+    <div class="top-bar">
+        <div class="title-area">
+            <h1 data-i18n="announcements">公告</h1>
+            <p class="page-subtitle" data-i18n="announcementsDesc">查看管理员发布的最新公告。</p>
+        </div>
+        <div class="topbar-actions">
+            <img id="avatar-preview" class="avatar" src="/static/images/default_avatar.jpg" alt="头像">
+            <div class="role-tag">
+                <span class="status-dot"></span>
+                <span data-i18n="organizer">局头</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="announcement-list" class="announcement-list">
+        <div class="announcement-loading" data-i18n="loading">加载中...</div>
+    </div>
+
+    <div id="announcement-detail-modal" class="custom-modal" style="display:none;">
+        <div class="custom-modal-content announcement-detail-content">
+            <div class="announcement-detail-header">
+                <h3 id="detail-title"></h3>
+                <div id="detail-date" class="announcement-detail-date"></div>
+            </div>
+            <div id="detail-content" class="announcement-detail-body"></div>
+            <div class="custom-modal-actions">
+                <button class="modal-confirm-button" onclick="closeDetailModal()" data-i18n="close">关闭</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="join-group-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content">
+        <h3 data-i18n="joinOtherGroup">加入其他组</h3>
+        <p data-i18n="joinGroupLogoutConfirm">此操作会退出当前登录，是否确认？</p>
+        <div class="custom-modal-actions">
+            <button class="modal-confirm-button" data-i18n="confirm" onclick="confirmJoinGroup()">确认</button>
+            <button class="modal-cancel-button" data-i18n="cancel" onclick="closeJoinGroupModal()">取消</button>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/organizer/dashboard/group_join.js?v={{ static_version }}"></script>
+<script src="/static/js/i18n/organizer.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+<script>
+    async function loadAnnouncements() {
+        const res = await fetch("/organizer/announcements");
+        const data = await res.json();
+        const list = document.getElementById("announcement-list");
+
+        if (!data.success || !data.announcements || data.announcements.length === 0) {
+            list.innerHTML = `<div class="announcement-empty">${t("noAnnouncements")}</div>`;
+            return;
+        }
+
+        list.innerHTML = "";
+        data.announcements.forEach(a => {
+            const card = document.createElement("div");
+            card.className = "announcement-card";
+            const preview = a.content.length > 100 ? a.content.slice(0, 100) + "..." : a.content;
+            card.innerHTML = `
+                <div class="announcement-card-header">
+                    <div class="announcement-card-title">${a.title}</div>
+                    <div class="announcement-card-date">${a.updated_at || a.created_at}</div>
+                </div>
+                <div class="announcement-card-preview">${preview}</div>
+            `;
+            card.onclick = () => openDetailModal(a);
+            list.appendChild(card);
+        });
+    }
+
+    function openDetailModal(a) {
+        document.getElementById("detail-title").innerText = a.title;
+        document.getElementById("detail-date").innerText = a.updated_at || a.created_at;
+        document.getElementById("detail-content").innerText = a.content;
+        document.getElementById("announcement-detail-modal").style.display = "flex";
+    }
+
+    function closeDetailModal() {
+        document.getElementById("announcement-detail-modal").style.display = "none";
+    }
+
+    window.addEventListener("pageshow", function () {
+        closeJoinGroupModal();
+        applyLanguage();
+        loadCurrentUser();
+        loadAnnouncements();
+    });
+</script>
+
+</body>
+</html>
