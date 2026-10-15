@@ -10,7 +10,7 @@ from database import Base
 
 class User(Base):
 
-    __tablename__ = "users"
+    __tablename__ = "poker_users"
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, nullable=False, index=True)
@@ -24,7 +24,7 @@ class User(Base):
 
 class Group(Base):
 
-    __tablename__ = "groups"
+    __tablename__ = "poker_groups"
 
     id = Column(Integer, primary_key=True, index=True)
     group_code = Column(String(50), unique=True, nullable=False, index=True)
@@ -35,18 +35,18 @@ class Group(Base):
 
 class UserGroupRole(Base):
 
-    __tablename__ = "user_group_roles"
+    __tablename__ = "poker_user_group_roles"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False)
+    group_id = Column(Integer, ForeignKey("poker_groups.id"), nullable=False)
     role = Column(String(30), nullable=False, default="user")
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
 class InvitationCode(Base):
 
-    __tablename__ = "invitation_codes"
+    __tablename__ = "poker_invitation_codes"
 
     id = Column(Integer, primary_key=True, index=True)
     code = Column(String(100), unique=True, nullable=False, index=True)
@@ -61,7 +61,7 @@ class InvitationCode(Base):
 
 class AuditLog(Base):
 
-    __tablename__ = "audit_logs"
+    __tablename__ = "poker_audit_logs"
 
     id = Column(Integer, primary_key=True, index=True)
     operator_id = Column(Integer, nullable=True)
@@ -77,7 +77,7 @@ class AuditLog(Base):
 
 class Announcement(Base):
 
-    __tablename__ = "announcements"
+    __tablename__ = "poker_announcements"
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(200), nullable=False)
@@ -95,8 +95,8 @@ class PokerGame(Base):
     __tablename__ = "poker_games"
 
     id = Column(Integer, primary_key=True, index=True)
-    group_id = Column(Integer, ForeignKey("groups.id"), nullable=False, index=True)
-    organizer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    group_id = Column(Integer, ForeignKey("poker_groups.id"), nullable=False, index=True)
+    organizer_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False)
     status = Column(String(20), nullable=False, default="ongoing")
     name = Column(String(100), nullable=True)
     started_at = Column(DateTime, nullable=False, default=datetime.utcnow)
@@ -114,7 +114,7 @@ class PokerGamePlayer(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     game_id = Column(Integer, ForeignKey("poker_games.id"), nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False)
     nickname = Column(String(50), nullable=True)
     total_buy_in = Column(Integer, nullable=False, default=0)
     cash_out = Column(Integer, nullable=True)
@@ -129,11 +129,11 @@ class ChipRequest(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     game_id = Column(Integer, ForeignKey("poker_games.id"), nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False)
     nickname = Column(String(50), nullable=True)
     type = Column(String(20), nullable=False, default="normal")
     amount = Column(Integer, nullable=False)
     status = Column(String(20), nullable=False, default="pending")
     requested_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     resolved_at = Column(DateTime, nullable=True)
-    resolved_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    resolved_by = Column(Integer, ForeignKey("poker_users.id"), nullable=True)
