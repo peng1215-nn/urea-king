@@ -1,5 +1,10 @@
 import os
+import sys
 from logging.config import fileConfig
+
+# Ensure project root is first in sys.path so "platform" resolves to our
+# package, not Python's built-in platform module.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from alembic import context
 from dotenv import load_dotenv
