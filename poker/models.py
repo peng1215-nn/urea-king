@@ -21,11 +21,15 @@ class PokerUser(Base):
 
 
 class PokerGroup(Base):
-    """A poker group (game circle). Replaces the old 'groups' table."""
+    """A poker group (game circle).
+    Always has a corresponding entry in platform_groups (platform_group_id).
+    """
 
     __tablename__ = "poker_groups"
 
     id = Column(Integer, primary_key=True, index=True)
+    # References platform_groups.id — no FK constraint to keep modules decoupled
+    platform_group_id = Column(Integer, nullable=True, index=True)
     group_code = Column(String(50), unique=True, nullable=False, index=True)
     group_name = Column(String(100), nullable=True)
     description = Column(Text, nullable=True)
@@ -48,6 +52,7 @@ class PokerUserGroupRole(Base):
 class PokerInvitationCode(Base):
     """Invite codes for joining a poker group.
     Format: POKER-G{group_id:03d}-{RANDOM4}
+    created_by: "admin" = created by platform admin, "organizer" = created by group organizer
     """
 
     __tablename__ = "poker_invitation_codes"
@@ -60,6 +65,7 @@ class PokerInvitationCode(Base):
     is_used = Column(Integer, nullable=False, default=0)
     used_by_user_id = Column(Integer, nullable=True)
     used_by_username = Column(String(50), nullable=True)
+    created_by = Column(String(20), nullable=False, default="organizer")  # "admin" | "organizer"
     created_at = Column(DateTime, default=datetime.utcnow)
     used_at = Column(DateTime, nullable=True)
 

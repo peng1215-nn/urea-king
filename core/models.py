@@ -18,8 +18,9 @@ class PlatformUser(Base):
 
 
 class PlatformGroup(Base):
-    """Platform-level group for admin/developer accounts.
-    Completely separate from poker groups.
+    """Platform-level group registry — one entry per group across ALL modules.
+    The DEV group is the special platform admin group (no module).
+    Module groups (poker, chess, …) are registered here with module="poker" etc.
     """
 
     __tablename__ = "platform_groups"
@@ -28,6 +29,10 @@ class PlatformGroup(Base):
     group_code = Column(String(50), unique=True, nullable=False, index=True)
     group_name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
+    # Which module this group belongs to; NULL = platform admin group (DEV)
+    module = Column(String(30), nullable=True, index=True)
+    # The platform admin who created this group
+    created_by_admin_id = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
