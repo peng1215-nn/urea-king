@@ -1,6 +1,6 @@
 from database import SessionLocal
 from poker.models import PokerGame, PokerGamePlayer, PokerChipRequest, PokerUserGroupRole
-from platform.models import PlatformUser
+from core.models import PlatformUser
 
 
 PAGE_SIZE = 5

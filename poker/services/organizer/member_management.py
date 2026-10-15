@@ -1,6 +1,6 @@
 from database import SessionLocal
 from poker.models import PokerGroup, PokerUserGroupRole
-from platform.models import PlatformUser
+from core.models import PlatformUser
 
 
 def get_organizer_members_service(group_id: int):

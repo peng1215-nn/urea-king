@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from platform.services.auth import (
+from core.services.auth import (
     register_service,
     login_service,
     verify_token_service,

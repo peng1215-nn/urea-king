@@ -5,8 +5,8 @@ Flow: validate inputs → create PlatformUser → join group via invite code
 import re
 
 from database import SessionLocal
-from platform.models import PlatformUser
-from platform.utils.security import hash_password
+from core.models import PlatformUser
+from core.utils.security import hash_password
 from poker.services.admin.audit_log import write_audit_log
 from poker.services.auth.group_join import poker_group_join_service
 

@@ -1,6 +1,6 @@
 from database import SessionLocal
 from poker.models import PokerGroup, PokerUserGroupRole
-from platform.models import PlatformUser
+from core.models import PlatformUser
 
 
 def add_no_cache_headers(response):

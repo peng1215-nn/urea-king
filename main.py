@@ -7,7 +7,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from utils.time import now_columbus_naive
 
 # Platform REST API
-from platform.routes.auth import router as platform_auth_router
+from core.routes.auth import router as platform_auth_router
 
 # Poker web routes — auth
 from poker.routes.auth.login import router as login_router
@@ -84,7 +84,7 @@ app.add_middleware(
     max_age=60 * 60 * 24,
 )
 
-app.mount("/static/platform", StaticFiles(directory="platform/static"), name="static-platform")
+app.mount("/static/platform", StaticFiles(directory="core/static"), name="static-platform")
 app.mount("/static/poker", StaticFiles(directory="poker/static"), name="static-poker")
 
 STATIC_VERSION = now_columbus_naive().strftime("%Y%m%d%H%M%S")

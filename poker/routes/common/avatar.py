@@ -5,7 +5,7 @@ import cloudinary.uploader
 from fastapi import APIRouter, File, Request, UploadFile
 
 from database import SessionLocal
-from platform.models import PlatformUser
+from core.models import PlatformUser
 
 router = APIRouter()
 

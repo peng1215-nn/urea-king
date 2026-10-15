@@ -1,8 +1,8 @@
 """Platform authentication services — register, login, verify token."""
 import re
 from database import SessionLocal
-from platform.models import PlatformUser
-from platform.utils.security import (
+from core.models import PlatformUser
+from core.utils.security import (
     hash_password,
     verify_password,
     create_token,

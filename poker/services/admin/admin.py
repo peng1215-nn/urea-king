@@ -4,7 +4,7 @@ from database import SessionLocal
 from poker.models import (
     PokerGroup, PokerInvitationCode, PokerUserGroupRole, PokerGame
 )
-from platform.models import PlatformUser
+from core.models import PlatformUser
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")

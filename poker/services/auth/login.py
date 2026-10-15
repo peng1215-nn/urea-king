@@ -1,6 +1,6 @@
 from database import SessionLocal
-from platform.models import PlatformUser
-from platform.utils.security import verify_password
+from core.models import PlatformUser
+from core.utils.security import verify_password
 from poker.models import PokerGroup, PokerUserGroupRole
 from poker.services.admin.audit_log import write_audit_log
 

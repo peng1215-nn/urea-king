@@ -1,6 +1,6 @@
 from passlib.context import CryptContext
 from database import SessionLocal
-from platform.models import PlatformUser
+from core.models import PlatformUser
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 

@@ -2,8 +2,8 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse
 
 from database import SessionLocal
-from platform.models import PlatformUser
-from platform.utils.security import verify_password
+from core.models import PlatformUser
+from core.utils.security import verify_password
 from poker.services.auth.group_join import poker_group_join_service
 from template_config import templates
 

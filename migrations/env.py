@@ -13,7 +13,7 @@ from sqlalchemy import engine_from_config, pool
 from database import Base
 
 # Import all models so Alembic sees every table in target_metadata
-from platform.models import PlatformUser  # noqa: F401
+from core.models import PlatformUser  # noqa: F401
 from poker.models import (  # noqa: F401
     PokerAnnouncement,
     PokerAuditLog,

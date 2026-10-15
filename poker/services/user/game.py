@@ -1,7 +1,7 @@
 from utils.time import now_columbus_naive
 from database import SessionLocal
 from poker.models import PokerChipRequest, PokerGame, PokerGamePlayer, PokerUserGroupRole
-from platform.models import PlatformUser
+from core.models import PlatformUser
 
 
 def get_user_ongoing_games_service(group_id: int, user_id: int):

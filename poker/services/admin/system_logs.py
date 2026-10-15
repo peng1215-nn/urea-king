@@ -1,7 +1,7 @@
 from math import ceil
 from database import SessionLocal
 from poker.models import PokerAuditLog
-from platform.models import PlatformUser
+from core.models import PlatformUser
 from sqlalchemy import or_
 
 
