@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 def require_admin(request: Request):
-    return request.session.get("current_role") == "admin"
+    return request.session.get("is_platform_admin") is True
 
 
 @router.get("/change-password", response_class=HTMLResponse)

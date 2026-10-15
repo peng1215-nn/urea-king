@@ -1,5 +1,5 @@
 from database import SessionLocal
-from core.models import PlatformUser
+from core.models import PlatformUser, PlatformUserGroupRole
 from core.utils.security import verify_password
 from poker.models import PokerGroup, PokerUserGroupRole
 from poker.services.admin.audit_log import write_audit_log
@@ -20,18 +20,17 @@ def login_user_service(request, username: str, password: str):
         if user.is_active == 0:
             return {"success": False, "error_code": "loginAccountDisabled"}
 
-        group_roles = (
-            db.query(PokerUserGroupRole, PokerGroup)
-            .join(PokerGroup, PokerUserGroupRole.group_id == PokerGroup.id)
-            .filter(PokerUserGroupRole.user_id == user.id)
-            .all()
-        )
+        # Check if this user is a platform-level admin (platform_user_group_roles)
+        platform_role = db.query(PlatformUserGroupRole).filter(
+            PlatformUserGroupRole.user_id == user.id
+        ).first()
 
         request.session["user_id"] = user.id
         request.session["username"] = user.username
         request.session.pop("current_group_id", None)
         request.session.pop("current_group_code", None)
         request.session.pop("current_role", None)
+        request.session.pop("is_platform_admin", None)
 
         write_audit_log(
             request=request,
@@ -44,9 +43,30 @@ def login_user_service(request, username: str, password: str):
             operator_username=user.username,
         )
 
+        # Platform admin: skip group selection, go directly to admin dashboard
+        if platform_role:
+            request.session["is_platform_admin"] = True
+            request.session["current_role"] = "admin"
+            return {
+                "success": True,
+                "display_name": user.nickname or user.username,
+                "is_platform_admin": True,
+                "redirect_url": "/admin-dashboard",
+                "groups": [],
+            }
+
+        # Regular poker user: show group selection
+        group_roles = (
+            db.query(PokerUserGroupRole, PokerGroup)
+            .join(PokerGroup, PokerUserGroupRole.group_id == PokerGroup.id)
+            .filter(PokerUserGroupRole.user_id == user.id)
+            .all()
+        )
+
         return {
             "success": True,
             "display_name": user.nickname or user.username,
+            "is_platform_admin": False,
             "groups": [
                 {
                     "group_id": group.id,

@@ -58,12 +58,7 @@ def select_group(request: Request, group_id: int = Form(...)):
         request.session["current_group_code"] = group.group_code
         request.session["current_role"] = ugr.role
 
-        redirect_url = "/user-dashboard"
-        if ugr.role == "admin":
-            redirect_url = "/admin-dashboard"
-        elif ugr.role == "organizer":
-            redirect_url = "/organizer-dashboard"
-
+        redirect_url = "/organizer-dashboard" if ugr.role == "organizer" else "/user-dashboard"
         return {"success": True, "role": ugr.role, "redirect_url": redirect_url}
     finally:
         db.close()
