@@ -14,6 +14,7 @@ def get_admin_stats_service():
     db = SessionLocal()
     try:
         total_users = db.query(PlatformUser).count()
+        admin_count = db.query(PokerUserGroupRole).filter(PokerUserGroupRole.role == "admin").count()
         organizer_count = db.query(PokerUserGroupRole).filter(PokerUserGroupRole.role == "organizer").count()
         user_count = db.query(PokerUserGroupRole).filter(PokerUserGroupRole.role == "user").count()
         unused_invitation_codes = db.query(PokerInvitationCode).filter(PokerInvitationCode.is_used == 0).count()
@@ -22,6 +23,7 @@ def get_admin_stats_service():
             "success": True,
             "total_users": total_users,
             "total_groups": total_groups,
+            "admin_count": admin_count,
             "organizer_count": organizer_count,
             "user_count": user_count,
             "unused_invitation_codes": unused_invitation_codes,
