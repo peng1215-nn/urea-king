@@ -40,7 +40,12 @@ def get_announcements(request: Request):
 def create_announcement(request: Request, title: str = Form(...), content: str = Form(...)):
     if not require_admin(request):
         return {"success": False, "message": "permissionDenied"}
-    return create_announcement_service(title=title, content=content)
+    return create_announcement_service(
+        title=title,
+        content=content,
+        author_id=request.session.get("user_id"),
+        author_username=request.session.get("username"),
+    )
 
 
 @router.post("/admin/announcements/update")

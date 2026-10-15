@@ -4,7 +4,7 @@ from database import SessionLocal
 from poker.models import (
     PokerGroup, PokerInvitationCode, PokerUserGroupRole, PokerGame
 )
-from core.models import PlatformUser
+from core.models import PlatformUser, PlatformUserGroupRole
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
@@ -14,7 +14,7 @@ def get_admin_stats_service():
     db = SessionLocal()
     try:
         total_users = db.query(PlatformUser).count()
-        admin_count = db.query(PokerUserGroupRole).filter(PokerUserGroupRole.role == "admin").count()
+        admin_count = db.query(PlatformUserGroupRole).count()  # platform-level admin/dev accounts
         organizer_count = db.query(PokerUserGroupRole).filter(PokerUserGroupRole.role == "organizer").count()
         user_count = db.query(PokerUserGroupRole).filter(PokerUserGroupRole.role == "user").count()
         unused_invitation_codes = db.query(PokerInvitationCode).filter(PokerInvitationCode.is_used == 0).count()

@@ -1,12 +1,12 @@
 from utils.time import now_columbus_naive
 from database import SessionLocal
-from poker.models import PokerAnnouncement
+from core.models import PlatformAnnouncement
 
 
 def get_announcements_service():
     db = SessionLocal()
     try:
-        items = db.query(PokerAnnouncement).order_by(PokerAnnouncement.created_at.desc()).all()
+        items = db.query(PlatformAnnouncement).order_by(PlatformAnnouncement.created_at.desc()).all()
         return {
             "success": True,
             "announcements": [
@@ -14,6 +14,7 @@ def get_announcements_service():
                     "id": a.id,
                     "title": a.title,
                     "content": a.content,
+                    "author_username": a.author_username or "",
                     "created_at": a.created_at.strftime("%Y-%m-%d %H:%M") if a.created_at else "",
                     "updated_at": a.updated_at.strftime("%Y-%m-%d %H:%M") if a.updated_at else "",
                 }
@@ -26,7 +27,7 @@ def get_announcements_service():
         db.close()
 
 
-def create_announcement_service(title, content):
+def create_announcement_service(title, content, author_id=None, author_username=None):
     db = SessionLocal()
     try:
         title, content = title.strip(), content.strip()
@@ -35,7 +36,14 @@ def create_announcement_service(title, content):
         if not content:
             return {"success": False, "message": "announcementContentRequired"}
 
-        a = PokerAnnouncement(title=title, content=content, created_at=now_columbus_naive(), updated_at=now_columbus_naive())
+        a = PlatformAnnouncement(
+            title=title,
+            content=content,
+            author_id=author_id,
+            author_username=author_username,
+            created_at=now_columbus_naive(),
+            updated_at=now_columbus_naive(),
+        )
         db.add(a)
         db.commit()
         db.refresh(a)
@@ -50,7 +58,7 @@ def create_announcement_service(title, content):
 def update_announcement_service(announcement_id, title, content):
     db = SessionLocal()
     try:
-        a = db.query(PokerAnnouncement).filter(PokerAnnouncement.id == announcement_id).first()
+        a = db.query(PlatformAnnouncement).filter(PlatformAnnouncement.id == announcement_id).first()
         if not a:
             return {"success": False, "message": "announcementNotFound"}
         title, content = title.strip(), content.strip()
@@ -73,7 +81,7 @@ def update_announcement_service(announcement_id, title, content):
 def delete_announcement_service(announcement_id):
     db = SessionLocal()
     try:
-        a = db.query(PokerAnnouncement).filter(PokerAnnouncement.id == announcement_id).first()
+        a = db.query(PlatformAnnouncement).filter(PlatformAnnouncement.id == announcement_id).first()
         if not a:
             return {"success": False, "message": "announcementNotFound"}
         db.delete(a)

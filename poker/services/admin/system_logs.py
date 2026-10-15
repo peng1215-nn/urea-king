@@ -1,7 +1,6 @@
 from math import ceil
 from database import SessionLocal
-from poker.models import PokerAuditLog
-from core.models import PlatformUser
+from core.models import PlatformAuditLog, PlatformUser
 from sqlalchemy import or_
 
 
@@ -14,22 +13,22 @@ def get_audit_logs_service(action=None, username=None, page=1, page_size=20):
             page_size = 5
 
         query = (
-            db.query(PokerAuditLog, PlatformUser)
-            .outerjoin(PlatformUser, PokerAuditLog.operator_id == PlatformUser.id)
+            db.query(PlatformAuditLog, PlatformUser)
+            .outerjoin(PlatformUser, PlatformAuditLog.operator_id == PlatformUser.id)
         )
         if action:
-            query = query.filter(PokerAuditLog.action == action)
+            query = query.filter(PlatformAuditLog.action == action)
         if username:
             keyword = f"%{username}%"
             query = query.filter(
                 or_(
-                    PokerAuditLog.operator_username.ilike(keyword),
+                    PlatformAuditLog.operator_username.ilike(keyword),
                     PlatformUser.nickname.ilike(keyword),
                 )
             )
 
         total = query.count()
-        logs = query.order_by(PokerAuditLog.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+        logs = query.order_by(PlatformAuditLog.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
         total_pages = ceil(total / page_size) if total > 0 else 1
 
         return {
@@ -40,6 +39,9 @@ def get_audit_logs_service(action=None, username=None, page=1, page_size=20):
                     "operator_id": log.operator_id,
                     "operator_username": log.operator_username,
                     "operator_nickname": user.nickname if user and user.nickname else "",
+                    "operator_group_id": log.operator_group_id,
+                    "operator_group_code": log.operator_group_code,
+                    "operator_role": log.operator_role,
                     "action": log.action,
                     "target_type": log.target_type,
                     "target_id": log.target_id,

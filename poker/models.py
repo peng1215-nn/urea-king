@@ -1,4 +1,6 @@
-"""Poker module models — all tables prefixed with poker_"""
+"""Poker module models — all tables prefixed with poker_
+Note: audit logs and announcements are platform-level concerns and live in core/models.py.
+"""
 from datetime import datetime
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from database import Base
@@ -46,33 +48,6 @@ class PokerInvitationCode(Base):
     used_by_username = Column(String(50), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     used_at = Column(DateTime, nullable=True)
-
-
-class PokerAuditLog(Base):
-
-    __tablename__ = "poker_audit_logs"
-
-    id = Column(Integer, primary_key=True, index=True)
-    operator_id = Column(Integer, nullable=True)
-    operator_username = Column(String(50), nullable=True)
-    action = Column(String(100), nullable=False)
-    target_type = Column(String(50), nullable=False)
-    target_id = Column(Integer, nullable=True)
-    old_value = Column(Text, nullable=True)
-    new_value = Column(Text, nullable=True)
-    ip_address = Column(String(100), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-
-class PokerAnnouncement(Base):
-
-    __tablename__ = "poker_announcements"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(200), nullable=False)
-    content = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 class PokerGame(Base):

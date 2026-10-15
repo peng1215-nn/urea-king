@@ -1,6 +1,6 @@
 from utils.time import now_columbus_naive
 from database import SessionLocal
-from poker.models import PokerAuditLog
+from core.models import PlatformAuditLog
 
 
 def get_client_ip(request):
@@ -21,12 +21,18 @@ def write_audit_log(
     new_value=None,
     operator_id=None,
     operator_username=None,
+    operator_group_id=None,
+    operator_group_code=None,
+    operator_role=None,
 ):
     db = SessionLocal()
     try:
-        log = PokerAuditLog(
+        log = PlatformAuditLog(
             operator_id=operator_id,
             operator_username=operator_username,
+            operator_group_id=operator_group_id,
+            operator_group_code=operator_group_code,
+            operator_role=operator_role,
             action=action,
             target_type=target_type,
             target_id=target_id,
@@ -39,6 +45,6 @@ def write_audit_log(
         db.commit()
     except Exception as error:
         db.rollback()
-        print("POKER AUDIT LOG ERROR:", error)
+        print("PLATFORM AUDIT LOG ERROR:", error)
     finally:
         db.close()
