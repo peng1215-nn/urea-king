@@ -9,11 +9,7 @@ from utils.time import now_columbus_naive
 # Platform REST API
 from core.routes.auth import router as platform_auth_router
 
-# Welcome page
-from core.routes.welcome import router as welcome_router
-
 # Platform admin web routes
-from core.routes.admin.login import router as admin_login_router
 from core.routes.admin.admin import router as admin_router
 from core.routes.admin.system_logs import router as system_logs_router
 from core.routes.admin.invite_management import router as admin_invite_router
@@ -50,11 +46,7 @@ app = FastAPI()
 # Platform REST API (prefix /platform)
 app.include_router(platform_auth_router)
 
-# Welcome page
-app.include_router(welcome_router)
-
 # Platform admin web
-app.include_router(admin_login_router)
 app.include_router(admin_router)
 app.include_router(system_logs_router)
 app.include_router(admin_invite_router)
