@@ -18,4 +18,4 @@ def welcome(request: Request):
             url="/organizer-dashboard" if role == "organizer" else "/user-dashboard",
             status_code=302,
         )
-    return templates.TemplateResponse(request=request, name="welcome.html")
+    return RedirectResponse(url="/poker/login", status_code=302)
