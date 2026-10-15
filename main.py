@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -42,6 +43,11 @@ from poker.routes.common.common import router as common_router
 load_dotenv()
 
 app = FastAPI()
+
+
+@app.get("/")
+def root():
+    return RedirectResponse(url="/poker/login", status_code=302)
 
 # Platform REST API (prefix /platform)
 app.include_router(platform_auth_router)
