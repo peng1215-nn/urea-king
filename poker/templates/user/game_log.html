@@ -30,6 +30,7 @@
     <div class="log-view-tabs">
         <button id="btn-logs" class="log-view-tab active" onclick="switchView('logs')" data-i18n="gameLogList">牌局记录</button>
         <button id="btn-stats" class="log-view-tab" onclick="switchView('stats')" data-i18n="statsPanel">统计面板</button>
+        <button id="btn-member-stats" class="log-view-tab" onclick="switchView('member-stats')" data-i18n="memberStats">成员统计</button>
     </div>
 
     <div id="view-logs">
@@ -41,6 +42,12 @@
 
     <div id="view-stats" style="display:none;">
         <div id="stats-panel" class="stats-panel">
+            <div class="log-loading" data-i18n="loading">加载中...</div>
+        </div>
+    </div>
+
+    <div id="view-member-stats" style="display:none;">
+        <div id="member-stats-panel" class="member-stats-panel">
             <div class="log-loading" data-i18n="loading">加载中...</div>
         </div>
     </div>

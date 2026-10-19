@@ -264,3 +264,68 @@ body {
 .rate-games { color: rgba(255,255,255,0.4); }
 .rate-win { color: #5CFFB2; }
 .rate-lose { color: #ff6b6b; }
+/* 成员统计 */
+.member-stats-panel {
+    margin-top: 12px;
+}
+
+.member-stats-table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+}
+
+.member-stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.member-stats-table thead tr {
+    background: rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.member-stats-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+
+.member-stats-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.85);
+    white-space: nowrap;
+}
+
+.member-stats-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.member-stats-table tbody tr:hover {
+    background: rgba(255,255,255,0.04);
+}
+
+.member-stats-table .rank-cell {
+    color: rgba(255,255,255,0.4);
+    font-size: 0.82rem;
+    width: 40px;
+}
+
+.member-stats-table .name-cell {
+    font-weight: 600;
+    color: #fff;
+}
+
+.member-stats-table .net-cell {
+    font-weight: 600;
+}
+
+.net-positive { color: #4caf7d; }
+.net-negative { color: #f44336; }
+.net-zero { color: rgba(255,255,255,0.5); }

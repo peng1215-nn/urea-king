@@ -26,10 +26,13 @@ function switchView(view) {
     currentView = view;
     document.getElementById("view-logs").style.display = view === "logs" ? "block" : "none";
     document.getElementById("view-stats").style.display = view === "stats" ? "block" : "none";
+    document.getElementById("view-member-stats").style.display = view === "member-stats" ? "block" : "none";
     document.getElementById("btn-logs").classList.toggle("active", view === "logs");
     document.getElementById("btn-stats").classList.toggle("active", view === "stats");
+    document.getElementById("btn-member-stats").classList.toggle("active", view === "member-stats");
     if (view === "logs") loadGameLogs(currentPage);
-    else loadStats();
+    else if (view === "stats") loadStats();
+    else loadMemberStats();
 }
 
 async function loadGameLogs(page) {
@@ -190,4 +193,57 @@ async function loadStats() {
             </div>
         `).join("") +
     `</div>` + playerRatesHtml;
+}
+async function loadMemberStats() {
+    const panel = document.getElementById("member-stats-panel");
+    panel.innerHTML = `<div class="log-loading">${t("loading")}</div>`;
+    let data;
+    try {
+        const resp = await fetch("/organizer/game-log/member-stats");
+        data = await resp.json();
+    } catch(e) {
+        panel.innerHTML = `<div class="log-loading">${t("operationFailed")}</div>`;
+        return;
+    }
+    if (!data.success) {
+        panel.innerHTML = `<div class="log-loading">${t("operationFailed")}</div>`;
+        return;
+    }
+    if (!data.members || data.members.length === 0) {
+        panel.innerHTML = `<div class="log-loading">${t("noGameLogs")}</div>`;
+        return;
+    }
+    renderMemberStatsTable(data.members, panel);
+}
+
+function renderMemberStatsTable(members, container) {
+    let html = `
+        <div class="member-stats-table-wrap">
+            <table class="member-stats-table">
+                <thead>
+                    <tr>
+                        <th>${t("memberRank")}</th>
+                        <th>${t("memberNickname")}</th>
+                        <th>${t("memberGames")}</th>
+                        <th>${t("memberWinRate")}</th>
+                        <th>${t("memberTotalNet")}</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    members.forEach((m, i) => {
+        const netClass = m.total_net > 0 ? "net-positive" : m.total_net < 0 ? "net-negative" : "net-zero";
+        const netStr = m.total_net > 0 ? "+" + m.total_net : String(m.total_net);
+        html += `
+            <tr>
+                <td class="rank-cell">${i + 1}</td>
+                <td class="name-cell">${m.nickname}</td>
+                <td>${m.game_count}</td>
+                <td>${m.win_rate}%（${m.win_count}${t("times")}）</td>
+                <td class="${netClass} net-cell">${netStr}</td>
+            </tr>
+        `;
+    });
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
 }

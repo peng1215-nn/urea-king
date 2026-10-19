@@ -10,6 +10,7 @@ from poker.services.organizer.change_password import update_nickname_service
 from poker.services.organizer.change_password import update_password_service
 from poker.services.organizer.game_log import get_game_logs_service
 from poker.services.organizer.game_log import get_stats_service
+from poker.services.organizer.game_log import get_member_stats_service
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
 
@@ -131,3 +132,12 @@ def get_stats(request: Request):
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
     return get_stats_service(group_id=int(group_id))
+
+@router.get("/user/game-log/member-stats")
+def get_member_stats(request: Request):
+    if not require_user(request):
+        return {"success": False, "message": "permissionDenied"}
+    group_id = get_group_id(request)
+    if not group_id:
+        return {"success": False, "message": "noGroupSelected"}
+    return get_member_stats_service(group_id=int(group_id))

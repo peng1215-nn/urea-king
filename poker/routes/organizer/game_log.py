@@ -7,6 +7,7 @@ from fastapi.responses import RedirectResponse
 from poker.services.organizer.game_log import get_game_logs_service
 from poker.services.organizer.game_log import get_stats_service
 from poker.services.organizer.game_log import delete_game_log_service
+from poker.services.organizer.game_log import get_member_stats_service
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
 
@@ -69,3 +70,14 @@ def delete_game_log(request: Request, game_id: int = Form(...)):
         return {"success": False, "message": "noGroupSelected"}
 
     return delete_game_log_service(game_id=game_id, group_id=int(group_id))
+
+@router.get("/organizer/game-log/member-stats")
+def get_member_stats(request: Request):
+    if not require_organizer(request):
+        return {"success": False, "message": "permissionDenied"}
+
+    group_id = get_group_id(request)
+    if not group_id:
+        return {"success": False, "message": "noGroupSelected"}
+
+    return get_member_stats_service(group_id=int(group_id))

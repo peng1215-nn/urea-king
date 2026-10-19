@@ -314,3 +314,61 @@ def delete_game_log_service(game_id: int, group_id: int):
         return {"success": False, "message": str(e)}
     finally:
         db.close()
+
+def get_member_stats_service(group_id: int):
+    db = SessionLocal()
+    try:
+        finished_games = db.query(PokerGame).filter(
+            PokerGame.group_id == group_id,
+            PokerGame.status == "finished",
+        ).all()
+
+        game_ids = [g.id for g in finished_games]
+
+        if not game_ids:
+            return {"success": True, "members": []}
+
+        all_players = db.query(PokerGamePlayer, User).join(
+            User, PokerGamePlayer.user_id == User.id
+        ).filter(
+            PokerGamePlayer.game_id.in_(game_ids),
+        ).all()
+
+        user_stats = {}
+        for p, u in all_players:
+            uid = p.user_id
+            net = p.net if p.net is not None else 0
+            if uid not in user_stats:
+                user_stats[uid] = {
+                    "user_id": uid,
+                    "nickname": p.nickname or u.username,
+                    "win_count": 0,
+                    "game_count": 0,
+                    "total_net": 0,
+                }
+            user_stats[uid]["game_count"] += 1
+            user_stats[uid]["total_net"] += net
+            if net > 0:
+                user_stats[uid]["win_count"] += 1
+
+        members = []
+        for uid, s in user_stats.items():
+            game_count = s["game_count"]
+            win_rate = round(s["win_count"] / game_count * 100, 1) if game_count > 0 else 0
+            members.append({
+                "user_id": uid,
+                "nickname": s["nickname"],
+                "game_count": game_count,
+                "win_count": s["win_count"],
+                "win_rate": win_rate,
+                "total_net": s["total_net"],
+            })
+
+        # 按总盈亏降序排列
+        members.sort(key=lambda x: x["total_net"], reverse=True)
+
+        return {"success": True, "members": members}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+    finally:
+        db.close()
