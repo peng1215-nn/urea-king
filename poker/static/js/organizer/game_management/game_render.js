@@ -117,8 +117,12 @@ function renderPlayerList() {
                     </div>
                 `;
             } else {
+                const proxyBtn = player.allow_organizer_chip_op
+                    ? `<button class="btn-small btn-proxy-buyin" onclick="openProxyBuyinModal(${player.user_id})">${t("proxyBuyin")}</button>`
+                    : "";
                 actionsHtml = `
                     <div class="player-action-row">
+                        ${proxyBtn}
                         <button class="btn-small btn-remove" onclick="removePlayer(${player.user_id})">${t("removeFromGame")}</button>
                     </div>
                 `;

@@ -35,6 +35,13 @@ def get_ongoing_games_service(group_id: int):
                 ChipRequest.status == "pending",
             ).order_by(ChipRequest.requested_at.desc()).all()
 
+            # 查询本组有哪些用户授权了局头代买
+            auth_records = db.query(UserGroupRole).filter(
+                UserGroupRole.group_id == game.group_id,
+                UserGroupRole.role == "user",
+            ).all()
+            auth_map = {r.user_id: r.allow_organizer_chip_op for r in auth_records}
+
             players_data = []
             for p, u in players:
                 pd = _format_player(p, u)
@@ -43,6 +50,7 @@ def get_ongoing_games_service(group_id: int):
                     pd["buy_in_normal"] = breakdown["normal"]
                     pd["buy_in_insurance"] = breakdown["insurance"]
                     pd["buy_in_anti"] = breakdown["anti"]
+                pd["allow_organizer_chip_op"] = auth_map.get(u.id, 0)
                 players_data.append(pd)
 
             result.append({
@@ -444,6 +452,68 @@ def organizer_buyin_service(game_id: int, group_id: int, user_id: int, amount: i
             requested_at=now_columbus_naive(),
             resolved_at=now_columbus_naive(),
             resolved_by=user_id,
+        )
+        db.add(req)
+        db.commit()
+
+        return {"success": True}
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "message": str(e)}
+    finally:
+        db.close()
+
+
+def organizer_proxy_buyin_service(game_id: int, group_id: int, organizer_id: int, target_user_id: int, amount: int):
+    """局头代替玩家买入（需要玩家已授权 allow_organizer_chip_op）"""
+    db = SessionLocal()
+    try:
+        game = db.query(PokerGame).filter(
+            PokerGame.id == game_id,
+            PokerGame.group_id == group_id,
+            PokerGame.status == "ongoing",
+        ).first()
+
+        if not game:
+            return {"success": False, "message": "gameNotFound"}
+
+        if amount <= 0:
+            return {"success": False, "message": "invalidAmount"}
+
+        # 检查目标玩家是否授权了局头代买
+        auth = db.query(UserGroupRole).filter(
+            UserGroupRole.user_id == target_user_id,
+            UserGroupRole.group_id == group_id,
+            UserGroupRole.role == "user",
+        ).first()
+
+        if not auth or not auth.allow_organizer_chip_op:
+            return {"success": False, "message": "proxyBuyinNotAuthorized"}
+
+        # 确认玩家在局中
+        player = db.query(PokerGamePlayer).filter(
+            PokerGamePlayer.game_id == game_id,
+            PokerGamePlayer.user_id == target_user_id,
+            PokerGamePlayer.is_active == 1,
+        ).first()
+
+        if not player:
+            return {"success": False, "message": "playerNotInGame"}
+
+        target_user = db.query(User).filter(User.id == target_user_id).first()
+
+        player.total_buy_in += amount
+
+        req = ChipRequest(
+            game_id=game_id,
+            user_id=target_user_id,
+            nickname=target_user.nickname or target_user.username if target_user else "",
+            type="normal",
+            amount=amount,
+            status="approved",
+            requested_at=now_columbus_naive(),
+            resolved_at=now_columbus_naive(),
+            resolved_by=organizer_id,
         )
         db.add(req)
         db.commit()

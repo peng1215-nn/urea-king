@@ -240,6 +240,56 @@ function closeOrganizerBuyinModal() {
     organizerBuyinUserId = null;
 }
 
+// ── 代买 modal ──
+let proxyBuyinUserId = null;
+
+function openProxyBuyinModal(userId) {
+    proxyBuyinUserId = userId;
+    document.getElementById("proxy-buyin-amount").value = "";
+    document.getElementById("proxy-buyin-message").innerText = "";
+    document.getElementById("proxy-buyin-modal").style.display = "flex";
+}
+
+function closeProxyBuyinModal() {
+    document.getElementById("proxy-buyin-modal").style.display = "none";
+    proxyBuyinUserId = null;
+}
+
+async function confirmProxyBuyin() {
+    const messageBox = document.getElementById("proxy-buyin-message");
+    messageBox.style.color = "#ff8a8a";
+    messageBox.innerText = "";
+
+    const amount = parseInt(document.getElementById("proxy-buyin-amount").value);
+    if (!amount || amount <= 0) {
+        messageBox.innerText = t("invalidAmount");
+        return;
+    }
+
+    if (!currentGame || !proxyBuyinUserId) return;
+
+    const fd = new FormData();
+    fd.append("game_id", currentGame.id);
+    fd.append("target_user_id", proxyBuyinUserId);
+    fd.append("amount", amount);
+
+    const res = await fetch("/organizer/game/proxy-buyin", { method: "POST", body: fd });
+    const data = await res.json();
+
+    if (!data.success) {
+        messageBox.innerText = t(data.message || "operationFailed");
+        return;
+    }
+
+    closeProxyBuyinModal();
+
+    const gameMsg = document.getElementById("game-message");
+    gameMsg.style.color = "#5CFFB2";
+    gameMsg.innerText = t("proxyBuyinSuccess");
+
+    await loadGamePage();
+}
+
 async function confirmOrganizerBuyin() {
     const messageBox = document.getElementById("organizer-buyin-message");
     messageBox.style.color = "#ff8a8a";

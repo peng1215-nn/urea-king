@@ -273,6 +273,30 @@
     </div>
 </div>
 
+<!-- 代买 Modal -->
+<div id="proxy-buyin-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content">
+        <h3 data-i18n="proxyBuyin">代买筹码</h3>
+        <p class="modal-desc" data-i18n="proxyBuyinDesc">代替该玩家买入筹码，直接计入其总买入。</p>
+        <div class="form-group">
+            <label data-i18n="amount">金额</label>
+            <input
+                type="number"
+                id="proxy-buyin-amount"
+                class="modal-input"
+                min="1"
+                data-i18n-placeholder="organizerBuyinPlaceholder"
+                placeholder="请输入买入数额"
+            >
+        </div>
+        <div id="proxy-buyin-message" class="operation-message"></div>
+        <div class="custom-modal-actions">
+            <button class="modal-confirm-button" onclick="confirmProxyBuyin()" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" onclick="closeProxyBuyinModal()" data-i18n="cancel">取消</button>
+        </div>
+    </div>
+</div>
+
 <div id="settlement-modal" class="custom-modal" style="display:none;">
     <div class="custom-modal-content modal-wide">
 

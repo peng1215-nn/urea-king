@@ -688,6 +688,15 @@
     background: rgba(255, 215, 64, 0.26);
 }
 
+.btn-proxy-buyin {
+    background: rgba(92, 255, 178, 0.12);
+    color: #5CFFB2;
+}
+
+.btn-proxy-buyin:hover {
+    background: rgba(92, 255, 178, 0.24);
+}
+
 body {
     background:
         linear-gradient(135deg, rgba(15,15,22,0.82), rgba(21,25,40,0.82), rgba(26,32,51,0.82)),

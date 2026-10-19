@@ -239,6 +239,10 @@ const organizerTranslations = {
         buyinSuccess: "买入成功。",
         organizerBuyinPlaceholder: "请输入买入数额",
         amountPlaceholder: "请输入金额",
+        proxyBuyin: "代买",
+        proxyBuyinDesc: "代替该玩家买入筹码，直接计入其总买入。",
+        proxyBuyinSuccess: "代买成功。",
+        proxyBuyinNotAuthorized: "该玩家未授权代买操作。",
     },
 
     en: {
@@ -481,6 +485,10 @@ const organizerTranslations = {
         buyinSuccess: "Buy-in successful.",
         organizerBuyinPlaceholder: "Enter buy-in amount",
         amountPlaceholder: "Enter amount",
+        proxyBuyin: "Proxy Buy-in",
+        proxyBuyinDesc: "Buy chips on behalf of this player. Applied directly to their total.",
+        proxyBuyinSuccess: "Proxy buy-in successful.",
+        proxyBuyinNotAuthorized: "This player has not authorized proxy buy-in.",
     },
 };
 

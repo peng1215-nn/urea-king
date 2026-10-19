@@ -15,6 +15,7 @@ from poker.services.organizer.game_management import get_game_history_service
 from poker.services.organizer.game_management import get_group_members_for_game_service
 from poker.services.organizer.game_management import get_ongoing_games_service
 from poker.services.organizer.game_management import organizer_buyin_service
+from poker.services.organizer.game_management import organizer_proxy_buyin_service
 from poker.services.organizer.game_management import reject_chip_request_service
 from poker.services.organizer.game_management import remove_player_from_game_service
 from poker.services.organizer.game_management import exit_player_from_game_service
@@ -257,6 +258,31 @@ def organizer_buyin(
         user_id=user_id,
         amount=amount,
         buy_type=buy_type,
+    )
+
+
+@router.post("/organizer/game/proxy-buyin")
+def proxy_buyin(
+    request: Request,
+    game_id: int = Form(...),
+    target_user_id: int = Form(...),
+    amount: int = Form(...),
+):
+    if not require_organizer(request):
+        return {"success": False, "message": "permissionDenied"}
+
+    group_id = get_group_id(request)
+    organizer_id = get_user_id(request)
+
+    if not group_id or not organizer_id:
+        return {"success": False, "message": "noGroupSelected"}
+
+    return organizer_proxy_buyin_service(
+        game_id=game_id,
+        group_id=int(group_id),
+        organizer_id=int(organizer_id),
+        target_user_id=target_user_id,
+        amount=amount,
     )
 
 
