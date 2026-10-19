@@ -10,6 +10,11 @@ function openGameSettings() {
 function closeGameSettings() {
     document.getElementById('game-settings-modal').style.display = 'none';
     pendingChipAuth = {};
+    const btn = document.querySelector('.settings-apply-btn');
+    if (btn) {
+        btn.disabled = false;
+        btn.textContent = '应用';
+    }
 }
 
 document.addEventListener('click', function(e) {
