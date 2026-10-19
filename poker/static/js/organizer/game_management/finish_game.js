@@ -32,6 +32,7 @@ function openFinishGameModal() {
         container.appendChild(row);
     });
 
+    document.getElementById("finish-game-note").value = "";
     document.getElementById("finish-message").innerText = "";
     document.getElementById("finish-confirm-btn").dataset.force = "false";
     document.getElementById("finish-confirm-btn").innerText = t("finishAndCheck");
@@ -110,6 +111,8 @@ async function confirmFinishGame() {
         playerCashOuts.push({ user_id: userId, cash_out: cashOut });
     }
 
+    const note = document.getElementById("finish-game-note").value.trim();
+
     const res = await fetch("/organizer/game/finish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -119,6 +122,7 @@ async function confirmFinishGame() {
             organizer_insurance_final: 0,
             organizer_anti_final: 0,
             force: force,
+            note: note,
         }),
     });
 

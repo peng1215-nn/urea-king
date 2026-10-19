@@ -8,6 +8,7 @@ from poker.services.organizer.game_log import get_game_logs_service
 from poker.services.organizer.game_log import get_stats_service
 from poker.services.organizer.game_log import delete_game_log_service
 from poker.services.organizer.game_log import get_member_stats_service
+from poker.services.organizer.game_log import get_member_trend_service
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
 
@@ -37,7 +38,7 @@ def game_logs_page(request: Request):
 
 
 @router.get("/organizer/game-log/list")
-def get_game_logs(request: Request, page: int = 1):
+def get_game_logs(request: Request, page: int = 1, q: str = ""):
     if not require_organizer(request):
         return {"success": False, "message": "permissionDenied"}
 
@@ -45,7 +46,7 @@ def get_game_logs(request: Request, page: int = 1):
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
 
-    return get_game_logs_service(group_id=int(group_id), page=page)
+    return get_game_logs_service(group_id=int(group_id), page=page, q=q)
 
 
 @router.get("/organizer/game-log/stats")
@@ -81,3 +82,13 @@ def get_member_stats(request: Request):
         return {"success": False, "message": "noGroupSelected"}
 
     return get_member_stats_service(group_id=int(group_id))
+
+
+@router.get("/organizer/game-log/member-trend")
+def get_member_trend(request: Request, user_id: int):
+    if not require_organizer(request):
+        return {"success": False, "message": "permissionDenied"}
+    group_id = get_group_id(request)
+    if not group_id:
+        return {"success": False, "message": "noGroupSelected"}
+    return get_member_trend_service(group_id=int(group_id), user_id=user_id)

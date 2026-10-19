@@ -329,3 +329,76 @@ body {
 .net-positive { color: #4caf7d; }
 .net-negative { color: #f44336; }
 .net-zero { color: rgba(255,255,255,0.5); }
+
+/* 搜索框 */
+.log-search-bar {
+    position: relative;
+    margin-bottom: 14px;
+}
+.log-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: #fff;
+    padding: 10px 16px 10px 40px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.log-search-input:focus { border-color: rgba(108,158,248,0.6); }
+.log-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255,255,255,0.35);
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+
+/* 备注标签 */
+.log-game-note {
+    font-size: 0.78rem;
+    color: rgba(255,215,64,0.75);
+    margin-top: 2px;
+}
+.log-game-note i { margin-right: 4px; }
+
+/* 成员统计排序 */
+.member-stats-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+.member-stats-table th.sortable:hover { color: rgba(255,255,255,0.9); }
+.sort-arrow { margin-left: 4px; opacity: 0.4; font-size: 0.75rem; }
+.sort-arrow.active { opacity: 1; color: #6c9ef8; }
+.member-row { cursor: pointer; }
+.member-row:hover { background: rgba(108,158,248,0.08) !important; }
+
+/* 走势图弹窗 */
+.trend-modal-content {
+    max-width: 680px !important;
+    width: 95vw;
+}
+.trend-chart-wrap {
+    position: relative;
+    height: 300px;
+    margin: 16px 0 8px;
+}
+.trend-chart-wrap canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+.trend-summary {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.7);
+    margin: 8px 0 4px;
+}
+.trend-summary .net-positive { color: #4caf7d; font-weight: 600; }
+.trend-summary .net-negative { color: #f44336; font-weight: 600; }

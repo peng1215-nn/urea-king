@@ -928,3 +928,28 @@ body {
     border-color: rgba(255,100,100,0.4);
     color: #ff6b6b;
 }
+/* 结束弹窗备注 */
+.finish-note-row {
+    margin: 10px 0 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.finish-note-label {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.55);
+}
+.finish-note-input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: #fff;
+    padding: 8px 12px;
+    font-size: 0.88rem;
+    resize: none;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+.finish-note-input:focus { border-color: rgba(108,158,248,0.5); }

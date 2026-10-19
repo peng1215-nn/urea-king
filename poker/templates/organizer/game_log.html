@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title data-i18n="gameLogs">牌局日志</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
     <link rel="stylesheet" href="/static/css/organizer/game_log.css?v={{ static_version }}">
 </head>
@@ -36,6 +37,10 @@
 
     <!-- 牌局记录 -->
     <div id="view-logs">
+        <div class="log-search-bar">
+            <input id="log-search-input" class="log-search-input" type="text" data-i18n-placeholder="searchGameLogs" placeholder="搜索牌局名称或备注…" oninput="onSearch()">
+            <i class="fa-solid fa-magnifying-glass log-search-icon"></i>
+        </div>
         <div id="game-log-list" class="game-log-list">
             <div class="log-loading" data-i18n="loading">加载中...</div>
         </div>
@@ -56,6 +61,19 @@
         </div>
     </div>
 
+</div>
+
+<div id="member-trend-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content modal-wide trend-modal-content">
+        <h3 id="trend-modal-title">走势图</h3>
+        <div class="trend-chart-wrap">
+            <canvas id="trend-chart"></canvas>
+        </div>
+        <div class="trend-summary" id="trend-summary"></div>
+        <div class="custom-modal-actions">
+            <button class="modal-cancel-button" onclick="closeMemberTrendModal()" data-i18n="close">关闭</button>
+        </div>
+    </div>
 </div>
 
 <div id="delete-game-modal" class="custom-modal" style="display:none;">

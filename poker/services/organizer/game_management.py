@@ -534,6 +534,7 @@ def finish_game_service(
     organizer_insurance_final: int = 0,
     organizer_anti_final: int = 0,
     force: bool = False,
+    note: str = "",
 ):
     db = SessionLocal()
     try:
@@ -579,6 +580,8 @@ def finish_game_service(
         game.total_cash_out = total_cash_out
         game.is_balanced = is_balanced
         game.player_count = len([p for p in players if p.total_buy_in > 0 or (p.cash_out or 0) > 0])
+        if note:
+            game.note = note.strip()
 
         db.commit()
 

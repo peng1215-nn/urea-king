@@ -11,6 +11,7 @@ from poker.services.organizer.change_password import update_password_service
 from poker.services.organizer.game_log import get_game_logs_service
 from poker.services.organizer.game_log import get_stats_service
 from poker.services.organizer.game_log import get_member_stats_service
+from poker.services.organizer.game_log import get_member_trend_service
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
 
@@ -114,14 +115,14 @@ def game_logs_page(request: Request):
 
 
 @router.get("/user/game-log/list")
-def get_game_logs(request: Request, page: int = 1):
+def get_game_logs(request: Request, page: int = 1, q: str = ""):
     if not require_user(request):
         return {"success": False, "message": "permissionDenied"}
     group_id = get_group_id(request)
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
     user_id = get_user_id(request)
-    return get_game_logs_service(group_id=int(group_id), page=page, viewer_user_id=int(user_id) if user_id else None)
+    return get_game_logs_service(group_id=int(group_id), page=page, viewer_user_id=int(user_id) if user_id else None, q=q)
 
 
 @router.get("/user/game-log/stats")
@@ -141,3 +142,13 @@ def get_member_stats(request: Request):
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
     return get_member_stats_service(group_id=int(group_id))
+
+
+@router.get("/user/game-log/member-trend")
+def get_member_trend(request: Request, user_id: int):
+    if not require_user(request):
+        return {"success": False, "message": "permissionDenied"}
+    group_id = get_group_id(request)
+    if not group_id:
+        return {"success": False, "message": "noGroupSelected"}
+    return get_member_trend_service(group_id=int(group_id), user_id=user_id)

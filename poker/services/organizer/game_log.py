@@ -9,18 +9,23 @@ from poker.models import UserGroupRole
 PAGE_SIZE = 5
 
 
-def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = None):
+def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = None, q: str = ""):
     db = SessionLocal()
     try:
-        total = db.query(PokerGame).filter(
+        base_filter = [
             PokerGame.group_id == group_id,
             PokerGame.status == "finished",
-        ).count()
+        ]
+        if q:
+            from sqlalchemy import or_
+            base_filter.append(or_(
+                PokerGame.name.ilike(f"%{q}%"),
+                PokerGame.note.ilike(f"%{q}%"),
+            ))
 
-        games = db.query(PokerGame).filter(
-            PokerGame.group_id == group_id,
-            PokerGame.status == "finished",
-        ).order_by(PokerGame.ended_at.desc()).offset((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).all()
+        total = db.query(PokerGame).filter(*base_filter).count()
+
+        games = db.query(PokerGame).filter(*base_filter).order_by(PokerGame.ended_at.desc()).offset((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).all()
 
         result = []
         for game in games:
@@ -84,6 +89,7 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
             result.append({
                 "id": game.id,
                 "name": game.name or "",
+                "note": game.note or "",
                 "started_at": game.started_at.strftime("%Y-%m-%d %H:%M") if game.started_at else "",
                 "ended_at": game.ended_at.strftime("%Y-%m-%d %H:%M") if game.ended_at else "",
                 "duration": duration,
@@ -368,6 +374,38 @@ def get_member_stats_service(group_id: int):
         members.sort(key=lambda x: x["total_net"], reverse=True)
 
         return {"success": True, "members": members}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+    finally:
+        db.close()
+
+
+def get_member_trend_service(group_id: int, user_id: int):
+    db = SessionLocal()
+    try:
+        records = db.query(PokerGame, PokerGamePlayer).join(
+            PokerGamePlayer, PokerGame.id == PokerGamePlayer.game_id
+        ).filter(
+            PokerGame.group_id == group_id,
+            PokerGame.status == "finished",
+            PokerGamePlayer.user_id == user_id,
+        ).order_by(PokerGame.ended_at.asc()).all()
+
+        points = []
+        cumulative = 0
+        for game, player in records:
+            net = player.net if player.net is not None else 0
+            cumulative += net
+            points.append({
+                "game_name": game.name or game.started_at.strftime("%m/%d") if game.started_at else str(game.id),
+                "date": game.ended_at.strftime("%Y-%m-%d") if game.ended_at else "",
+                "net": net,
+                "cumulative": cumulative,
+                "buy_in": player.total_buy_in or 0,
+                "cash_out": player.cash_out or 0,
+            })
+
+        return {"success": True, "points": points}
     except Exception as e:
         return {"success": False, "message": str(e)}
     finally:

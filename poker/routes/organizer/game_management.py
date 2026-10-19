@@ -292,6 +292,7 @@ class FinishGameBody(BaseModel):
     player_cash_outs: List[dict]
     organizer_insurance_final: int = 0
     organizer_anti_final: int = 0
+    note: str = ""
 
 
 @router.post("/organizer/game/finish")
@@ -313,6 +314,7 @@ def finish_game(request: Request, body: FinishGameBody):
         organizer_insurance_final=body.organizer_insurance_final,
         organizer_anti_final=body.organizer_anti_final,
         force=body.force,
+        note=body.note,
     )
 
     if result.get("success"):

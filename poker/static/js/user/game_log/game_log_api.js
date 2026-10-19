@@ -1,5 +1,7 @@
-async function fetchGameLogs(page) {
-    const res = await fetch(`/user/game-log/list?page=${page}`);
+async function fetchGameLogs(page, q = "") {
+    const params = new URLSearchParams({ page });
+    if (q) params.set("q", q);
+    const res = await fetch(`/user/game-log/list?${params}`);
     return await res.json();
 }
 
