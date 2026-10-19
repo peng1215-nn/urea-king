@@ -6,25 +6,25 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
-from routes.admin.admin import router as admin_router
-from routes.admin import system_logs
-from routes.admin import invite_management
-from routes.admin import announcement
-from routes.common.avatar import router as avatar_router
-from routes.common.common import router as common_router
-from routes.auth.login import router as login_router
-from routes.auth.register import router as register_router
-from routes.admin.change_password import router as admin_change_password_router
-from routes.organizer.change_password import router as organizer_change_password_router
-from routes.organizer.announcement import router as organizer_announcement_router
-from routes.organizer.invite_management import router as organizer_invite_router
-from routes.organizer.game_log import router as organizer_game_log_router
-from routes.organizer.organizer import router as organizer_router
-from routes.organizer.game_management import router as game_router
-from routes.auth.group_join import router as group_join_router
-from routes.user.dashboard import router as user_dashboard_router
-from routes.user.game import router as user_game_router
-from routes.user.misc import router as user_misc_router
+from poker.routes.admin.admin import router as admin_router
+from poker.routes.admin import system_logs
+from poker.routes.admin import invite_management
+from poker.routes.admin import announcement
+from poker.routes.common.avatar import router as avatar_router
+from poker.routes.common.common import router as common_router
+from poker.routes.auth.login import router as login_router
+from poker.routes.auth.register import router as register_router
+from poker.routes.admin.change_password import router as admin_change_password_router
+from poker.routes.organizer.change_password import router as organizer_change_password_router
+from poker.routes.organizer.announcement import router as organizer_announcement_router
+from poker.routes.organizer.invite_management import router as organizer_invite_router
+from poker.routes.organizer.game_log import router as organizer_game_log_router
+from poker.routes.organizer.organizer import router as organizer_router
+from poker.routes.organizer.game_management import router as game_router
+from poker.routes.auth.group_join import router as group_join_router
+from poker.routes.user.dashboard import router as user_dashboard_router
+from poker.routes.user.game import router as user_game_router
+from poker.routes.user.misc import router as user_misc_router
 
 
 load_dotenv()
@@ -65,7 +65,7 @@ app.add_middleware(
 
 app.mount(
     "/static",
-    StaticFiles(directory="static"),
+    StaticFiles(directory="poker/static"),
     name="static"
 )
 
