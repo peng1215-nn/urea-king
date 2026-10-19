@@ -439,12 +439,12 @@ body {
     color: rgba(255,255,255,0.85);
 }
 
-/* ── 滑轨开关 ── */
+/* ── 滑轨开关（3D内凹风格）── */
 .toggle-switch {
     position: relative;
     display: inline-block;
-    width: 44px;
-    height: 24px;
+    width: 56px;
+    height: 30px;
     flex-shrink: 0;
 }
 .toggle-switch input {
@@ -455,26 +455,37 @@ body {
 .toggle-slider {
     position: absolute;
     inset: 0;
-    background: rgba(255,255,255,0.15);
-    border-radius: 24px;
+    background: #7a3a3a;
+    border-radius: 30px;
     cursor: pointer;
-    transition: background 0.25s;
+    transition: background 0.28s;
+    /* 内凹槽感：内阴影模拟凹陷 */
+    box-shadow:
+        inset 0 3px 6px rgba(0,0,0,0.45),
+        inset 0 1px 3px rgba(0,0,0,0.3);
 }
 .toggle-slider::before {
     content: '';
     position: absolute;
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     left: 3px;
     top: 3px;
     background: #ffffff;
     border-radius: 50%;
-    transition: transform 0.25s;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+    /* 圆钮立体感 */
+    box-shadow:
+        0 3px 8px rgba(0,0,0,0.4),
+        0 1px 3px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.9);
 }
 .toggle-switch input:checked + .toggle-slider {
-    background: #3fd68f;
+    background: #3a9e5f;
+    box-shadow:
+        inset 0 3px 6px rgba(0,0,0,0.35),
+        inset 0 1px 3px rgba(0,0,0,0.2);
 }
 .toggle-switch input:checked + .toggle-slider::before {
-    transform: translateX(20px);
+    transform: translateX(26px);
 }
