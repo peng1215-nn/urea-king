@@ -19,7 +19,7 @@
             <p class="page-subtitle" data-i18n="gameManagementUserDesc">查看当前进行中的牌局，提交筹码买入申请。</p>
         </div>
         <div class="topbar-actions">
-            <button class="game-settings-btn" onclick="openGameSettings()" title="牌局设置">
+            <button class="game-settings-btn" onclick="openGameSettings()" data-i18n-title="gameSettings" title="牌局设置">
                 <i class="fa-solid fa-sliders"></i>
             </button>
             <img id="avatar-preview" class="avatar" src="/static/images/default_avatar.jpg" alt="avatar">
@@ -57,13 +57,13 @@
 <div id="game-settings-modal" class="custom-modal" style="display:none;">
     <div class="custom-modal-content settings-modal-content">
         <div class="settings-modal-header">
-            <h3><i class="fa-solid fa-sliders"></i> 牌局设置</h3>
+            <h3><i class="fa-solid fa-sliders"></i> <span data-i18n="gameSettings">牌局设置</span></h3>
             <button class="settings-close-btn" onclick="closeGameSettings()"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div class="settings-section">
-            <div class="settings-section-title">筹码操作授权</div>
-            <p class="settings-section-desc">开启后，局头可代替您进行筹码买入与结算操作。</p>
+            <div class="settings-section-title" data-i18n="chipAuthTitle">筹码操作授权</div>
+            <p class="settings-section-desc" data-i18n="chipAuthDesc">开启后，局头可代替您进行筹码买入与结算操作。</p>
             <div id="chip-auth-list" class="chip-auth-list">
                 <div class="settings-loading">加载中...</div>
             </div>
@@ -72,7 +72,7 @@
         <!-- 未来可在此添加更多设置区块 -->
 
         <div class="settings-modal-footer">
-            <button class="settings-apply-btn" onclick="applyGameSettings()">应用</button>
+            <button class="settings-apply-btn" onclick="applyGameSettings()" data-i18n="apply">应用</button>
         </div>
 
     </div>

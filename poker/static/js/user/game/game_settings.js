@@ -13,7 +13,7 @@ function closeGameSettings() {
     const btn = document.querySelector('.settings-apply-btn');
     if (btn) {
         btn.disabled = false;
-        btn.textContent = '应用';
+        btn.textContent = t('apply');
     }
 }
 
@@ -24,17 +24,17 @@ document.addEventListener('click', function(e) {
 
 function loadChipAuthSettings() {
     const list = document.getElementById('chip-auth-list');
-    list.innerHTML = '<div class="settings-loading">加载中...</div>';
+    list.innerHTML = `<div class="settings-loading">${t('settingsLoading')}</div>`;
 
     fetch('/user/game/chip-auth-settings')
         .then(r => r.json())
         .then(data => {
             if (!data.success) {
-                list.innerHTML = '<div class="settings-loading">加载失败</div>';
+                list.innerHTML = `<div class="settings-loading">${t('settingsLoadError')}</div>`;
                 return;
             }
             if (data.settings.length === 0) {
-                list.innerHTML = '<div class="settings-loading">暂无所属组</div>';
+                list.innerHTML = `<div class="settings-loading">${t('settingsNoGroup')}</div>`;
                 return;
             }
             list.innerHTML = data.settings.map(s => `
@@ -53,7 +53,7 @@ function loadChipAuthSettings() {
             `).join('');
         })
         .catch(() => {
-            list.innerHTML = '<div class="settings-loading">加载失败</div>';
+            list.innerHTML = `<div class="settings-loading">${t('settingsLoadError')}</div>`;
         });
 }
 
@@ -71,7 +71,7 @@ function applyGameSettings() {
     }
 
     btn.disabled = true;
-    btn.textContent = '保存中...';
+    btn.textContent = t('settingsSaving');
 
     const requests = keys.map(groupId =>
         fetch('/user/game/chip-auth-update', {
@@ -87,13 +87,13 @@ function applyGameSettings() {
             if (allOk) {
                 closeGameSettings();
             } else {
-                btn.textContent = '应用';
+                btn.textContent = t('apply');
                 btn.disabled = false;
                 loadChipAuthSettings();
             }
         })
         .catch(() => {
-            btn.textContent = '应用';
+            btn.textContent = t('apply');
             btn.disabled = false;
         });
 }

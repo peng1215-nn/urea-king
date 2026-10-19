@@ -42,6 +42,16 @@ window.userTranslations = {
         requestRejected: "已拒绝",
         invalidAmount: "请输入有效的数额。",
 
+        // 牌局设置
+        gameSettings: "牌局设置",
+        chipAuthTitle: "筹码操作授权",
+        chipAuthDesc: "开启后，局头可代替您进行筹码买入与结算操作。",
+        apply: "应用",
+        settingsLoading: "加载中...",
+        settingsLoadError: "加载失败",
+        settingsNoGroup: "暂无所属组",
+        settingsSaving: "保存中...",
+
         // 牌局日志
         gameLogs: "牌局日志",
         gameLogsDesc: "查看每局的开始时间、结束时间、总筹码、参与者盈亏与统计结果。",
@@ -158,6 +168,16 @@ window.userTranslations = {
         requestApproved: "Approved",
         requestRejected: "Rejected",
         invalidAmount: "Please enter a valid amount.",
+
+        // Game Settings
+        gameSettings: "Game Settings",
+        chipAuthTitle: "Chip Op Authorization",
+        chipAuthDesc: "When enabled, the organizer can buy chips and settle on your behalf.",
+        apply: "Apply",
+        settingsLoading: "Loading...",
+        settingsLoadError: "Failed to load",
+        settingsNoGroup: "No groups found",
+        settingsSaving: "Saving...",
 
         // Game Logs
         gameLogs: "Game Logs",

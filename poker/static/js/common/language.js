@@ -112,6 +112,18 @@ function applyLanguage(language = getCurrentLanguage()) {
             }
         });
 
+    document
+        .querySelectorAll("[data-i18n-title]")
+        .forEach(element => {
+            const key =
+                element.getAttribute("data-i18n-title");
+
+            if (key && translations[key]) {
+                element.title =
+                    translations[key];
+            }
+        });
+
     const toggleButton =
         document.getElementById("language-toggle");
 
