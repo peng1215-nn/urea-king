@@ -489,3 +489,29 @@ body {
 .toggle-switch input:checked + .toggle-slider::before {
     transform: translateX(26px);
 }
+
+/* ── 设置弹窗底部 ── */
+.settings-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 24px 20px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+}
+.settings-apply-btn {
+    padding: 8px 24px;
+    border-radius: 8px;
+    border: none;
+    background: #3a9e5f;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+}
+.settings-apply-btn:hover {
+    background: #2e8a50;
+}
+.settings-apply-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
