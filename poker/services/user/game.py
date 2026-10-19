@@ -97,6 +97,56 @@ def get_user_ongoing_games_service(group_id: int, user_id: int):
         db.close()
 
 
+def get_chip_auth_settings_service(user_id: int):
+    """获取用户在所有组里的局头筹码授权状态"""
+    db = SessionLocal()
+    try:
+        from poker.models import Group
+        records = db.query(UserGroupRole, Group).join(
+            Group, UserGroupRole.group_id == Group.id
+        ).filter(
+            UserGroupRole.user_id == user_id,
+            UserGroupRole.role == "user",
+        ).all()
+
+        settings = []
+        for ugr, grp in records:
+            settings.append({
+                "group_id": grp.id,
+                "group_name": grp.group_name or grp.group_code,
+                "allow_organizer_chip_op": ugr.allow_organizer_chip_op or 0,
+            })
+
+        return {"success": True, "settings": settings}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+    finally:
+        db.close()
+
+
+def update_chip_auth_service(user_id: int, group_id: int, allow: int):
+    """更新某个组的局头筹码授权"""
+    db = SessionLocal()
+    try:
+        ugr = db.query(UserGroupRole).filter(
+            UserGroupRole.user_id == user_id,
+            UserGroupRole.group_id == group_id,
+            UserGroupRole.role == "user",
+        ).first()
+
+        if not ugr:
+            return {"success": False, "message": "recordNotFound"}
+
+        ugr.allow_organizer_chip_op = 1 if allow else 0
+        db.commit()
+        return {"success": True}
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "message": str(e)}
+    finally:
+        db.close()
+
+
 def submit_buyin_request_service(game_id: int, group_id: int, user_id: int, amount: int):
     db = SessionLocal()
     try:

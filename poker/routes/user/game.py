@@ -6,6 +6,8 @@ from fastapi.responses import RedirectResponse
 
 from poker.services.user.game import get_user_ongoing_games_service
 from poker.services.user.game import submit_buyin_request_service
+from poker.services.user.game import get_chip_auth_settings_service
+from poker.services.user.game import update_chip_auth_service
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
 
@@ -52,6 +54,34 @@ def get_user_ongoing_games(request: Request):
     return get_user_ongoing_games_service(
         group_id=int(group_id),
         user_id=int(user_id),
+    )
+
+
+@router.get("/user/game/chip-auth-settings")
+def get_chip_auth_settings(request: Request):
+    if not require_user(request):
+        return {"success": False, "message": "permissionDenied"}
+    user_id = get_user_id(request)
+    if not user_id:
+        return {"success": False, "message": "notLoggedIn"}
+    return get_chip_auth_settings_service(user_id=int(user_id))
+
+
+@router.post("/user/game/chip-auth-update")
+def update_chip_auth(
+    request: Request,
+    group_id: int = Form(...),
+    allow: int = Form(...),
+):
+    if not require_user(request):
+        return {"success": False, "message": "permissionDenied"}
+    user_id = get_user_id(request)
+    if not user_id:
+        return {"success": False, "message": "notLoggedIn"}
+    return update_chip_auth_service(
+        user_id=int(user_id),
+        group_id=group_id,
+        allow=allow,
     )
 
 

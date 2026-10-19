@@ -19,6 +19,9 @@
             <p class="page-subtitle" data-i18n="gameManagementUserDesc">查看当前进行中的牌局，提交筹码买入申请。</p>
         </div>
         <div class="topbar-actions">
+            <button class="game-settings-btn" onclick="openGameSettings()" title="牌局设置">
+                <i class="fa-solid fa-sliders"></i>
+            </button>
             <img id="avatar-preview" class="avatar" src="/static/images/default_avatar.jpg" alt="avatar">
             <div class="role-tag">
                 <span class="status-dot"></span>
@@ -50,6 +53,27 @@
     </div>
 </div>
 
+<!-- 牌局设置 Modal -->
+<div id="game-settings-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content settings-modal-content">
+        <div class="settings-modal-header">
+            <h3><i class="fa-solid fa-sliders"></i> 牌局设置</h3>
+            <button class="settings-close-btn" onclick="closeGameSettings()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-section-title">筹码操作授权</div>
+            <p class="settings-section-desc">开启后，局头可代替您进行筹码买入与结算操作。</p>
+            <div id="chip-auth-list" class="chip-auth-list">
+                <div class="settings-loading">加载中...</div>
+            </div>
+        </div>
+
+        <!-- 未来可在此添加更多设置区块 -->
+
+    </div>
+</div>
+
 <div id="join-group-modal" class="custom-modal" style="display:none;">
     <div class="custom-modal-content">
         <h3 data-i18n="joinOtherGroup">加入其他组</h3>
@@ -61,6 +85,7 @@
     </div>
 </div>
 
+<script src="/static/js/user/game/game_settings.js?v={{ static_version }}"></script>
 <script src="/static/js/user/dashboard/group_join.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/user.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>

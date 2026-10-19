@@ -41,6 +41,7 @@ class UserGroupRole(Base):
     user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False)
     group_id = Column(Integer, ForeignKey("poker_groups.id"), nullable=False)
     role = Column(String(30), nullable=False, default="user")
+    allow_organizer_chip_op = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
