@@ -121,8 +121,8 @@ function renderPlayerList() {
                     ? `<button class="btn-small btn-proxy-buyin" onclick="openProxyBuyinModal(${player.user_id})">${t("proxyBuyin")}</button>`
                     : "";
                 actionsHtml = `
+                    ${proxyBtn ? `<div class="player-action-row">${proxyBtn}</div>` : ""}
                     <div class="player-action-row">
-                        ${proxyBtn}
                         <button class="btn-small btn-remove" onclick="removePlayer(${player.user_id})">${t("removeFromGame")}</button>
                     </div>
                 `;

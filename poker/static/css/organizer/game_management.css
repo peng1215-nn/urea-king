@@ -689,12 +689,12 @@
 }
 
 .btn-proxy-buyin {
-    background: rgba(92, 255, 178, 0.12);
-    color: #5CFFB2;
+    background: rgba(255, 215, 64, 0.14);
+    color: #FFD740;
 }
 
 .btn-proxy-buyin:hover {
-    background: rgba(92, 255, 178, 0.24);
+    background: rgba(255, 215, 64, 0.26);
 }
 
 body {
