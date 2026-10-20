@@ -203,9 +203,9 @@ body {
 
     body {
         flex-direction: column;
-        /* 移动端背景图：contain等比例完整显示，scroll去掉fixed闪烁 */
+        /* 移动端背景图：cover+scroll，全屏覆盖，去掉fixed避免闪烁 */
         background-attachment: scroll !important;
-        background-size: contain !important;
+        background-size: cover !important;
         background-position: center center !important;
     }
 
