@@ -386,31 +386,11 @@ body {
     .member-stats-table {
         font-size: 12px;
     }
-    .stats-row {
-        flex-wrap: wrap;
-        gap: 8px 12px;
-        padding: 12px 14px;
-    }
-    .stats-row-icon {
-        flex-shrink: 0;
-    }
     .stats-row-label {
-        width: auto;
-        flex: 1;
-        min-width: 80px;
-        font-size: 12px;
+        width: 100px;
     }
     .stats-row-value {
-        width: 100%;
-        font-size: 14px;
-        padding-left: 48px; /* indent past icon */
-    }
-    .stats-row-sub {
-        width: 100%;
-        text-align: left;
-        padding-left: 48px;
-        min-width: 0;
-        font-size: 12px;
+        white-space: nowrap;
     }
 }
 
