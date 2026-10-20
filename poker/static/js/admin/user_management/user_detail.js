@@ -127,21 +127,10 @@ function updateResetPasswordState(user) {
 
 
 function setDetailText(elementId, value) {
-    const element =
-        document.getElementById(elementId);
-
-    if (!element) {
-        return;
-    }
-
-    element.innerHTML = `
-        <span
-            class="truncate-text detail-truncate"
-            title="${value}"
-        >
-            ${value}
-        </span>
-    `;
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    element.textContent = value;
+    element.title = value;
 }
 
 
