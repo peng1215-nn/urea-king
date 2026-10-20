@@ -386,4 +386,10 @@ body {
     .member-stats-table {
         font-size: 12px;
     }
+    .stats-row-label {
+        width: 100px;
+    }
+    .stats-row-value {
+        white-space: nowrap;
+    }
 }
