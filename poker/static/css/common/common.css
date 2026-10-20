@@ -293,6 +293,7 @@ body {
     .role-tag {
         padding: 8px 14px;
         font-size: 13px;
+        white-space: nowrap;
     }
 
 }
