@@ -296,10 +296,12 @@ tbody tr.active {
 
 
 .detail-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-size: 15px;
+
     color: white;
-    word-break: break-word;
-    text-align: center;
 }
 
 

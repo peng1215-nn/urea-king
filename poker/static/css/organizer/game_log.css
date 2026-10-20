@@ -150,7 +150,9 @@ body {
     text-align: right;
     min-width: 60px;
     max-width: 120px;
-    word-break: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Modal */
@@ -432,9 +434,6 @@ body {
         width: 100px;
     }
     .stats-row-value {
-        word-break: break-word;
-    }
-    .stats-row-sub {
-        text-align: center;
+        white-space: nowrap;
     }
 }

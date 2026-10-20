@@ -97,7 +97,9 @@ body {
 }
 
 .invite-meta > * {
-    word-break: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .invite-status-badge {
