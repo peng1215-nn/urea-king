@@ -190,20 +190,21 @@ body {
     width: 40px;
     height: 40px;
 
-    background: rgba(10, 10, 18, 0.75);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(10, 10, 18, 0.28);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 10px;
 
-    color: white;
+    color: rgba(255, 255, 255, 0.75);
     font-size: 16px;
 
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, color 0.2s;
 }
 
 .hamburger-btn:hover {
-    background: rgba(10, 10, 18, 0.92);
+    background: rgba(10, 10, 18, 0.65);
+    color: white;
 }
 
 
@@ -242,12 +243,15 @@ body {
 }
 
 
-/* ───── Main 占满全宽 ───── */
+/* ───── Main 占满全宽，内容居中 ───── */
 
 .main {
     flex: 1;
-    padding: 38px;
     width: 100%;
+    padding: 38px 60px 38px 80px; /* 左边留出汉堡按钮空间 */
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
 
