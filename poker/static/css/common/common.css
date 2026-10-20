@@ -203,6 +203,9 @@ body {
 
     body {
         flex-direction: column;
+        background-attachment: fixed !important;
+        background-size: cover !important;
+        background-position: center center !important;
     }
 
     /* Mobile top bar */
