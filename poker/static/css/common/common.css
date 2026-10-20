@@ -160,6 +160,7 @@ body {
     color: white;
 
     font-size: 14px;
+    white-space: nowrap;
 
     cursor: pointer;
     transition: 0.25s;
