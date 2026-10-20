@@ -141,9 +141,6 @@ body {
     font-weight: 700;
     color: #ffffff;
     flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
@@ -151,8 +148,9 @@ body {
     font-size: 13px;
     color: rgba(255,255,255,0.5);
     flex-shrink: 1;
+    flex-basis: auto;
     text-align: right;
-    min-width: 40px;
+    min-width: 0;
     max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;

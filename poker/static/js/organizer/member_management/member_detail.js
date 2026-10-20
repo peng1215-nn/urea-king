@@ -63,12 +63,6 @@ function setDetailText(elementId, value) {
 
     if (!element) return;
 
-    element.innerHTML = `
-        <span
-            class="truncate-text detail-truncate"
-            title="${value}"
-        >
-            ${value}
-        </span>
-    `;
+    element.textContent = value;
+    element.title = value;
 }
