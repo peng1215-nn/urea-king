@@ -34,7 +34,7 @@ tbody tr {
 body {
     background:
         linear-gradient(135deg, rgba(15,15,22,0.82), rgba(21,25,40,0.82), rgba(26,32,51,0.82)),
-        url("/static/images/organizer_background.png") center center / cover no-repeat scroll;
+        url("/static/images/organizer_background.png") center top / cover no-repeat scroll;
 }
 @media (max-width: 768px) {
     .detail-grid {
