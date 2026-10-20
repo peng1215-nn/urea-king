@@ -281,6 +281,8 @@ tbody tr.active {
     border-radius: 14px;
 
     background: rgba(255, 255, 255, 0.04);
+
+    overflow: hidden;
 }
 
 
@@ -294,6 +296,9 @@ tbody tr.active {
 
 
 .detail-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-size: 15px;
 
     color: white;

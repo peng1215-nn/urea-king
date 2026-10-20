@@ -301,5 +301,15 @@ body {
         white-space: nowrap;
     }
 
+    .topbar-actions {
+        gap: 10px;
+        flex-wrap: wrap;
+        max-width: 100%;
+    }
+
+    .main {
+        overflow-x: hidden;
+    }
+
 }
 

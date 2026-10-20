@@ -89,10 +89,17 @@ body {
 
 .invite-meta {
     display: flex;
-    gap: 20px;
+    gap: 12px;
     flex: 1;
     font-size: 13px;
     color: rgba(255,255,255,0.45);
+    overflow: hidden;
+}
+
+.invite-meta > * {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .invite-status-badge {
