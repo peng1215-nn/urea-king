@@ -206,6 +206,7 @@ body {
         background-attachment: fixed !important;
         background-size: cover !important;
         background-position: center center !important;
+        background-repeat: no-repeat !important;
     }
 
     /* Mobile top bar */
