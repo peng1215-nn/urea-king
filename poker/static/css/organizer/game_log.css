@@ -259,10 +259,20 @@ body {
 
 .player-rate-stats {
     display: flex;
-    gap: 20px;
+    gap: 12px;
     font-size: 13px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.rate-games, .rate-win, .rate-lose {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .rate-games { color: rgba(255,255,255,0.4); }

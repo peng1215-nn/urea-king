@@ -280,9 +280,15 @@ body {
 
     /* Top bar stacks on small screens */
     .top-bar {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        align-items: center;
         gap: 12px;
         margin-bottom: 20px;
+    }
+
+    .title-area {
+        flex: 1;
+        min-width: 0;
     }
 
     .title-area h1 {
@@ -301,9 +307,9 @@ body {
         white-space: nowrap;
     }
 
-    /* Mobile topbar 两行布局
-       第一行：语言切换 ←→ 更换头像
-       第二行：头像圆框 + 角色标签
+    /* Mobile topbar 布局
+       非dashboard页面：单行，头像+角色靠右
+       dashboard页面：两行（有topbar-row-break时）
     */
     .topbar-actions {
         display: flex;
@@ -311,6 +317,11 @@ body {
         align-items: center;
         justify-content: flex-end;
         gap: 8px 10px;
+        flex-shrink: 0;
+    }
+
+    /* 有row-break时（dashboard）撑满宽度实现两行布局 */
+    .topbar-actions:has(.topbar-row-break) {
         width: 100%;
     }
 
@@ -363,7 +374,7 @@ body {
     padding: 10px 16px;
     color: #fff;
     font-size: 14px;
-    max-width: 280px;
+    max-width: min(280px, calc(100vw - 16px));
     word-break: break-all;
     z-index: 9999;
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
