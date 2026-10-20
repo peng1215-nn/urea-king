@@ -179,10 +179,10 @@ body {
 
 .hamburger-btn {
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 16px;
+    left: 16px;
     z-index: 201;
-    border-radius: 0 0 10px 0;
+    border-radius: 10px;
 
     display: flex;
     align-items: center;

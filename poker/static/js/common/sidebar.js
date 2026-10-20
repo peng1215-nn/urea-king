@@ -1,3 +1,109 @@
+// ── 汉堡按钮拖拽 ──────────────────────────────────────────
+(function makeDraggable() {
+    var STORAGE_KEY = 'hamburger_pos';
+
+    function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+    function applyPos(btn, x, y) {
+        btn.style.left = x + 'px';
+        btn.style.top  = y + 'px';
+    }
+
+    function savePos(x, y) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify({x: x, y: y})); } catch(e) {}
+    }
+
+    function loadPos() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch(e) { return null; }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var btn = document.querySelector('.hamburger-btn');
+        if (!btn) return;
+
+        // 恢复上次位置
+        var saved = loadPos();
+        if (saved) {
+            var maxX = window.innerWidth  - btn.offsetWidth;
+            var maxY = window.innerHeight - btn.offsetHeight;
+            applyPos(btn, clamp(saved.x, 0, maxX), clamp(saved.y, 0, maxY));
+        }
+
+        var dragging = false;
+        var startX, startY, origX, origY;
+
+        btn.addEventListener('mousedown', function (e) {
+            dragging = false;
+            startX = e.clientX;
+            startY = e.clientY;
+            origX  = btn.getBoundingClientRect().left;
+            origY  = btn.getBoundingClientRect().top;
+
+            function onMove(e) {
+                var dx = e.clientX - startX;
+                var dy = e.clientY - startY;
+                if (!dragging && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+                dragging = true;
+                var maxX = window.innerWidth  - btn.offsetWidth;
+                var maxY = window.innerHeight - btn.offsetHeight;
+                applyPos(btn, clamp(origX + dx, 0, maxX), clamp(origY + dy, 0, maxY));
+            }
+
+            function onUp(e) {
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup',   onUp);
+                if (dragging) {
+                    savePos(btn.getBoundingClientRect().left, btn.getBoundingClientRect().top);
+                    e.stopPropagation();
+                }
+            }
+
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup',   onUp);
+        });
+
+        // 触摸拖拽
+        btn.addEventListener('touchstart', function (e) {
+            dragging = false;
+            var t0 = e.touches[0];
+            startX = t0.clientX;
+            startY = t0.clientY;
+            origX  = btn.getBoundingClientRect().left;
+            origY  = btn.getBoundingClientRect().top;
+
+            function onMove(e) {
+                var t = e.touches[0];
+                var dx = t.clientX - startX;
+                var dy = t.clientY - startY;
+                if (!dragging && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+                dragging = true;
+                e.preventDefault();
+                var maxX = window.innerWidth  - btn.offsetWidth;
+                var maxY = window.innerHeight - btn.offsetHeight;
+                applyPos(btn, clamp(origX + dx, 0, maxX), clamp(origY + dy, 0, maxY));
+            }
+
+            function onEnd() {
+                btn.removeEventListener('touchmove', onMove);
+                btn.removeEventListener('touchend',  onEnd);
+                if (dragging) {
+                    savePos(btn.getBoundingClientRect().left, btn.getBoundingClientRect().top);
+                }
+            }
+
+            btn.addEventListener('touchmove', onMove, { passive: false });
+            btn.addEventListener('touchend',  onEnd);
+        }, { passive: true });
+
+        // 拖拽时不触发 toggleSidebar
+        btn.addEventListener('click', function (e) {
+            if (dragging) { e.stopImmediatePropagation(); dragging = false; }
+        }, true);
+    });
+})();
+
+// ─────────────────────────────────────────────────────────────
+
 function toggleSidebar() {
     const sidebar = document.querySelector(".sidebar");
     const overlay = document.querySelector(".sidebar-overlay");
