@@ -207,4 +207,7 @@ body {
         flex-wrap: wrap;
         gap: 10px;
     }
+    .btn-create-invite {
+        white-space: nowrap;
+    }
 }
