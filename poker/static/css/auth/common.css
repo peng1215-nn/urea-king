@@ -111,3 +111,11 @@ select {
     color: rgba(255, 255, 255, 0.75);
     letter-spacing: 1px;
 }
+@media (max-width: 768px) {
+    body {
+        overflow: auto;
+    }
+    .sidebar {
+        display: none;
+    }
+}
