@@ -297,11 +297,12 @@ tbody tr.active {
 
 
 .detail-value {
+    display: block;
+    width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 15px;
-    max-width: 100%;
 
     color: white;
 }
@@ -1012,11 +1013,12 @@ tbody tr.active {
 
 
 .detail-value {
+    display: block;
+    width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 15px;
-    max-width: 100%;
 
     color: white;
 }
