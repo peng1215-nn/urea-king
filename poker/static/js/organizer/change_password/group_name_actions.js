@@ -10,43 +10,35 @@ async function loadGroupInfo() {
 }
 
 async function saveGroupName() {
-    const messageBox = document.getElementById("group-name-message");
+    setMsg("group-name-message", "", "");
+
     const newName = document.getElementById("new-group-name").value.trim();
 
-    messageBox.className = "operation-message";
-    messageBox.innerText = "";
-
     if (!newName) {
-        messageBox.classList.add("error");
-        messageBox.innerText = t("groupNameRequired");
+        setMsg("group-name-message", t("groupNameRequired"), "error");
         return;
     }
     if (newName.length > 50) {
-        messageBox.classList.add("error");
-        messageBox.innerText = t("groupNameTooLong");
+        setMsg("group-name-message", t("groupNameTooLong"), "error");
         return;
     }
 
     const currentName = document.getElementById("current-group-name").value.trim();
     if (newName === currentName) {
-        messageBox.classList.add("error");
-        messageBox.innerText = t("groupNameNoChange");
+        setMsg("group-name-message", t("groupNameNoChange"), "error");
         return;
     }
 
     try {
         const data = await apiUpdateGroupName(newName);
         if (data.success) {
-            messageBox.classList.add("success");
-            messageBox.innerText = t("groupNameUpdateSuccess");
+            setMsg("group-name-message", t("groupNameUpdateSuccess"), "success");
             document.getElementById("current-group-name").value = newName;
             document.getElementById("new-group-name").value = "";
         } else {
-            messageBox.classList.add("error");
-            messageBox.innerText = t(data.message) || data.message || t("operationFailed");
+            setMsg("group-name-message", t(data.message) || data.message || t("operationFailed"), "error");
         }
     } catch (e) {
-        messageBox.classList.add("error");
-        messageBox.innerText = t("operationFailed");
+        setMsg("group-name-message", t("operationFailed"), "error");
     }
 }

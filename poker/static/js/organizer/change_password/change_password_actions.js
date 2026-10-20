@@ -1,145 +1,85 @@
+function setMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.className = "operation-message" + (type ? " " + type : "");
+    el.innerText = text;
+}
+
 async function saveNickname() {
-    const messageBox =
-        document.getElementById("nickname-message");
+    setMsg("nickname-message", "", "");
 
-    messageBox.style.color = "#ff8a8a";
-    messageBox.innerText = "";
-
-    const nickname =
-        document.getElementById(
-            "new-nickname"
-        ).value.trim();
+    const nickname = document.getElementById("new-nickname").value.trim();
 
     if (!nickname) {
-        messageBox.innerText =
-            t("nicknameRequired");
-
+        setMsg("nickname-message", t("nicknameRequired"), "error");
         return;
     }
 
     if (nickname.length > 50) {
-        messageBox.innerText =
-            t("nicknameTooLong");
-
+        setMsg("nickname-message", t("nicknameTooLong"), "error");
         return;
     }
 
     try {
-        const data =
-            await apiUpdateNickname(nickname);
+        const data = await apiUpdateNickname(nickname);
 
         if (!data.success) {
-            messageBox.innerText =
-                t(data.message || "operationFailed");
-
+            setMsg("nickname-message", t(data.message || "operationFailed"), "error");
             return;
         }
 
-        messageBox.style.color =
-            "#5CFFB2";
+        setMsg("nickname-message", t("nicknameUpdateSuccess"), "success");
 
-        messageBox.innerText =
-            t("nicknameUpdateSuccess");
-
-        document.getElementById(
-            "current-nickname"
-        ).value = data.nickname || nickname;
-
-        document.getElementById(
-            "new-nickname"
-        ).value = "";
+        document.getElementById("current-nickname").value = data.nickname || nickname;
+        document.getElementById("new-nickname").value = "";
 
     } catch (error) {
         console.error(error);
-
-        messageBox.innerText =
-            t("operationFailed");
+        setMsg("nickname-message", t("operationFailed"), "error");
     }
 }
 
 
 async function savePassword() {
-    const messageBox =
-        document.getElementById("password-message");
+    setMsg("password-message", "", "");
 
-    messageBox.style.color = "#ff8a8a";
-    messageBox.innerText = "";
-
-    const current =
-        document.getElementById(
-            "current-password"
-        ).value;
-
-    const newPwd =
-        document.getElementById(
-            "new-password"
-        ).value;
-
-    const confirm =
-        document.getElementById(
-            "confirm-password"
-        ).value;
+    const current = document.getElementById("current-password").value;
+    const newPwd = document.getElementById("new-password").value;
+    const confirm = document.getElementById("confirm-password").value;
 
     if (!current) {
-        messageBox.innerText =
-            t("currentPasswordRequired");
-
+        setMsg("password-message", t("currentPasswordRequired"), "error");
         return;
     }
 
     if (!newPwd) {
-        messageBox.innerText =
-            t("newPasswordRequired");
-
+        setMsg("password-message", t("newPasswordRequired"), "error");
         return;
     }
 
     if (newPwd.length < 6) {
-        messageBox.innerText =
-            t("newPasswordTooShort");
-
+        setMsg("password-message", t("newPasswordTooShort"), "error");
         return;
     }
 
     if (newPwd !== confirm) {
-        messageBox.innerText =
-            t("newPasswordMismatch");
-
+        setMsg("password-message", t("newPasswordMismatch"), "error");
         return;
     }
 
     try {
-        const data =
-            await apiUpdatePassword(
-                current,
-                newPwd,
-                confirm
-            );
+        const data = await apiUpdatePassword(current, newPwd, confirm);
 
         if (!data.success) {
-            messageBox.innerText =
-                t(data.message || "operationFailed");
-
+            setMsg("password-message", t(data.message || "operationFailed"), "error");
             return;
         }
 
-        messageBox.style.color =
-            "#5CFFB2";
+        setMsg("password-message", t("passwordUpdateSuccessLogout"), "success");
 
-        messageBox.innerText =
-            t("passwordUpdateSuccessLogout");
-
-        setTimeout(
-            () => {
-                window.location.href = "/login";
-            },
-            1500
-        );
+        setTimeout(() => { window.location.href = "/login"; }, 1500);
 
     } catch (error) {
         console.error(error);
-
-        messageBox.innerText =
-            t("operationFailed");
+        setMsg("password-message", t("operationFailed"), "error");
     }
 }
