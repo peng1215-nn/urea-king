@@ -46,4 +46,9 @@ body {
     .action-panel {
         min-height: auto !important;
     }
+    .search-button,
+    .clear-button {
+        white-space: nowrap;
+        padding: 0 14px;
+    }
 }
