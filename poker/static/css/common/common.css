@@ -203,8 +203,8 @@ body {
 
     body {
         flex-direction: column;
-        /* 移动端背景图：cover+scroll，全屏覆盖，去掉fixed避免闪烁 */
-        background-attachment: scroll !important;
+        /* 移动端：fixed保持视口固定，移动端闪烁问题用will-change缓解 */
+        background-attachment: fixed !important;
         background-size: cover !important;
         background-position: center center !important;
     }
