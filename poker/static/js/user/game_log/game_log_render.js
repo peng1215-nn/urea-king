@@ -146,6 +146,8 @@ async function loadStats() {
         { color: "blue",   icon: "fa-users",            label: t("statMostGames"),  value: s.most_games.names.join("、"),  sub: s.most_games.count + " " + t("times") },
         { color: "cyan",   icon: "fa-clock",            label: t("statLongestGame"),value: s.longest_game.duration,        sub: s.longest_game.name },
         { color: "orange", icon: "fa-coins",            label: t("statMaxChips"),   value: s.max_chips.amount,             sub: s.max_chips.name },
+        { color: "green",  icon: "fa-star",              label: t("statBestSingle"),  value: s.best_single ? (s.best_single.nickname || "-") : "-",   sub: s.best_single && s.best_single.nickname ? "+" + s.best_single.amount + (s.best_single.game ? " · " + s.best_single.game : "") : "" },
+        { color: "red",    icon: "fa-skull",              label: t("statWorstSingle"), value: s.worst_single ? (s.worst_single.nickname || "-") : "-",  sub: s.worst_single && s.worst_single.nickname ? s.worst_single.amount + (s.worst_single.game ? " · " + s.worst_single.game : "") : "" },
     ];
     let playerRatesHtml = "";
     if (s.player_rates && s.player_rates.length > 0) {

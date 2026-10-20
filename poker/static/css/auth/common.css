@@ -111,6 +111,16 @@ select {
     color: rgba(255, 255, 255, 0.75);
     letter-spacing: 1px;
 }
+.login-poker-sub {
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
 @media (max-width: 768px) {
     body {
         overflow: auto;
