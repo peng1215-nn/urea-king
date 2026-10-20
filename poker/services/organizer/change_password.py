@@ -117,3 +117,33 @@ def update_password_service(
 
     finally:
         db.close()
+
+def get_group_info_service(group_id: int):
+    from poker.models import Group
+    db = SessionLocal()
+    try:
+        group = db.query(Group).filter(Group.id == group_id).first()
+        if not group:
+            return {"success": False, "message": "组别不存在。"}
+        return {"success": True, "group_name": group.group_name or ""}
+    finally:
+        db.close()
+
+
+def update_group_name_service(group_id: int, group_name: str):
+    from poker.models import Group
+    db = SessionLocal()
+    try:
+        group = db.query(Group).filter(Group.id == group_id).first()
+        if not group:
+            return {"success": False, "message": "组别不存在。"}
+        group_name = group_name.strip()
+        if not group_name:
+            return {"success": False, "message": "组名不能为空。"}
+        if len(group_name) > 50:
+            return {"success": False, "message": "组名不能超过50个字符。"}
+        group.group_name = group_name
+        db.commit()
+        return {"success": True, "message": "组名修改成功。"}
+    finally:
+        db.close()

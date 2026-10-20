@@ -7,6 +7,8 @@ from fastapi.responses import RedirectResponse
 from poker.services.organizer.change_password import get_current_account_service
 from poker.services.organizer.change_password import update_nickname_service
 from poker.services.organizer.change_password import update_password_service
+from poker.services.organizer.change_password import get_group_info_service
+from poker.services.organizer.change_password import update_group_name_service
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
 
@@ -89,3 +91,26 @@ def update_password(
         request.session.clear()
 
     return result
+
+
+@router.get("/organizer/group-info")
+def get_group_info(request: Request):
+    if not require_organizer(request):
+        return {"success": False, "message": "permissionDenied"}
+    group_id = request.session.get("current_group_id")
+    if not group_id:
+        return {"success": False, "message": "未选择组别。"}
+    return get_group_info_service(group_id=int(group_id))
+
+
+@router.post("/organizer/update-group-name")
+def update_group_name(
+    request: Request,
+    group_name: str = Form(...),
+):
+    if not require_organizer(request):
+        return {"success": False, "message": "permissionDenied"}
+    group_id = request.session.get("current_group_id")
+    if not group_id:
+        return {"success": False, "message": "未选择组别。"}
+    return update_group_name_service(group_id=int(group_id), group_name=group_name)

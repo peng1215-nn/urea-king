@@ -49,5 +49,7 @@ window.addEventListener(
         loadCurrentUser();
 
         loadCurrentAccount();
+
+        loadGroupInfo();
     }
 );

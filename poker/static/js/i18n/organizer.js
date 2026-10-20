@@ -241,6 +241,19 @@ const organizerTranslations = {
         changePassword: "修改密码",
         changePasswordPageDesc: "在此页面修改昵称与账户密码。",
         changePasswordOrganizerDesc: "修改当前局头账户的昵称与密码。",
+
+        // 修改组名
+        updateGroupName: "修改组名",
+        updateGroupNameDesc: "修改当前所在组的显示名称。",
+        currentGroupName: "当前组名",
+        newGroupName: "新组名",
+        newGroupNamePlaceholder: "请输入新组名",
+        saveGroupName: "保存组名",
+        groupNameRequired: "组名不能为空。",
+        groupNameTooLong: "组名不能超过50个字符。",
+        groupNameNoChange: "新组名与当前组名相同。",
+        groupNameUpdateSuccess: "组名修改成功。",
+
         buyInType: "买入类型",
         buyInNormal: "普通买入",
         buyInInsurance: "保险买入",
@@ -498,6 +511,19 @@ const organizerTranslations = {
         changePassword: "Change Password",
         changePasswordPageDesc: "Update your nickname and password here.",
         changePasswordOrganizerDesc: "Update the nickname and password for your organizer account.",
+
+        // Group name
+        updateGroupName: "Update Group Name",
+        updateGroupNameDesc: "Change the display name of your current group.",
+        currentGroupName: "Current Group Name",
+        newGroupName: "New Group Name",
+        newGroupNamePlaceholder: "Enter new group name",
+        saveGroupName: "Save Group Name",
+        groupNameRequired: "Group name cannot be empty.",
+        groupNameTooLong: "Group name cannot exceed 50 characters.",
+        groupNameNoChange: "New group name is the same as the current one.",
+        groupNameUpdateSuccess: "Group name updated successfully.",
+
         buyInType: "Buy-in Type",
         buyInNormal: "Normal",
         buyInInsurance: "Insurance",
