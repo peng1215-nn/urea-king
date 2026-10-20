@@ -286,6 +286,11 @@ body {
         margin-bottom: 20px;
     }
 
+    /* Dashboard页面（topbar-actions内有row-break）允许换行，让topbar-actions占独立一行 */
+    .top-bar:has(.topbar-row-break) {
+        flex-wrap: wrap;
+    }
+
     .title-area {
         flex: 1;
         min-width: 0;
