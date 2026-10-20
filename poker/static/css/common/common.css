@@ -179,9 +179,10 @@ body {
 
 .hamburger-btn {
     position: fixed;
-    top: 16px;
-    left: 16px;
+    top: 0;
+    left: 0;
     z-index: 201;
+    border-radius: 0 0 10px 0;
 
     display: flex;
     align-items: center;
@@ -193,8 +194,6 @@ body {
     background: rgba(10, 10, 18, 0.28);
     backdrop-filter: blur(4px);
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
-
     color: rgba(255, 255, 255, 0.75);
     font-size: 16px;
 

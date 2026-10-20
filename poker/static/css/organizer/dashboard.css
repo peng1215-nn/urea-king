@@ -62,15 +62,15 @@
 }
 
 .modules {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
 }
 
 .module-card {
     position: relative;
 
-    width: 285px;
+    width: 100%;
     min-height: 165px;
 
     padding: 24px;
@@ -278,7 +278,7 @@ body {
 }
 @media (max-width: 768px) {
     .modules {
-        flex-direction: column;
+        grid-template-columns: 1fr;
     }
     .module-card {
         width: 100%;
