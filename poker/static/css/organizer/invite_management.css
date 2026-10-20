@@ -199,3 +199,12 @@ body {
 .modal-cancel-button:hover {
     background: rgba(255,255,255,0.14);
 }
+@media (max-width: 768px) {
+    .invite-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .invite-stats {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}

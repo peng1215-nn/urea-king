@@ -402,3 +402,28 @@ body {
 }
 .trend-summary .net-positive { color: #4caf7d; font-weight: 600; }
 .trend-summary .net-negative { color: #f44336; font-weight: 600; }
+
+@media (max-width: 768px) {
+    .log-tabs {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .log-card-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .log-card-meta {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .trend-modal-content {
+        width: 96vw !important;
+        padding: 16px !important;
+    }
+    .trend-chart-wrap {
+        height: 220px;
+    }
+    .member-stats-table {
+        font-size: 12px;
+    }
+}

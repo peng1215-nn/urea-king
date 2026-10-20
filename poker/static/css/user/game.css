@@ -515,3 +515,12 @@ body {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+@media (max-width: 768px) {
+    .game-info-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    .player-list-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

@@ -953,3 +953,38 @@ body {
     font-family: inherit;
 }
 .finish-note-input:focus { border-color: rgba(108,158,248,0.5); }
+
+@media (max-width: 768px) {
+    .game-panels {
+        grid-template-columns: 1fr;
+    }
+    .game-status-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px;
+    }
+    .game-status-info {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .finish-player-row {
+        grid-template-columns: 1fr 80px 90px;
+        gap: 8px;
+        padding: 10px 12px;
+    }
+    .modal-wide {
+        width: 92vw;
+    }
+    .settlement-cols {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .remove-type-btns {
+        flex-direction: column;
+    }
+    .game-tabs-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

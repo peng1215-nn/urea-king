@@ -36,3 +36,14 @@ body {
         linear-gradient(135deg, rgba(15,15,22,0.82), rgba(21,25,40,0.82), rgba(26,32,51,0.82)),
         url("/static/images/organizer_background.png") center center / cover no-repeat fixed;
 }
+@media (max-width: 768px) {
+    .detail-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    .management-actions {
+        grid-template-columns: 1fr !important;
+    }
+    .action-panel {
+        min-height: auto !important;
+    }
+}
