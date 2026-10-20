@@ -22,3 +22,20 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+
+// Mobile topbar: inject row-break div between upload-button and avatar
+// so first row = language + upload-avatar, second row = avatar + role-tag
+(function injectTopbarBreak() {
+    function doInject() {
+        if (window.innerWidth > 768) return;
+        const actions = document.querySelector('.topbar-actions');
+        if (!actions || actions.querySelector('.topbar-row-break')) return;
+        const avatar = actions.querySelector('.avatar');
+        if (!avatar) return;
+        const br = document.createElement('div');
+        br.className = 'topbar-row-break';
+        actions.insertBefore(br, avatar);
+    }
+    document.addEventListener('DOMContentLoaded', doInject);
+    window.addEventListener('resize', doInject);
+})();

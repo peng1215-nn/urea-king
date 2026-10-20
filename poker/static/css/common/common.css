@@ -301,10 +301,49 @@ body {
         white-space: nowrap;
     }
 
+    /* Mobile topbar 两行布局
+       第一行：语言切换 ←→ 更换头像
+       第二行：头像圆框 + 角色标签
+    */
     .topbar-actions {
-        gap: 10px;
+        display: flex;
         flex-wrap: wrap;
-        max-width: 100%;
+        align-items: center;
+        gap: 8px 10px;
+        width: 100%;
+    }
+
+    .topbar-actions .dashboard-language-toggle {
+        order: 1;
+        flex-shrink: 0;
+    }
+
+    .topbar-actions .upload-avatar-button {
+        order: 2;
+        margin-left: auto;
+        font-size: 13px;
+        padding: 8px 14px;
+        flex-shrink: 0;
+    }
+
+    /* 换行分隔符（JS注入 或 在dashboard HTML里加） */
+    .topbar-row-break {
+        order: 3;
+        width: 100%;
+        height: 0;
+        flex-basis: 100%;
+    }
+
+    .topbar-actions .avatar {
+        order: 4;
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+    }
+
+    .topbar-actions .role-tag {
+        order: 5;
+        flex-shrink: 0;
     }
 
     .main {
@@ -313,3 +352,28 @@ body {
 
 }
 
+
+/* ───── Overflow Tooltip ───── */
+.detail-value-tooltip {
+    position: fixed;
+    background: rgba(30, 35, 60, 0.97);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 10px 16px;
+    color: #fff;
+    font-size: 14px;
+    max-width: 280px;
+    word-break: break-all;
+    z-index: 9999;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+.detail-value-tooltip.visible {
+    opacity: 1;
+}
+.detail-value[data-overflowing="true"] {
+    cursor: pointer;
+    text-decoration: underline dotted rgba(255,255,255,0.3);
+}
