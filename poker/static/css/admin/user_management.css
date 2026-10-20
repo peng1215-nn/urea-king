@@ -690,3 +690,14 @@ tbody tr.active {
 .modal-cancel-button:hover {
     background: rgba(255, 255, 255, 0.14);
 }
+@media (max-width: 768px) {
+    .detail-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    .management-actions {
+        grid-template-columns: 1fr !important;
+    }
+    .action-panel {
+        min-height: auto !important;
+    }
+}
