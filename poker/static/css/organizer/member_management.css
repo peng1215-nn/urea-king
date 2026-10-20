@@ -51,4 +51,17 @@ body {
         white-space: nowrap;
         padding: 0 14px;
     }
+    /* 强制detail-item和detail-value在移动端正确截断 */
+    .detail-item {
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+    .detail-value {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
 }
