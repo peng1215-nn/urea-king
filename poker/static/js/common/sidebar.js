@@ -30,6 +30,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (window.innerWidth > 768) return;
         const actions = document.querySelector('.topbar-actions');
         if (!actions || actions.querySelector('.topbar-row-break')) return;
+        // 只有同时存在语言切换和更换头像按钮时才需要换行（dashboard页面）
+        const hasLangToggle = actions.querySelector('.dashboard-language-toggle');
+        const hasUploadBtn = actions.querySelector('.upload-avatar-button');
+        if (!hasLangToggle || !hasUploadBtn) return;
         const avatar = actions.querySelector('.avatar');
         if (!avatar) return;
         const br = document.createElement('div');
