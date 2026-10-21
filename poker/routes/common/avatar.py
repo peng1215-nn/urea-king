@@ -34,6 +34,9 @@ async def upload_avatar(
         upload_result = cloudinary.uploader.upload(
             avatar.file,
             folder="urea_king_avatars",
+            public_id=f"user_{user_id}",
+            overwrite=True,
+            invalidate=True,
         )
 
         avatar_url = upload_result["secure_url"]

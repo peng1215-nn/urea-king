@@ -16,14 +16,17 @@ async function loadCurrentUser() {
             );
 
         if (avatarPreview) {
+            const src = data.avatar_url
+                ? data.avatar_url + "?t=" + Date.now()
+                : "/static/images/default_avatar.jpg";
 
-            avatarPreview.src =
-                data.avatar_url ||
-                "/static/images/default_avatar.jpg";
+            avatarPreview.onerror = () => {
+                avatarPreview.onerror = null;
+                avatarPreview.src = "/static/images/default_avatar.jpg";
+            };
 
-            avatarPreview.classList.add(
-                "loaded"
-            );
+            avatarPreview.src = src;
+            avatarPreview.classList.add("loaded");
         }
 
         const currentGroupText =
