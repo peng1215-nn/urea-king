@@ -32,6 +32,17 @@ load_dotenv()
 
 app = FastAPI()
 
+@app.middleware("http")
+async def domain_router(request: Request, call_next):
+    host = request.headers.get("host", "")
+    path = request.url.path
+    # non-poker domain: only allow "/" and static assets
+    if not host.startswith("poker.") and not host.startswith("localhost") and not host.startswith("127."):
+        if path == "/" or path.startswith("/static"):
+            return await call_next(request)
+        return RedirectResponse(url="/")
+    return await call_next(request)
+
 @app.get("/")
 async def index(request: Request):
     host = request.headers.get("host", "")
