@@ -172,25 +172,6 @@ async function loadStats() {
         { color: "green",  icon: "fa-star",               label: t("statBestSingle"),  value: s.best_single.nickname || "-",   sub: s.best_single.nickname ? "+" + s.best_single.amount + (s.best_single.game ? " · " + s.best_single.game : "") : "" },
         { color: "red",    icon: "fa-skull",               label: t("statWorstSingle"), value: s.worst_single.nickname || "-",  sub: s.worst_single.nickname ? s.worst_single.amount + (s.worst_single.game ? " · " + s.worst_single.game : "") : "" },
     ];
-    let playerRatesHtml = "";
-    if (s.player_rates && s.player_rates.length > 0) {
-        playerRatesHtml = `<div class="player-rates-section">
-            <div class="player-rates-title">${t("statPlayerRates")}</div>
-            <div class="player-rates-list">` +
-            s.player_rates.map(p => `
-                <div class="player-rate-row">
-                    <div class="player-rate-name">${p.nickname}</div>
-                    <div class="player-rate-stats">
-                        <span class="rate-games">${t("participated")} ${p.game_count} ${t("games")}</span>
-                        <span class="rate-win">${t("winRate")} ${p.win_rate}%（${p.win_count}次）</span>
-                        <span class="rate-lose">${t("loseRate")} ${p.lose_rate}%（${p.lose_count}次）</span>
-
-                    </div>
-                </div>
-            `).join("") +
-            `</div></div>`;
-    }
-
     panel.innerHTML = `<div class="stats-list">` +
         rows.map(r => `
             <div class="stats-row">
@@ -200,7 +181,7 @@ async function loadStats() {
                 <div class="stats-row-sub">${r.sub}</div>
             </div>
         `).join("") +
-    `</div>` + playerRatesHtml;
+    `</div>`;
 }
 let memberSortKey = "total_net";
 let memberSortAsc = false;
@@ -261,7 +242,8 @@ function renderMemberStatsTable(members, container) {
                         <th>${t("memberRank")}</th>
                         <th>${t("memberNickname")}</th>
                         <th class="sortable" onclick="sortMemberStats('game_count')">${t("memberGames")} ${arrow("game_count")}</th>
-                        <th class="sortable" onclick="sortMemberStats('win_rate')">${t("memberWinRate")} ${arrow("win_rate")}</th>
+                        <th class="sortable" onclick="sortMemberStats('win_rate')" style="color:#4caf7d">${t("memberWinRate")} ${arrow("win_rate")}</th>
+                        <th class="sortable" onclick="sortMemberStats('lose_rate')" style="color:#e05c5c">${t("memberLoseRate")} ${arrow("lose_rate")}</th>
                         <th class="sortable" onclick="sortMemberStats('total_net')">${t("memberTotalNet")} ${arrow("total_net")}</th>
                     </tr>
                 </thead>
@@ -275,7 +257,8 @@ function renderMemberStatsTable(members, container) {
                 <td class="rank-cell">${i + 1}</td>
                 <td class="name-cell">${m.nickname}</td>
                 <td>${m.game_count}</td>
-                <td>${m.win_rate}%（${m.win_count}${t("times")}）</td>
+                <td style="color:#4caf7d">${m.win_rate}%（${m.win_count}${t("times")}）</td>
+                <td style="color:#e05c5c">${m.lose_rate !== undefined ? m.lose_rate + "%（" + m.lose_count + t("times") + "）" : "-"}</td>
                 <td class="${netClass} net-cell">${netStr}</td>
             </tr>
         `;
