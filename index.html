@@ -1105,32 +1105,32 @@ const FXRegistry = [SupernovaEngine];
 // Public API: CoinEngine.tossCoin(result)  result = 'heads' | 'tails'
 // ══════════════════════════════════════════════════════════════════════════════
 const CoinEngine = (() => {
-  // ── DOM / overlay ──────────────────────────────────────────────────────────
-  const overlay = (() => {
-    const el = document.createElement('div');
-    Object.assign(el.style, {
+  // ── DOM / overlay — created lazily on first use ────────────────────────────
+  let overlay = null, cvs = null;
+
+  function ensureDOM() {
+    if (overlay) return;
+    overlay = document.createElement('div');
+    Object.assign(overlay.style, {
       position:'fixed', inset:'0', zIndex:'500',
       display:'none', pointerEvents:'none',
     });
-    document.body.appendChild(el);
-    return el;
-  })();
+    document.body.appendChild(overlay);
 
-  const cvs = (() => {
-    const c = document.createElement('canvas');
-    Object.assign(c.style, { position:'absolute', inset:'0', width:'100%', height:'100%' });
-    overlay.appendChild(c);
-    return c;
-  })();
+    cvs = document.createElement('canvas');
+    Object.assign(cvs.style, { position:'absolute', inset:'0', width:'100%', height:'100%' });
+    overlay.appendChild(cvs);
+  }
 
   // ── state ──────────────────────────────────────────────────────────────────
-  let renderer, scene, camera, coin, rimLight, keyLight, fillLight, envSphere;
+  let renderer, scene, camera, coin;
   let animId = null;
   let busy   = false;
   let threeOk = false;
 
-  // ── init (called once THREE is available) ──────────────────────────────────
+  // ── init (called once THREE is available + DOM ready) ─────────────────────
   function init() {
+    ensureDOM();
     renderer = new THREE.WebGLRenderer({ canvas: cvs, alpha: true, antialias: true, powerPreference:'high-performance' });
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.toneMapping       = THREE.ACESFilmicToneMapping;
@@ -1168,138 +1168,74 @@ const CoinEngine = (() => {
     sideLight.position.set(6, 0, 2);
     scene.add(sideLight);
 
-    // ── coin geometry ──
-    const R  = 1.0,  T = 0.085;   // radius, half-thickness
-    const seg = 128;
+    // ── coin geometry ──────────────────────────────────────────────────────
+    // CylinderGeometry(R, R, height, segs, 1, false) produces:
+    //   materialIndex 0 = side (rim)
+    //   materialIndex 1 = top cap  (+Y face) — will be heads
+    //   materialIndex 2 = bottom cap (−Y face) — will be tails
+    // We pre-tilt the whole mesh by rotation.x = PI/2 so the caps face ±Z
+    // (toward/away from camera). Then animating rotation.x flips between faces.
+    const R = 1.0, T = 0.09, SEG = 80;
 
-    // Use MeshPhongMaterial — works without HDR envMap, looks metallic with strong lights
-    function goldPhong(specHex) {
-      return new THREE.MeshPhongMaterial({
-        color:     0xe8b820,
-        specular:  new THREE.Color(specHex || 0xfff0a0),
-        shininess: 160,
-        emissive:  new THREE.Color(0x1a0d00),
-        emissiveIntensity: 1,
-      });
+    // Face textures via Canvas 2D
+    function makeTex(symbol, bgFrom, bgTo) {
+      const sz = 512, c = document.createElement('canvas');
+      c.width = c.height = sz;
+      const g = c.getContext('2d');
+      const gr = g.createRadialGradient(sz/2,sz/2,sz*.04, sz/2,sz/2,sz*.52);
+      gr.addColorStop(0, bgFrom); gr.addColorStop(0.6,'#e8a800'); gr.addColorStop(1, bgTo);
+      g.fillStyle = gr; g.beginPath(); g.arc(sz/2,sz/2,sz/2,0,Math.PI*2); g.fill();
+      g.strokeStyle='rgba(255,220,60,.4)'; g.lineWidth=sz*.02;
+      g.beginPath(); g.arc(sz/2,sz/2,sz*.44,0,Math.PI*2); g.stroke();
+      g.fillStyle='rgba(20,8,0,.85)'; g.font=`bold ${sz*.46}px serif`;
+      g.textAlign='center'; g.textBaseline='middle';
+      g.shadowColor='rgba(0,0,0,.5)'; g.shadowBlur=sz*.025;
+      g.fillText(symbol, sz/2, sz*.49);
+      const t = new THREE.CanvasTexture(c);
+      return t;
     }
 
-    // Rim: CylinderGeometry openEnded, just the side
-    const rimGeo = new THREE.CylinderGeometry(R, R, T*2, seg, 1, true);
-    // Notched rim: bump vertices to simulate milled edge
-    const rPos = rimGeo.attributes.position;
-    for (let i = 0; i < rPos.count; i++) {
-      const theta = Math.atan2(rPos.getX(i), rPos.getZ(i));
-      const bump  = 0.013 * Math.sin(theta * 80);
-      const nx    = rPos.getX(i) / R;
-      const nz    = rPos.getZ(i) / R;
-      rPos.setX(i, rPos.getX(i) + nx * bump);
-      rPos.setZ(i, rPos.getZ(i) + nz * bump);
-    }
-    rimGeo.computeVertexNormals();
+    const headsTex = makeTex('♠', '#ffe870', '#7a4800');
+    const tailsTex = makeTex('♣', '#fff0a0', '#6a4000');
 
     const rimMat = new THREE.MeshPhongMaterial({
-      color: 0xc8941a, specular: 0xffe070, shininess: 120,
-      emissive: 0x0d0600, emissiveIntensity: 1,
+      color:0xb8820e, specular:0xffe060, shininess:100,
+      emissive:0x0a0500,
     });
-    const rimMesh = new THREE.Mesh(rimGeo, rimMat);
+    const headsMat = new THREE.MeshPhongMaterial({
+      map:headsTex, color:0xeec030, specular:0xfff090, shininess:130,
+      emissive:0x120800,
+    });
+    const tailsMat = new THREE.MeshPhongMaterial({
+      map:tailsTex, color:0xeec030, specular:0xfff090, shininess:130,
+      emissive:0x120800,
+    });
 
-    // Heads cap: ♠ symbol baked into CanvasTexture
-    function makeFaceTex(drawFn) {
-      const sz = 512;
-      const fc = document.createElement('canvas');
-      fc.width = fc.height = sz;
-      const gx = fc.getContext('2d');
-
-      // gold radial gradient background
-      const gr = gx.createRadialGradient(sz/2, sz/2, sz*0.05, sz/2, sz/2, sz*0.52);
-      gr.addColorStop(0, '#ffe97a');
-      gr.addColorStop(0.5,'#f0b820');
-      gr.addColorStop(1,  '#8a5a00');
-      gx.fillStyle = gr;
-      gx.beginPath();
-      gx.arc(sz/2, sz/2, sz/2, 0, Math.PI*2);
-      gx.fill();
-
-      // subtle concentric ring near edge
-      gx.strokeStyle = 'rgba(255,220,80,0.35)';
-      gx.lineWidth = sz * 0.018;
-      gx.beginPath();
-      gx.arc(sz/2, sz/2, sz*0.44, 0, Math.PI*2);
-      gx.stroke();
-
-      drawFn(gx, sz);
-
-      const tex = new THREE.CanvasTexture(fc);
-      tex.encoding = THREE.sRGBEncoding;
-      return tex;
+    // Build notched rim via vertex displacement
+    const coinGeo = new THREE.CylinderGeometry(R, R, T*2, SEG, 1, false);
+    const pos = coinGeo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const y = pos.getY(i);
+      if (Math.abs(Math.abs(y) - T) > 0.001) { // side vertices only (not caps)
+        const th = Math.atan2(pos.getX(i), pos.getZ(i));
+        const b  = 0.014 * Math.sin(th * 72);
+        pos.setX(i, pos.getX(i) * (1 + b));
+        pos.setZ(i, pos.getZ(i) * (1 + b));
+      }
     }
+    coinGeo.computeVertexNormals();
 
-    // heads: spade ♠
-    const headsTex = makeFaceTex((gx, sz) => {
-      gx.fillStyle = '#1a0800';
-      gx.font = `bold ${sz*0.48}px serif`;
-      gx.textAlign = 'center';
-      gx.textBaseline = 'middle';
-      gx.shadowColor = 'rgba(0,0,0,0.6)';
-      gx.shadowBlur  = sz * 0.03;
-      gx.fillText('♠', sz/2, sz*0.48);
-    });
+    const coinMesh = new THREE.Mesh(coinGeo, [rimMat, headsMat, tailsMat]);
+    // Pre-tilt: rotate X by PI/2 so top cap (+Y) → toward camera (+Z)
+    // Now: rotation.x = PI/2 → heads toward camera
+    //      rotation.x = PI/2 + PI → tails toward camera
+    // rotation.x = PI/2 is the starting/resting tilt (heads toward camera).
+    // During animation we set coinMesh.rotation.x = PI/2 + flipAngle directly.
+    coinMesh.rotation.x = Math.PI / 2;
 
-    // tails: ¥ / 字 (poker chip reverse)
-    const tailsTex = makeFaceTex((gx, sz) => {
-      // different gold tone
-      const gr2 = gx.createRadialGradient(sz/2, sz/2, sz*0.05, sz/2, sz/2, sz*0.52);
-      gr2.addColorStop(0, '#fff0a0');
-      gr2.addColorStop(0.5,'#e8a800');
-      gr2.addColorStop(1,  '#7a4e00');
-      gx.fillStyle = gr2;
-      gx.beginPath();
-      gx.arc(sz/2, sz/2, sz/2, 0, Math.PI*2);
-      gx.fill();
-
-      gx.strokeStyle = 'rgba(255,210,60,0.35)';
-      gx.lineWidth = sz * 0.018;
-      gx.beginPath();
-      gx.arc(sz/2, sz/2, sz*0.44, 0, Math.PI*2);
-      gx.stroke();
-
-      gx.fillStyle = '#1a0800';
-      gx.font = `bold ${sz*0.48}px serif`;
-      gx.textAlign = 'center';
-      gx.textBaseline = 'middle';
-      gx.shadowColor = 'rgba(0,0,0,0.6)';
-      gx.shadowBlur  = sz * 0.03;
-      gx.fillText('♣', sz/2, sz*0.48);
-    });
-
-    // Cap discs
-    function makeCap(tex, yPos) {
-      const geo = new THREE.CircleGeometry(R, seg);
-      const mat = new THREE.MeshPhongMaterial({
-        map: tex,
-        color: 0xf0c840,
-        specular: 0xffe890, shininess: 140,
-        emissive: 0x160a00, emissiveIntensity: 1,
-      });
-      const m = new THREE.Mesh(geo, mat);
-      m.position.y = yPos;
-      return m;
-    }
-
-    const headsCap = makeCap(headsTex,  T);
-    const tailsCap = makeCap(tailsTex, -T);
-    // tailsCap faces down (−Y), rotate around Y so texture is readable from outside
-    tailsCap.rotation.set(Math.PI, 0, 0);
-
-    // flipGroup handles face flipping; coin is position/scale outer wrapper
-    const flipGroup = new THREE.Group();
-    flipGroup.add(rimMesh, headsCap, tailsCap);
-    // CylinderGeometry axis = Y.  Tilt 90° so faces point at camera (+Z)
-    flipGroup.rotation.x = Math.PI / 2;
-
-    coin = new THREE.Group();   // outer: position, scale, wobble
-    coin.add(flipGroup);
-    coin._flipGroup = flipGroup;
+    coin = new THREE.Group();  // outer: Y position, scale, wobble around Z
+    coin.add(coinMesh);
+    coin._coinMesh = coinMesh;
     scene.add(coin);
 
     // ── highlight flare: thin disc in front of coin ──
@@ -1349,7 +1285,7 @@ const CoinEngine = (() => {
 
   // ── tossCoin ───────────────────────────────────────────────────────────────
   function tossCoin(result, onDone) {
-    if (busy || !threeOk) return;
+    if (busy || !threeOk || !overlay) return;
     busy = true;
 
     // Pause FXRegistry while coin plays (track whether we did it)
@@ -1357,20 +1293,27 @@ const CoinEngine = (() => {
     if (_pausedByUs) FXRegistry.forEach(fx => fx.pause());
 
     overlay.style.display = 'block';
+    // Re-set renderer size now that overlay is visible
+    const W = window.innerWidth, H = window.innerHeight;
+    renderer.setSize(W, H);
+    camera.aspect = W / H;
+    camera.updateProjectionMatrix();
     coin.visible = true;
     coin._backdrop.visible = true;
 
-    // ── Flip axis: flipGroup has rotation.x = PI/2 (pre-tilt so faces → camera)
-    // Rotating flipGroup.rotation.y = flipping face-over-face ✓
-    // heads: final y-angle = 0 (heads cap at +Y → after tilt → toward camera)
-    // tails: final y-angle = PI (tails cap at -Y → after tilt → toward camera)
-    const SPINS     = 5;   // full flips during flight
+    // ── Flip axis ──
+    // flipGroup.rotation.x = PI/2  → coin faces camera (cylinder axis Y → world Z)
+    // Incrementing rotation.x past PI/2 → face flips over the top ✓
+    // heads: lands at PI/2 + 0   = PI/2  (or any 2π multiple)
+    // tails: lands at PI/2 + PI  = 3PI/2
+    const SPINS     = 5;   // full flips
     const finalFlip = result === 'tails' ? Math.PI : 0;
     const totalFlip = SPINS * Math.PI * 2 + finalFlip;
+    // We'll store flip angle separately and apply as: fg.rotation.x = PI/2 + flipAngle
 
     // Reset state
-    const fg = coin._flipGroup;
-    fg.rotation.set(Math.PI / 2, 0, 0);  // clear any previous
+    const cm = coin._coinMesh;
+    cm.rotation.set(Math.PI / 2, 0, 0);
     coin.rotation.set(0, 0, 0);
     coin._flare.material.opacity = 0;
     coin._flare.position.x = -1.3;
@@ -1409,8 +1352,8 @@ const CoinEngine = (() => {
         coin.position.y = startY + (peakY - startY) * rEased;
         coin.scale.setScalar(startScale + (finalScale - startScale) * rEased);
 
-        // Spin decelerates: 70% of totalFlip during rise, eased with quintic
-        fg.rotation.y = easeOutQuint(rp) * totalFlip * 0.70;
+        // Spin decelerates: 70% of totalFlip during rise
+        cm.rotation.x = Math.PI / 2 + easeOutQuint(rp) * totalFlip * 0.70;
 
       } else if (p <= PEAK_END) {
         // ── PEAK: settle to final angle ──
@@ -1420,8 +1363,8 @@ const CoinEngine = (() => {
         coin.position.y = peakY + (finalY - peakY) * pEased;
         coin.scale.setScalar(finalScale);
 
-        const spinDone  = totalFlip * 0.70;
-        fg.rotation.y   = spinDone + (totalFlip - spinDone) * pEased;
+        const spinDone = totalFlip * 0.70;
+        cm.rotation.x  = Math.PI / 2 + spinDone + (totalFlip - spinDone) * pEased;
 
       } else {
         // ── REVEAL: locked face, float + highlight sweep ──
@@ -1430,7 +1373,7 @@ const CoinEngine = (() => {
         // Gentle float
         coin.position.y = finalY + Math.sin(ep * Math.PI * 2.5) * 0.07;
         coin.scale.setScalar(finalScale);
-        fg.rotation.y = totalFlip;  // locked
+        cm.rotation.x = Math.PI / 2 + totalFlip;  // locked
 
         // Subtle tilt wobble as it settles
         const settle = (1 - ep);
@@ -1462,9 +1405,9 @@ const CoinEngine = (() => {
 
   function hide() {
     if (animId) { cancelAnimationFrame(animId); animId = null; }
-    overlay.style.display = 'none';
-    coin.visible = false;
-    if (coin._backdrop) coin._backdrop.visible = false;
+    if (overlay) overlay.style.display = 'none';
+    if (coin) { coin.visible = false; }
+    if (coin && coin._backdrop) coin._backdrop.visible = false;
     busy = false;
     if (_pausedByUs) {
       FXRegistry.forEach(fx => fx.resume());
@@ -1472,12 +1415,16 @@ const CoinEngine = (() => {
     }
   }
 
-  // Poll until THREE ready
+  // Poll until THREE ready + DOM ready
   function tryInit() {
-    if (typeof THREE !== 'undefined') init();
+    if (typeof THREE !== 'undefined' && document.body) init();
     else setTimeout(tryInit, 80);
   }
-  setTimeout(tryInit, 0);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(tryInit, 0));
+  } else {
+    setTimeout(tryInit, 0);
+  }
 
   return { tossCoin, hide };
 })();
