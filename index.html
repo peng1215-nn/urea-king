@@ -2,6 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" defer></script>
 
 <style>
 :root {
@@ -27,6 +28,7 @@ html, body {
 }
 
 #canvas { position: fixed; inset: 0; z-index: 0; }
+#nova-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
 
 .grid {
   position: fixed; inset: 0; z-index: 1;
@@ -292,6 +294,7 @@ html, body {
 </style>
 
 <canvas id="canvas"></canvas>
+<canvas id="nova-canvas"></canvas>
 <div class="grid"></div>
 
 <div class="stage">
@@ -408,6 +411,7 @@ function resetScene() {
   btnShown  = false;
   sweepPassCount = 0;
   lastCountedAngle = null;
+  if (typeof tX !== 'undefined') SupernovaEngine.resetPlanet(tX, tY);
   blips.length = 0;
   radarTarget.style.display = 'none';
   radarTarget.style.pointerEvents = 'none';
@@ -458,121 +462,445 @@ function drawBlips(maxR) {
 let sweepPassCount = 0;
 let lastCountedAngle = null; // guard: only count once per revolution
 
-// ── solar wind effect ──
-let windActive = false;
-let windStart  = 0;
-const WIND_DUR   = 2200; // ms
-const STORM_EVERY = 4;   // every N passes after planet shown
+// ── SupernovaEngine: WebGL-based 5-phase supernova ──
+const SupernovaEngine = (() => {
+  let renderer, scene, camera, composer;
+  let novaCanvas, W2, H2;
+  let THREE_loaded = false;
 
-// wind particles: each ejected from planet surface in a cone
-let windParticles = [];
+  // Per-planet state
+  const planets = new Map(); // key: "x,y" → { phase, animT, animating, mesh refs... }
 
-function spawnWindParticles() {
-  windParticles = [];
-  const pc = document.getElementById('planet-canvas');
-  const S  = pc.width;
-  // 2 eruption jets at slightly different angles (like CME)
-  const jets = [
-    { angle: -0.35, spread: 0.45, count: 22 },
-    { angle:  0.55, spread: 0.35, count: 14 },
-  ];
-  for (const jet of jets) {
-    for (let i = 0; i < jet.count; i++) {
-      const a = jet.angle + (Math.random() - 0.5) * jet.spread;
-      const speed = 0.55 + Math.random() * 0.9;
-      const delay = Math.random() * 0.28;
-      windParticles.push({
-        // start at planet surface edge
-        x: S/2 + Math.cos(a) * S/2 * 0.85,
-        y: S/2 + Math.sin(a) * S/2 * 0.85,
-        vx: Math.cos(a) * speed,
-        vy: Math.sin(a) * speed,
-        life: 0,
-        delay,
-        maxLife: 0.55 + Math.random() * 0.35,
-        size: 0.8 + Math.random() * 1.6,
-        // color variation: white-hot core → purple-violet outer
-        hot: Math.random() < 0.3,
+  // EffectComposer / UnrealBloom polyfill via manual ping-pong bloom
+  // (use additive blending + glow layers to simulate bloom without addon dependency)
+
+  function init() {
+    novaCanvas = document.getElementById('nova-canvas');
+    W2 = novaCanvas.width  = window.innerWidth;
+    H2 = novaCanvas.height = window.innerHeight;
+
+    renderer = new THREE.WebGLRenderer({ canvas: novaCanvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(W2, H2);
+    renderer.setClearColor(0x000000, 0);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+
+    scene  = new THREE.Scene();
+    camera = new THREE.OrthographicCamera(-W2/2, W2/2, H2/2, -H2/2, -1000, 1000);
+    camera.position.z = 100;
+
+    THREE_loaded = true;
+    animate();
+  }
+
+  function resize() {
+    if (!THREE_loaded) return;
+    W2 = novaCanvas.width  = window.innerWidth;
+    H2 = novaCanvas.height = window.innerHeight;
+    renderer.setSize(W2, H2);
+    camera.left  = -W2/2; camera.right = W2/2;
+    camera.top   =  H2/2; camera.bottom = -H2/2;
+    camera.updateProjectionMatrix();
+  }
+
+  // Convert screen coords to Three.js world coords (orthographic, origin at center)
+  function toWorld(sx, sy) {
+    return new THREE.Vector2(sx - W2/2, -(sy - H2/2));
+  }
+
+  // ── Phase objects pool ──
+  function makePlanetState(sx, sy) {
+    const key = sx + ',' + sy;
+    if (planets.has(key)) return planets.get(key);
+    const state = {
+      sx, sy,
+      phase: 0,        // 0=idle, 1-5=phases
+      animStart: 0,
+      group: new THREE.Group(),
+      meshes: [],      // disposable meshes per phase
+      nebulaParts: [], // for phase 4
+      shockwaves: [],  // rings for phase 3
+    };
+    const wp = toWorld(sx, sy);
+    state.group.position.set(wp.x, wp.y, 0);
+    scene.add(state.group);
+    planets.set(key, state);
+    return state;
+  }
+
+  // dispose all phase meshes
+  function clearMeshes(state) {
+    for (const m of state.meshes) {
+      if (m.geometry) m.geometry.dispose();
+      if (m.material) m.material.dispose();
+      state.group.remove(m);
+    }
+    state.meshes = [];
+    state.nebulaParts = [];
+    state.shockwaves = [];
+  }
+
+  // ────────────────────────────────
+  // PHASE 1: Energy accumulation — blue-white corona + inward particles
+  // ────────────────────────────────
+  function startPhase1(state) {
+    clearMeshes(state);
+    // Soft outer corona halo
+    const coronaGeo = new THREE.CircleGeometry(120, 64);
+    const coronaMat = new THREE.MeshBasicMaterial({
+      color: 0x88ccff,
+      transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const corona = new THREE.Mesh(coronaGeo, coronaMat);
+    state.group.add(corona); state.meshes.push(corona);
+
+    // Inward particle streams (points converging to center)
+    const count = 180;
+    const positions = new Float32Array(count * 3);
+    const progArr   = new Float32Array(count);   // 0→1 progress inward
+    const angArr    = new Float32Array(count);    // orbit angle
+    const radArr    = new Float32Array(count);    // start radius
+    for (let i = 0; i < count; i++) {
+      angArr[i] = Math.random() * Math.PI * 2;
+      radArr[i] = 60 + Math.random() * 80;
+      progArr[i] = Math.random(); // staggered
+      positions[i*3]   = Math.cos(angArr[i]) * radArr[i] * (1 - progArr[i]);
+      positions[i*3+1] = Math.sin(angArr[i]) * radArr[i] * (1 - progArr[i]);
+      positions[i*3+2] = 0;
+    }
+    const ptGeo = new THREE.BufferGeometry();
+    ptGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const ptMat = new THREE.PointsMaterial({
+      color: 0xaaddff, size: 2.5,
+      transparent: true, opacity: 0.8,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const pts = new THREE.Points(ptGeo, ptMat);
+    state.group.add(pts); state.meshes.push(pts);
+
+    // store refs for update
+    state._p1 = { corona, coronaMat, pts, ptGeo, positions, progArr, angArr, radArr, count };
+  }
+
+  function updatePhase1(state, t) {
+    const p = state._p1; if (!p) return;
+    const pulse = 0.5 + 0.5 * Math.sin(t * 8);
+    // corona breathes
+    p.coronaMat.opacity = (0.08 + 0.06 * pulse) * Math.min(t * 3, 1);
+    p.corona.scale.setScalar(0.8 + 0.3 * pulse);
+    // particles orbit inward
+    const pos = p.positions;
+    for (let i = 0; i < p.count; i++) {
+      p.progArr[i] = (p.progArr[i] + 0.003) % 1;
+      const r = p.radArr[i] * (1 - p.progArr[i]);
+      p.angArr[i] += 0.025;
+      pos[i*3]   = Math.cos(p.angArr[i]) * r;
+      pos[i*3+1] = Math.sin(p.angArr[i]) * r;
+    }
+    p.ptGeo.attributes.position.needsUpdate = true;
+    p.pts.material.opacity = 0.7 + 0.3 * pulse;
+  }
+
+  // ────────────────────────────────
+  // PHASE 2: Core collapse — star shrinks to white point, space darkens
+  // ────────────────────────────────
+  function startPhase2(state) {
+    clearMeshes(state);
+    // Dark veil (darken surroundings)
+    const veilGeo = new THREE.CircleGeometry(200, 64);
+    const veilMat = new THREE.MeshBasicMaterial({
+      color: 0x000008, transparent: true, opacity: 0,
+      blending: THREE.NormalBlending, depthWrite: false,
+    });
+    const veil = new THREE.Mesh(veilGeo, veilMat);
+    state.group.add(veil); state.meshes.push(veil);
+
+    // Core contracting sphere
+    const coreGeo = new THREE.CircleGeometry(1, 32);
+    const coreMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    state.group.add(core); state.meshes.push(core);
+
+    // Outer glow around contracting core
+    const glowGeo = new THREE.CircleGeometry(1, 32);
+    const glowMat = new THREE.MeshBasicMaterial({
+      color: 0x4488ff, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const glow = new THREE.Mesh(glowGeo, glowMat);
+    state.group.add(glow); state.meshes.push(glow);
+
+    state._p2 = { veil, veilMat, core, coreMat, glow, glowMat };
+  }
+
+  function updatePhase2(state, t) {
+    const p = state._p2; if (!p) return;
+    // First 0.6: collapse inward
+    const collapse = Math.min(t / 0.6, 1);
+    const ease = 1 - Math.pow(1 - collapse, 3);
+    // Core goes from planet size (34px) to tiny white dot
+    const coreR = 34 * (1 - ease) + 2;
+    p.coreMat.opacity = Math.min(t * 4, 1);
+    p.core.scale.setScalar(coreR);
+    // Glow around core
+    p.glowMat.opacity = ease * 0.6;
+    p.glow.scale.setScalar(coreR * 3);
+    // Dark veil builds up
+    p.veilMat.opacity = ease * 0.55;
+    p.veil.scale.setScalar(1 + ease * 0.5);
+  }
+
+  // ────────────────────────────────
+  // PHASE 3: Explosion — shockwaves + bloom flash + particle jets
+  // ────────────────────────────────
+  function startPhase3(state) {
+    clearMeshes(state);
+    // Flash (white-blue full-screen briefly, using a large circle)
+    const flashGeo = new THREE.CircleGeometry(500, 64);
+    const flashMat = new THREE.MeshBasicMaterial({
+      color: 0xddeeff, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const flash = new THREE.Mesh(flashGeo, flashMat);
+    state.group.add(flash); state.meshes.push(flash);
+
+    // Multiple shockwave rings
+    const rings = [];
+    const ringCount = 5;
+    for (let i = 0; i < ringCount; i++) {
+      const rGeo = new THREE.RingGeometry(1, 1.06, 96);
+      const rMat = new THREE.MeshBasicMaterial({
+        color: i < 2 ? 0xffffff : (i < 4 ? 0x88ccff : 0x4466bb),
+        transparent: true, opacity: 0,
+        blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
       });
+      const ring = new THREE.Mesh(rGeo, rMat);
+      ring.userData.delay = i * 0.08;
+      ring.userData.maxR  = 120 + i * 55;
+      state.group.add(ring); state.meshes.push(ring);
+      rings.push(ring); state.shockwaves.push(ring);
+    }
+
+    // Particle jets — high-speed streaks outward
+    const jCount = 400;
+    const jPos  = new Float32Array(jCount * 3);
+    const jVel  = new Float32Array(jCount * 3);
+    const jLife = new Float32Array(jCount);
+    const jDel  = new Float32Array(jCount);
+    for (let i = 0; i < jCount; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const sp = 2.5 + Math.random() * 5.5;
+      jVel[i*3]   = Math.cos(a) * sp;
+      jVel[i*3+1] = Math.sin(a) * sp;
+      jVel[i*3+2] = 0;
+      jPos[i*3] = jPos[i*3+1] = jPos[i*3+2] = 0;
+      jLife[i] = 0;
+      jDel[i]  = Math.random() * 0.25;
+    }
+    const jGeo = new THREE.BufferGeometry();
+    jGeo.setAttribute('position', new THREE.BufferAttribute(jPos, 3));
+    const jMat = new THREE.PointsMaterial({
+      color: 0xffffff, size: 3,
+      transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const jets = new THREE.Points(jGeo, jMat);
+    state.group.add(jets); state.meshes.push(jets);
+
+    state._p3 = { flash, flashMat, rings, jets, jGeo, jPos, jVel, jLife, jDel, jCount };
+  }
+
+  function updatePhase3(state, t) {
+    const p = state._p3; if (!p) return;
+    // Flash: bright 0-0.15, fade 0.15-0.5
+    if (t < 0.15)      p.flashMat.opacity = t / 0.15 * 0.75;
+    else if (t < 0.5)  p.flashMat.opacity = (1 - (t - 0.15) / 0.35) * 0.75;
+    else               p.flashMat.opacity = 0;
+
+    // Shockwave rings expand
+    for (const ring of p.rings) {
+      const d = ring.userData.delay;
+      const local = Math.max(0, t - d);
+      const maxR  = ring.userData.maxR;
+      const r = local * maxR / 0.9;
+      ring.scale.setScalar(Math.min(r, maxR));
+      const fade = 1 - Math.min(local / 0.9, 1);
+      ring.material.opacity = fade * (ring === p.rings[0] ? 0.9 : 0.5);
+    }
+
+    // Jet particles fly outward
+    const pos = p.jPos; const vel = p.jVel;
+    for (let i = 0; i < p.jCount; i++) {
+      if (t < p.jDel[i]) continue;
+      p.jLife[i] += 0.018;
+      pos[i*3]   += vel[i*3];
+      pos[i*3+1] += vel[i*3+1];
+    }
+    p.jGeo.attributes.position.needsUpdate = true;
+    const jetFade = t < 0.3 ? t / 0.3 : Math.max(0, 1 - (t - 0.3) / 0.7);
+    p.jets.material.opacity = jetFade * 0.85;
+    // tint jets color over time: white → blue → purple
+    if (t < 0.4)       p.jets.material.color.setHex(0xffffff);
+    else if (t < 0.7)  p.jets.material.color.setHex(0x88aaff);
+    else               p.jets.material.color.setHex(0xaa66ff);
+  }
+
+  // ────────────────────────────────
+  // PHASE 4: Nebula expansion — rolling gas clouds
+  // ────────────────────────────────
+  function startPhase4(state) {
+    clearMeshes(state);
+    const partCount = 300;
+    const parts = [];
+    const colors = [
+      0x3366ff, 0x6633ff, 0xff6633, 0xff3366,
+      0xaa44ff, 0xff9944, 0x44aaff,
+    ];
+    for (let i = 0; i < partCount; i++) {
+      const a   = Math.random() * Math.PI * 2;
+      const spd = 0.18 + Math.random() * 0.55;
+      const geo = new THREE.CircleGeometry(6 + Math.random() * 18, 16);
+      const mat = new THREE.MeshBasicMaterial({
+        color: colors[Math.floor(Math.random() * colors.length)],
+        transparent: true, opacity: 0,
+        blending: THREE.AdditiveBlending, depthWrite: false,
+      });
+      const m = new THREE.Mesh(geo, mat);
+      m.userData = {
+        vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
+        rot: (Math.random() - 0.5) * 0.04,
+        delay: Math.random() * 0.35,
+        maxOpacity: 0.08 + Math.random() * 0.18,
+        spin: (Math.random() - 0.5) * 0.02,
+      };
+      state.group.add(m); state.meshes.push(m);
+      state.nebulaParts.push(m); parts.push(m);
+    }
+    state._p4 = { parts };
+  }
+
+  function updatePhase4(state, t) {
+    const p = state._p4; if (!p) return;
+    for (const m of p.parts) {
+      const d = m.userData.delay;
+      if (t < d) continue;
+      const local = (t - d) / (1 - d);
+      m.position.x += m.userData.vx * 1.8;
+      m.position.y += m.userData.vy * 1.8;
+      m.rotation.z += m.userData.spin;
+      // fade in then plateau
+      const fadeIn = Math.min(local / 0.2, 1);
+      m.material.opacity = fadeIn * m.userData.maxOpacity;
     }
   }
-}
 
-function triggerStorm() {
-  if (windActive) return;
-  windActive = true;
-  windStart  = performance.now();
-  spawnWindParticles();
-  animateWind();
-}
-
-function animateWind() {
-  if (!windActive) return;
-  const pc = document.getElementById('planet-canvas');
-  const c  = pc.getContext('2d');
-  const S  = pc.width;
-  const elapsed = (performance.now() - windStart) / WIND_DUR;
-  const t = Math.min(elapsed, 1);
-
-  // redraw base planet
-  drawPlanetOn(c, S);
-
-  // corona glow at eruption site (fades quickly)
-  if (t < 0.3) {
-    const coronaA = (1 - t / 0.3) * 0.7;
-    const cg = c.createRadialGradient(S*0.62, S*0.38, 0, S*0.62, S*0.38, S*0.28);
-    cg.addColorStop(0,   `rgba(255,240,200,${coronaA})`);
-    cg.addColorStop(0.4, `rgba(220,140,255,${coronaA * 0.5})`);
-    cg.addColorStop(1,   `rgba(150,60,255,0)`);
-    c.fillStyle = cg; c.fillRect(0, 0, S, S);
-  }
-
-  // update + draw wind particles
-  const dt = 0.016;
-  for (const p of windParticles) {
-    if (t < p.delay) continue;
-    p.life = Math.min(p.life + dt / (WIND_DUR / 1000), 1);
-    p.x += p.vx;
-    p.y += p.vy;
-    // slight outward acceleration + dispersion
-    p.vx += Math.cos(Math.atan2(p.vy, p.vx)) * 0.04;
-    p.vy += Math.sin(Math.atan2(p.vy, p.vx)) * 0.04;
-
-    const fadeIn  = Math.min(p.life / 0.12, 1);
-    const fadeOut = p.life > p.maxLife ? 1 - (p.life - p.maxLife) / (1 - p.maxLife) : 1;
-    const a = fadeIn * fadeOut;
-    if (a <= 0) continue;
-
-    // elongated streak in direction of travel
-    const speed = Math.hypot(p.vx, p.vy);
-    const angle = Math.atan2(p.vy, p.vx);
-    c.save();
-    c.translate(p.x, p.y);
-    c.rotate(angle);
-    const grad = c.createLinearGradient(-speed * 3, 0, speed * 0.5, 0);
-    if (p.hot) {
-      grad.addColorStop(0, `rgba(255,255,255,0)`);
-      grad.addColorStop(0.5, `rgba(255,230,180,${a * 0.9})`);
-      grad.addColorStop(1, `rgba(255,200,120,${a * 0.5})`);
-    } else {
-      grad.addColorStop(0, `rgba(180,80,255,0)`);
-      grad.addColorStop(0.5, `rgba(200,140,255,${a * 0.75})`);
-      grad.addColorStop(1, `rgba(230,190,255,${a * 0.4})`);
+  function sustainPhase4(state) {
+    // Very slow drift while sustained (between sweeps)
+    for (const m of state.nebulaParts) {
+      m.position.x += m.userData.vx * 0.12;
+      m.position.y += m.userData.vy * 0.12;
+      m.rotation.z += m.userData.spin * 0.3;
     }
-    c.beginPath();
-    c.ellipse(0, 0, speed * 3, p.size * 0.5, 0, 0, Math.PI * 2);
-    c.fillStyle = grad;
-    c.fill();
-    c.restore();
   }
 
-  if (t < 1) {
-    requestAnimationFrame(animateWind);
-  } else {
-    windActive = false;
-    drawPlanet();
+  // ────────────────────────────────
+  // PHASE 5: Fade out — nebula disperses, star returns
+  // ────────────────────────────────
+  function startPhase5(state) {
+    // Don't clear — fade out existing nebula + shockwave remnants
+    state._p5 = { startOpacities: state.nebulaParts.map(m => m.material.opacity) };
   }
-}
+
+  function updatePhase5(state, t) {
+    const p = state._p5; if (!p) return;
+    const fade = 1 - t;
+    for (let i = 0; i < state.nebulaParts.length; i++) {
+      const m = state.nebulaParts[i];
+      m.material.opacity = (p.startOpacities[i] || 0) * fade;
+      m.position.x += m.userData.vx * 0.08;
+      m.position.y += m.userData.vy * 0.08;
+    }
+  }
+
+  // ────────────────────────────────
+  // Main animation loop
+  // ────────────────────────────────
+  const PHASE_DURATION = {
+    1: 99999, // sustained until next sweep
+    2: 99999,
+    3: 3500,  // ms — explosion transition plays out then sustains last frame
+    4: 99999,
+    5: 3000,
+  };
+
+  function animate() {
+    requestAnimationFrame(animate);
+    if (!THREE_loaded) return;
+    const now = performance.now();
+
+    for (const [, state] of planets) {
+      if (state.phase === 0) continue;
+      const t = Math.min((now - state.animStart) / PHASE_DURATION[state.phase], 1);
+
+      switch (state.phase) {
+        case 1: updatePhase1(state, (now - state.animStart) / 1000); break;
+        case 2: updatePhase2(state, t); break;
+        case 3: updatePhase3(state, t); break;
+        case 4:
+          if (t < 1) updatePhase4(state, t);
+          else sustainPhase4(state);
+          break;
+        case 5:
+          updatePhase5(state, t);
+          if (t >= 1) { clearMeshes(state); state.phase = 0; }
+          break;
+      }
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  // ────────────────────────────────
+  // Public API
+  // ────────────────────────────────
+  function onSweep(sx, sy) {
+    if (!THREE_loaded) return;
+    const state = makePlanetState(sx, sy);
+    const nextPhase = state.phase === 0 ? 1 : (state.phase % 5) + 1;
+    state.phase = nextPhase;
+    state.animStart = performance.now();
+
+    switch (nextPhase) {
+      case 1: startPhase1(state); break;
+      case 2: startPhase2(state); break;
+      case 3: startPhase3(state); break;
+      case 4: startPhase4(state); break;
+      case 5: startPhase5(state); break;
+    }
+  }
+
+  function resetPlanet(sx, sy) {
+    const key = sx + ',' + sy;
+    const state = planets.get(key);
+    if (state) { clearMeshes(state); state.phase = 0; }
+  }
+
+  function onResize() { resize(); }
+
+  // Wait for THREE to load then init
+  function tryInit() {
+    if (typeof THREE !== 'undefined') { init(); }
+    else { setTimeout(tryInit, 50); }
+  }
+  setTimeout(tryInit, 0);
+
+  return { onSweep, resetPlanet, onResize };
+})();
 
 function checkSweep() {
   const diff = norm(tAngle) - norm(angle);
@@ -617,10 +945,8 @@ function checkSweep() {
         lbl.style.letterSpacing = '3px';
       }, 60);
 
-      // every STORM_EVERY passes after reveal → trigger solar wind (skip pass 2 = reveal)
-      if (sweepPassCount > 2 && (sweepPassCount - 2) % STORM_EVERY === 0) {
-        setTimeout(triggerStorm, 80);
-      }
+      // trigger supernova phase advance on every sweep after planet shown
+      SupernovaEngine.onSweep(tX, tY);
     }
   }
 }
@@ -767,7 +1093,7 @@ function drawPlanet() {
 
 drawPlanet();
 resize(); resetScene(); initParticles(); draw();
-window.addEventListener('resize', () => { resize(); resetScene(); initParticles(); });
+window.addEventListener('resize', () => { resize(); resetScene(); initParticles(); SupernovaEngine.onResize(); });
 
 // only reset on actual page load/reload, not tab switching
 
