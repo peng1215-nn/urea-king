@@ -556,16 +556,16 @@ const SupernovaEngine = (() => {
     const corona = new THREE.Mesh(coronaGeo, coronaMat);
     state.group.add(corona); state.meshes.push(corona);
 
-    // Inward particle streams (points converging to center)
-    const count = 180;
+    // Sparse inward energy motes — subtle, not chaotic
+    const count = 48;
     const positions = new Float32Array(count * 3);
-    const progArr   = new Float32Array(count);   // 0→1 progress inward
-    const angArr    = new Float32Array(count);    // orbit angle
-    const radArr    = new Float32Array(count);    // start radius
+    const progArr   = new Float32Array(count);
+    const angArr    = new Float32Array(count);
+    const radArr    = new Float32Array(count);
     for (let i = 0; i < count; i++) {
       angArr[i] = Math.random() * Math.PI * 2;
-      radArr[i] = 60 + Math.random() * 80;
-      progArr[i] = Math.random(); // staggered
+      radArr[i] = 38 + Math.random() * 42;
+      progArr[i] = Math.random();
       positions[i*3]   = Math.cos(angArr[i]) * radArr[i] * (1 - progArr[i]);
       positions[i*3+1] = Math.sin(angArr[i]) * radArr[i] * (1 - progArr[i]);
       positions[i*3+2] = 0;
@@ -573,34 +573,35 @@ const SupernovaEngine = (() => {
     const ptGeo = new THREE.BufferGeometry();
     ptGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     const ptMat = new THREE.PointsMaterial({
-      color: 0xaaddff, size: 2.5,
-      transparent: true, opacity: 0.8,
+      color: 0xaaccff, size: 1.6,
+      transparent: true, opacity: 0,
       blending: THREE.AdditiveBlending, depthWrite: false,
     });
     const pts = new THREE.Points(ptGeo, ptMat);
     state.group.add(pts); state.meshes.push(pts);
 
-    // store refs for update
     state._p1 = { corona, coronaMat, pts, ptGeo, positions, progArr, angArr, radArr, count };
   }
 
   function updatePhase1(state, t) {
     const p = state._p1; if (!p) return;
-    const pulse = 0.5 + 0.5 * Math.sin(t * 8);
-    // corona breathes
-    p.coronaMat.opacity = (0.08 + 0.06 * pulse) * Math.min(t * 3, 1);
-    p.corona.scale.setScalar(0.8 + 0.3 * pulse);
-    // particles orbit inward
+    // Slow, gentle pulse — 0.5 cycle per second
+    const pulse = 0.5 + 0.5 * Math.sin(t * 3.2);
+    const fadeIn = Math.min(t / 2, 1); // ease in over 2 seconds
+    // Very subtle corona shimmer
+    p.coronaMat.opacity = (0.04 + 0.025 * pulse) * fadeIn;
+    p.corona.scale.setScalar(0.9 + 0.12 * pulse);
+    // Particles slowly spiral inward
     const pos = p.positions;
     for (let i = 0; i < p.count; i++) {
-      p.progArr[i] = (p.progArr[i] + 0.003) % 1;
+      p.progArr[i] = (p.progArr[i] + 0.0008) % 1;
       const r = p.radArr[i] * (1 - p.progArr[i]);
-      p.angArr[i] += 0.025;
+      p.angArr[i] += 0.008;
       pos[i*3]   = Math.cos(p.angArr[i]) * r;
       pos[i*3+1] = Math.sin(p.angArr[i]) * r;
     }
     p.ptGeo.attributes.position.needsUpdate = true;
-    p.pts.material.opacity = 0.7 + 0.3 * pulse;
+    p.pts.material.opacity = (0.3 + 0.2 * pulse) * fadeIn;
   }
 
   // ────────────────────────────────
@@ -669,19 +670,22 @@ const SupernovaEngine = (() => {
     const flash = new THREE.Mesh(flashGeo, flashMat);
     state.group.add(flash); state.meshes.push(flash);
 
-    // Multiple shockwave rings
+    // Shockwave rings — each expands continuously until fully transparent
     const rings = [];
     const ringCount = 5;
     for (let i = 0; i < ringCount; i++) {
-      const rGeo = new THREE.RingGeometry(1, 1.06, 96);
+      const rGeo = new THREE.RingGeometry(1, 1.055, 96);
       const rMat = new THREE.MeshBasicMaterial({
         color: i < 2 ? 0xffffff : (i < 4 ? 0x88ccff : 0x4466bb),
         transparent: true, opacity: 0,
         blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
       });
       const ring = new THREE.Mesh(rGeo, rMat);
-      ring.userData.delay = i * 0.08;
-      ring.userData.maxR  = 120 + i * 55;
+      // delay: stagger launch; speed: px/t-unit; fadeDur: how long fade takes
+      ring.userData.delay   = i * 0.10;
+      ring.userData.speed   = 320 + i * 60;   // px per t=1
+      ring.userData.peakR   = 30 + i * 12;    // radius at peak brightness
+      ring.userData.peakOp  = i < 2 ? 0.85 : 0.5;
       state.group.add(ring); state.meshes.push(ring);
       rings.push(ring); state.shockwaves.push(ring);
     }
@@ -722,15 +726,19 @@ const SupernovaEngine = (() => {
     else if (t < 0.5)  p.flashMat.opacity = (1 - (t - 0.15) / 0.35) * 0.75;
     else               p.flashMat.opacity = 0;
 
-    // Shockwave rings expand
+    // Shockwave rings: expand continuously, fade as radius grows
     for (const ring of p.rings) {
       const d = ring.userData.delay;
-      const local = Math.max(0, t - d);
-      const maxR  = ring.userData.maxR;
-      const r = local * maxR / 0.9;
-      ring.scale.setScalar(Math.min(r, maxR));
-      const fade = 1 - Math.min(local / 0.9, 1);
-      ring.material.opacity = fade * (ring === p.rings[0] ? 0.9 : 0.5);
+      if (t < d) continue;
+      const local = t - d;
+      const r = Math.max(1, local * ring.userData.speed);
+      ring.scale.setScalar(r);
+      // Fade: ramps up quickly to peak then decays proportional to radius
+      const riseT = ring.userData.peakR;
+      const opacity = r < riseT
+        ? (r / riseT) * ring.userData.peakOp
+        : ring.userData.peakOp * Math.max(0, 1 - (r - riseT) / (ring.userData.speed * 1.2));
+      ring.material.opacity = opacity;
     }
 
     // Jet particles fly outward
@@ -833,7 +841,7 @@ const SupernovaEngine = (() => {
   const PHASE_DURATION = {
     1: 99999, // sustained until next sweep
     2: 99999,
-    3: 3500,  // ms — explosion transition plays out then sustains last frame
+    3: 5500,  // ms — rings need time to fully expand and fade
     4: 99999,
     5: 3000,
   };
@@ -917,16 +925,19 @@ function checkSweep() {
     stampBlip();
     radarTarget.style.display = 'flex';
     radarTarget.style.pointerEvents = 'none';
-  } else if (canCount) {
-    sweepPassCount++;
-    lastCountedAngle = angle;
-    stampBlip();
-    if (sweepPassCount === 2 && !btnShown) {
+    // Show POKER on first scan
+    if (!btnShown) {
       btnShown = true;
       planetWrap.style.transition = 'opacity 1.4s ease';
       planetWrap.style.opacity = '1';
       setTimeout(() => { radarTarget.style.pointerEvents = 'auto'; }, 1400);
-    } else if (btnShown) {
+    }
+    SupernovaEngine.onSweep(tX, tY);
+  } else if (canCount) {
+    sweepPassCount++;
+    lastCountedAngle = angle;
+    stampBlip();
+    if (btnShown) {
       // flash planet and label
       const el = document.getElementById('enter-btn');
       const lbl = document.querySelector('.planet-label');
