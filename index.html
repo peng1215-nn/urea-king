@@ -233,19 +233,55 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0.01ms !important; }
 }
-@media (max-width: 480px) {
-  .coord { margin-bottom: 28px; }
-  .wordmark { margin-bottom: 12px; }
+@media (max-width: 600px) {
+  .coord {
+    font-size: 13px;
+    letter-spacing: 3px;
+    margin-bottom: 32px;
+  }
+  .wordmark-main {
+    font-size: 48px;
+    letter-spacing: 0.18em;
+  }
+  .wordmark-sub {
+    font-size: 13px;
+    letter-spacing: 4px;
+  }
+  .wordmark {
+    margin-bottom: 16px;
+  }
+  .descriptor {
+    font-size: 15px;
+    max-width: 280px;
+  }
+  .contact-bar {
+    bottom: max(32px, env(safe-area-inset-bottom, 0px));
+  }
+  .contact-link {
+    font-size: 14px;
+    letter-spacing: 4px;
+    padding: 8px 4px;
+    border-bottom-width: 1.5px;
+  }
   .enter-link {
-    width: 80px; height: 80px;
+    width: 86px; height: 86px;
   }
   #planet-canvas {
-    width: 80px; height: 80px;
+    width: 86px; height: 86px;
+  }
+  .planet-label {
+    font-size: 12px;
+    letter-spacing: 4px;
   }
   .modal {
-    padding: 24px 18px 20px;
+    padding: 24px 20px 20px;
+    margin: 0 8px;
   }
-  .modal-email { font-size: 12px; }
+  .modal-title { font-size: 12px; letter-spacing: 5px; }
+  .modal-email { font-size: 14px; }
+  .modal-template { font-size: 13px; }
+  .btn-copy { font-size: 11px; padding: 5px 10px; }
+  .btn-close { font-size: 12px; }
 }
 </style>
 
