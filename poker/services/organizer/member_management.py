@@ -2,6 +2,7 @@ from datetime import datetime
 from database import SessionLocal
 from poker.models import Group
 from poker.models import GroupMemberAlias
+from poker.models import InvitationCode
 from poker.models import User
 from poker.models import UserGroupRole
 
@@ -131,6 +132,18 @@ def remove_member_service(group_id: int, target_user_id: int):
                 "success": False,
                 "message": "不允许移除局头。",
             }
+
+        # 释放该成员使用的邀请码仓位
+        user = db.query(User).filter(User.id == target_user_id).first()
+        group = db.query(Group).filter(Group.id == group_id).first()
+        if user and group:
+            used_invite = db.query(InvitationCode).filter(
+                InvitationCode.group_code == group.group_code,
+                InvitationCode.used_by_username == user.username,
+                InvitationCode.is_used == 1,
+            ).first()
+            if used_invite:
+                db.delete(used_invite)
 
         db.delete(record)
         db.commit()
