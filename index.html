@@ -159,11 +159,11 @@ html, body {
 .modal-overlay.open { opacity: 1; pointer-events: auto; }
 
 .modal {
-  width: 100%; max-width: 420px;
-  background: rgba(12, 16, 28, 0.95);
+  width: 100%; max-width: 400px;
+  background: rgba(12, 16, 28, 0.96);
   border: 1px solid rgba(150, 80, 255, 0.2);
   border-radius: 4px;
-  padding: 32px 28px 28px;
+  padding: 30px 26px 24px;
   transform: translateY(12px);
   transition: transform 0.25s ease;
   box-shadow: 0 0 60px rgba(120,40,200,0.15);
@@ -173,56 +173,57 @@ html, body {
 .modal-title {
   font-family: var(--mono); font-size: 11px;
   letter-spacing: 4px; color: rgba(150,80,255,0.9);
-  text-transform: uppercase; margin-bottom: 24px;
+  text-transform: uppercase; margin-bottom: 20px;
 }
 
-.modal label {
-  display: block;
+.modal-email-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 22px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 2px;
+}
+.modal-email {
+  font-family: var(--mono); font-size: 13px;
+  color: rgba(180,130,255,0.9); flex: 1;
+  user-select: all;
+}
+.btn-copy {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+  color: var(--muted); background: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 2px; cursor: pointer;
+  text-transform: uppercase; padding: 4px 8px;
+  transition: color 0.2s, border-color 0.2s; white-space: nowrap;
+}
+.btn-copy:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+
+.modal-label {
   font-family: var(--mono); font-size: 9px;
   letter-spacing: 3px; color: var(--muted);
-  text-transform: uppercase; margin-bottom: 6px;
+  text-transform: uppercase; margin-bottom: 10px;
 }
-.modal input, .modal textarea {
-  width: 100%; background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 2px; color: var(--text);
-  font-family: var(--mono); font-size: 13px;
-  padding: 10px 12px; outline: none;
-  transition: border-color 0.2s;
-  resize: none;
+.modal-template {
+  font-family: var(--mono); font-size: 12px; line-height: 1.8;
+  color: rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 2px; padding: 12px 14px;
+  margin-bottom: 22px;
 }
-.modal input:focus, .modal textarea:focus {
-  border-color: rgba(150,80,255,0.5);
-}
-.modal-field { margin-bottom: 18px; }
-.modal textarea { height: 100px; }
-
-.modal-error {
-  font-family: var(--mono); font-size: 10px;
-  color: rgba(255, 100, 100, 0.85); margin-bottom: 14px;
-  min-height: 14px; letter-spacing: 1px;
-}
+.modal-template span { color: rgba(150,80,255,0.8); }
 
 .modal-actions {
-  display: flex; gap: 12px; justify-content: flex-end; margin-top: 4px;
+  display: flex; justify-content: flex-end;
 }
-.btn-cancel {
+.btn-close {
   font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
   color: var(--muted); background: none; border: none;
   cursor: pointer; text-transform: uppercase; padding: 8px 4px;
   transition: color 0.2s;
 }
-.btn-cancel:hover { color: var(--text); }
-.btn-submit {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
-  color: #fff; background: rgba(120,40,200,0.4);
-  border: 1px solid rgba(150,80,255,0.4);
-  border-radius: 2px; cursor: pointer;
-  text-transform: uppercase; padding: 8px 20px;
-  transition: background 0.2s, border-color 0.2s;
-}
-.btn-submit:hover { background: rgba(150,60,255,0.55); border-color: rgba(180,100,255,0.6); }
-.btn-submit:disabled { opacity: 0.4; cursor: default; }
+.btn-close:hover { color: var(--text); }
 
 /* ── animations ── */
 @keyframes fadein {
@@ -273,18 +274,22 @@ html, body {
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <div class="modal-title">Contact Admin</div>
-    <div class="modal-field">
-      <label for="c-username">Username</label>
-      <input type="text" id="c-username" placeholder="Your username" autocomplete="off">
+    <div class="modal-email-row">
+      <span class="modal-email" id="admin-email">admin@urea-king.com</span>
+      <button class="btn-copy" id="btn-copy">Copy</button>
     </div>
-    <div class="modal-field">
-      <label for="c-desc">Issue Description</label>
-      <textarea id="c-desc" placeholder="Describe your issue..."></textarea>
+    <div class="modal-label" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>Email format</span>
+      <button class="btn-copy" id="btn-copy-tpl">Copy</button>
     </div>
-    <div class="modal-error" id="modal-error"></div>
+    <div class="modal-template" id="modal-tpl">
+      Subject: [Issue] <span>Your Username</span><br>
+      <br>
+      Username: <span>your username</span><br>
+      Issue: <span>describe your problem here</span>
+    </div>
     <div class="modal-actions">
-      <button class="btn-cancel" id="modal-cancel">Cancel</button>
-      <button class="btn-submit" id="modal-submit">Submit</button>
+      <button class="btn-close" id="modal-close">Close</button>
     </div>
   </div>
 </div>
@@ -572,53 +577,36 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ── contact modal ──
-const overlay   = document.getElementById('modal-overlay');
-const modalErr  = document.getElementById('modal-error');
-
-function openModal() {
-  document.getElementById('c-username').value = '';
-  document.getElementById('c-desc').value = '';
-  modalErr.textContent = '';
-  overlay.classList.add('open');
-}
+const overlay = document.getElementById('modal-overlay');
+function openModal()  { overlay.classList.add('open'); }
 function closeModal() { overlay.classList.remove('open'); }
 
 document.getElementById('contact-btn').addEventListener('click', openModal);
-document.getElementById('modal-cancel').addEventListener('click', closeModal);
+document.getElementById('modal-close').addEventListener('click', closeModal);
 overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-document.getElementById('modal-submit').addEventListener('click', async () => {
-  const username    = document.getElementById('c-username').value.trim();
-  const description = document.getElementById('c-desc').value.trim();
-  modalErr.textContent = '';
+document.getElementById('btn-copy-tpl').addEventListener('click', () => {
+  const tplText = "Subject: [Issue] Your Username\n\nUsername: your username\nIssue: describe your problem here";
+  const btn = document.getElementById('btn-copy-tpl');
+  navigator.clipboard.writeText(tplText).then(() => {
+    btn.textContent = 'Copied';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1800);
+  }).catch(() => {});
+});
 
-  if (!username && !description) {
-    modalErr.textContent = 'Username and description are required.'; return;
-  }
-  if (!username) { modalErr.textContent = 'Username is required.'; return; }
-  if (!description) { modalErr.textContent = 'Issue description is required.'; return; }
-
-  const btn = document.getElementById('modal-submit');
-  btn.disabled = true; btn.textContent = 'Sending...';
-
-  try {
-    const res  = await fetch('/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, description }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      btn.textContent = 'Sent';
-      setTimeout(closeModal, 800);
-    } else {
-      modalErr.textContent = data.message || 'Failed to send. Please try again.';
-      btn.disabled = false; btn.textContent = 'Submit';
-    }
-  } catch {
-    modalErr.textContent = 'Network error. Please try again.';
-    btn.disabled = false; btn.textContent = 'Submit';
-  }
+document.getElementById('btn-copy').addEventListener('click', () => {
+  const email = document.getElementById('admin-email').textContent;
+  const btn = document.getElementById('btn-copy');
+  navigator.clipboard.writeText(email).then(() => {
+    btn.textContent = 'Copied';
+    setTimeout(() => { btn.textContent = 'Copy'; }, 1800);
+  }).catch(() => {
+    // fallback: select the text
+    const sel = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(document.getElementById('admin-email'));
+    sel.removeAllRanges(); sel.addRange(range);
+  });
 });
 </script>

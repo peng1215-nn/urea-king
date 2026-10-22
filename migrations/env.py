@@ -11,7 +11,6 @@ from poker.models import UserGroupRole
 from poker.models import InvitationCode
 from poker.models import AuditLog
 from poker.models import Announcement
-import models  # noqa: F401 — registers landing_* tables with Base.metadata
 
 
 load_dotenv()
