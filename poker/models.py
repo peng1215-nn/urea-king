@@ -124,6 +124,17 @@ class PokerGamePlayer(Base):
     joined_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 
+class ContactMessage(Base):
+
+    __tablename__ = "contact_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(100), nullable=False)
+    description = Column(Text, nullable=False)
+    ip_address = Column(String(100), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
 class ChipRequest(Base):
 
     __tablename__ = "poker_chip_requests"

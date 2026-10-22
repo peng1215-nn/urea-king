@@ -11,6 +11,7 @@ from poker.routes.admin import system_logs
 from poker.routes.admin import invite_management
 from poker.routes.admin import announcement
 from poker.routes.common.avatar import router as avatar_router
+from poker.routes.common.contact import router as contact_router
 from poker.routes.common.common import router as common_router
 from poker.routes.auth.login import router as login_router
 from poker.routes.auth.register import router as register_router
@@ -36,6 +37,7 @@ app.include_router(login_router)
 app.include_router(group_join_router)
 app.include_router(admin_router)
 app.include_router(avatar_router)
+app.include_router(contact_router)
 app.include_router(common_router)
 app.include_router(invite_management.router)
 app.include_router(system_logs.router)
