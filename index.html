@@ -564,9 +564,9 @@ function draw() {
 const coordEl = document.getElementById('coord');
 function updateCoord() {
   const d = new Date();
-  const lat = (d.getSeconds() * 0.001 + 31.23).toFixed(4);
-  const lon = (d.getSeconds() * 0.002 + 121.47).toFixed(4);
-  coordEl.textContent = `${lat} N  /  ${lon} E`;
+  const lat = (d.getSeconds() * 0.0001 + 39.9938).toFixed(4);
+  const lon = (d.getSeconds() * 0.0001 + 83.0089).toFixed(4);
+  coordEl.textContent = `${lat} N  /  ${lon} W`;
 }
 setInterval(updateCoord, 1200);
 
