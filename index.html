@@ -1364,11 +1364,17 @@ const CardDealEngine = (function() {
   const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
   const RED   = new Set(['♥','♦']);
 
+  function cryptoRandInt(n) {
+    const buf = new Uint32Array(1);
+    window.crypto.getRandomValues(buf);
+    return buf[0] % n;
+  }
+
   function randTwo() {
     const deck = [];
     for (const s of SUITS) for (const r of RANKS) deck.push({s, r});
-    const i = Math.floor(Math.random() * 52);
-    let j; do { j = Math.floor(Math.random() * 52); } while (j === i);
+    const i = cryptoRandInt(52);
+    let j; do { j = cryptoRandInt(52); } while (j === i);
     return [deck[i], deck[j]];
   }
 
