@@ -542,7 +542,7 @@ function draw() {
   }
 
   checkSweep();
-  angle += 0.004;
+  angle += window.innerWidth < 600 ? 0.006 : 0.004;
   requestAnimationFrame(draw);
 }
 
