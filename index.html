@@ -123,12 +123,20 @@ html, body {
 
 /* sweep-lit flicker on planet */
 @keyframes sweep-flash {
-  0%   { box-shadow: 0 0 60px rgba(200,140,255,1), 0 0 120px rgba(160,80,255,0.8), inset 0 0 40px rgba(80,20,120,0.9); filter: brightness(2.2); }
-  40%  { box-shadow: 0 0 40px rgba(160,80,255,0.9), 0 0 80px rgba(120,40,200,0.5), inset 0 0 30px rgba(40,10,80,0.7); filter: brightness(1.5); }
-  100% { box-shadow: 0 0 20px rgba(120,60,200,0.5), 0 0 40px rgba(100,30,180,0.2), inset 0 0 20px rgba(20,5,40,0.5); filter: brightness(1); }
+  0%   { filter: brightness(2.8) drop-shadow(0 0 18px rgba(200,140,255,1)); }
+  35%  { filter: brightness(1.8) drop-shadow(0 0 10px rgba(160,100,255,0.7)); }
+  100% { filter: brightness(1)   drop-shadow(0 0 4px  rgba(140,80,230,0.3)); }
+}
+@keyframes label-flash {
+  0%   { color: #fff; text-shadow: 0 0 18px rgba(220,180,255,1), 0 0 40px rgba(180,120,255,0.9); letter-spacing: 4px; }
+  40%  { color: rgba(255,255,255,0.95); text-shadow: 0 0 10px rgba(180,120,255,0.7); letter-spacing: 3.5px; }
+  100% { color: rgba(255,255,255,0.9);  text-shadow: 0 0 8px rgba(180,120,255,0.9); letter-spacing: 3px; }
 }
 #radar-target.lit .enter-link {
-  animation: sweep-flash 0.6s ease-out forwards;
+  animation: sweep-flash 0.7s ease-out forwards;
+}
+#radar-target.lit .planet-label {
+  animation: label-flash 0.7s ease-out forwards;
 }
 
 /* ── contact admin ── */
@@ -575,10 +583,7 @@ drawPlanet();
 resize(); resetScene(); initParticles(); draw();
 window.addEventListener('resize', () => { resize(); resetScene(); initParticles(); });
 
-// re-run full scan when tab becomes visible again (close→reopen)
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) resetScene();
-});
+// only reset on actual page load/reload, not tab switching
 
 // ── contact modal ──
 const overlay = document.getElementById('modal-overlay');
