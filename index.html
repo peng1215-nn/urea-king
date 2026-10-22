@@ -29,6 +29,13 @@ html, body {
 
 #canvas { position: fixed; inset: 0; z-index: 0; }
 #nova-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+#flash-veil {
+  position: fixed; inset: 0; z-index: 100;
+  pointer-events: none;
+  background: #fff;
+  opacity: 0;
+  transition: none;
+}
 
 .grid {
   position: fixed; inset: 0; z-index: 1;
@@ -295,6 +302,7 @@ html, body {
 
 <canvas id="canvas"></canvas>
 <canvas id="nova-canvas"></canvas>
+<div id="flash-veil"></div>
 <div class="grid"></div>
 
 <div class="stage">
@@ -530,6 +538,7 @@ const SupernovaEngine = (() => {
 
   // dispose all phase meshes
   function clearMeshes(state) {
+    flashVeil.style.opacity = 0; // always reset veil when switching phase
     for (const m of state.meshes) {
       if (m.geometry) m.geometry.dispose();
       if (m.material) m.material.dispose();
@@ -659,14 +668,27 @@ const SupernovaEngine = (() => {
   // ────────────────────────────────
   // PHASE 3: Explosion — shockwaves + bloom flash + particle jets
   // ────────────────────────────────
+  // DOM full-screen white veil element
+  const flashVeil = document.getElementById('flash-veil');
+
   function startPhase3(state) {
     clearMeshes(state);
-    // Flash: layered radial glow — white core, blue mid, purple outer
+
+    // Timeline (ms):
+    //   0 – 900   : glow builds from centre outward (WebGL layers)
+    //   900 – 1100: full-screen white DOM veil slams in (opacity 0→1)
+    //   1100 – 1400: veil holds at peak
+    //   1400 – 2200: veil fades out, revealing shockwaves + jets below
+    //   1400+      : shockwave rings expand, jets fly (offset by REVEAL_MS)
+
+    const REVEAL_MS = 1400; // shockwaves & jets start when veil begins fading
+
+    // ── Radial glow layers (WebGL, centred on planet) ──
     const flashLayers = [
-      { r: 120,  color: 0xffffff, peakOp: 1.0  }, // white-hot core
-      { r: 320,  color: 0xaaccff, peakOp: 0.80 }, // blue halo
-      { r: 600,  color: 0x7744dd, peakOp: 0.40 }, // purple mid bloom
-      { r: 900,  color: 0x441188, peakOp: 0.18 }, // deep violet outer
+      { r: 100, color: 0xffffff, peakOp: 1.0  },
+      { r: 280, color: 0xaaccff, peakOp: 0.85 },
+      { r: 550, color: 0x7744dd, peakOp: 0.45 },
+      { r: 860, color: 0x441188, peakOp: 0.20 },
     ];
     const flashMeshes = [];
     for (const fl of flashLayers) {
@@ -680,31 +702,26 @@ const SupernovaEngine = (() => {
       state.group.add(mesh); state.meshes.push(mesh);
       flashMeshes.push(mesh);
     }
-    const flash = flashMeshes[0]; // used only as handle; opacity set per-layer below
-    const flashMat = flash.material; // kept for compat reference
 
-    // Shockwave rings — each expands continuously until fully transparent
+    // ── Shockwave rings ──
     const rings = [];
-    const ringCount = 5;
-    for (let i = 0; i < ringCount; i++) {
+    const ringColors = [0xeef5ff, 0xaaddff, 0xff9944, 0xff5511, 0xcc2200];
+    for (let i = 0; i < 5; i++) {
       const rGeo = new THREE.RingGeometry(1, 1.055, 96);
-      const ringColors = [0xeef5ff, 0xaaddff, 0xff9944, 0xff5511, 0xcc2200];
       const rMat = new THREE.MeshBasicMaterial({
-        color: ringColors[i],
-        transparent: true, opacity: 0,
+        color: ringColors[i], transparent: true, opacity: 0,
         blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
       });
       const ring = new THREE.Mesh(rGeo, rMat);
-      // delay: stagger launch; speed: px/t-unit; fadeDur: how long fade takes
-      ring.userData.delay   = i * 0.14;
-      ring.userData.speed   = 190 + i * 36;   // px per second
-      ring.userData.peakR   = 30 + i * 12;    // radius at peak brightness
-      ring.userData.peakOp  = [0.9, 0.8, 0.7, 0.6, 0.5][i];
+      ring.userData.delay  = i * 0.14;   // stagger (s, relative to REVEAL_MS)
+      ring.userData.speed  = 190 + i * 36;
+      ring.userData.peakR  = 30 + i * 12;
+      ring.userData.peakOp = [0.9, 0.8, 0.7, 0.6, 0.5][i];
       state.group.add(ring); state.meshes.push(ring);
       rings.push(ring); state.shockwaves.push(ring);
     }
 
-    // Particle jets — high-speed streaks outward
+    // ── Particle jets ──
     const jCount = 400;
     const jPos  = new Float32Array(jCount * 3);
     const jVel  = new Float32Array(jCount * 3);
@@ -713,73 +730,79 @@ const SupernovaEngine = (() => {
     for (let i = 0; i < jCount; i++) {
       const a = Math.random() * Math.PI * 2;
       const sp = 2.5 + Math.random() * 5.5;
-      jVel[i*3]   = Math.cos(a) * sp;
-      jVel[i*3+1] = Math.sin(a) * sp;
-      jVel[i*3+2] = 0;
+      jVel[i*3] = Math.cos(a) * sp; jVel[i*3+1] = Math.sin(a) * sp; jVel[i*3+2] = 0;
       jPos[i*3] = jPos[i*3+1] = jPos[i*3+2] = 0;
-      jLife[i] = 0;
-      jDel[i]  = Math.random() * 0.25;
+      jLife[i] = 0; jDel[i] = Math.random() * 0.25;
     }
     const jGeo = new THREE.BufferGeometry();
     jGeo.setAttribute('position', new THREE.BufferAttribute(jPos, 3));
     const jMat = new THREE.PointsMaterial({
-      color: 0xffffff, size: 3,
-      transparent: true, opacity: 0,
+      color: 0xffffff, size: 3, transparent: true, opacity: 0,
       blending: THREE.AdditiveBlending, depthWrite: false,
     });
     const jets = new THREE.Points(jGeo, jMat);
     state.group.add(jets); state.meshes.push(jets);
 
-    state._p3 = { flash, flashMat, flashMeshes, rings, jets, jGeo, jPos, jVel, jLife, jDel, jCount };
+    state._p3 = { flashMeshes, rings, jets, jGeo, jPos, jVel, jLife, jDel, jCount, REVEAL_MS, veilActive: false };
   }
 
   function updatePhase3(state, ms) {
-    // ms = raw elapsed milliseconds (unclamped) so rings expand forever
     const p = state._p3; if (!p) return;
-    const t = ms / 1000; // seconds
+    const { REVEAL_MS } = p;
 
-    // Flash: ramp up 0-500ms, fade 500-3200ms — applied per-layer with individual peak opacity
-    // Flash: fast ramp 0-300ms, hold bright 300-1500ms, slow fade 1500-5500ms
-    const flashRatio = ms < 300
-      ? (ms / 300)
-      : ms < 1500 ? 1.0
-      : ms < 5500 ? (1 - (ms - 1500) / 4000)
-      : 0;
+    // ── 1. Radial glow: builds 0→900ms, then fades as veil takes over ──
+    const glowRatio = ms < 900
+      ? (ms / 900)                                          // build-up
+      : ms < 1200 ? 1.0                                    // hold while veil rises
+      : Math.max(0, 1 - (ms - 1200) / 1000);              // fade behind veil
     for (const fm of p.flashMeshes) {
-      fm.material.opacity = flashRatio * fm.userData.peakOp;
+      fm.material.opacity = glowRatio * fm.userData.peakOp;
     }
 
-    // Shockwave rings: expand continuously until fully transparent — NO cap
+    // ── 2. Full-screen DOM veil ──
+    let veilOp = 0;
+    if (ms >= 900 && ms < 1100)       veilOp = (ms - 900) / 200;     // slam in
+    else if (ms >= 1100 && ms < REVEAL_MS) veilOp = 1.0;             // hold white
+    else if (ms >= REVEAL_MS && ms < 2200) veilOp = 1 - (ms - REVEAL_MS) / 800; // fade out
+    flashVeil.style.opacity = veilOp;
+
+    // ── 3. Shockwave rings: start expanding after veil begins fading ──
     for (const ring of p.rings) {
-      const delayMs = ring.userData.delay * 1000;
-      if (ms < delayMs) continue;
-      const localMs = ms - delayMs;
-      // speed in px/second
+      const ringStartMs = REVEAL_MS + ring.userData.delay * 1000;
+      if (ms < ringStartMs) { ring.material.opacity = 0; continue; }
+      const localMs = ms - ringStartMs;
       const r = Math.max(1, localMs / 1000 * ring.userData.speed);
       ring.scale.setScalar(r);
-      // riseR: radius at peak brightness; then linear fade to 0 at maxFadeR
       const riseR    = ring.userData.peakR;
-      const maxFadeR = ring.userData.speed * 4.5; // fully gone by this radius
+      const maxFadeR = ring.userData.speed * 4.5;
       const opacity  = r < riseR
         ? (r / riseR) * ring.userData.peakOp
         : ring.userData.peakOp * Math.max(0, 1 - (r - riseR) / (maxFadeR - riseR));
       ring.material.opacity = opacity;
     }
 
-    // Jet particles
-    const pos = p.jPos; const vel = p.jVel;
-    for (let i = 0; i < p.jCount; i++) {
-      if (t < p.jDel[i]) continue;
-      p.jLife[i] += 0.018;
-      pos[i*3]   += vel[i*3];
-      pos[i*3+1] += vel[i*3+1];
+    // ── 4. Jet particles: appear after veil fades ──
+    const jetLocalMs = ms - REVEAL_MS;
+    if (jetLocalMs > 0) {
+      const t = jetLocalMs / 1000;
+      const pos = p.jPos; const vel = p.jVel;
+      for (let i = 0; i < p.jCount; i++) {
+        if (t < p.jDel[i]) continue;
+        p.jLife[i] += 0.018;
+        pos[i*3]   += vel[i*3];
+        pos[i*3+1] += vel[i*3+1];
+      }
+      p.jGeo.attributes.position.needsUpdate = true;
+      const jetFade = jetLocalMs < 400
+        ? jetLocalMs / 400
+        : Math.max(0, 1 - (jetLocalMs - 400) / 3000);
+      p.jets.material.opacity = jetFade * 0.85;
+      if (jetLocalMs < 1000)      p.jets.material.color.setHex(0xffffff);
+      else if (jetLocalMs < 2500) p.jets.material.color.setHex(0x88aaff);
+      else                        p.jets.material.color.setHex(0xaa66ff);
+    } else {
+      p.jets.material.opacity = 0;
     }
-    p.jGeo.attributes.position.needsUpdate = true;
-    const jetFade = ms < 500 ? ms / 500 : Math.max(0, 1 - (ms - 500) / 3000);
-    p.jets.material.opacity = jetFade * 0.85;
-    if (ms < 1000)      p.jets.material.color.setHex(0xffffff);
-    else if (ms < 2500) p.jets.material.color.setHex(0x88aaff);
-    else                p.jets.material.color.setHex(0xaa66ff);
   }
 
   // ────────────────────────────────
