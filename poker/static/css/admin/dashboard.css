@@ -152,6 +152,11 @@
 }
 
 
+.module-icon.cyan {
+    background: rgba(86, 211, 255, 0.16);
+    color: #56d3ff;
+}
+
 .module-icon.yellow {
     background: rgba(255, 210, 80, 0.14);
     color: #ffd250;
