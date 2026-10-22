@@ -62,7 +62,6 @@ function renderGameCard(game, container) {
             <div class="log-card-right">
                 <span class="log-chips">${t("totalBuyIn")}：${game.total_buy_in}</span>
                 ${balanced}
-                <button class="btn-export-log" onclick="event.stopPropagation(); exportGameCard(${game.id})">${t("export")}</button>
                 <i class="fa-solid fa-chevron-down log-chevron"></i>
             </div>
         </div>
