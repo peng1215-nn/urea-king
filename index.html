@@ -407,6 +407,7 @@ function resetScene() {
   tRevealed = false;
   btnShown  = false;
   sweepPassCount = 0;
+  lastCountedAngle = null;
   blips.length = 0;
   radarTarget.style.display = 'none';
   radarTarget.style.pointerEvents = 'none';
@@ -455,6 +456,7 @@ function drawBlips(maxR) {
 }
 
 let sweepPassCount = 0;
+let lastCountedAngle = null; // guard: only count once per revolution
 
 // ── solar wind effect ──
 let windActive = false;
@@ -576,14 +578,20 @@ function checkSweep() {
   const diff = norm(tAngle) - norm(angle);
   const hit  = diff > -0.08 && diff < 0.15;
   if (!hit) return;
+  // guard: only count once per revolution (require ≥80% of 2π between counts)
+  const canCount = lastCountedAngle === null ||
+                   Math.abs(angle - lastCountedAngle) > Math.PI * 1.6;
+
   if (!tRevealed) {
     tRevealed = true;
     sweepPassCount = 1;
+    lastCountedAngle = angle;
     stampBlip();
     radarTarget.style.display = 'flex';
     radarTarget.style.pointerEvents = 'none';
-  } else {
+  } else if (canCount) {
     sweepPassCount++;
+    lastCountedAngle = angle;
     stampBlip();
     if (sweepPassCount === 2 && !btnShown) {
       btnShown = true;
