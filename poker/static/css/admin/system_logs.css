@@ -180,52 +180,52 @@
     white-space: nowrap;
 }
 
-.logs-table th:nth-child(1),
-.logs-table td:nth-child(1) {
-    width: 10%;
-}
-
 .logs-table th:nth-child(2),
 .logs-table td:nth-child(2) {
-    width: 13%;
-    white-space: nowrap;
+    width: 10%;
 }
 
 .logs-table th:nth-child(3),
 .logs-table td:nth-child(3) {
-    width: 12%;
+    width: 13%;
+    white-space: nowrap;
 }
 
 .logs-table th:nth-child(4),
 .logs-table td:nth-child(4) {
-    width: 8%;
+    width: 12%;
 }
 
 .logs-table th:nth-child(5),
 .logs-table td:nth-child(5) {
+    width: 8%;
+}
+
+.logs-table th:nth-child(6),
+.logs-table td:nth-child(6) {
     width: 7%;
     text-align: center;
     white-space: nowrap;
 }
 
-.logs-table th:nth-child(6),
-.logs-table td:nth-child(6) {
-    width: 11%;
-}
-
 .logs-table th:nth-child(7),
 .logs-table td:nth-child(7) {
-    width: 13%;
+    width: 11%;
 }
 
 .logs-table th:nth-child(8),
 .logs-table td:nth-child(8) {
-    width: 17%;
-    white-space: nowrap;
+    width: 13%;
 }
 
 .logs-table th:nth-child(9),
 .logs-table td:nth-child(9) {
+    width: 17%;
+    white-space: nowrap;
+}
+
+.logs-table th:nth-child(10),
+.logs-table td:nth-child(10) {
     width: 10%;
     white-space: nowrap;
 }
@@ -344,5 +344,92 @@
 .logs-table td {
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ───── 批量选择 / 导出 / 批量删除 ───── */
+
+.filter-button.outline {
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+}
+
+.filter-button.danger {
+    background: linear-gradient(135deg, #b62324, #da3633);
+}
+
+.filter-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.logs-table th.col-check,
+.logs-table td.col-check {
+    width: 44px;
+    padding-left: 12px;
+    padding-right: 4px;
+}
+
+.logs-table .col-check input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #2ea043;
+}
+
+.logs-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.62);
+}
+
+.logs-modal[hidden] {
+    display: none;
+}
+
+.logs-modal-content {
+    width: 420px;
+    max-width: 90vw;
+    padding: 28px;
+    border-radius: 18px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.logs-modal-content h3 {
+    margin-bottom: 12px;
+    font-size: 20px;
+    color: #f0f6fc;
+}
+
+.logs-modal-content p {
+    margin-bottom: 24px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #c9d1d9;
+}
+
+.logs-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* 按钮区独占一行，按钮文字不换行 */
+.filter-actions {
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.filter-button {
     white-space: nowrap;
 }

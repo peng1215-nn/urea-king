@@ -21,3 +21,17 @@ async function fetchAuditLogs() {
 
     return await response.json();
 }
+
+
+async function deleteAuditLogs(ids) {
+    const response =
+        await fetch("/admin/audit-logs/delete", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ids }),
+        });
+
+    return await response.json();
+}

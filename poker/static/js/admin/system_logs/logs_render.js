@@ -35,7 +35,7 @@ function renderLogs(logs) {
     if (!logs || logs.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="9" class="empty-row">
+                <td colspan="10" class="empty-row">
                     ${t("noLogsFound")}
                 </td>
             </tr>
@@ -49,6 +49,16 @@ function renderLogs(logs) {
             document.createElement("tr");
 
         row.innerHTML = `
+            <td class="col-check">
+                <input
+                    type="checkbox"
+                    class="log-checkbox"
+                    data-id="${log.id}"
+                    ${window.systemLogsState.selectedIds.has(log.id) ? "checked" : ""}
+                    onchange="toggleLogSelection(${log.id}, this.checked)"
+                >
+            </td>
+
             <td title="${escapeHtml(getSafeValue(log.operator_username))}">
                 ${escapeHtml(getSafeValue(log.operator_username))}
             </td>

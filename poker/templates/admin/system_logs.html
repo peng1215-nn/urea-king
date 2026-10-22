@@ -163,6 +163,13 @@
                     >
                         移除组内成员
                     </option>
+
+                    <option
+                            value="DELETE_AUDIT_LOGS"
+                            data-i18n="DELETE_AUDIT_LOGS"
+                    >
+                        删除系统日志
+                    </option>
                 </select>
             </div>
 
@@ -215,6 +222,24 @@
                     清除
                 </button>
 
+                <button
+                    class="filter-button outline"
+                    data-i18n="exportLogs"
+                    onclick="exportLogs()"
+                >
+                    导出
+                </button>
+
+                <button
+                    id="bulk-delete-button"
+                    class="filter-button danger"
+                    onclick="openBulkDeleteModal()"
+                    disabled
+                >
+                    <span data-i18n="bulkDelete">批量删除</span>
+                    <span id="selected-count"></span>
+                </button>
+
             </div>
 
         </div>
@@ -232,6 +257,13 @@
 
             <thead>
                 <tr>
+                    <th class="col-check">
+                        <input
+                            type="checkbox"
+                            id="select-all-logs"
+                            onchange="toggleSelectAll(this.checked)"
+                        >
+                    </th>
                     <th data-i18n="operator">操作者</th>
                     <th data-i18n="nickname">昵称</th>
                     <th data-i18n="logAction">动作</th>
@@ -248,7 +280,7 @@
 
                 <tr>
                     <td
-                        colspan="9"
+                        colspan="10"
                         class="empty-row"
                         data-i18n="loading"
                     >
@@ -291,6 +323,21 @@
 
     </div>
 
+</div>
+
+<div class="logs-modal" id="bulk-delete-modal" hidden>
+    <div class="logs-modal-content">
+        <h3 data-i18n="bulkDeleteTitle">批量删除系统日志</h3>
+        <p>
+            <span data-i18n="bulkDeleteConfirmPrefix">确认删除选中的</span>
+            <strong id="bulk-delete-count">0</strong>
+            <span data-i18n="bulkDeleteConfirmSuffix">条日志？删除后无法恢复。</span>
+        </p>
+        <div class="logs-modal-actions">
+            <button class="filter-button secondary" data-i18n="cancel" onclick="closeBulkDeleteModal()">取消</button>
+            <button class="filter-button danger" id="bulk-delete-confirm" data-i18n="confirmDelete" onclick="confirmBulkDelete()">确认删除</button>
+        </div>
+    </div>
 </div>
 
 <script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>

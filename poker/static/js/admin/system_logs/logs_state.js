@@ -4,4 +4,5 @@ window.systemLogsState = {
     pageSize: 5,
     totalPages: 1,
     total: 0,
+    selectedIds: new Set(),
 };
