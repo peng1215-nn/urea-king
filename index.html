@@ -122,9 +122,13 @@ html, body {
 }
 
 /* sweep-lit flicker on planet */
+@keyframes sweep-flash {
+  0%   { box-shadow: 0 0 60px rgba(200,140,255,1), 0 0 120px rgba(160,80,255,0.8), inset 0 0 40px rgba(80,20,120,0.9); filter: brightness(2.2); }
+  40%  { box-shadow: 0 0 40px rgba(160,80,255,0.9), 0 0 80px rgba(120,40,200,0.5), inset 0 0 30px rgba(40,10,80,0.7); filter: brightness(1.5); }
+  100% { box-shadow: 0 0 20px rgba(120,60,200,0.5), 0 0 40px rgba(100,30,180,0.2), inset 0 0 20px rgba(20,5,40,0.5); filter: brightness(1); }
+}
 #radar-target.lit .enter-link {
-  box-shadow: 0 0 40px rgba(160,80,255,0.95), 0 0 80px rgba(120,40,200,0.4), inset 0 0 30px rgba(40,10,80,0.7);
-  transition: box-shadow 0.08s ease;
+  animation: sweep-flash 0.6s ease-out forwards;
 }
 
 /* ── contact admin ── */
@@ -258,7 +262,7 @@ html, body {
 <div id="radar-target">
   <div id="blip"><div id="blip-dot"></div></div>
   <div class="planet-wrap" id="planet-wrap">
-    <a class="enter-link" id="enter-btn" href="https://poker.urea-king.com" target="_blank" rel="noopener">
+    <a class="enter-link" id="enter-btn" href="https://poker.urea-king.com">
       <canvas id="planet-canvas" width="88" height="88"></canvas>
       <div class="planet-label">POKER</div>
     </a>
