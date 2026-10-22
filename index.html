@@ -456,6 +456,81 @@ function drawBlips(maxR) {
 
 let sweepPassCount = 0;
 
+// ── storm effect ──
+let stormActive = false;
+let stormStart  = 0;
+const STORM_DUR = 1400; // ms
+const STORM_EVERY = 4;  // every N passes after revealed
+
+function triggerStorm() {
+  if (stormActive) return;
+  stormActive = true;
+  stormStart  = performance.now();
+  animateStorm();
+}
+
+function animateStorm() {
+  if (!stormActive) return;
+  const pc = document.getElementById('planet-canvas');
+  const c  = pc.getContext('2d');
+  const S  = pc.width;
+  const elapsed = performance.now() - stormStart;
+  const t = Math.min(elapsed / STORM_DUR, 1);
+
+  // easing: fast in, slow fade out
+  const alpha = t < 0.15
+    ? t / 0.15
+    : 1 - ((t - 0.15) / 0.85);
+
+  // redraw base planet first
+  drawPlanetOn(c, S);
+
+  // storm: expanding ring + swirl arcs
+  const maxExpand = S * 0.55;
+  const r = maxExpand * Math.min(t * 3, 1);
+
+  // outer shockwave ring
+  const ring = c.createRadialGradient(S/2, S/2, r * 0.6, S/2, S/2, r);
+  ring.addColorStop(0,   `rgba(220,180,255,0)`);
+  ring.addColorStop(0.5, `rgba(200,140,255,${alpha * 0.55})`);
+  ring.addColorStop(0.8, `rgba(255,220,255,${alpha * 0.35})`);
+  ring.addColorStop(1,   `rgba(180,80,255,0)`);
+  c.beginPath(); c.arc(S/2, S/2, r, 0, Math.PI * 2);
+  c.fillStyle = ring; c.fill();
+
+  // swirl arcs (3 rotating arms)
+  for (let arm = 0; arm < 3; arm++) {
+    const baseAngle = (t * Math.PI * 4) + (arm * Math.PI * 2 / 3);
+    const armR = r * 0.45;
+    c.save();
+    c.translate(S/2, S/2);
+    c.rotate(baseAngle);
+    c.beginPath();
+    c.arc(0, 0, armR, -0.6, 0.6);
+    c.strokeStyle = `rgba(230,190,255,${alpha * 0.7})`;
+    c.lineWidth = 2.5;
+    c.stroke();
+    c.restore();
+  }
+
+  // bright core flash at storm start
+  if (t < 0.25) {
+    const coreA = (1 - t / 0.25) * alpha * 0.6;
+    const core = c.createRadialGradient(S*0.38, S*0.33, 0, S/2, S/2, S*0.3);
+    core.addColorStop(0,   `rgba(255,240,255,${coreA})`);
+    core.addColorStop(0.5, `rgba(200,150,255,${coreA * 0.4})`);
+    core.addColorStop(1,   `rgba(150,80,255,0)`);
+    c.fillStyle = core; c.fillRect(0, 0, S, S);
+  }
+
+  if (t < 1) {
+    requestAnimationFrame(animateStorm);
+  } else {
+    stormActive = false;
+    drawPlanet(); // restore clean planet
+  }
+}
+
 function checkSweep() {
   const diff = norm(tAngle) - norm(angle);
   const hit  = diff > -0.08 && diff < 0.15;
@@ -464,20 +539,18 @@ function checkSweep() {
     tRevealed = true;
     sweepPassCount = 1;
     stampBlip();
-    // show target container immediately (for blip drawing position ref)
     radarTarget.style.display = 'flex';
     radarTarget.style.pointerEvents = 'none';
   } else {
     sweepPassCount++;
     stampBlip();
-    // after 2nd sweep pass → start fading in the planet
     if (sweepPassCount === 2 && !btnShown) {
       btnShown = true;
       planetWrap.style.transition = 'opacity 1.4s ease';
       planetWrap.style.opacity = '1';
       setTimeout(() => { radarTarget.style.pointerEvents = 'auto'; }, 1400);
     } else if (btnShown) {
-      // subsequent passes: flash planet and label via JS
+      // flash planet and label
       const el = document.getElementById('enter-btn');
       const lbl = document.querySelector('.planet-label');
       el.style.transition = 'none';
@@ -494,6 +567,11 @@ function checkSweep() {
         lbl.style.textShadow = '0 0 8px rgba(180,120,255,0.9)';
         lbl.style.letterSpacing = '3px';
       }, 60);
+
+      // every STORM_EVERY passes → trigger storm
+      if ((sweepPassCount - 2) % STORM_EVERY === 0) {
+        setTimeout(triggerStorm, 80);
+      }
     }
   }
 }
@@ -570,26 +648,19 @@ function updateCoord() {
 }
 setInterval(updateCoord, 1200);
 
-// ── draw planet ──
-function drawPlanet() {
-  const pc = document.getElementById('planet-canvas');
-  pc.width = 68; pc.height = 68;
-  const c  = pc.getContext('2d');
-  const S  = 68;
+// ── draw planet (shared core, used by drawPlanet and storm animator) ──
+function drawPlanetOn(c, S) {
   c.clearRect(0, 0, S, S);
 
-  // clip to circle
   c.save();
   c.beginPath(); c.arc(S/2, S/2, S/2, 0, Math.PI*2); c.clip();
 
-  // base: deep space purple-black
   const base = c.createRadialGradient(S*0.38, S*0.32, 2, S/2, S/2, S/2);
   base.addColorStop(0,   '#2a1450');
   base.addColorStop(0.5, '#150830');
   base.addColorStop(1,   '#08030f');
   c.fillStyle = base; c.fillRect(0, 0, S, S);
 
-  // nebula cloud patches (purple/violet haze)
   const clouds = [
     { x: 18, y: 20, rx: 16, ry: 10, a: 0.13, col: [140,60,220] },
     { x: 44, y: 14, rx: 14, ry: 8,  a: 0.09, col: [160,80,255] },
@@ -606,7 +677,6 @@ function drawPlanet() {
     c.fillStyle = ng; c.fill(); c.restore();
   }
 
-  // atmosphere bands (faint violet stripes)
   const bands = [
     { y: 16, h: 5,  a: 0.09, col: [150,70,255] },
     { y: 30, h: 9,  a: 0.06, col: [120,50,200] },
@@ -618,14 +688,12 @@ function drawPlanet() {
     c.fillRect(0, b.y, S, b.h);
   }
 
-  // specular highlight (cool white-violet)
   const spec = c.createRadialGradient(S*0.3, S*0.26, 0, S*0.36, S*0.33, S*0.32);
   spec.addColorStop(0,   'rgba(230,200,255,0.22)');
   spec.addColorStop(0.5, 'rgba(200,160,255,0.06)');
   spec.addColorStop(1,   'rgba(200,160,255,0)');
   c.fillStyle = spec; c.fillRect(0, 0, S, S);
 
-  // limb darkening
   const limb = c.createRadialGradient(S/2, S/2, S*0.3, S/2, S/2, S/2);
   limb.addColorStop(0,   'rgba(0,0,0,0)');
   limb.addColorStop(0.7, 'rgba(0,0,0,0.1)');
@@ -634,13 +702,18 @@ function drawPlanet() {
 
   c.restore();
 
-  // outer glow ring (purple)
   const ring = c.createRadialGradient(S/2, S/2, S/2-1, S/2, S/2, S/2+8);
   ring.addColorStop(0,   'rgba(150,70,255,0.45)');
   ring.addColorStop(0.5, 'rgba(120,40,200,0.15)');
   ring.addColorStop(1,   'rgba(120,40,200,0)');
   c.beginPath(); c.arc(S/2, S/2, S/2+4, 0, Math.PI*2);
   c.fillStyle = ring; c.fill();
+}
+
+function drawPlanet() {
+  const pc = document.getElementById('planet-canvas');
+  pc.width = 68; pc.height = 68;
+  drawPlanetOn(pc.getContext('2d'), 68);
 }
 
 drawPlanet();
