@@ -67,6 +67,59 @@ html, body {
 #pause-btn.paused .icon-play  { display: block; }
 #pause-btn.paused .icon-pause { display: none; }
 
+/* ── Coin transition overlay ── */
+#coin-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  pointer-events: none;
+  display: none;
+}
+#coin-overlay.active { display: block; }
+#coin-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+
+/* ripple for heads result */
+@keyframes coin-ripple {
+  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.8; }
+  100% { transform: translate(-50%,-50%) scale(6); opacity: 0; }
+}
+.coin-ripple {
+  position: fixed;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,210,60,0.6) 0%, transparent 70%);
+  pointer-events: none;
+  animation: coin-ripple 0.9s ease-out forwards;
+}
+
+/* vignette for tails result */
+@keyframes coin-vignette {
+  0%   { opacity: 0; }
+  60%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+.coin-vignette {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 20%, #000 100%);
+  animation: coin-vignette 0.8s ease-in forwards;
+}
+
+/* glitch for edge result */
+@keyframes coin-glitch {
+  0%,100% { opacity: 1; transform: translate(0); filter: none; }
+  20%  { opacity: 0.8; transform: translate(-3px, 1px); filter: hue-rotate(90deg) saturate(3); }
+  40%  { opacity: 0.9; transform: translate(3px,-2px); filter: hue-rotate(-90deg) saturate(3); }
+  60%  { opacity: 0.7; transform: translate(-2px, 2px); filter: invert(0.3); }
+  80%  { opacity: 1;   transform: translate(2px,-1px); filter: none; }
+}
+.coin-glitch {
+  position: fixed; inset: 0;
+  background: rgba(0,255,180,0.06);
+  animation: coin-glitch 0.5s steps(1) forwards;
+}
+
 .grid {
   position: fixed; inset: 0; z-index: 1;
   background-image:
@@ -334,6 +387,11 @@ html, body {
 <canvas id="nova-canvas"></canvas>
 <div id="flash-veil"></div>
 
+<!-- Coin transition overlay (Three.js canvas for coin, DOM for screen effects) -->
+<div id="coin-overlay">
+  <canvas id="coin-canvas"></canvas>
+</div>
+
 <!-- FX pause button -->
 <button id="pause-btn" title="Pause / resume effects" aria-label="Pause effects">
   <!-- pause icon (two vertical bars) -->
@@ -361,7 +419,7 @@ html, body {
 <div id="radar-target">
   <div id="blip"><div id="blip-dot"></div></div>
   <div class="planet-wrap" id="planet-wrap">
-    <a class="enter-link" id="enter-btn" href="https://poker.urea-king.com">
+    <a class="enter-link" id="enter-btn" href="https://poker.urea-king.com" data-dest="https://poker.urea-king.com">
       <canvas id="planet-canvas" width="88" height="88"></canvas>
       <div class="planet-label">POKER</div>
     </a>
@@ -1125,6 +1183,208 @@ const FXRegistry = [SupernovaEngine];
     if (localStorage.getItem('fx-paused') === '1') applyPause(true);
   } catch(e) {}
 })();
+
+// ── Coin Transition Engine ──────────────────────────────────────────────
+const CoinEngine = (function() {
+  const overlay   = document.getElementById('coin-overlay');
+  const coinCvs   = document.getElementById('coin-canvas');
+
+  let renderer2, scene2, camera2, coinMesh, animId;
+  let running = false;
+
+  function initRenderer() {
+    if (renderer2) return;
+    if (typeof THREE === 'undefined') return;
+    renderer2 = new THREE.WebGLRenderer({ canvas: coinCvs, alpha: true, antialias: true });
+    renderer2.setPixelRatio(devicePixelRatio);
+    renderer2.setSize(innerWidth, innerHeight);
+
+    scene2 = new THREE.Scene();
+    camera2 = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 100);
+    camera2.position.set(0, 0, 5);
+
+    // Coin: thin cylinder (gold face / silver rim)
+    const geo = new THREE.CylinderGeometry(1, 1, 0.12, 64);
+    const mats = [
+      // rim
+      new THREE.MeshStandardMaterial({ color: 0xc8a840, metalness: 0.9, roughness: 0.2 }),
+      // heads face (gold, subtle ♠ imprint via emissive)
+      new THREE.MeshStandardMaterial({ color: 0xf0c030, metalness: 1.0, roughness: 0.1, emissive: 0x332200, emissiveIntensity: 0.3 }),
+      // tails face (slightly cooler gold)
+      new THREE.MeshStandardMaterial({ color: 0xd4a820, metalness: 1.0, roughness: 0.15, emissive: 0x112233, emissiveIntensity: 0.2 }),
+    ];
+    coinMesh = new THREE.Mesh(geo, mats);
+    coinMesh.rotation.z = Math.PI / 2; // spin around X axis (flip axis)
+    scene2.add(coinMesh);
+
+    // Lights
+    const amb = new THREE.AmbientLight(0xffffff, 0.5);
+    scene2.add(amb);
+    const pt = new THREE.PointLight(0xfff4cc, 2.5, 20);
+    pt.position.set(3, 4, 5);
+    scene2.add(pt);
+    const pt2 = new THREE.PointLight(0xaaccff, 1.0, 20);
+    pt2.position.set(-4, -2, 3);
+    scene2.add(pt2);
+  }
+
+  // Roll: 0–0.49 = heads, 0.49–0.98 = tails, 0.98–1.0 = edge
+  function rollResult() {
+    const r = Math.random();
+    if (r < 0.49)  return 'heads';
+    if (r < 0.98)  return 'tails';
+    return 'edge';
+  }
+
+  function playCoin(dest) {
+    if (running) return;
+    running = true;
+    initRenderer();
+
+    // Pause all other FX while coin plays
+    FXRegistry.forEach(fx => fx.pause());
+
+    overlay.classList.add('active');
+
+    const result = rollResult();
+    const startTime = performance.now();
+
+    // Coin starts below center, arcs up then falls
+    // total ~1800ms for heads/tails, ~2400ms for edge
+    const totalMs = result === 'edge' ? 2400 : 1800;
+    const peakMs  = totalMs * 0.38; // when coin is highest
+
+    // Spin counts: many spins during flight
+    const spinRev = result === 'edge' ? 7 : 9; // full X-rotations
+
+    // Final face angle: heads=0, tails=π, edge=π/2
+    const finalAngle = result === 'heads' ? 0
+                     : result === 'tails'  ? Math.PI
+                     : Math.PI / 2;
+
+    let screenEffectDone = false;
+
+    function frame() {
+      if (!running) return;
+      animId = requestAnimationFrame(frame);
+
+      const ms = performance.now() - startTime;
+      const p  = Math.min(ms / totalMs, 1);
+
+      // Vertical arc: parabolic, y goes up then down
+      const yArc = -4 * (p - 0.5) * (p - 0.5) + 1; // 0→1→0 parabola
+      const yPos = -2.5 + yArc * 4.5;               // starts low, peaks high
+
+      // X drift: slight rightward
+      const xPos = (p - 0.5) * 0.6;
+
+      coinMesh.position.set(xPos, yPos, 0);
+
+      // Scale: bigger at peak (perspective feel)
+      const sc = 0.55 + yArc * 0.55;
+      coinMesh.scale.setScalar(sc);
+
+      // Spin: fast during flight, decelerates to final angle near land
+      let spinAngle;
+      if (p < 0.82) {
+        // free spin
+        spinAngle = p * spinRev * Math.PI * 2;
+      } else {
+        // decelerate and lock to final
+        const landP = (p - 0.82) / 0.18;
+        const eased = 1 - Math.pow(1 - landP, 3);
+        const spinEnd = spinRev * Math.PI * 2;
+        spinAngle = spinEnd + (finalAngle - (spinEnd % (Math.PI * 2))) * eased;
+      }
+      coinMesh.rotation.x = spinAngle;
+
+      // Opacity: fade in quickly, fade out near end
+      const opacity = p < 0.06 ? p / 0.06
+                    : p > 0.88 ? (1 - p) / 0.12
+                    : 1;
+      coinMesh.traverse(o => { if (o.isMesh) o.material.forEach?.(m => { m.transparent = true; m.opacity = opacity; }); });
+
+      renderer2.render(scene2, camera2);
+
+      // Screen effect at landing (~82%)
+      if (p >= 0.82 && !screenEffectDone) {
+        screenEffectDone = true;
+        applyScreenEffect(result, xPos, yPos);
+      }
+
+      // Done
+      if (p >= 1) {
+        finish(dest, result);
+      }
+    }
+
+    frame();
+  }
+
+  function applyScreenEffect(result, cx, cy) {
+    if (result === 'heads') {
+      // Gold ripple from coin landing position
+      const el = document.createElement('div');
+      el.className = 'coin-ripple';
+      // convert Three.js coords to screen
+      const sx = innerWidth  / 2 + cx * innerWidth  * 0.15;
+      const sy = innerHeight / 2 - cy * innerHeight * 0.15;
+      el.style.left = sx + 'px';
+      el.style.top  = sy + 'px';
+      overlay.appendChild(el);
+      setTimeout(() => el.remove(), 1000);
+
+    } else if (result === 'tails') {
+      // Dark vignette closes in
+      const el = document.createElement('div');
+      el.className = 'coin-vignette';
+      overlay.appendChild(el);
+      setTimeout(() => el.remove(), 900);
+
+    } else {
+      // Edge: glitch burst
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          const el = document.createElement('div');
+          el.className = 'coin-glitch';
+          overlay.appendChild(el);
+          setTimeout(() => el.remove(), 550);
+        }, i * 120);
+      }
+    }
+  }
+
+  function finish(dest, result) {
+    running = false;
+    cancelAnimationFrame(animId);
+    overlay.classList.remove('active');
+
+    // Resume FX only if they weren't already paused by the user
+    // (check globalPaused via the button class)
+    const wasUserPaused = document.getElementById('pause-btn').classList.contains('paused');
+    if (!wasUserPaused) FXRegistry.forEach(fx => fx.resume());
+
+    // Extra pause for edge result (let them see it)
+    const delay = result === 'edge' ? 550 : 0;
+    setTimeout(() => { window.location.href = dest; }, delay);
+  }
+
+  return { playCoin };
+})();
+
+// ── Enter link interception ─────────────────────────────────────────────
+document.querySelectorAll('a[data-dest]').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const dest = link.dataset.dest;
+    // If FX already paused by user → skip animation, jump directly
+    if (SupernovaEngine.isPaused()) {
+      window.location.href = dest;
+    } else {
+      CoinEngine.playCoin(dest);
+    }
+  });
+});
 
 function checkSweep() {
   const diff = norm(tAngle) - norm(angle);
