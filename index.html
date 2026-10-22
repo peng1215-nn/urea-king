@@ -661,14 +661,26 @@ const SupernovaEngine = (() => {
   // ────────────────────────────────
   function startPhase3(state) {
     clearMeshes(state);
-    // Flash (white-blue full-screen briefly, using a large circle)
-    const flashGeo = new THREE.CircleGeometry(500, 64);
-    const flashMat = new THREE.MeshBasicMaterial({
-      color: 0xddeeff, transparent: true, opacity: 0,
-      blending: THREE.AdditiveBlending, depthWrite: false,
-    });
-    const flash = new THREE.Mesh(flashGeo, flashMat);
-    state.group.add(flash); state.meshes.push(flash);
+    // Flash: layered radial glow — white core, blue mid, purple outer
+    const flashLayers = [
+      { r: 80,  color: 0xffffff, peakOp: 0.95 }, // white-hot core
+      { r: 220, color: 0x88bbff, peakOp: 0.55 }, // blue halo
+      { r: 480, color: 0x6633bb, peakOp: 0.22 }, // purple outer bloom
+    ];
+    const flashMeshes = [];
+    for (const fl of flashLayers) {
+      const g = new THREE.CircleGeometry(fl.r, 64);
+      const m = new THREE.MeshBasicMaterial({
+        color: fl.color, transparent: true, opacity: 0,
+        blending: THREE.AdditiveBlending, depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(g, m);
+      mesh.userData.peakOp = fl.peakOp;
+      state.group.add(mesh); state.meshes.push(mesh);
+      flashMeshes.push(mesh);
+    }
+    const flash = flashMeshes[0]; // used only as handle; opacity set per-layer below
+    const flashMat = flash.material; // kept for compat reference
 
     // Shockwave rings — each expands continuously until fully transparent
     const rings = [];
@@ -717,7 +729,7 @@ const SupernovaEngine = (() => {
     const jets = new THREE.Points(jGeo, jMat);
     state.group.add(jets); state.meshes.push(jets);
 
-    state._p3 = { flash, flashMat, rings, jets, jGeo, jPos, jVel, jLife, jDel, jCount };
+    state._p3 = { flash, flashMat, flashMeshes, rings, jets, jGeo, jPos, jVel, jLife, jDel, jCount };
   }
 
   function updatePhase3(state, ms) {
@@ -725,10 +737,14 @@ const SupernovaEngine = (() => {
     const p = state._p3; if (!p) return;
     const t = ms / 1000; // seconds
 
-    // Flash: ramp up 0-500ms, fade 500-3200ms
-    if (ms < 500)        p.flashMat.opacity = (ms / 500) * 0.82;
-    else if (ms < 3200)  p.flashMat.opacity = (1 - (ms - 500) / 2700) * 0.82;
-    else                 p.flashMat.opacity = 0;
+    // Flash: ramp up 0-500ms, fade 500-3200ms — applied per-layer with individual peak opacity
+    const flashRatio = ms < 500
+      ? (ms / 500)
+      : ms < 3200 ? (1 - (ms - 500) / 2700)
+      : 0;
+    for (const fm of p.flashMeshes) {
+      fm.material.opacity = flashRatio * fm.userData.peakOp;
+    }
 
     // Shockwave rings: expand continuously until fully transparent — NO cap
     for (const ring of p.rings) {
