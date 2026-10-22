@@ -456,78 +456,119 @@ function drawBlips(maxR) {
 
 let sweepPassCount = 0;
 
-// ── storm effect ──
-let stormActive = false;
-let stormStart  = 0;
-const STORM_DUR = 1400; // ms
-const STORM_EVERY = 4;  // every N passes after revealed
+// ── solar wind effect ──
+let windActive = false;
+let windStart  = 0;
+const WIND_DUR   = 2200; // ms
+const STORM_EVERY = 4;   // every N passes after planet shown
 
-function triggerStorm() {
-  if (stormActive) return;
-  stormActive = true;
-  stormStart  = performance.now();
-  animateStorm();
+// wind particles: each ejected from planet surface in a cone
+let windParticles = [];
+
+function spawnWindParticles() {
+  windParticles = [];
+  const pc = document.getElementById('planet-canvas');
+  const S  = pc.width;
+  // 2 eruption jets at slightly different angles (like CME)
+  const jets = [
+    { angle: -0.35, spread: 0.45, count: 22 },
+    { angle:  0.55, spread: 0.35, count: 14 },
+  ];
+  for (const jet of jets) {
+    for (let i = 0; i < jet.count; i++) {
+      const a = jet.angle + (Math.random() - 0.5) * jet.spread;
+      const speed = 0.55 + Math.random() * 0.9;
+      const delay = Math.random() * 0.28;
+      windParticles.push({
+        // start at planet surface edge
+        x: S/2 + Math.cos(a) * S/2 * 0.85,
+        y: S/2 + Math.sin(a) * S/2 * 0.85,
+        vx: Math.cos(a) * speed,
+        vy: Math.sin(a) * speed,
+        life: 0,
+        delay,
+        maxLife: 0.55 + Math.random() * 0.35,
+        size: 0.8 + Math.random() * 1.6,
+        // color variation: white-hot core → purple-violet outer
+        hot: Math.random() < 0.3,
+      });
+    }
+  }
 }
 
-function animateStorm() {
-  if (!stormActive) return;
+function triggerStorm() {
+  if (windActive) return;
+  windActive = true;
+  windStart  = performance.now();
+  spawnWindParticles();
+  animateWind();
+}
+
+function animateWind() {
+  if (!windActive) return;
   const pc = document.getElementById('planet-canvas');
   const c  = pc.getContext('2d');
   const S  = pc.width;
-  const elapsed = performance.now() - stormStart;
-  const t = Math.min(elapsed / STORM_DUR, 1);
+  const elapsed = (performance.now() - windStart) / WIND_DUR;
+  const t = Math.min(elapsed, 1);
 
-  // easing: fast in, slow fade out
-  const alpha = t < 0.15
-    ? t / 0.15
-    : 1 - ((t - 0.15) / 0.85);
-
-  // redraw base planet first
+  // redraw base planet
   drawPlanetOn(c, S);
 
-  // storm: expanding ring + swirl arcs
-  const maxExpand = S * 0.55;
-  const r = maxExpand * Math.min(t * 3, 1);
+  // corona glow at eruption site (fades quickly)
+  if (t < 0.3) {
+    const coronaA = (1 - t / 0.3) * 0.7;
+    const cg = c.createRadialGradient(S*0.62, S*0.38, 0, S*0.62, S*0.38, S*0.28);
+    cg.addColorStop(0,   `rgba(255,240,200,${coronaA})`);
+    cg.addColorStop(0.4, `rgba(220,140,255,${coronaA * 0.5})`);
+    cg.addColorStop(1,   `rgba(150,60,255,0)`);
+    c.fillStyle = cg; c.fillRect(0, 0, S, S);
+  }
 
-  // outer shockwave ring
-  const ring = c.createRadialGradient(S/2, S/2, r * 0.6, S/2, S/2, r);
-  ring.addColorStop(0,   `rgba(220,180,255,0)`);
-  ring.addColorStop(0.5, `rgba(200,140,255,${alpha * 0.55})`);
-  ring.addColorStop(0.8, `rgba(255,220,255,${alpha * 0.35})`);
-  ring.addColorStop(1,   `rgba(180,80,255,0)`);
-  c.beginPath(); c.arc(S/2, S/2, r, 0, Math.PI * 2);
-  c.fillStyle = ring; c.fill();
+  // update + draw wind particles
+  const dt = 0.016;
+  for (const p of windParticles) {
+    if (t < p.delay) continue;
+    p.life = Math.min(p.life + dt / (WIND_DUR / 1000), 1);
+    p.x += p.vx;
+    p.y += p.vy;
+    // slight outward acceleration + dispersion
+    p.vx += Math.cos(Math.atan2(p.vy, p.vx)) * 0.04;
+    p.vy += Math.sin(Math.atan2(p.vy, p.vx)) * 0.04;
 
-  // swirl arcs (3 rotating arms)
-  for (let arm = 0; arm < 3; arm++) {
-    const baseAngle = (t * Math.PI * 4) + (arm * Math.PI * 2 / 3);
-    const armR = r * 0.45;
+    const fadeIn  = Math.min(p.life / 0.12, 1);
+    const fadeOut = p.life > p.maxLife ? 1 - (p.life - p.maxLife) / (1 - p.maxLife) : 1;
+    const a = fadeIn * fadeOut;
+    if (a <= 0) continue;
+
+    // elongated streak in direction of travel
+    const speed = Math.hypot(p.vx, p.vy);
+    const angle = Math.atan2(p.vy, p.vx);
     c.save();
-    c.translate(S/2, S/2);
-    c.rotate(baseAngle);
+    c.translate(p.x, p.y);
+    c.rotate(angle);
+    const grad = c.createLinearGradient(-speed * 3, 0, speed * 0.5, 0);
+    if (p.hot) {
+      grad.addColorStop(0, `rgba(255,255,255,0)`);
+      grad.addColorStop(0.5, `rgba(255,230,180,${a * 0.9})`);
+      grad.addColorStop(1, `rgba(255,200,120,${a * 0.5})`);
+    } else {
+      grad.addColorStop(0, `rgba(180,80,255,0)`);
+      grad.addColorStop(0.5, `rgba(200,140,255,${a * 0.75})`);
+      grad.addColorStop(1, `rgba(230,190,255,${a * 0.4})`);
+    }
     c.beginPath();
-    c.arc(0, 0, armR, -0.6, 0.6);
-    c.strokeStyle = `rgba(230,190,255,${alpha * 0.7})`;
-    c.lineWidth = 2.5;
-    c.stroke();
+    c.ellipse(0, 0, speed * 3, p.size * 0.5, 0, 0, Math.PI * 2);
+    c.fillStyle = grad;
+    c.fill();
     c.restore();
   }
 
-  // bright core flash at storm start
-  if (t < 0.25) {
-    const coreA = (1 - t / 0.25) * alpha * 0.6;
-    const core = c.createRadialGradient(S*0.38, S*0.33, 0, S/2, S/2, S*0.3);
-    core.addColorStop(0,   `rgba(255,240,255,${coreA})`);
-    core.addColorStop(0.5, `rgba(200,150,255,${coreA * 0.4})`);
-    core.addColorStop(1,   `rgba(150,80,255,0)`);
-    c.fillStyle = core; c.fillRect(0, 0, S, S);
-  }
-
   if (t < 1) {
-    requestAnimationFrame(animateStorm);
+    requestAnimationFrame(animateWind);
   } else {
-    stormActive = false;
-    drawPlanet(); // restore clean planet
+    windActive = false;
+    drawPlanet();
   }
 }
 
@@ -568,8 +609,8 @@ function checkSweep() {
         lbl.style.letterSpacing = '3px';
       }, 60);
 
-      // every STORM_EVERY passes → trigger storm
-      if ((sweepPassCount - 2) % STORM_EVERY === 0) {
+      // every STORM_EVERY passes after reveal → trigger solar wind (skip pass 2 = reveal)
+      if (sweepPassCount > 2 && (sweepPassCount - 2) % STORM_EVERY === 0) {
         setTimeout(triggerStorm, 80);
       }
     }
