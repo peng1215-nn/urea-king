@@ -18,7 +18,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.create_table(
-        'contact_messages',
+        'landing_contact_messages',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('username', sa.String(length=100), nullable=False),
         sa.Column('description', sa.Text(), nullable=False),
@@ -26,9 +26,9 @@ def upgrade() -> None:
         sa.Column('created_at', sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint('id'),
     )
-    op.create_index(op.f('ix_contact_messages_id'), 'contact_messages', ['id'], unique=False)
+    op.create_index(op.f('ix_landing_contact_messages_id'), 'landing_contact_messages', ['id'], unique=False)
 
 
 def downgrade() -> None:
-    op.drop_index(op.f('ix_contact_messages_id'), table_name='contact_messages')
-    op.drop_table('contact_messages')
+    op.drop_index(op.f('ix_landing_contact_messages_id'), table_name='landing_contact_messages')
+    op.drop_table('landing_contact_messages')

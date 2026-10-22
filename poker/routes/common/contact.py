@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 
 from database import SessionLocal
-from poker.models import ContactMessage
+from models import ContactMessage
 
 router = APIRouter()
 
