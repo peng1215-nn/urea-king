@@ -1401,8 +1401,9 @@ const CardDealEngine = (function() {
       fontFamily: 'Georgia, serif',
       position: 'relative',
       opacity: '0',
-      transform: 'translateY(60px) scale(0.85)',
-      transition: 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.22,1,0.36,1)',
+      // Start off-screen to the right with a tilt
+      transform: 'translateX(140vw) rotate(25deg) scale(0.9)',
+      transition: 'opacity 0.35s ease, transform 0.45s cubic-bezier(0.22,1,0.36,1)',
     });
 
     // top-left corner
@@ -1445,28 +1446,23 @@ const CardDealEngine = (function() {
     const el2 = makeCardEl(c2);
     overlay.append(el1, el2);
 
-    // Animate in with slight stagger
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        el1.style.opacity = '1'; el1.style.transform = 'translateY(0) scale(1)';
-        setTimeout(() => {
-          el2.style.opacity = '1'; el2.style.transform = 'translateY(0) scale(1)';
-        }, 120);
-      });
-    });
-
-    // After 2.2s, fade out and navigate
-    setTimeout(() => {
-      overlay.style.transition = 'opacity 0.35s ease';
-      overlay.style.opacity = '0';
+    // Cards start off-screen right, slide into position one after another
+    // el1 lands left-of-center, el2 lands right-of-center
+    const dealIn = (el, delay) => {
       setTimeout(() => {
-        overlay.style.display = 'none';
-        overlay.style.opacity = '';
-        overlay.style.transition = '';
-        busy = false;
-        window.location.href = dest;
-      }, 350);
-    }, 2200);
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0) rotate(0deg) scale(1)';
+      }, delay);
+    };
+    dealIn(el1, 80);
+    dealIn(el2, 320);
+
+    // After 2.4s, fade out overlay and navigate simultaneously
+    setTimeout(() => {
+      overlay.style.transition = 'opacity 0.3s ease';
+      overlay.style.opacity = '0';
+      window.location.href = dest;          // navigate right away, don't wait for fade
+    }, 2400);
   }
 
   return { deal };
@@ -1479,7 +1475,7 @@ const CardDealEngine = (function() {
   btn.addEventListener('click', function(e) {
     if (SupernovaEngine.isPaused()) return; // FX off → navigate directly
     e.preventDefault();
-    CardDealEngine.deal(btn.href);
+    CardDealEngine.deal(btn.getAttribute('href'));
   });
 })();
 </script>
