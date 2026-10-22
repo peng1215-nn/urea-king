@@ -1,6 +1,15 @@
 let currentPage = 1;
 let currentView = "logs";
 let currentSearch = "";
+let _exportGameCache = {};
+
+function exportGameCard(gameId) {
+    const game = _exportGameCache[gameId];
+    if (!game) { console.warn("exportGameCard: game not in cache", gameId); return; }
+    const groupName = document.getElementById("current-group-text")?.innerText || "";
+    const lang = localStorage.getItem("language") || "zh";
+    generateGamePdf(game, groupName, lang);
+}
 
 function switchView(view) {
     currentView = view;
@@ -28,7 +37,10 @@ async function loadGameLogs(page) {
     if (!data.success) { list.innerHTML = `<div class="log-loading">${t("operationFailed")}</div>`; return; }
     if (!data.games || data.games.length === 0) { list.innerHTML = `<div class="log-loading">${t("noGameLogs")}</div>`; renderPagination(1,1); return; }
     list.innerHTML = "";
-    data.games.forEach(game => renderGameCard(game, list));
+    data.games.forEach(game => {
+        _exportGameCache[game.id] = game;
+        renderGameCard(game, list);
+    });
     renderPagination(data.page, data.total_pages);
 }
 
@@ -49,6 +61,7 @@ function renderGameCard(game, container) {
             <div class="log-card-right">
                 <span class="log-chips">${t("totalBuyIn")}：${game.total_buy_in}</span>
                 ${balanced}
+                <button class="btn-export-log" onclick="event.stopPropagation(); exportGameCard(${game.id})">${t("export")}</button>
                 <i class="fa-solid fa-chevron-down log-chevron"></i>
             </div>
         </div>

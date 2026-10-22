@@ -7,6 +7,17 @@ let pendingDeleteGameId = null;
 let currentPage = 1;
 let currentView = "logs";
 let currentSearch = "";
+let _exportGameCache = {};
+
+function exportGameCard(gameId) {
+    const game = _exportGameCache[gameId];
+    if (!game) { console.warn("exportGameCard: game not in cache", gameId); return; }
+    // 管理员端从 group select 的 option text 获取组名
+    const select = document.getElementById("admin-group-select");
+    const groupName = select ? (select.options[select.selectedIndex]?.textContent || "") : "";
+    const lang = localStorage.getItem("language") || "zh";
+    generateGamePdf(game, groupName, lang);
+}
 
 function openDeleteGameModal(gameId) {
     pendingDeleteGameId = gameId;
@@ -51,7 +62,10 @@ async function loadGameLogs(page) {
     if (!data.success) { list.innerHTML = `<div class="log-loading">${t("operationFailed")}</div>`; return; }
     if (!data.games || data.games.length === 0) { list.innerHTML = `<div class="log-loading">${t("noGameLogs")}</div>`; renderPagination(1,1); return; }
     list.innerHTML = "";
-    data.games.forEach(game => renderGameCard(game, list));
+    data.games.forEach(game => {
+        _exportGameCache[game.id] = game;
+        renderGameCard(game, list);
+    });
     renderPagination(data.page, data.total_pages);
 }
 
@@ -74,6 +88,7 @@ function renderGameCard(game, container) {
             <div class="log-card-right">
                 <span class="log-chips">${t("totalBuyIn")}：${game.total_buy_in}</span>
                 ${balanced}
+                <button class="btn-export-log" onclick="event.stopPropagation(); exportGameCard(${game.id})">${t("export")}</button>
                 <button class="btn-delete-log" onclick="event.stopPropagation(); openDeleteGameModal(${game.id})">${t("delete")}</button>
                 <i class="fa-solid fa-chevron-down log-chevron"></i>
             </div>

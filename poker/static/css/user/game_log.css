@@ -123,6 +123,9 @@ body {
 .custom-modal-content h3 { font-size: 22px; font-weight: 700; color: #ffffff; margin-bottom: 12px; }
 .custom-modal-content p { font-size: 15px; color: rgba(255,255,255,0.7); margin-bottom: 28px; line-height: 1.6; }
 .custom-modal-actions { display: flex; gap: 16px; }
+.btn-export-log { padding: 4px 12px; border-radius: 8px; border: none; background: rgba(92,141,255,0.12); color: #6b9fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.btn-export-log:hover { background: rgba(92,141,255,0.24); }
+
 .modal-confirm-button, .modal-cancel-button { flex: 1; height: 48px; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
 .modal-confirm-button { background: rgba(92,141,255,0.85); color: white; }
 .modal-confirm-button:hover { background: rgba(92,141,255,1); }

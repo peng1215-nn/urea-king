@@ -1,40 +1,11 @@
 let _exportGameCache = {};
 
-async function exportGameCard(gameId) {
-    // Use cached game data (populated whenever a page is loaded)
-    let game = _exportGameCache[gameId];
-    if (!game) { alert(t("operationFailed")); return; }
-
-    const lines = [];
-    const sep = "\t";
-
-    lines.push(game.name || ("Game #" + gameId));
-    lines.push(game.started_at + " → " + game.ended_at + "   " + game.duration);
-    lines.push((game.is_balanced ? t("balanced") : t("unbalanced")) + "   " + t("totalBuyIn") + ": " + game.total_buy_in);
-    lines.push("");
-    lines.push([t("memberNickname"), t("buyIn"), t("cashOut"), t("net")].join(sep));
-
-    if (game.players && game.players.length > 0) {
-        game.players.forEach(p => {
-            const netStr = (p.net > 0 ? "+" : "") + p.net;
-            lines.push([p.nickname, p.total_buy_in, p.cash_out, netStr].join(sep));
-        });
-    }
-    if (game.note) {
-        lines.push("");
-        lines.push(t("note") + ": " + game.note);
-    }
-
-    const content = lines.join("\n");
-    const blob = new Blob(["﻿" + content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = (game.name || ("game_" + gameId)) + ".txt";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+function exportGameCard(gameId) {
+    const game = _exportGameCache[gameId];
+    if (!game) { console.warn("exportGameCard: game not in cache", gameId); return; }
+    const groupName = document.getElementById("current-group-text")?.innerText || "";
+    const lang = localStorage.getItem("language") || "zh";
+    generateGamePdf(game, groupName, lang);
 }
 
 let pendingDeleteGameId = null;
