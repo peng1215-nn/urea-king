@@ -675,15 +675,20 @@ const SupernovaEngine = (() => {
     clearMeshes(state);
 
     // Timeline (ms):
-    //   0 – 2200  : glow builds from centre outward, slowly intensifying
-    //   2200 – 2700: full-screen white DOM veil slams in (opacity 0→1)
-    //   2700 – 3800: veil holds pure white — total whiteout
-    //   3800 – 5200: veil fades out, revealing shockwaves + jets below
-    //   3800+      : shockwave rings expand, jets fly (offset by REVEAL_MS)
+    //   0 – 1600  : inward-spiralling suction particles (energy charging)
+    //   0 – 1600  : radial glow builds slowly outward
+    //   1600–2000 : glow pulses bright, suction stops, core flares
+    //   2000–2500 : white veil slams in
+    //   2500–4000 : pure white whiteout holds (1.5s)
+    //   4000–5500 : veil fades revealing shockwaves + jets
+    //   4000+     : shockwaves expand
 
-    const REVEAL_MS = 3800; // shockwaves & jets start when veil begins fading
+    const CHARGE_MS  = 1600; // suction phase duration
+    const VEIL_IN_MS = 2000; // veil starts rising
+    const VEIL_HOLD  = 2500; // veil fully opaque
+    const REVEAL_MS  = 4000; // veil starts fading / shockwaves start
 
-    // ── Radial glow layers (WebGL, centred on planet) ──
+    // ── Radial glow layers ──
     const flashLayers = [
       { r: 100, color: 0xffffff, peakOp: 1.0  },
       { r: 280, color: 0xaaccff, peakOp: 0.85 },
@@ -703,6 +708,27 @@ const SupernovaEngine = (() => {
       flashMeshes.push(mesh);
     }
 
+    // ── Inward suction particles (energy charging toward core) ──
+    const sCount = 220;
+    const sPos   = new Float32Array(sCount * 3);
+    const sAngle = new Float32Array(sCount);   // initial angle
+    const sDist  = new Float32Array(sCount);   // initial distance from centre
+    const sSpeed = new Float32Array(sCount);   // inward speed (px/s)
+    for (let i = 0; i < sCount; i++) {
+      sAngle[i] = Math.random() * Math.PI * 2;
+      sDist[i]  = 120 + Math.random() * 280;   // spawn 120–400px out
+      sSpeed[i] = 80 + Math.random() * 120;    // 80–200 px/s inward
+      sPos[i*3] = sPos[i*3+1] = sPos[i*3+2] = 0;
+    }
+    const sGeo = new THREE.BufferGeometry();
+    sGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
+    const sMat = new THREE.PointsMaterial({
+      color: 0x88ccff, size: 2.5, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const suction = new THREE.Points(sGeo, sMat);
+    state.group.add(suction); state.meshes.push(suction);
+
     // ── Shockwave rings ──
     const rings = [];
     const ringColors = [0xeef5ff, 0xaaddff, 0xff9944, 0xff5511, 0xcc2200];
@@ -713,7 +739,7 @@ const SupernovaEngine = (() => {
         blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
       });
       const ring = new THREE.Mesh(rGeo, rMat);
-      ring.userData.delay  = i * 0.14;   // stagger (s, relative to REVEAL_MS)
+      ring.userData.delay  = i * 0.14;
       ring.userData.speed  = 190 + i * 36;
       ring.userData.peakR  = 30 + i * 12;
       ring.userData.peakOp = [0.9, 0.8, 0.7, 0.6, 0.5][i];
@@ -743,31 +769,63 @@ const SupernovaEngine = (() => {
     const jets = new THREE.Points(jGeo, jMat);
     state.group.add(jets); state.meshes.push(jets);
 
-    state._p3 = { flashMeshes, rings, jets, jGeo, jPos, jVel, jLife, jDel, jCount, REVEAL_MS, veilActive: false };
+    state._p3 = {
+      flashMeshes, rings, jets, jGeo, jPos, jVel, jLife, jDel, jCount,
+      suction, sGeo, sPos, sAngle, sDist, sSpeed, sCount,
+      CHARGE_MS, VEIL_IN_MS, VEIL_HOLD, REVEAL_MS,
+    };
   }
 
   function updatePhase3(state, ms) {
     const p = state._p3; if (!p) return;
-    const { REVEAL_MS } = p;
+    const { CHARGE_MS, VEIL_IN_MS, VEIL_HOLD, REVEAL_MS } = p;
 
-    // ── 1. Radial glow: slow build 0→2200ms with pulsing intensification ──
-    // Uses an eased curve so it feels like energy is charging up
-    const glowRatio = ms < 2200
-      ? Math.pow(ms / 2200, 0.6)                           // ease-in build (slow start, accelerates)
-      : ms < 2900 ? 1.0                                    // hold bright while veil rises
-      : Math.max(0, 1 - (ms - 2900) / 1200);              // fade behind veil
-    for (const fm of p.flashMeshes) {
-      fm.material.opacity = glowRatio * fm.userData.peakOp;
+    // ── 1. Inward suction particles (0 → CHARGE_MS) ──
+    if (ms < VEIL_IN_MS) {
+      const chargeT = Math.min(ms / CHARGE_MS, 1); // 0→1 during charge
+      const sPos = p.sPos;
+      for (let i = 0; i < p.sCount; i++) {
+        // each particle travels inward; when it reaches centre, respawn at edge
+        const elapsed = ms / 1000;
+        const travelFrac = (elapsed * p.sSpeed[i] / p.sDist[i]) % 1;
+        const dist = p.sDist[i] * (1 - travelFrac); // shrinks toward 0
+        // add slight spiral drift
+        const a = p.sAngle[i] + travelFrac * 1.2;
+        sPos[i*3]   = Math.cos(a) * dist;
+        sPos[i*3+1] = Math.sin(a) * dist;
+        sPos[i*3+2] = 0;
+      }
+      p.sGeo.attributes.position.needsUpdate = true;
+      // fade in quickly then out as veil rises
+      const sOp = ms < CHARGE_MS
+        ? Math.min(ms / 300, 1) * 0.7                       // fade in over 300ms
+        : Math.max(0, 1 - (ms - CHARGE_MS) / (VEIL_IN_MS - CHARGE_MS)) * 0.7;
+      p.suction.material.opacity = sOp;
+      // colour shifts blue→white as charge builds
+      const blue = Math.max(0, 1 - chargeT);
+      p.suction.material.color.setRGB(blue * 0.5 + 0.5, blue * 0.8 + 0.2, 1);
+    } else {
+      p.suction.material.opacity = 0;
     }
 
-    // ── 2. Full-screen DOM veil ──
+    // ── 2. Radial glow ──
+    const glowRatio = ms < CHARGE_MS
+      ? Math.pow(ms / CHARGE_MS, 0.55)                      // ease-in charge build
+      : ms < VEIL_IN_MS ? 1.0 + (ms - CHARGE_MS) / (VEIL_IN_MS - CHARGE_MS) * 0.4 // flare up extra
+      : ms < VEIL_HOLD  ? 1.4                               // hold flare while veil rises
+      : Math.max(0, 1 - (ms - VEIL_HOLD) / 1200);          // fade behind veil
+    for (const fm of p.flashMeshes) {
+      fm.material.opacity = Math.min(1, glowRatio) * fm.userData.peakOp;
+    }
+
+    // ── 3. Full-screen DOM veil ──
     let veilOp = 0;
-    if (ms >= 2200 && ms < 2700)       veilOp = (ms - 2200) / 500;          // slam in over 500ms
-    else if (ms >= 2700 && ms < REVEAL_MS) veilOp = 1.0;                    // hold white 1.1s
-    else if (ms >= REVEAL_MS && ms < 5200) veilOp = 1 - (ms - REVEAL_MS) / 1400; // slow fade
+    if (ms >= VEIL_IN_MS && ms < VEIL_HOLD)       veilOp = (ms - VEIL_IN_MS) / (VEIL_HOLD - VEIL_IN_MS);
+    else if (ms >= VEIL_HOLD && ms < REVEAL_MS)   veilOp = 1.0;
+    else if (ms >= REVEAL_MS && ms < REVEAL_MS + 1600) veilOp = 1 - (ms - REVEAL_MS) / 1600;
     flashVeil.style.opacity = veilOp;
 
-    // ── 3. Shockwave rings: start expanding after veil begins fading ──
+    // ── 4. Shockwave rings ──
     for (const ring of p.rings) {
       const ringStartMs = REVEAL_MS + ring.userData.delay * 1000;
       if (ms < ringStartMs) { ring.material.opacity = 0; continue; }
@@ -782,7 +840,7 @@ const SupernovaEngine = (() => {
       ring.material.opacity = opacity;
     }
 
-    // ── 4. Jet particles: appear after veil fades ──
+    // ── 5. Jet particles ──
     const jetLocalMs = ms - REVEAL_MS;
     if (jetLocalMs > 0) {
       const t = jetLocalMs / 1000;
