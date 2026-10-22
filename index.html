@@ -508,7 +508,10 @@ function draw() {
   ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
 
-  // sweep wedge
+  // afterglow blips first (below sweep line)
+  drawBlips(maxR);
+
+  // sweep wedge on top
   const sweepWidth = Math.PI * 0.18;
   const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
   grad.addColorStop(0,   SWEEP + '0.0)');
@@ -522,9 +525,6 @@ function draw() {
   ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(maxR, 0);
   ctx.strokeStyle = SWEEP + '0.55)'; ctx.lineWidth = 1.5; ctx.stroke();
   ctx.restore();
-
-  // afterglow blips (canvas-drawn, decay naturally)
-  drawBlips(maxR);
 
   // particles
   for (const p of particles) {
