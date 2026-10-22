@@ -270,10 +270,10 @@ html, body {
     color: rgba(255,255,255,0.5);
   }
   .enter-link {
-    width: 86px; height: 86px;
+    width: 72px; height: 72px;
   }
   #planet-canvas {
-    width: 86px; height: 86px;
+    width: 72px; height: 72px;
   }
   .planet-label {
     font-size: 12px;
@@ -491,7 +491,9 @@ function checkSweep() {
 
 function draw() {
   ctx.clearRect(0, 0, W, H);
-  const maxR = Math.hypot(cx, cy) * 0.9;
+  const maxR = W < 600
+    ? Math.hypot(W, H) * 0.6
+    : Math.hypot(cx, cy) * 0.9;
 
   // rings
   for (let i = 1; i <= 4; i++) {
