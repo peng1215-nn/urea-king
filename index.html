@@ -1216,18 +1216,25 @@ const CoinEngine = (function() {
     ];
     mats.forEach(m => { m.transparent = true; m.opacity = 1; });
     coinMesh = new THREE.Mesh(geo, mats);
-    // Tilt 90° so flat faces point toward camera (+Z)
-    coinMesh.rotation.x = Math.PI / 2;
+    // No pre-tilt: spin via rotation.x flips faces toward/away from camera naturally
+    // (CylinderGeometry cap faces point along ±Y; rotation.x rotates around X axis,
+    //  alternately showing top cap and bottom cap to the camera)
     scene2.add(coinMesh);
 
-    // Strong front light so coin face is always lit
-    const amb = new THREE.AmbientLight(0xffffff, 1.2);
+    // Lights from multiple directions so caps are lit as they rotate
+    const amb = new THREE.AmbientLight(0xffffff, 1.0);
     scene2.add(amb);
-    const front = new THREE.DirectionalLight(0xffe8a0, 2.0);
-    front.position.set(0, 0, 10);
-    scene2.add(front);
+    // Top light (hits heads cap when facing up)
+    const top = new THREE.DirectionalLight(0xffe8a0, 2.5);
+    top.position.set(0, 10, 3);
+    scene2.add(top);
+    // Bottom light (hits tails cap)
+    const bot = new THREE.DirectionalLight(0xffd060, 2.0);
+    bot.position.set(0, -10, 3);
+    scene2.add(bot);
+    // Side fill
     const fill = new THREE.PointLight(0xaaccff, 1.0, 30);
-    fill.position.set(-3, 3, 5);
+    fill.position.set(-4, 0, 5);
     scene2.add(fill);
 
     threeReady = true;
@@ -1258,7 +1265,7 @@ const CoinEngine = (function() {
     // Reset coin to center, make visible
     coinMesh.position.set(0, -4, 0);
     coinMesh.scale.setScalar(0.4);
-    coinMesh.rotation.z = 0;
+    coinMesh.rotation.set(0, 0, 0);
 
     // Pause all other FX while coin plays
     FXRegistry.forEach(fx => fx.pause());
@@ -1278,8 +1285,10 @@ const CoinEngine = (function() {
     // Spin counts during flight
     const spinRev = result === 'edge' ? 7 : 9;
 
-    // Final face angle (rotation around Z after X-tilt):
-    // heads = face 1 toward camera = 0, tails = face 2 = π, edge = coin upright = π/2
+    // Final rotation.x angle:
+    // 0 or 2π = top cap (heads/花) faces camera
+    // π       = bottom cap (tails/字) faces camera
+    // π/2     = edge-on (立边)
     const finalAngle = result === 'heads' ? 0
                      : result === 'tails'  ? Math.PI
                      : Math.PI / 2;
@@ -1335,8 +1344,8 @@ const CoinEngine = (function() {
         if (diff < -Math.PI) diff += Math.PI * 2;
         spinAngle = spinEnd + diff * eased;
       }
-      // spin around Z axis (coin flipping face over face)
-      coinMesh.rotation.z = spinAngle;
+      // spin around X axis: flips top/bottom cap toward camera (true coin flip)
+      coinMesh.rotation.x = spinAngle;
 
       // Opacity: fade in fast, stay solid through most of hold, fade out last 300ms
       let opacity;
