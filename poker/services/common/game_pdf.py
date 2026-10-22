@@ -19,6 +19,43 @@ WKHTMLTOPDF_OPTIONS = {
 
 CST = timezone(timedelta(hours=8))
 
+
+def _ensure_cjk_fontconfig() -> None:
+    """
+    Railway/Nixpacks 把字体装在 /nix/store 下，wkhtmltopdf 的 fontconfig
+    默认不会扫描那里，导致中文字符渲染为空白。
+    这里在运行时找到 Nix 里的 CJK 字体目录，生成一份 fonts.conf 并通过
+    FONTCONFIG_FILE 指给 wkhtmltopdf。本地（系统已有字体）则不做任何改动。
+    """
+    import glob
+    import os
+    import tempfile
+
+    if os.environ.get("_CJK_FONTCONFIG_READY"):
+        return
+
+    nix_dirs = glob.glob("/nix/store/*noto-fonts-cjk*/share/fonts")
+    nix_dirs += glob.glob("/nix/store/*noto-fonts-cjk*/share/fonts/*")
+    if not nix_dirs:
+        return
+
+    conf_dir = os.path.join(tempfile.gettempdir(), "poker-fontconfig")
+    os.makedirs(conf_dir, exist_ok=True)
+    conf_path = os.path.join(conf_dir, "fonts.conf")
+    dirs_xml = "\n".join(f"  <dir>{d}</dir>" for d in sorted(set(nix_dirs)))
+    with open(conf_path, "w", encoding="utf-8") as f:
+        f.write(
+            '<?xml version="1.0"?>\n'
+            '<!DOCTYPE fontconfig SYSTEM "fonts.dtd">\n'
+            "<fontconfig>\n"
+            f"{dirs_xml}\n"
+            "  <dir>/usr/share/fonts</dir>\n"
+            f"  <cachedir>{conf_dir}/cache</cachedir>\n"
+            "</fontconfig>\n"
+        )
+    os.environ["FONTCONFIG_FILE"] = conf_path
+    os.environ["_CJK_FONTCONFIG_READY"] = "1"
+
 I18N = {
     "zh": {
         "subtitle": "牌局记录",
@@ -212,7 +249,7 @@ body {{
     font-size: 12px;
     margin-bottom: 10px;
 }}
-.meta-item {{ display: flex; align-items: center; gap: 4px; }}
+.meta-item {{ display: inline-block; margin-right: 22px; }}
 .meta-label {{ color: #8892b0; margin-right: 4px; }}
 
 /* ── 总买入 + 平衡徽章 ── */
@@ -313,16 +350,15 @@ tr.winner-row td.col-rank {{ border-left: 3px solid #f9ca24; }}
 
 /* ── 页脚 ── */
 .footer {{
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    padding: 8px 28px;
+    margin: 24px 0 0;
+    padding-top: 8px;
     border-top: 1px solid #e8ecf5;
-    display: flex;
-    justify-content: space-between;
     font-size: 10.5px;
     color: #b2bec3;
-    background: #fff;
+    overflow: hidden;
 }}
+.footer-left {{ float: left; }}
+.footer-right {{ float: right; }}
 </style>
 </head>
 <body>
@@ -377,15 +413,16 @@ tr.winner-row td.col-rank {{ border-left: 3px solid #f9ca24; }}
     </table>
 
     {note_section}
-</div>
 
-<div class="footer">
-    <span>{t["exported_at"]}：{now_cst}</span>
-    <span>{t["generated_by"]}</span>
+    <div class="footer">
+        <span class="footer-left">{t["exported_at"]}：{now_cst}</span>
+        <span class="footer-right">{t["generated_by"]}</span>
+    </div>
 </div>
 
 </body>
 </html>"""
 
+    _ensure_cjk_fontconfig()
     pdf_bytes = pdfkit.from_string(html, False, options=WKHTMLTOPDF_OPTIONS)
     return pdf_bytes
