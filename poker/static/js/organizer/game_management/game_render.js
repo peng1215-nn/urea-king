@@ -12,20 +12,17 @@ function _getAudioCtx() {
 function playChipRequestSound() {
     try {
         const ctx = _getAudioCtx();
-        // 两声短"叮"，间隔 180ms
-        [0, 0.18].forEach(delay => {
-            const osc  = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.type = "sine";
-            osc.frequency.value = 880;
-            gain.gain.setValueAtTime(0, ctx.currentTime + delay);
-            gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + delay + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.35);
-            osc.start(ctx.currentTime + delay);
-            osc.stop(ctx.currentTime + delay + 0.35);
-        });
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.value = 660;
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.5);
     } catch (e) {
         // 浏览器未授权音频，静默忽略
     }
