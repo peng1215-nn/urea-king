@@ -1207,27 +1207,28 @@ const CoinEngine = (function() {
 
     // Coin geometry: thin cylinder, faces along Y axis by default
     const geo  = new THREE.CylinderGeometry(1, 1, 0.1, 64);
-    // material index: 0=rim, 1=top face(heads), 2=bottom face(tails)
+    // MeshPhongMaterial: responds to lighting, shows color clearly
+    // material index: 0=rim, 1=top face(heads/花), 2=bottom face(tails/字)
     const mats = [
-      new THREE.MeshStandardMaterial({ color: 0xb8902a, metalness: 0.95, roughness: 0.2 }),
-      new THREE.MeshStandardMaterial({ color: 0xf5c518, metalness: 1.0,  roughness: 0.08 }),
-      new THREE.MeshStandardMaterial({ color: 0xd4a020, metalness: 1.0,  roughness: 0.12 }),
+      new THREE.MeshPhongMaterial({ color: 0xb8902a, shininess: 80 }),           // rim: dark gold
+      new THREE.MeshPhongMaterial({ color: 0xf5c518, shininess: 120, emissive: 0x332200 }), // heads: bright gold
+      new THREE.MeshPhongMaterial({ color: 0xe8b820, shininess: 100, emissive: 0x221100 }), // tails: slightly different
     ];
-    // Pre-set all materials as transparent so opacity changes work
     mats.forEach(m => { m.transparent = true; m.opacity = 1; });
     coinMesh = new THREE.Mesh(geo, mats);
-    // Tilt so the flat face points toward camera (+Z)
+    // Tilt 90° so flat faces point toward camera (+Z)
     coinMesh.rotation.x = Math.PI / 2;
     scene2.add(coinMesh);
 
-    const amb = new THREE.AmbientLight(0xffffff, 0.6);
+    // Strong front light so coin face is always lit
+    const amb = new THREE.AmbientLight(0xffffff, 1.2);
     scene2.add(amb);
-    const pt1 = new THREE.PointLight(0xffe8a0, 3, 20);
-    pt1.position.set(3, 5, 5);
-    scene2.add(pt1);
-    const pt2 = new THREE.PointLight(0x88aaff, 1.2, 20);
-    pt2.position.set(-4, -2, 4);
-    scene2.add(pt2);
+    const front = new THREE.DirectionalLight(0xffe8a0, 2.0);
+    front.position.set(0, 0, 10);
+    scene2.add(front);
+    const fill = new THREE.PointLight(0xaaccff, 1.0, 30);
+    fill.position.set(-3, 3, 5);
+    scene2.add(fill);
 
     threeReady = true;
     return true;
@@ -1271,7 +1272,7 @@ const CoinEngine = (function() {
     // total ~1800ms for heads/tails, ~2400ms for edge
     // flight = toss arc, land = coin settles at center, hold = pause before jump
     const flightMs = result === 'edge' ? 2000 : 1600;
-    const holdMs   = result === 'edge' ? 800  : 500;
+    const holdMs   = result === 'edge' ? 1400 : 1200; // long enough to see screen effect
     const totalMs  = flightMs + holdMs;
 
     // Spin counts during flight
@@ -1337,25 +1338,24 @@ const CoinEngine = (function() {
       // spin around Z axis (coin flipping face over face)
       coinMesh.rotation.z = spinAngle;
 
-      // Opacity: fade in fast, stay solid, fade out only during hold phase
+      // Opacity: fade in fast, stay solid through most of hold, fade out last 300ms
       let opacity;
       if (fp < 0.06) {
         opacity = fp / 0.06;
-      } else if (ms > flightMs) {
-        // hold phase: fade out
-        const hp = (ms - flightMs) / holdMs;
-        opacity = 1 - hp;
+      } else if (ms > flightMs + holdMs - 300) {
+        // last 300ms: fade out
+        opacity = (totalMs - ms) / 300;
       } else {
         opacity = 1;
       }
-      coinMesh.material.forEach(m => { m.opacity = opacity; });
+      coinMesh.material.forEach(m => { m.opacity = Math.max(0, opacity); });
 
       renderer2.render(scene2, camera2);
 
-      // Screen effect fires once at landing (fp ≈ 1)
-      if (fp >= 0.92 && !screenEffectDone) {
+      // Screen effect fires right at landing (fp = 1)
+      if (fp >= 1 && !screenEffectDone) {
         screenEffectDone = true;
-        applyScreenEffect(result, 0, 0); // always screen center
+        applyScreenEffect(result, 0, 0);
       }
     }
 
