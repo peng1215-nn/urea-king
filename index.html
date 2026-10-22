@@ -499,6 +499,10 @@ const SupernovaEngine = (() => {
 
     THREE_loaded = true;
     animate();
+    // Wrap all text nodes into per-char spans for blast effect
+    wrapChars();
+    // Small delay to let layout settle before recording positions
+    setTimeout(initCharPositions, 200);
   }
 
   function resize() {
@@ -539,14 +543,7 @@ const SupernovaEngine = (() => {
   // dispose all phase meshes
   function clearMeshes(state) {
     flashVeil.style.opacity = 0; // always reset veil when switching phase
-    // Reset any blasted UI elements immediately
-    BLAST_TARGETS.forEach(({ sel }) => {
-      const el = document.querySelector(sel);
-      if (!el) return;
-      el.style.transition = 'none';
-      el.style.transform  = '';
-      el.style.opacity    = '';
-    });
+    resetCharBlast();
     for (const m of state.meshes) {
       if (m.geometry) m.geometry.dispose();
       if (m.material) m.material.dispose();
@@ -679,43 +676,99 @@ const SupernovaEngine = (() => {
   // DOM full-screen white veil element
   const flashVeil = document.getElementById('flash-veil');
 
-  // ── UI blast: shockwave blows page elements away, they drift back ──
-  const BLAST_TARGETS = [
-    { sel: '.stage',       exclude: null },
-    { sel: '.grid',        exclude: null },
-    { sel: '#blip',        exclude: null },
-    { sel: '.contact-bar', exclude: null },
+  // ── Char-blast: shockwave ring sweeps through text, chars scatter then drift back ──
+  // Text containers to wrap into individual char spans
+  const CHAR_BLAST_SELS = [
+    '#coord',
+    '.wordmark-main',
+    '.wordmark-sub',
+    '.descriptor',
+    '.contact-link',
   ];
 
-  function blastUI() {
-    BLAST_TARGETS.forEach(({ sel }) => {
+  let charSpans = []; // { el, origX, origY, blasted }
+
+  function wrapChars() {
+    charSpans = [];
+    CHAR_BLAST_SELS.forEach(sel => {
       const el = document.querySelector(sel);
       if (!el) return;
-
-      // Random blast direction weighted away from screen centre
-      const dx  = (Math.random() - 0.5) * 700;
-      const dy  = (Math.random() - 0.5) * 500;
-      const rot = (Math.random() - 0.5) * 50;
-      const sc  = 0.25 + Math.random() * 0.45;
-
-      // Instant: kill any transition, snap to blasted state
-      el.style.transition = 'none';
-      el.style.transform  = `translate(${dx}px, ${dy}px) rotate(${rot}deg) scale(${sc})`;
-      el.style.opacity    = '0';
-
-      // Staggered drift-back: random delay per element (0–1.4s)
-      const delay    = Math.random() * 1400;
-      const duration = 2200 + Math.random() * 1000; // 2.2–3.2s
-
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          el.style.transition = `transform ${duration}ms cubic-bezier(0.22,0.61,0.36,1) ${delay}ms,
-                                 opacity   ${duration * 0.8}ms ease ${delay}ms`;
-          el.style.transform  = '';
-          el.style.opacity    = '';
-        }, 30); // small buffer so the "none" transition sticks
+      const text = el.textContent;
+      el.textContent = '';
+      [...text].forEach(ch => {
+        const span = document.createElement('span');
+        span.textContent = ch;
+        span.style.display = 'inline-block';
+        span.style.position = 'relative'; // keeps layout, allows transform
+        el.appendChild(span);
       });
     });
+  }
+
+  function initCharPositions() {
+    // Record each span's centre in screen coords
+    charSpans = [];
+    CHAR_BLAST_SELS.forEach(sel => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      el.querySelectorAll('span').forEach(span => {
+        const r = span.getBoundingClientRect();
+        charSpans.push({
+          el: span,
+          cx: r.left + r.width  / 2,
+          cy: r.top  + r.height / 2,
+          blasted: false,
+        });
+      });
+    });
+  }
+
+  // Called each frame during phase 3 after REVEAL_MS — pass shockwave radius in px
+  function updateCharBlast(epicX, epicY, shockR) {
+    charSpans.forEach(c => {
+      if (c.blasted) return;
+      const dx = c.cx - epicX;
+      const dy = c.cy - epicY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > shockR) return; // wave hasn't reached this char yet
+
+      c.blasted = true;
+      const el = c.el;
+
+      // Direction: away from epicentre + random spread
+      const angle  = Math.atan2(dy, dx) + (Math.random() - 0.5) * 1.2;
+      const force  = 120 + Math.random() * 260;
+      const fdx    = Math.cos(angle) * force;
+      const fdy    = Math.sin(angle) * force;
+      const rot    = (Math.random() - 0.5) * 720;
+      const sc     = 0.1 + Math.random() * 0.4;
+
+      // Snap to blasted
+      el.style.transition = 'none';
+      el.style.transform  = `translate(${fdx}px,${fdy}px) rotate(${rot}deg) scale(${sc})`;
+      el.style.opacity    = '0';
+
+      // Drift back with staggered ease
+      const delay    = 400 + Math.random() * 1800; // 0.4–2.2s after blast
+      const duration = 1800 + Math.random() * 1200;
+      setTimeout(() => {
+        el.style.transition = `transform ${duration}ms cubic-bezier(0.22,0.61,0.36,1),
+                               opacity   ${duration * 0.75}ms ease`;
+        el.style.transform  = '';
+        el.style.opacity    = '';
+      }, delay);
+    });
+  }
+
+  function resetCharBlast() {
+    charSpans.forEach(c => {
+      c.blasted = false;
+      c.el.style.transition = 'none';
+      c.el.style.transform  = '';
+      c.el.style.opacity    = '';
+    });
+    // Re-record positions (layout may have shifted)
+    setTimeout(initCharPositions, 50);
   }
 
   function startPhase3(state) {
@@ -872,10 +925,14 @@ const SupernovaEngine = (() => {
     else if (ms >= REVEAL_MS && ms < REVEAL_MS + 1600) veilOp = 1 - (ms - REVEAL_MS) / 1600;
     flashVeil.style.opacity = veilOp;
 
-    // ── 3b. Blast UI elements as veil starts fading ──
-    if (ms >= REVEAL_MS && !p.blasted) {
-      p.blasted = true;
-      blastUI();
+    // ── 3b. Char-blast: feed largest shockwave radius to char scatter system ──
+    if (ms >= REVEAL_MS && charSpans.length > 0) {
+      // Use the fastest ring's current radius as the wave front
+      const fastestRing = p.rings[p.rings.length - 1];
+      const ringLocalMs = ms - REVEAL_MS;
+      const waveR = ringLocalMs / 1000 * fastestRing.userData.speed;
+      // epicentre is the planet's screen position
+      updateCharBlast(state.sx, state.sy, waveR);
     }
 
     // ── 4. Shockwave rings ──
@@ -1058,7 +1115,7 @@ const SupernovaEngine = (() => {
     if (state) { clearMeshes(state); state.phase = 0; }
   }
 
-  function onResize() { resize(); }
+  function onResize() { resize(); setTimeout(initCharPositions, 100); }
 
   // Wait for THREE to load then init
   function tryInit() {
