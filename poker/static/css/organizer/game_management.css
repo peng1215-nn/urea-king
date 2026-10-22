@@ -850,6 +850,19 @@ body {
     font-weight: 700;
 }
 
+.tab-pending-dot {
+    color: #ff8a8a;
+    font-size: 0.6em;
+    vertical-align: super;
+    margin-left: 3px;
+    animation: tab-dot-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes tab-dot-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+}
+
 .game-tabs-bar {
     display: flex;
     align-items: center;

@@ -79,9 +79,10 @@ function renderGameTabs() {
     tabContainer.innerHTML = "";
 
     currentGames.forEach((game, index) => {
+        const hasPending = (game.requests || []).some(r => r.status === "pending");
         const tab = document.createElement("button");
         tab.className = "game-tab" + (index === currentGameIndex ? " active" : "");
-        tab.innerText = game.name || `#${index + 1}`;
+        tab.innerHTML = `${game.name || `#${index + 1}`}${hasPending ? ' <span class="tab-pending-dot">●</span>' : ""}`;
         tab.onclick = () => selectGameTab(index);
         tabContainer.appendChild(tab);
     });
