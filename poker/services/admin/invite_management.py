@@ -323,6 +323,16 @@ def create_invitation_code_service(
                 "message": "inviteCodeExists",
             }
 
+        total_count = db.query(InvitationCode).filter(
+            InvitationCode.group_code == group.group_code,
+        ).count()
+
+        if total_count >= group.invite_code_limit:
+            return {
+                "success": False,
+                "message": "inviteCodeLimitReached",
+            }
+
         invitation = InvitationCode(
             code=code,
             assigned_to=None,
