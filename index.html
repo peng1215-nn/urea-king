@@ -743,19 +743,16 @@ const SupernovaEngine = (() => {
       const rot    = (Math.random() - 0.5) * 720;
       const sc     = 0.1 + Math.random() * 0.4;
 
-      // Snap to blasted
+      // Snap to blasted — visible but scattered
       el.style.transition = 'none';
       el.style.transform  = `translate(${fdx}px,${fdy}px) rotate(${rot}deg) scale(${sc})`;
-      el.style.opacity    = '0';
 
-      // Drift back with staggered ease
-      const delay    = 400 + Math.random() * 1800; // 0.4–2.2s after blast
+      // Drift back with staggered ease, stays fully visible throughout
+      const delay    = 400 + Math.random() * 1800;
       const duration = 1800 + Math.random() * 1200;
       setTimeout(() => {
-        el.style.transition = `transform ${duration}ms cubic-bezier(0.22,0.61,0.36,1),
-                               opacity   ${duration * 0.75}ms ease`;
+        el.style.transition = `transform ${duration}ms cubic-bezier(0.22,0.61,0.36,1)`;
         el.style.transform  = '';
-        el.style.opacity    = '';
       }, delay);
     });
   }
@@ -765,7 +762,6 @@ const SupernovaEngine = (() => {
       c.blasted = false;
       c.el.style.transition = 'none';
       c.el.style.transform  = '';
-      c.el.style.opacity    = '';
     });
     // Re-record positions (layout may have shifted)
     setTimeout(initCharPositions, 50);
