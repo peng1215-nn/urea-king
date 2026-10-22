@@ -663,9 +663,10 @@ const SupernovaEngine = (() => {
     clearMeshes(state);
     // Flash: layered radial glow — white core, blue mid, purple outer
     const flashLayers = [
-      { r: 80,  color: 0xffffff, peakOp: 0.95 }, // white-hot core
-      { r: 220, color: 0x88bbff, peakOp: 0.55 }, // blue halo
-      { r: 480, color: 0x6633bb, peakOp: 0.22 }, // purple outer bloom
+      { r: 120,  color: 0xffffff, peakOp: 1.0  }, // white-hot core
+      { r: 320,  color: 0xaaccff, peakOp: 0.80 }, // blue halo
+      { r: 600,  color: 0x7744dd, peakOp: 0.40 }, // purple mid bloom
+      { r: 900,  color: 0x441188, peakOp: 0.18 }, // deep violet outer
     ];
     const flashMeshes = [];
     for (const fl of flashLayers) {
@@ -738,9 +739,11 @@ const SupernovaEngine = (() => {
     const t = ms / 1000; // seconds
 
     // Flash: ramp up 0-500ms, fade 500-3200ms — applied per-layer with individual peak opacity
-    const flashRatio = ms < 500
-      ? (ms / 500)
-      : ms < 3200 ? (1 - (ms - 500) / 2700)
+    // Flash: fast ramp 0-300ms, hold bright 300-1500ms, slow fade 1500-5500ms
+    const flashRatio = ms < 300
+      ? (ms / 300)
+      : ms < 1500 ? 1.0
+      : ms < 5500 ? (1 - (ms - 1500) / 4000)
       : 0;
     for (const fm of p.flashMeshes) {
       fm.material.opacity = flashRatio * fm.userData.peakOp;
