@@ -3,15 +3,12 @@ from fastapi import Form
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
-from fastapi.responses import Response
 
 from poker.services.organizer.game_log import get_game_logs_service
 from poker.services.organizer.game_log import get_stats_service
 from poker.services.organizer.game_log import delete_game_log_service
 from poker.services.organizer.game_log import get_member_stats_service
 from poker.services.organizer.game_log import get_member_trend_service
-from poker.services.organizer.game_log import get_single_game_for_export
-from poker.services.common.game_pdf import generate_game_pdf_bytes
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
 
@@ -95,28 +92,3 @@ def get_member_trend(request: Request, user_id: int):
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
     return get_member_trend_service(group_id=int(group_id), user_id=user_id)
-
-
-@router.get("/organizer/game-log/export-pdf")
-def export_game_pdf(request: Request, game_id: int, lang: str = "zh"):
-    if not require_organizer(request):
-        return {"success": False, "message": "permissionDenied"}
-
-    group_id = get_group_id(request)
-    if not group_id:
-        return {"success": False, "message": "noGroupSelected"}
-
-    game = get_single_game_for_export(game_id=game_id, group_id=int(group_id))
-    if not game:
-        return {"success": False, "message": "gameNotFound"}
-
-    # 组名从 session 里取不到，留空（前端传 group_name 参数）
-    group_name = request.query_params.get("group_name", "")
-    pdf_bytes = generate_game_pdf_bytes(game, group_name=group_name, lang=lang)
-
-    filename = f"game_{game_id}.pdf"
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-    )

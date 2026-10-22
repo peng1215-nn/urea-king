@@ -4,8 +4,3 @@ __pycache__/
 .env
 .idea/
 *.db
-
-# 字体文件（从系统 NotoSansCJK 提取，不纳入版本控制）
-# 部署时运行 scripts/extract_fonts.py 重新生成
-poker/static/fonts/*.ttf
-poker/static/fonts/*.otf

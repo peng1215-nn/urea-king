@@ -1,17 +1,6 @@
 let currentPage = 1;
 let currentView = "logs";
 let currentSearch = "";
-function exportGameCard(gameId) {
-    const groupName = encodeURIComponent(document.getElementById("current-group-text")?.innerText || "");
-    const lang = localStorage.getItem("language") || "zh";
-    const url = `/user/game-log/export-pdf?game_id=${gameId}&lang=${lang}&group_name=${groupName}`;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `game_${gameId}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}
 
 function switchView(view) {
     currentView = view;
@@ -39,9 +28,7 @@ async function loadGameLogs(page) {
     if (!data.success) { list.innerHTML = `<div class="log-loading">${t("operationFailed")}</div>`; return; }
     if (!data.games || data.games.length === 0) { list.innerHTML = `<div class="log-loading">${t("noGameLogs")}</div>`; renderPagination(1,1); return; }
     list.innerHTML = "";
-    data.games.forEach(game => {
-        renderGameCard(game, list);
-    });
+    data.games.forEach(game => renderGameCard(game, list));
     renderPagination(data.page, data.total_pages);
 }
 

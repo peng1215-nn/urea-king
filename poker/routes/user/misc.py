@@ -8,14 +8,10 @@ from poker.services.organizer.announcement import get_announcements_service
 from poker.services.organizer.change_password import get_current_account_service
 from poker.services.organizer.change_password import update_nickname_service
 from poker.services.organizer.change_password import update_password_service
-from fastapi.responses import Response
-
 from poker.services.organizer.game_log import get_game_logs_service
 from poker.services.organizer.game_log import get_stats_service
 from poker.services.organizer.game_log import get_member_stats_service
 from poker.services.organizer.game_log import get_member_trend_service
-from poker.services.organizer.game_log import get_single_game_for_export
-from poker.services.common.game_pdf import generate_game_pdf_bytes
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
 
@@ -156,25 +152,3 @@ def get_member_trend(request: Request, user_id: int):
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
     return get_member_trend_service(group_id=int(group_id), user_id=user_id)
-
-
-@router.get("/user/game-log/export-pdf")
-def user_export_game_pdf(request: Request, game_id: int, lang: str = "zh"):
-    user_id = request.session.get("user_id")
-    group_id = request.session.get("current_group_id")
-    if not user_id or not group_id:
-        return {"success": False, "message": "permissionDenied"}
-
-    game = get_single_game_for_export(game_id=game_id, group_id=int(group_id))
-    if not game:
-        return {"success": False, "message": "gameNotFound"}
-
-    group_name = request.query_params.get("group_name", "")
-    pdf_bytes = generate_game_pdf_bytes(game, group_name=group_name, lang=lang)
-
-    filename = f"game_{game_id}.pdf"
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-    )
