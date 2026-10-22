@@ -675,13 +675,13 @@ const SupernovaEngine = (() => {
     clearMeshes(state);
 
     // Timeline (ms):
-    //   0 – 900   : glow builds from centre outward (WebGL layers)
-    //   900 – 1100: full-screen white DOM veil slams in (opacity 0→1)
-    //   1100 – 1400: veil holds at peak
-    //   1400 – 2200: veil fades out, revealing shockwaves + jets below
-    //   1400+      : shockwave rings expand, jets fly (offset by REVEAL_MS)
+    //   0 – 2200  : glow builds from centre outward, slowly intensifying
+    //   2200 – 2700: full-screen white DOM veil slams in (opacity 0→1)
+    //   2700 – 3800: veil holds pure white — total whiteout
+    //   3800 – 5200: veil fades out, revealing shockwaves + jets below
+    //   3800+      : shockwave rings expand, jets fly (offset by REVEAL_MS)
 
-    const REVEAL_MS = 1400; // shockwaves & jets start when veil begins fading
+    const REVEAL_MS = 3800; // shockwaves & jets start when veil begins fading
 
     // ── Radial glow layers (WebGL, centred on planet) ──
     const flashLayers = [
@@ -750,20 +750,21 @@ const SupernovaEngine = (() => {
     const p = state._p3; if (!p) return;
     const { REVEAL_MS } = p;
 
-    // ── 1. Radial glow: builds 0→900ms, then fades as veil takes over ──
-    const glowRatio = ms < 900
-      ? (ms / 900)                                          // build-up
-      : ms < 1200 ? 1.0                                    // hold while veil rises
-      : Math.max(0, 1 - (ms - 1200) / 1000);              // fade behind veil
+    // ── 1. Radial glow: slow build 0→2200ms with pulsing intensification ──
+    // Uses an eased curve so it feels like energy is charging up
+    const glowRatio = ms < 2200
+      ? Math.pow(ms / 2200, 0.6)                           // ease-in build (slow start, accelerates)
+      : ms < 2900 ? 1.0                                    // hold bright while veil rises
+      : Math.max(0, 1 - (ms - 2900) / 1200);              // fade behind veil
     for (const fm of p.flashMeshes) {
       fm.material.opacity = glowRatio * fm.userData.peakOp;
     }
 
     // ── 2. Full-screen DOM veil ──
     let veilOp = 0;
-    if (ms >= 900 && ms < 1100)       veilOp = (ms - 900) / 200;     // slam in
-    else if (ms >= 1100 && ms < REVEAL_MS) veilOp = 1.0;             // hold white
-    else if (ms >= REVEAL_MS && ms < 2200) veilOp = 1 - (ms - REVEAL_MS) / 800; // fade out
+    if (ms >= 2200 && ms < 2700)       veilOp = (ms - 2200) / 500;          // slam in over 500ms
+    else if (ms >= 2700 && ms < REVEAL_MS) veilOp = 1.0;                    // hold white 1.1s
+    else if (ms >= REVEAL_MS && ms < 5200) veilOp = 1 - (ms - REVEAL_MS) / 1400; // slow fade
     flashVeil.style.opacity = veilOp;
 
     // ── 3. Shockwave rings: start expanding after veil begins fading ──
