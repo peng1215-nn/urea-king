@@ -1251,11 +1251,13 @@ const CoinEngine = (function() {
 
     // Coin starts below center, arcs up then falls
     // total ~1800ms for heads/tails, ~2400ms for edge
-    const totalMs = result === 'edge' ? 2400 : 1800;
-    const peakMs  = totalMs * 0.38; // when coin is highest
+    // flight = toss arc, land = coin settles at center, hold = pause before jump
+    const flightMs = result === 'edge' ? 2000 : 1600;
+    const holdMs   = result === 'edge' ? 800  : 500;
+    const totalMs  = flightMs + holdMs;
 
-    // Spin counts: many spins during flight
-    const spinRev = result === 'edge' ? 7 : 9; // full X-rotations
+    // Spin counts during flight
+    const spinRev = result === 'edge' ? 7 : 9;
 
     // Final face angle: heads=0, tails=π, edge=π/2
     const finalAngle = result === 'heads' ? 0
@@ -1263,58 +1265,82 @@ const CoinEngine = (function() {
                      : Math.PI / 2;
 
     let screenEffectDone = false;
+    let holdStarted = false;
 
     function frame() {
       if (!running) return;
       animId = requestAnimationFrame(frame);
 
       const ms = performance.now() - startTime;
-      const p  = Math.min(ms / totalMs, 1);
 
-      // Vertical arc: parabolic, y goes up then down
-      const yArc = -4 * (p - 0.5) * (p - 0.5) + 1; // 0→1→0 parabola
-      const yPos = -2.5 + yArc * 4.5;               // starts low, peaks high
+      if (ms >= totalMs) {
+        finish(dest, result);
+        return;
+      }
 
-      // X drift: slight rightward
-      const xPos = (p - 0.5) * 0.6;
+      // ── Flight phase (0 → flightMs) ──
+      const fp = Math.min(ms / flightMs, 1); // 0→1 during flight
+
+      // Arc: starts below center, peaks above, lands at center (y=0)
+      // y = startY*(1-fp) + peakY*sin(fp*π) adjusted to land at 0
+      const startY = -3.5;
+      const peakY  =  2.8;
+      // parabola landing exactly at 0: y(fp) = startY + (peakY-startY)*sin(fp*π) + startY*(fp-1)*...
+      // simpler: lerp from startY→0 with parabolic lift
+      const lift  = Math.sin(fp * Math.PI) * peakY;
+      const base  = startY * (1 - fp); // startY→0 as fp→1
+      const yPos  = base + lift;
+
+      // X: slight arc, returns to center at landing
+      const xPos = Math.sin(fp * Math.PI) * 0.4;
 
       coinMesh.position.set(xPos, yPos, 0);
 
-      // Scale: bigger at peak (perspective feel)
-      const sc = 0.55 + yArc * 0.55;
+      // Scale: coin appears small when far, big at center
+      const sc = 0.4 + fp * 0.7;
       coinMesh.scale.setScalar(sc);
 
-      // Spin: fast during flight, decelerates to final angle near land
+      // Spin: fast during flight, decelerates near landing
       let spinAngle;
-      if (p < 0.82) {
-        // free spin
-        spinAngle = p * spinRev * Math.PI * 2;
+      if (fp < 0.80) {
+        spinAngle = fp * spinRev * Math.PI * 2;
       } else {
-        // decelerate and lock to final
-        const landP = (p - 0.82) / 0.18;
-        const eased = 1 - Math.pow(1 - landP, 3);
+        const landP  = (fp - 0.80) / 0.20;
+        const eased  = 1 - Math.pow(1 - landP, 3);
         const spinEnd = spinRev * Math.PI * 2;
-        spinAngle = spinEnd + (finalAngle - (spinEnd % (Math.PI * 2))) * eased;
+        // normalize current spin end to find shortest path to finalAngle
+        const curMod = spinEnd % (Math.PI * 2);
+        let diff = finalAngle - curMod;
+        if (diff > Math.PI)  diff -= Math.PI * 2;
+        if (diff < -Math.PI) diff += Math.PI * 2;
+        spinAngle = spinEnd + diff * eased;
       }
       coinMesh.rotation.x = spinAngle;
 
-      // Opacity: fade in quickly, fade out near end
-      const opacity = p < 0.06 ? p / 0.06
-                    : p > 0.88 ? (1 - p) / 0.12
-                    : 1;
-      coinMesh.traverse(o => { if (o.isMesh) o.material.forEach?.(m => { m.transparent = true; m.opacity = opacity; }); });
+      // Opacity: fade in fast, stay solid, fade out only during hold phase
+      let opacity;
+      if (fp < 0.06) {
+        opacity = fp / 0.06;
+      } else if (ms > flightMs) {
+        // hold phase: fade out
+        const hp = (ms - flightMs) / holdMs;
+        opacity = 1 - hp;
+      } else {
+        opacity = 1;
+      }
+      coinMesh.material && (coinMesh.material.opacity = opacity);
+      coinMesh.traverse(o => {
+        if (o.isMesh && Array.isArray(o.material)) {
+          o.material.forEach(m => { m.transparent = true; m.opacity = opacity; });
+        }
+      });
 
       renderer2.render(scene2, camera2);
 
-      // Screen effect at landing (~82%)
-      if (p >= 0.82 && !screenEffectDone) {
+      // Screen effect fires once at landing (fp ≈ 1)
+      if (fp >= 0.92 && !screenEffectDone) {
         screenEffectDone = true;
-        applyScreenEffect(result, xPos, yPos);
-      }
-
-      // Done
-      if (p >= 1) {
-        finish(dest, result);
+        applyScreenEffect(result, 0, 0); // always screen center
       }
     }
 
@@ -1364,9 +1390,7 @@ const CoinEngine = (function() {
     const wasUserPaused = document.getElementById('pause-btn').classList.contains('paused');
     if (!wasUserPaused) FXRegistry.forEach(fx => fx.resume());
 
-    // Extra pause for edge result (let them see it)
-    const delay = result === 'edge' ? 550 : 0;
-    setTimeout(() => { window.location.href = dest; }, delay);
+    setTimeout(() => { window.location.href = dest; }, 0);
   }
 
   return { playCoin };
