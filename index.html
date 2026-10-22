@@ -659,12 +659,15 @@ function checkSweep() {
         lbl.style.letterSpacing = '3px';
       }, 60);
 
-      // small charge burst every pass
-      spawnCharge();
+      // passIndex: 1 = first pass after planet shown (sweepPassCount===3)
+      const passIndex = sweepPassCount - 2; // 1, 2, 3, 4, ...
 
-      // big eruption every ERUPTION_EVERY passes (counting from first reveal pass)
-      if ((sweepPassCount - 1) % ERUPTION_EVERY === 0) {
+      if (passIndex % ERUPTION_EVERY === 0) {
+        // big eruption on pass 3, 6, 9...
         setTimeout(triggerStorm, 80);
+      } else {
+        // small charge sparks on all other passes
+        spawnCharge();
       }
     }
   }
