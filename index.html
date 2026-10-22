@@ -1214,7 +1214,8 @@ const CoinEngine = (function() {
       new THREE.MeshStandardMaterial({ color: 0xd4a820, metalness: 1.0, roughness: 0.15, emissive: 0x112233, emissiveIntensity: 0.2 }),
     ];
     coinMesh = new THREE.Mesh(geo, mats);
-    coinMesh.rotation.z = Math.PI / 2; // spin around X axis (flip axis)
+    // Cylinder axis is Y by default → faces point along Y → tilt so faces point toward camera (Z)
+    coinMesh.rotation.x = Math.PI / 2;
     scene2.add(coinMesh);
 
     // Lights
@@ -1259,7 +1260,8 @@ const CoinEngine = (function() {
     // Spin counts during flight
     const spinRev = result === 'edge' ? 7 : 9;
 
-    // Final face angle: heads=0, tails=π, edge=π/2
+    // Final face angle (rotation around Z after X-tilt):
+    // heads = face 1 toward camera = 0, tails = face 2 = π, edge = coin upright = π/2
     const finalAngle = result === 'heads' ? 0
                      : result === 'tails'  ? Math.PI
                      : Math.PI / 2;
@@ -1315,7 +1317,8 @@ const CoinEngine = (function() {
         if (diff < -Math.PI) diff += Math.PI * 2;
         spinAngle = spinEnd + diff * eased;
       }
-      coinMesh.rotation.x = spinAngle;
+      // spin around Z axis (coin flipping face over face)
+      coinMesh.rotation.z = spinAngle;
 
       // Opacity: fade in fast, stay solid, fade out only during hold phase
       let opacity;
