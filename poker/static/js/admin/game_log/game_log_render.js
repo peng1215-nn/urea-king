@@ -1,3 +1,9 @@
+const _gameCache = {};
+
+function exportGameCard(gameId) {
+    exportGameImage(_gameCache[gameId]);
+}
+
 // 完全复用局头日志渲染逻辑，差异仅在：
 // 1. 有删除按钮（局头没有）
 // 2. 数据来自 admin API（带 group_id 参数）
@@ -56,6 +62,7 @@ async function loadGameLogs(page) {
 }
 
 function renderGameCard(game, container) {
+    _gameCache[game.id] = game;
     const card = document.createElement("div");
     card.className = "log-card";
     const balanced = game.is_balanced
@@ -74,6 +81,7 @@ function renderGameCard(game, container) {
             <div class="log-card-right">
                 <span class="log-chips">${t("totalBuyIn")}：${game.total_buy_in}</span>
                 ${balanced}
+                <button class="btn-export-log" onclick="event.stopPropagation(); exportGameCard(${game.id})">${t("export")}</button>
                 <button class="btn-delete-log" onclick="event.stopPropagation(); openDeleteGameModal(${game.id})">${t("delete")}</button>
                 <i class="fa-solid fa-chevron-down log-chevron"></i>
             </div>

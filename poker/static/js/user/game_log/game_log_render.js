@@ -1,3 +1,9 @@
+const _gameCache = {};
+
+function exportGameCard(gameId) {
+    exportGameImage(_gameCache[gameId]);
+}
+
 let currentPage = 1;
 let currentView = "logs";
 let currentSearch = "";
@@ -33,6 +39,7 @@ async function loadGameLogs(page) {
 }
 
 function renderGameCard(game, container) {
+    _gameCache[game.id] = game;
     const card = document.createElement("div");
     card.className = "log-card";
     const balanced = game.is_balanced ? `<span class="badge-balanced">${t("balanced")}</span>` : `<span class="badge-unbalanced">${t("unbalanced")}</span>`;
@@ -49,6 +56,7 @@ function renderGameCard(game, container) {
             <div class="log-card-right">
                 <span class="log-chips">${t("totalBuyIn")}：${game.total_buy_in}</span>
                 ${balanced}
+                <button class="btn-export-log" onclick="event.stopPropagation(); exportGameCard(${game.id})">${t("export")}</button>
                 <i class="fa-solid fa-chevron-down log-chevron"></i>
             </div>
         </div>
