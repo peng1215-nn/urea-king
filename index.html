@@ -1205,14 +1205,40 @@ const CoinEngine = (function() {
     camera2 = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 100);
     camera2.position.set(0, 0, 6);
 
+    // Helper: draw a coin face onto a canvas and return a THREE.CanvasTexture
+    function makeFaceTex(symbol, bgColor, fgColor) {
+      const sz = 256;
+      const fc = document.createElement('canvas');
+      fc.width = fc.height = sz;
+      const fx = fc.getContext('2d');
+      // gold background
+      const grad = fx.createRadialGradient(sz/2, sz/2, sz*0.1, sz/2, sz/2, sz*0.5);
+      grad.addColorStop(0, bgColor[0]);
+      grad.addColorStop(1, bgColor[1]);
+      fx.fillStyle = grad;
+      fx.beginPath(); fx.arc(sz/2, sz/2, sz/2, 0, Math.PI*2); fx.fill();
+      // symbol
+      fx.fillStyle = fgColor;
+      fx.font = `bold ${sz * 0.52}px serif`;
+      fx.textAlign = 'center';
+      fx.textBaseline = 'middle';
+      fx.fillText(symbol, sz/2, sz/2 + sz*0.04);
+      return new THREE.CanvasTexture(fc);
+    }
+
     // Coin geometry: thin cylinder, faces along Y axis by default
     const geo  = new THREE.CylinderGeometry(1, 1, 0.1, 64);
-    // MeshPhongMaterial: responds to lighting, shows color clearly
-    // material index: 0=rim, 1=top face(heads/花), 2=bottom face(tails/字)
+    // material index: 0=rim, 1=top cap (heads/花), 2=bottom cap (tails/字)
     const mats = [
-      new THREE.MeshPhongMaterial({ color: 0xb8902a, shininess: 80 }),           // rim: dark gold
-      new THREE.MeshPhongMaterial({ color: 0xf5c518, shininess: 120, emissive: 0x332200 }), // heads: bright gold
-      new THREE.MeshPhongMaterial({ color: 0xe8b820, shininess: 100, emissive: 0x221100 }), // tails: slightly different
+      new THREE.MeshPhongMaterial({ color: 0xb8902a, shininess: 80 }), // rim
+      new THREE.MeshPhongMaterial({                                      // heads: ♠ on gold
+        map: makeFaceTex('♠', ['#ffe066','#c8860a'], '#1a0a00'),
+        shininess: 100,
+      }),
+      new THREE.MeshPhongMaterial({                                      // tails: 字 on gold
+        map: makeFaceTex('字', ['#f5d020','#b87800'], '#2a1200'),
+        shininess: 100,
+      }),
     ];
     mats.forEach(m => { m.transparent = true; m.opacity = 1; });
     coinMesh = new THREE.Mesh(geo, mats);
