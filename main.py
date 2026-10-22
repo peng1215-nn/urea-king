@@ -11,6 +11,7 @@ from poker.routes.admin.admin import router as admin_router
 from poker.routes.admin import system_logs
 from poker.routes.admin import invite_management
 from poker.routes.admin import announcement
+from poker.routes.admin.game_log import router as admin_game_log_router
 from poker.routes.common.avatar import router as avatar_router
 from poker.routes.common.common import router as common_router
 from poker.routes.auth.login import router as login_router
@@ -60,6 +61,7 @@ app.include_router(invite_management.router)
 app.include_router(system_logs.router)
 app.include_router(announcement.router)
 app.include_router(admin_change_password_router)
+app.include_router(admin_game_log_router)
 app.include_router(organizer_change_password_router)
 app.include_router(organizer_announcement_router)
 app.include_router(organizer_invite_router)

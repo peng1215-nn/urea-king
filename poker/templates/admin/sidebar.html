@@ -58,6 +58,16 @@
         </div>
 
         <div
+                class="menu-item {% if current_page == 'game_logs' %}active{% endif %}"
+                onclick="window.location.href='/admin-game-logs'"
+        >
+            <i class="fa-solid fa-book"></i>
+            <span data-i18n="gameLogs">
+                牌局日志
+            </span>
+        </div>
+
+        <div
                 class="menu-item {% if current_page == 'system_logs' %}active{% endif %}"
                 onclick="window.location.href='/system-logs'"
         >

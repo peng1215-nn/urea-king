@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="titleGameLogs">UREAKING-POKER</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/organizer/game_log.css?v={{ static_version }}">
+    <style>
+        .group-select-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .group-select-bar label {
+            color: rgba(200, 210, 255, 0.7);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        .group-select-bar select {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(200,210,255,0.9);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            min-width: 200px;
+        }
+        .group-select-bar select:focus {
+            outline: none;
+            border-color: rgba(92,141,255,0.5);
+        }
+        #admin-log-content { display: none; }
+    </style>
+</head>
+<body>
+
+{% include "admin/sidebar.html" %}
+
+<div class="main">
+
+    <div class="top-bar">
+        <div class="title-area">
+            <h1 data-i18n="gameLogs">牌局日志</h1>
+            <p id="current-group-text"></p>
+        </div>
+        <div class="topbar-actions">
+            <img id="avatar-preview" class="avatar" src="/static/images/default_avatar.jpg" alt="头像">
+            <div class="role-tag">
+                <span class="status-dot"></span>
+                <span data-i18n="admin">管理员</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 选择组 -->
+    <div class="group-select-bar">
+        <label data-i18n="selectGroup">选择组：</label>
+        <select id="admin-group-select" onchange="onGroupChange()">
+            <option value="" data-i18n="pleaseSelectGroup">请选择组别</option>
+        </select>
+    </div>
+
+    <!-- 日志内容区（选组后显示） -->
+    <div id="admin-log-content">
+
+        <!-- 切换按钮 -->
+        <div class="log-view-tabs">
+            <button id="btn-logs" class="log-view-tab active" onclick="switchView('logs')" data-i18n="gameLogList">牌局记录</button>
+            <button id="btn-stats" class="log-view-tab" onclick="switchView('stats')" data-i18n="statsPanel">统计面板</button>
+            <button id="btn-member-stats" class="log-view-tab" onclick="switchView('member-stats')" data-i18n="memberStats">成员统计</button>
+        </div>
+
+        <!-- 牌局记录 -->
+        <div id="view-logs">
+            <div class="log-search-bar">
+                <input id="log-search-input" class="log-search-input" type="text" data-i18n-placeholder="searchGameLogs" placeholder="搜索牌局名称或备注…" oninput="onSearch()">
+                <i class="fa-solid fa-magnifying-glass log-search-icon"></i>
+            </div>
+            <div id="game-log-list" class="game-log-list">
+                <div class="log-loading" data-i18n="loading">加载中...</div>
+            </div>
+            <div id="pagination" class="pagination"></div>
+        </div>
+
+        <!-- 统计面板 -->
+        <div id="view-stats" style="display:none;">
+            <div id="stats-panel" class="stats-panel">
+                <div class="log-loading" data-i18n="loading">加载中...</div>
+            </div>
+        </div>
+
+        <!-- 成员统计 -->
+        <div id="view-member-stats" style="display:none;">
+            <div id="member-stats-panel" class="member-stats-panel">
+                <div class="log-loading" data-i18n="loading">加载中...</div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- 成员走势弹窗 -->
+<div id="member-trend-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content modal-wide trend-modal-content">
+        <h3 id="trend-modal-title">走势图</h3>
+        <div class="trend-chart-wrap">
+            <canvas id="trend-chart"></canvas>
+        </div>
+        <div class="trend-summary" id="trend-summary"></div>
+        <div class="custom-modal-actions">
+            <button class="modal-cancel-button" onclick="closeMemberTrendModal()" data-i18n="close">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- 删除确认弹窗 -->
+<div id="delete-game-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content">
+        <h3 data-i18n="deleteGameLog">删除牌局记录</h3>
+        <p data-i18n="deleteGameLogConfirm">删除后无法恢复，确认删除该牌局记录？</p>
+        <div class="custom-modal-actions">
+            <button class="modal-confirm-button warning" onclick="confirmDeleteGame()" data-i18n="confirmDelete">确认删除</button>
+            <button class="modal-cancel-button" onclick="closeDeleteGameModal()" data-i18n="cancel">取消</button>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
+<script src="/static/js/common/logout.js?v={{ static_version }}"></script>
+<script src="/static/js/common/sidebar.js?v={{ static_version }}"></script>
+<script src="/static/js/common/overflow_tooltip.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/game_log/game_log_api.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/game_log/game_log_render.js?v={{ static_version }}"></script>
+<script src="/static/js/admin/game_log/game_log_init.js?v={{ static_version }}"></script>
+
+</body>
+</html>
