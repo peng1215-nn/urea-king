@@ -2,8 +2,8 @@ from datetime import datetime
 from utils.time import now_columbus_naive
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -33,7 +33,10 @@ load_dotenv()
 app = FastAPI()
 
 @app.get("/")
-async def index():
+async def index(request: Request):
+    host = request.headers.get("host", "")
+    if host.startswith("poker."):
+        return RedirectResponse(url="/login")
     return FileResponse("index.html")
 
 app.include_router(register_router)
