@@ -1114,6 +1114,7 @@ const CoinEngine = (() => {
     Object.assign(overlay.style, {
       position:'fixed', inset:'0', zIndex:'500',
       display:'none', pointerEvents:'none',
+      background:'radial-gradient(ellipse at 50% 60%, #0d1a2e 0%, #050810 60%, #000 100%)',
     });
     document.body.appendChild(overlay);
 
@@ -1178,25 +1179,48 @@ const CoinEngine = (() => {
     const R = 1.0, T = 0.09, SEG = 80;
 
     // Face textures via Canvas 2D
-    function makeTex(symbol, bgFrom, bgTo) {
-      const sz = 512, c = document.createElement('canvas');
-      c.width = c.height = sz;
-      const g = c.getContext('2d');
-      const gr = g.createRadialGradient(sz/2,sz/2,sz*.04, sz/2,sz/2,sz*.52);
-      gr.addColorStop(0, bgFrom); gr.addColorStop(0.6,'#e8a800'); gr.addColorStop(1, bgTo);
-      g.fillStyle = gr; g.beginPath(); g.arc(sz/2,sz/2,sz/2,0,Math.PI*2); g.fill();
-      g.strokeStyle='rgba(255,220,60,.4)'; g.lineWidth=sz*.02;
-      g.beginPath(); g.arc(sz/2,sz/2,sz*.44,0,Math.PI*2); g.stroke();
-      g.fillStyle='rgba(20,8,0,.85)'; g.font=`bold ${sz*.46}px serif`;
-      g.textAlign='center'; g.textBaseline='middle';
-      g.shadowColor='rgba(0,0,0,.5)'; g.shadowBlur=sz*.025;
-      g.fillText(symbol, sz/2, sz*.49);
-      const t = new THREE.CanvasTexture(c);
+    // Three.js r134 CylinderGeometry top-cap UV: u,v center is (0.5,0.5),
+    // but the default winding can flip/rotate the texture.
+    // We draw into an intermediate canvas then blit with rotation correction.
+    function makeTex(symbol, bgFrom, bgMid, bgTo, rotDeg) {
+      const sz = 512;
+      // draw into offscreen first
+      const off = document.createElement('canvas');
+      off.width = off.height = sz;
+      const g = off.getContext('2d');
+
+      // circular gold background
+      const gr = g.createRadialGradient(sz/2,sz/2,sz*.03, sz/2,sz/2,sz*.52);
+      gr.addColorStop(0, bgFrom);
+      gr.addColorStop(0.55, bgMid);
+      gr.addColorStop(1,   bgTo);
+      g.fillStyle = gr;
+      g.beginPath(); g.arc(sz/2,sz/2,sz/2,0,Math.PI*2); g.fill();
+
+      // subtle inner ring
+      g.strokeStyle='rgba(255,230,80,.45)'; g.lineWidth=sz*.018;
+      g.beginPath(); g.arc(sz/2,sz/2,sz*.43,0,Math.PI*2); g.stroke();
+
+      // symbol — dark with slight glow
+      g.save();
+      g.translate(sz/2, sz/2);
+      g.rotate((rotDeg || 0) * Math.PI / 180);
+      g.fillStyle='rgba(15,6,0,.9)';
+      g.font=`bold ${sz*.44}px serif`;
+      g.textAlign='center';
+      g.textBaseline='middle';
+      g.shadowColor='rgba(0,0,0,.6)';
+      g.shadowBlur=sz*.03;
+      g.fillText(symbol, 0, sz*.01);
+      g.restore();
+
+      const t = new THREE.CanvasTexture(off);
       return t;
     }
 
-    const headsTex = makeTex('♠', '#ffe870', '#7a4800');
-    const tailsTex = makeTex('♣', '#fff0a0', '#6a4000');
+    // r134 CylinderGeometry cap UV origin: top face needs 180° flip
+    const headsTex = makeTex('♠', '#ffe870', '#e8a800', '#7a4800', 180);
+    const tailsTex = makeTex('♣', '#fff0a0', '#e8b200', '#6a4000', 180);
 
     const rimMat = new THREE.MeshPhongMaterial({
       color:0xb8820e, specular:0xffe060, shininess:100,
@@ -1253,18 +1277,8 @@ const CoinEngine = (() => {
 
     coin.visible = false;  // hidden until tossCoin()
 
-    // Dim backdrop behind coin
-    coin._backdrop = (() => {
-      const geo = new THREE.PlaneGeometry(30, 30);
-      const mat = new THREE.MeshBasicMaterial({
-        color: 0x000000, transparent: true, opacity: 0.72, depthWrite: false,
-      });
-      const m = new THREE.Mesh(geo, mat);
-      m.position.z = -0.5;
-      return m;
-    })();
-    scene.add(coin._backdrop);
-    coin._backdrop.visible = false;
+    // backdrop handled by CSS gradient on overlay div
+    coin._backdrop = null;
 
     resize();
     threeOk = true;
@@ -1299,7 +1313,6 @@ const CoinEngine = (() => {
     camera.aspect = W / H;
     camera.updateProjectionMatrix();
     coin.visible = true;
-    coin._backdrop.visible = true;
 
     // ── Flip axis ──
     // flipGroup.rotation.x = PI/2  → coin faces camera (cylinder axis Y → world Z)
