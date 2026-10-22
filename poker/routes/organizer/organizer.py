@@ -8,6 +8,7 @@ from poker.services.admin.audit_log import write_audit_log
 from poker.services.common.common import add_no_cache_headers
 from poker.services.organizer.member_management import get_organizer_members_service
 from poker.services.organizer.member_management import remove_member_service
+from poker.services.organizer.member_management import save_member_alias_service
 from poker.template_config import templates
 
 
@@ -122,6 +123,26 @@ def remove_member(
         )
 
     return result
+
+
+@router.post("/organizer/save-member-alias")
+def save_member_alias(
+    request: Request,
+    target_user_id: int = Form(...),
+    alias: str = Form(""),
+):
+    if not require_organizer(request):
+        return {"success": False, "message": "无权限访问。"}
+
+    group_id = get_current_group_id(request)
+    if not group_id:
+        return {"success": False, "message": "未选择组别，请重新登录。"}
+
+    return save_member_alias_service(
+        group_id=int(group_id),
+        target_user_id=target_user_id,
+        alias=alias,
+    )
 
 
 @router.get("/organizer/logout-to-join")

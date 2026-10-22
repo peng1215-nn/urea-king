@@ -142,6 +142,43 @@
         <div class="action-panel">
 
             <div class="panel-title">
+                <i class="fa-solid fa-tag"></i>
+                <h2 data-i18n="memberAlias">设置备注</h2>
+            </div>
+
+            <p class="panel-description" data-i18n="memberAliasDesc">
+                为所选成员设置备注名，仅在本组内有效。备注将显示在昵称后，所有组内成员可见，仅局头可编辑。
+            </p>
+
+            <div class="alias-input-row">
+                <input
+                    id="alias-input"
+                    class="alias-input"
+                    type="text"
+                    maxlength="50"
+                    data-i18n-placeholder="aliasPlaceholder"
+                    placeholder="输入备注（留空则清除）"
+                />
+                <button
+                    id="alias-save-button"
+                    class="panel-button"
+                    data-i18n="saveAlias"
+                    onclick="saveAlias()"
+                >
+                    保存备注
+                </button>
+            </div>
+
+            <div
+                id="alias-message"
+                class="operation-message"
+            ></div>
+
+        </div>
+
+        <div class="action-panel">
+
+            <div class="panel-title">
                 <i class="fa-solid fa-user-minus"></i>
                 <h2 data-i18n="removeMember">移除成员</h2>
             </div>
@@ -219,6 +256,7 @@
 <script src="/static/js/organizer/member_management/member_search.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/member_management/member_detail.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/member_management/member_remove.js?v={{ static_version }}"></script>
+<script src="/static/js/organizer/member_management/member_alias.js?v={{ static_version }}"></script>
 
 <div
     id="join-group-modal"

@@ -115,6 +115,13 @@ const organizerTranslations = {
         searchResultPrefix: "共找到",
         searchResultSuffix: "条匹配结果。",
 
+        memberAlias: "设置备注",
+        memberAliasDesc: "为所选成员设置备注名，仅在本组内有效。备注将显示在昵称后，所有组内成员可见，仅局头可编辑。",
+        aliasPlaceholder: "输入备注（留空则清除）",
+        saveAlias: "保存备注",
+        aliasSavedSuccess: "备注已保存。",
+        aliasClearedSuccess: "备注已清除。",
+
         removeMember: "移除成员",
         removeMemberDesc: "将所选成员移出本组。此操作仅删除该成员在本组的关系，不影响其账号及其他组的身份。局头不可被移除。",
         confirmRemoveMember: "确认移除成员",
@@ -392,6 +399,13 @@ const organizerTranslations = {
         searchNoResult: "No matching members found.",
         searchResultPrefix: "Found",
         searchResultSuffix: "result(s).",
+
+        memberAlias: "Set Alias",
+        memberAliasDesc: "Set an alias for the selected member, valid within this group only. The alias will appear after the nickname and is visible to all group members. Only the organizer can edit it.",
+        aliasPlaceholder: "Enter alias (leave blank to clear)",
+        saveAlias: "Save Alias",
+        aliasSavedSuccess: "Alias saved.",
+        aliasClearedSuccess: "Alias cleared.",
 
         removeMember: "Remove Member",
         removeMemberDesc: "Remove the selected member from this group. This only deletes the group relationship and does not affect the account or memberships in other groups. The organizer cannot be removed.",

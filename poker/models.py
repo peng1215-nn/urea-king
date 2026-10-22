@@ -124,6 +124,17 @@ class PokerGamePlayer(Base):
     joined_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 
+class GroupMemberAlias(Base):
+
+    __tablename__ = "poker_group_member_aliases"
+
+    id = Column(Integer, primary_key=True, index=True)
+    group_id = Column(Integer, ForeignKey("poker_groups.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False, index=True)
+    alias = Column(String(50), nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class ChipRequest(Base):
 
     __tablename__ = "poker_chip_requests"

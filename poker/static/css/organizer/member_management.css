@@ -77,3 +77,31 @@ body {
         background-repeat: no-repeat !important;
     }
 }
+
+.alias-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.alias-input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+    color: #e8eaf6;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.alias-input:focus {
+    border-color: rgba(130, 170, 255, 0.5);
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.alias-input::placeholder {
+    color: rgba(200, 210, 255, 0.35);
+}

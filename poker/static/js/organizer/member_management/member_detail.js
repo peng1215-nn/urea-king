@@ -20,6 +20,7 @@ function selectMember(member, rowElement) {
     );
 
     updateRemoveMemberPanel(member);
+    updateAliasPanel(member);
 }
 
 
@@ -38,6 +39,7 @@ function resetSelectedMemberState() {
     setDetailText("detail-status",     "--");
 
     resetRemoveMemberPanel();
+    resetAliasPanel();
 }
 
 

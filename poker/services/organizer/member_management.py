@@ -1,7 +1,17 @@
+from datetime import datetime
 from database import SessionLocal
 from poker.models import Group
+from poker.models import GroupMemberAlias
 from poker.models import User
 from poker.models import UserGroupRole
+
+
+def _get_aliases(db, group_id: int) -> dict:
+    """返回 {user_id: alias} 字典"""
+    rows = db.query(GroupMemberAlias).filter(
+        GroupMemberAlias.group_id == group_id
+    ).all()
+    return {r.user_id: r.alias for r in rows}
 
 
 def get_organizer_members_service(group_id: int):
@@ -29,6 +39,7 @@ def get_organizer_members_service(group_id: int):
             .all()
         )
 
+        aliases = _get_aliases(db, group_id)
         members = []
 
         for user_group_role, user in rows:
@@ -36,6 +47,7 @@ def get_organizer_members_service(group_id: int):
                 "id": user.id,
                 "username": user.username,
                 "nickname": user.nickname,
+                "alias": aliases.get(user.id, ""),
                 "role": user_group_role.role,
                 "group_id": group.id,
                 "group_code": group.group_code,
@@ -62,6 +74,39 @@ def get_organizer_members_service(group_id: int):
             "message": str(e),
         }
 
+    finally:
+        db.close()
+
+
+def save_member_alias_service(group_id: int, target_user_id: int, alias: str):
+    db = SessionLocal()
+    try:
+        alias = alias.strip()
+        existing = db.query(GroupMemberAlias).filter(
+            GroupMemberAlias.group_id == group_id,
+            GroupMemberAlias.user_id == target_user_id,
+        ).first()
+        if alias == "":
+            # 清空备注 → 删除记录
+            if existing:
+                db.delete(existing)
+                db.commit()
+            return {"success": True}
+        if existing:
+            existing.alias = alias
+            existing.updated_at = datetime.utcnow()
+        else:
+            db.add(GroupMemberAlias(
+                group_id=group_id,
+                user_id=target_user_id,
+                alias=alias,
+                updated_at=datetime.utcnow(),
+            ))
+        db.commit()
+        return {"success": True}
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "message": str(e)}
     finally:
         db.close()
 

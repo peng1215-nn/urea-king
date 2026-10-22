@@ -1,9 +1,21 @@
 from database import SessionLocal
+from poker.models import GroupMemberAlias
 from poker.models import PokerGame
 from poker.models import PokerGamePlayer
 from poker.models import ChipRequest
 from poker.models import User
 from poker.models import UserGroupRole
+
+
+def _get_aliases(db, group_id: int) -> dict:
+    rows = db.query(GroupMemberAlias).filter(
+        GroupMemberAlias.group_id == group_id
+    ).all()
+    return {r.user_id: r.alias for r in rows}
+
+
+def _display(nickname: str, alias: str) -> str:
+    return f"{nickname}（{alias}）" if alias else nickname
 
 
 PAGE_SIZE = 5
@@ -12,6 +24,7 @@ PAGE_SIZE = 5
 def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = None, q: str = ""):
     db = SessionLocal()
     try:
+        aliases = _get_aliases(db, group_id)
         base_filter = [
             PokerGame.group_id == group_id,
             PokerGame.status == "finished",
@@ -40,9 +53,10 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
             for p, u in players:
                 net = p.net if p.net is not None else 0
                 is_org = p.user_id == game.organizer_id
+                raw_nick = p.nickname or u.username
                 pd = {
                     "user_id": p.user_id,
-                    "nickname": p.nickname or u.username,
+                    "nickname": _display(raw_nick, aliases.get(p.user_id, "")),
                     "is_organizer": is_org,
                     "total_buy_in": p.total_buy_in,
                     "cash_out": p.cash_out or 0,
@@ -118,6 +132,7 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
 def get_stats_service(group_id: int):
     db = SessionLocal()
     try:
+        aliases = _get_aliases(db, group_id)
         # 获取组内局头 user_id
         organizer_roles = db.query(UserGroupRole).filter(
             UserGroupRole.group_id == group_id,
@@ -149,8 +164,9 @@ def get_stats_service(group_id: int):
             uid = p.user_id
             net = p.net if p.net is not None else 0
             if uid not in user_stats:
+                raw_nick = p.nickname or u.username
                 user_stats[uid] = {
-                    "nickname": p.nickname or u.username,
+                    "nickname": _display(raw_nick, aliases.get(uid, "")),
                     "win_count": 0,
                     "lose_count": 0,
                     "total_net": 0,
@@ -208,7 +224,7 @@ def get_stats_service(group_id: int):
             net = p.net if p.net is not None else 0
             if net > best_single_net:
                 best_single_net = net
-                best_single_nickname = p.nickname or u.username
+                best_single_nickname = _display(p.nickname or u.username, aliases.get(p.user_id, ""))
                 game_obj = db.query(PokerGame).filter(PokerGame.id == p.game_id).first()
                 best_single = game_obj.name or (game_obj.started_at.strftime("%Y-%m-%d") if game_obj and game_obj.started_at else "")
 
@@ -340,15 +356,18 @@ def get_member_stats_service(group_id: int):
             PokerGamePlayer.game_id.in_(game_ids),
         ).all()
 
+        aliases = _get_aliases(db, group_id)
         user_stats = {}
         for p, u in all_players:
             uid = p.user_id
             net = p.net if p.net is not None else 0
             if uid not in user_stats:
+                raw_nick = p.nickname or u.username
                 user_stats[uid] = {
                     "user_id": uid,
-                    "nickname": p.nickname or u.username,
+                    "nickname": _display(raw_nick, aliases.get(uid, "")),
                     "win_count": 0,
+                    "lose_count": 0,
                     "game_count": 0,
                     "total_net": 0,
                 }
@@ -356,17 +375,22 @@ def get_member_stats_service(group_id: int):
             user_stats[uid]["total_net"] += net
             if net > 0:
                 user_stats[uid]["win_count"] += 1
+            elif net < 0:
+                user_stats[uid]["lose_count"] += 1
 
         members = []
         for uid, s in user_stats.items():
             game_count = s["game_count"]
             win_rate = round(s["win_count"] / game_count * 100, 1) if game_count > 0 else 0
+            lose_rate = round(s["lose_count"] / game_count * 100, 1) if game_count > 0 else 0
             members.append({
                 "user_id": uid,
                 "nickname": s["nickname"],
                 "game_count": game_count,
                 "win_count": s["win_count"],
+                "lose_count": s["lose_count"],
                 "win_rate": win_rate,
+                "lose_rate": lose_rate,
                 "total_net": s["total_net"],
             })
 
