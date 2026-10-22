@@ -434,3 +434,56 @@ def get_member_trend_service(group_id: int, user_id: int):
         return {"success": False, "message": str(e)}
     finally:
         db.close()
+
+
+def get_single_game_for_export(game_id: int, group_id: int):
+    """获取单条牌局完整数据，用于 PDF 导出。group_id 做鉴权隔离。"""
+    db = SessionLocal()
+    try:
+        game = db.query(PokerGame).filter(
+            PokerGame.id == game_id,
+            PokerGame.group_id == group_id,
+            PokerGame.status == "finished",
+        ).first()
+        if not game:
+            return None
+
+        aliases = _get_aliases(db, group_id)
+
+        players = db.query(PokerGamePlayer, User).join(
+            User, PokerGamePlayer.user_id == User.id
+        ).filter(PokerGamePlayer.game_id == game.id).all()
+
+        players_data = []
+        for p, u in players:
+            net = p.net if p.net is not None else 0
+            raw_nick = p.nickname or u.username
+            players_data.append({
+                "user_id": p.user_id,
+                "nickname": _display(raw_nick, aliases.get(p.user_id, "")),
+                "total_buy_in": p.total_buy_in or 0,
+                "cash_out": p.cash_out or 0,
+                "net": net,
+            })
+
+        duration_seconds = None
+        if game.started_at and game.ended_at:
+            duration_seconds = int((game.ended_at - game.started_at).total_seconds())
+
+        return {
+            "id": game.id,
+            "name": game.name or "",
+            "note": game.note or "",
+            "organizer_id": game.organizer_id,
+            "started_at": game.started_at,
+            "ended_at": game.ended_at,
+            "duration_seconds": duration_seconds,
+            "total_buy_in": game.total_buy_in or 0,
+            "is_balanced": game.is_balanced,
+            "balance_diff": 0 if game.is_balanced else (game.total_buy_in or 0) - (game.total_cash_out or 0),
+            "players": players_data,
+        }
+    except Exception:
+        return None
+    finally:
+        db.close()

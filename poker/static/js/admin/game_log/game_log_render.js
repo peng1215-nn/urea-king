@@ -7,16 +7,18 @@ let pendingDeleteGameId = null;
 let currentPage = 1;
 let currentView = "logs";
 let currentSearch = "";
-let _exportGameCache = {};
-
 function exportGameCard(gameId) {
-    const game = _exportGameCache[gameId];
-    if (!game) { console.warn("exportGameCard: game not in cache", gameId); return; }
-    // 管理员端从 group select 的 option text 获取组名
     const select = document.getElementById("admin-group-select");
-    const groupName = select ? (select.options[select.selectedIndex]?.textContent || "") : "";
+    const groupName = encodeURIComponent(select ? (select.options[select.selectedIndex]?.textContent || "") : "");
+    const groupId = window.adminGameLogState?.groupId || "";
     const lang = localStorage.getItem("language") || "zh";
-    generateGamePdf(game, groupName, lang);
+    const url = `/admin/game-log/export-pdf?game_id=${gameId}&group_id=${groupId}&lang=${lang}&group_name=${groupName}`;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `game_${gameId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }
 
 function openDeleteGameModal(gameId) {
@@ -63,7 +65,6 @@ async function loadGameLogs(page) {
     if (!data.games || data.games.length === 0) { list.innerHTML = `<div class="log-loading">${t("noGameLogs")}</div>`; renderPagination(1,1); return; }
     list.innerHTML = "";
     data.games.forEach(game => {
-        _exportGameCache[game.id] = game;
         renderGameCard(game, list);
     });
     renderPagination(data.page, data.total_pages);
