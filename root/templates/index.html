@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>UREAKING</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" defer></script>
+<link rel="stylesheet" href="/static/root/css/base.css?v={{ static_version }}">
+<link rel="stylesheet" href="/static/root/css/radar.css?v={{ static_version }}">
+<link rel="stylesheet" href="/static/root/css/contact.css?v={{ static_version }}">
+<link rel="stylesheet" href="/static/root/css/effects.css?v={{ static_version }}">
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<canvas id="nova-canvas"></canvas>
+<div id="flash-veil"></div>
+
+<!-- FX pause button -->
+<button id="pause-btn" title="Pause / resume effects" aria-label="Pause effects">
+  <!-- pause icon (two vertical bars) -->
+  <svg class="icon-pause" viewBox="0 0 14 14" fill="currentColor">
+    <rect x="2" y="1" width="3.5" height="12" rx="1"/>
+    <rect x="8.5" y="1" width="3.5" height="12" rx="1"/>
+  </svg>
+  <!-- play icon (right-pointing triangle) -->
+  <svg class="icon-play" viewBox="0 0 14 14" fill="currentColor">
+    <path d="M3 1.5 L12 7 L3 12.5 Z"/>
+  </svg>
+</button>
+<div class="grid"></div>
+
+<div class="stage">
+  <div class="coord" id="coord">0°00'00" N · 0°00'00" E</div>
+  <div class="wordmark">
+    <div class="wordmark-main">UREAKING</div>
+    <div class="wordmark-sub">observer ecosystem</div>
+  </div>
+  <p class="descriptor">A multi-module web platform.</p>
+</div>
+
+<!-- radar target -->
+<div id="radar-target">
+  <div id="blip"><div id="blip-dot"></div></div>
+  <div class="planet-wrap" id="planet-wrap">
+    <a class="enter-link" id="enter-btn" href="{{ poker_url }}">
+      <canvas id="planet-canvas" width="88" height="88"></canvas>
+      <div class="planet-label">POKER</div>
+    </a>
+  </div>
+</div>
+
+<!-- contact -->
+<div class="contact-bar">
+  <button class="contact-link" id="contact-btn">contact admin</button>
+</div>
+
+<!-- contact modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">Contact Admin</div>
+    <div class="modal-email-row">
+      <span class="modal-email" id="admin-email">{{ admin_email }}</span>
+      <button class="btn-copy" id="btn-copy">Copy</button>
+    </div>
+    <div class="modal-label" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>Email format</span>
+      <button class="btn-copy" id="btn-copy-tpl">Copy</button>
+    </div>
+    <div class="modal-template" id="modal-tpl">
+      Subject: [Issue] <span>Your Username</span><br>
+      <br>
+      Username: <span>your username</span><br>
+      Issue: <span>describe your problem here</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-close" id="modal-close">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="/static/root/js/radar.js?v={{ static_version }}"></script>
+<script src="/static/root/js/supernova.js?v={{ static_version }}"></script>
+<script src="/static/root/js/fx_controls.js?v={{ static_version }}"></script>
+<script src="/static/root/js/scene.js?v={{ static_version }}"></script>
+<script src="/static/root/js/contact_modal.js?v={{ static_version }}"></script>
+<script src="/static/root/js/card_deal.js?v={{ static_version }}"></script>
+</body>
+</html>

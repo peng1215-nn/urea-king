@@ -240,7 +240,11 @@ body {
     z-index: 200;
 
     width: 250px;
+    height: 100vh;
     min-height: 100vh;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 
     transform: translateX(-100%);
     transition: transform 0.28s ease;

@@ -93,16 +93,20 @@ Different roles have different permissions and accessible pages.
 ```text
 project/
 │
-├── routes/
-├── services/
-├── templates/
-├── static/
-│   ├── js/
-│   ├── css/
-│   └── images/
+├── root/                 # 主域名首页（urea-king.com）
+│   ├── routes/           #   路由（GET /）
+│   ├── services/         #   首页所需配置（POKER_URL / ADMIN_CONTACT_EMAIL）
+│   ├── templates/        #   index.html
+│   └── static/           #   css / js（挂载在 /static/root）
+│
+├── poker/                # Poker 子系统（poker.urea-king.com）
+│   ├── routes/
+│   ├── services/
+│   ├── templates/
+│   └── static/           #   js / css / images（挂载在 /static）
 │
 ├── migrations/
-├── models.py
+├── utils/
 ├── database.py
 ├── main.py
 └── requirements.txt

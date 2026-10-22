@@ -3,10 +3,11 @@ from utils.time import now_columbus_naive
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
+from root.routes.index import router as root_index_router
 from poker.routes.admin.admin import router as admin_router
 from poker.routes.admin import system_logs
 from poker.routes.admin import invite_management
@@ -44,13 +45,7 @@ async def domain_router(request: Request, call_next):
         return RedirectResponse(url="/")
     return await call_next(request)
 
-@app.get("/")
-async def index(request: Request):
-    host = request.headers.get("host", "")
-    if host.startswith("poker."):
-        return RedirectResponse(url="/login")
-    return FileResponse("index.html")
-
+app.include_router(root_index_router)
 app.include_router(register_router)
 app.include_router(login_router)
 app.include_router(group_join_router)
@@ -82,6 +77,12 @@ app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET_KEY,
     max_age=60 * 60 * 24,
+)
+
+app.mount(
+    "/static/root",
+    StaticFiles(directory="root/static"),
+    name="root-static"
 )
 
 app.mount(

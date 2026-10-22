@@ -1,0 +1,49 @@
+/* ── radar target ── */
+#radar-target {
+  position: fixed; z-index: 4;
+  display: none; pointer-events: none;
+  transform: translate(-50%, -50%);
+  width: 80px; height: 80px;
+  align-items: center; justify-content: center;
+}
+
+/* blip: drawn on canvas, no DOM dot needed */
+#blip { display: none; }
+
+/* planet button */
+.planet-wrap {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+}
+.enter-link {
+  text-decoration: none;
+  display: block;
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 0 16px rgba(140,80,220,0.35), inset 0 0 24px rgba(40,10,80,0.7);
+}
+.enter-link:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 32px rgba(160,80,255,0.6), inset 0 0 30px rgba(40,10,80,0.7);
+}
+/* planet canvas drawn by JS */
+#planet-canvas {
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  display: block;
+}
+.planet-label {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 3px; color: rgba(255,255,255,0.9);
+  text-transform: uppercase;
+  pointer-events: none;
+  text-shadow: 0 0 8px rgba(180,120,255,0.9);
+}
+
+/* sweep-lit flicker handled by JS */
+
