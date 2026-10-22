@@ -3,6 +3,7 @@ from utils.time import now_columbus_naive
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -30,6 +31,10 @@ from poker.routes.user.misc import router as user_misc_router
 load_dotenv()
 
 app = FastAPI()
+
+@app.get("/")
+async def index():
+    return FileResponse("index.html")
 
 app.include_router(register_router)
 app.include_router(login_router)
