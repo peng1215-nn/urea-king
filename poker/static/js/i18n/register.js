@@ -1,5 +1,6 @@
 window.registerTranslations = {
     zh: {
+        pageTitle: "UREAKING-POKER 注册",
         username: "用户名",
         nickname: "昵称",
         password: "密码",
@@ -34,6 +35,7 @@ window.registerTranslations = {
     },
 
     en: {
+        pageTitle: "UREAKING-POKER Register",
         username: "Username",
         nickname: "Nickname",
         password: "Password",

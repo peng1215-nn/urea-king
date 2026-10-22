@@ -1,5 +1,12 @@
 const organizerTranslations = {
     zh: {
+        titleOrganizerDashboard: "UREAKING-POKER 局头控制台",
+        titleMemberManagement: "UREAKING-POKER 成员管理",
+        titleInviteManagement: "UREAKING-POKER 邀请码管理",
+        titleAnnouncements: "UREAKING-POKER 公告",
+        titleGameManagement: "UREAKING-POKER 牌局管理",
+        titleGameLogs: "UREAKING-POKER 牌局日志",
+        titleChangePassword: "UREAKING-POKER 修改密码",
         console: "控制台",
 
         organizerDashboard: "局头控制台",
@@ -270,6 +277,13 @@ const organizerTranslations = {
     },
 
     en: {
+        titleOrganizerDashboard: "UREAKING-POKER Organizer Dashboard",
+        titleMemberManagement: "UREAKING-POKER Member Management",
+        titleInviteManagement: "UREAKING-POKER Invitation Management",
+        titleAnnouncements: "UREAKING-POKER Announcements",
+        titleGameManagement: "UREAKING-POKER Game Management",
+        titleGameLogs: "UREAKING-POKER Game Logs",
+        titleChangePassword: "UREAKING-POKER Change Password",
         console: "Dashboard",
 
         organizerDashboard: "Organizer Dashboard",

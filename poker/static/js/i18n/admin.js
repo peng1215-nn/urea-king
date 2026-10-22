@@ -1,5 +1,12 @@
 window.adminTranslations = {
     zh: {
+        titleDashboard: "UREAKING-POKER 控制面板",
+        titleSystemMonitor: "UREAKING-POKER 系统监控",
+        titleUserManagement: "UREAKING-POKER 用户管理",
+        titleInviteManagement: "UREAKING-POKER 邀请码管理",
+        titleSystemLogs: "UREAKING-POKER 系统日志",
+        titleAnnouncementManagement: "UREAKING-POKER 公告管理",
+        titleChangePassword: "UREAKING-POKER 修改密码",
         console: "控制台",
         dashboard: "控制面板",
         systemMonitor: "系统监控",
@@ -260,6 +267,13 @@ window.adminTranslations = {
     },
 
     en: {
+        titleDashboard: "UREAKING-POKER Dashboard",
+        titleSystemMonitor: "UREAKING-POKER System Monitor",
+        titleUserManagement: "UREAKING-POKER User Management",
+        titleInviteManagement: "UREAKING-POKER Invitation Management",
+        titleSystemLogs: "UREAKING-POKER System Logs",
+        titleAnnouncementManagement: "UREAKING-POKER Announcement Management",
+        titleChangePassword: "UREAKING-POKER Change Password",
         console: "Console",
         dashboard: "Dashboard",
         systemMonitor: "System Monitor",

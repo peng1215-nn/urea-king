@@ -1,5 +1,9 @@
 window.userTranslations = {
     zh: {
+        titleUserDashboard: "UREAKING-POKER 用户控制台",
+        titleJoinGame: "UREAKING-POKER 加入牌局",
+        titleGameLogs: "UREAKING-POKER 牌局日志",
+        titleChangePassword: "UREAKING-POKER 修改密码",
         // 通用
         dashboard: "控制台",
         confirm: "确认",
@@ -138,6 +142,10 @@ window.userTranslations = {
     },
 
     en: {
+        titleUserDashboard: "UREAKING-POKER User Dashboard",
+        titleJoinGame: "UREAKING-POKER Join Game",
+        titleGameLogs: "UREAKING-POKER Game Logs",
+        titleChangePassword: "UREAKING-POKER Change Password",
         // General
         dashboard: "Dashboard",
         confirm: "Confirm",

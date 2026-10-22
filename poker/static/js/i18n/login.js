@@ -1,5 +1,6 @@
 window.loginTranslations = {
     zh: {
+        pageTitle: "UREAKING-POKER 登录",
         username: "用户名",
         password: "密码",
         login: "登录",
@@ -45,6 +46,7 @@ window.loginTranslations = {
     },
 
     en: {
+        pageTitle: "UREAKING-POKER Login",
         username: "Username",
         password: "Password",
         login: "Login",
