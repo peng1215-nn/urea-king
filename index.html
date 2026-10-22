@@ -386,7 +386,7 @@ function updateCoord() {
   const d = new Date();
   const lat = (d.getSeconds() * 0.001 + 31.23).toFixed(4);
   const lon = (d.getSeconds() * 0.002 + 121.47).toFixed(4);
-  coordEl.textContent = `${lat}° N  ·  ${lon}° E`;
+  coordEl.textContent = `${lat} N  /  ${lon} E`;
 }
 setInterval(updateCoord, 1200);
 
