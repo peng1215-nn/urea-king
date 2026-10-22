@@ -95,7 +95,8 @@
             });
             const a = document.createElement("a");
             a.href = canvas.toDataURL("image/png");
-            a.download = `game_${game.id}.png`;
+            const safeName = String(game.name || "").replace(/[\\/:*?"<>|\r\n\t]+/g, " ").trim().slice(0, 60);
+            a.download = safeName ? `${safeName}_${game.id}.png` : `game_${game.id}.png`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
