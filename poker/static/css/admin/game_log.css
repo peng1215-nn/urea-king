@@ -1,0 +1,12 @@
+/* Admin game log page — overrides organizer/game_log.css body background */
+body {
+    background: linear-gradient(135deg, #0f0f16, #151928, #1a2033) !important;
+    background-attachment: unset !important;
+}
+
+@media (max-width: 768px) {
+    body {
+        background: linear-gradient(135deg, #0f0f16, #151928, #1a2033) !important;
+        background-image: none !important;
+    }
+}
