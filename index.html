@@ -234,10 +234,14 @@ html, body {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0.01ms !important; }
 }
 @media (max-width: 600px) {
+  .stage {
+    justify-content: flex-start;
+    padding-top: max(72px, env(safe-area-inset-top, 0px));
+  }
   .coord {
     font-size: 13px;
     letter-spacing: 3px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
   .wordmark-main {
     font-size: 48px;
@@ -248,20 +252,21 @@ html, body {
     letter-spacing: 4px;
   }
   .wordmark {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
   .descriptor {
     font-size: 15px;
     max-width: 280px;
   }
   .contact-bar {
-    bottom: max(32px, env(safe-area-inset-bottom, 0px));
+    bottom: max(28px, env(safe-area-inset-bottom, 0px));
   }
   .contact-link {
-    font-size: 14px;
+    font-size: 15px;
     letter-spacing: 4px;
-    padding: 8px 4px;
+    padding: 10px 6px;
     border-bottom-width: 1.5px;
+    color: rgba(255,255,255,0.5);
   }
   .enter-link {
     width: 86px; height: 86px;
