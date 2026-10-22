@@ -724,10 +724,10 @@ const SupernovaEngine = (() => {
     const p = state._p3; if (!p) return;
     const t = ms / 1000; // seconds
 
-    // Flash: bright 0-0.15s, fade 0.15-0.6s
-    if (ms < 150)       p.flashMat.opacity = (ms / 150) * 0.8;
-    else if (ms < 600)  p.flashMat.opacity = (1 - (ms - 150) / 450) * 0.8;
-    else                p.flashMat.opacity = 0;
+    // Flash: ramp up 0-300ms, hold briefly, fade 300-1800ms
+    if (ms < 300)        p.flashMat.opacity = (ms / 300) * 0.78;
+    else if (ms < 1800)  p.flashMat.opacity = (1 - (ms - 300) / 1500) * 0.78;
+    else                 p.flashMat.opacity = 0;
 
     // Shockwave rings: expand continuously until fully transparent — NO cap
     for (const ring of p.rings) {
@@ -755,10 +755,10 @@ const SupernovaEngine = (() => {
       pos[i*3+1] += vel[i*3+1];
     }
     p.jGeo.attributes.position.needsUpdate = true;
-    const jetFade = ms < 300 ? ms / 300 : Math.max(0, 1 - (ms - 300) / 1800);
+    const jetFade = ms < 500 ? ms / 500 : Math.max(0, 1 - (ms - 500) / 3000);
     p.jets.material.opacity = jetFade * 0.85;
-    if (ms < 600)       p.jets.material.color.setHex(0xffffff);
-    else if (ms < 1400) p.jets.material.color.setHex(0x88aaff);
+    if (ms < 1000)      p.jets.material.color.setHex(0xffffff);
+    else if (ms < 2500) p.jets.material.color.setHex(0x88aaff);
     else                p.jets.material.color.setHex(0xaa66ff);
   }
 
