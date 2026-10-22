@@ -719,29 +719,34 @@ const SupernovaEngine = (() => {
     state._p3 = { flash, flashMat, rings, jets, jGeo, jPos, jVel, jLife, jDel, jCount };
   }
 
-  function updatePhase3(state, t) {
+  function updatePhase3(state, ms) {
+    // ms = raw elapsed milliseconds (unclamped) so rings expand forever
     const p = state._p3; if (!p) return;
-    // Flash: bright 0-0.15, fade 0.15-0.5
-    if (t < 0.15)      p.flashMat.opacity = t / 0.15 * 0.75;
-    else if (t < 0.5)  p.flashMat.opacity = (1 - (t - 0.15) / 0.35) * 0.75;
-    else               p.flashMat.opacity = 0;
+    const t = ms / 1000; // seconds
 
-    // Shockwave rings: expand continuously, fade as radius grows
+    // Flash: bright 0-0.15s, fade 0.15-0.6s
+    if (ms < 150)       p.flashMat.opacity = (ms / 150) * 0.8;
+    else if (ms < 600)  p.flashMat.opacity = (1 - (ms - 150) / 450) * 0.8;
+    else                p.flashMat.opacity = 0;
+
+    // Shockwave rings: expand continuously until fully transparent — NO cap
     for (const ring of p.rings) {
-      const d = ring.userData.delay;
-      if (t < d) continue;
-      const local = t - d;
-      const r = Math.max(1, local * ring.userData.speed);
+      const delayMs = ring.userData.delay * 1000;
+      if (ms < delayMs) continue;
+      const localMs = ms - delayMs;
+      // speed in px/second
+      const r = Math.max(1, localMs / 1000 * ring.userData.speed);
       ring.scale.setScalar(r);
-      // Fade: ramps up quickly to peak then decays proportional to radius
-      const riseT = ring.userData.peakR;
-      const opacity = r < riseT
-        ? (r / riseT) * ring.userData.peakOp
-        : ring.userData.peakOp * Math.max(0, 1 - (r - riseT) / (ring.userData.speed * 1.2));
+      // riseR: radius at peak brightness; then linear fade to 0 at maxFadeR
+      const riseR    = ring.userData.peakR;
+      const maxFadeR = ring.userData.speed * 4.5; // fully gone by this radius
+      const opacity  = r < riseR
+        ? (r / riseR) * ring.userData.peakOp
+        : ring.userData.peakOp * Math.max(0, 1 - (r - riseR) / (maxFadeR - riseR));
       ring.material.opacity = opacity;
     }
 
-    // Jet particles fly outward
+    // Jet particles
     const pos = p.jPos; const vel = p.jVel;
     for (let i = 0; i < p.jCount; i++) {
       if (t < p.jDel[i]) continue;
@@ -750,12 +755,11 @@ const SupernovaEngine = (() => {
       pos[i*3+1] += vel[i*3+1];
     }
     p.jGeo.attributes.position.needsUpdate = true;
-    const jetFade = t < 0.3 ? t / 0.3 : Math.max(0, 1 - (t - 0.3) / 0.7);
+    const jetFade = ms < 300 ? ms / 300 : Math.max(0, 1 - (ms - 300) / 1800);
     p.jets.material.opacity = jetFade * 0.85;
-    // tint jets color over time: white → blue → purple
-    if (t < 0.4)       p.jets.material.color.setHex(0xffffff);
-    else if (t < 0.7)  p.jets.material.color.setHex(0x88aaff);
-    else               p.jets.material.color.setHex(0xaa66ff);
+    if (ms < 600)       p.jets.material.color.setHex(0xffffff);
+    else if (ms < 1400) p.jets.material.color.setHex(0x88aaff);
+    else                p.jets.material.color.setHex(0xaa66ff);
   }
 
   // ────────────────────────────────
@@ -853,12 +857,13 @@ const SupernovaEngine = (() => {
 
     for (const [, state] of planets) {
       if (state.phase === 0) continue;
-      const t = Math.min((now - state.animStart) / PHASE_DURATION[state.phase], 1);
+      const elapsed = now - state.animStart;
+      const t = Math.min(elapsed / PHASE_DURATION[state.phase], 1);
 
       switch (state.phase) {
-        case 1: updatePhase1(state, (now - state.animStart) / 1000); break;
+        case 1: updatePhase1(state, elapsed / 1000); break;
         case 2: updatePhase2(state, t); break;
-        case 3: updatePhase3(state, t); break;
+        case 3: updatePhase3(state, elapsed); break; // phase3 gets raw ms, not clamped t
         case 4:
           if (t < 1) updatePhase4(state, t);
           else sustainPhase4(state);
@@ -925,14 +930,13 @@ function checkSweep() {
     stampBlip();
     radarTarget.style.display = 'flex';
     radarTarget.style.pointerEvents = 'none';
-    // Show POKER on first scan
+    // Show POKER on first scan — no supernova yet
     if (!btnShown) {
       btnShown = true;
       planetWrap.style.transition = 'opacity 1.4s ease';
       planetWrap.style.opacity = '1';
       setTimeout(() => { radarTarget.style.pointerEvents = 'auto'; }, 1400);
     }
-    SupernovaEngine.onSweep(tX, tY);
   } else if (canCount) {
     sweepPassCount++;
     lastCountedAngle = angle;
