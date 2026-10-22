@@ -1386,7 +1386,7 @@ const CardDealEngine = (function() {
     Object.assign(overlay.style, {
       position: 'fixed', inset: '0', zIndex: '600',
       display: 'none', alignItems: 'center', justifyContent: 'center',
-      gap: '32px',
+      gap: 'clamp(16px, 5vw, 40px)',
       background: 'rgba(0,0,0,0.92)',
       backdropFilter: 'blur(4px)',
     });
@@ -1396,42 +1396,50 @@ const CardDealEngine = (function() {
   function makeCardEl(card) {
     const el = document.createElement('div');
     const isRed = RED.has(card.s);
+    // Responsive sizing: card width = 22vw, clamped between 90px and 150px
+    // Height = width * 1.5 (standard card ratio)
     Object.assign(el.style, {
-      width: '120px', height: '180px',
-      borderRadius: '14px',
+      width: 'clamp(90px, 22vw, 150px)',
+      height: 'clamp(135px, 33vw, 225px)',
+      borderRadius: 'clamp(8px, 1.5vw, 14px)',
       background: '#fff',
       boxShadow: '0 8px 40px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.5)',
       display: 'flex', flexDirection: 'column',
-      padding: '10px',
+      padding: 'clamp(6px, 1.2vw, 12px)',
       color: isRed ? '#d32f2f' : '#111',
       fontFamily: 'Georgia, serif',
       position: 'relative',
       opacity: '0',
-      // Start off-screen to the right with a tilt
       transform: 'translateX(140vw) rotate(25deg) scale(0.9)',
       transition: 'opacity 0.35s ease, transform 0.45s cubic-bezier(0.22,1,0.36,1)',
     });
 
     // top-left corner
     const tl = document.createElement('div');
-    Object.assign(tl.style, { lineHeight: '1.1', fontSize: '22px', fontWeight: 'bold' });
-    tl.innerHTML = `<div>${card.r}</div><div style="font-size:18px">${card.s}</div>`;
+    Object.assign(tl.style, {
+      lineHeight: '1.1',
+      fontSize: 'clamp(14px, 3.5vw, 22px)',
+      fontWeight: 'bold',
+    });
+    tl.innerHTML = `<div>${card.r}</div><div style="font-size:0.8em">${card.s}</div>`;
 
     // center suit large
     const ctr = document.createElement('div');
     Object.assign(ctr.style, {
       flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: '64px', lineHeight: '1',
+      fontSize: 'clamp(36px, 10vw, 72px)', lineHeight: '1',
     });
     ctr.textContent = card.s;
 
     // bottom-right (rotated)
     const br = document.createElement('div');
     Object.assign(br.style, {
-      lineHeight: '1.1', fontSize: '22px', fontWeight: 'bold',
+      lineHeight: '1.1',
+      fontSize: 'clamp(14px, 3.5vw, 22px)',
+      fontWeight: 'bold',
       transform: 'rotate(180deg)', alignSelf: 'flex-end',
     });
-    br.innerHTML = `<div>${card.r}</div><div style="font-size:18px">${card.s}</div>`;
+    br.innerHTML = `<div>${card.r}</div><div style="font-size:0.8em">${card.s}</div>`;
 
     el.append(tl, ctr, br);
     return el;
