@@ -37,6 +37,36 @@ html, body {
   transition: none;
 }
 
+/* ── Pause button ── */
+#pause-btn {
+  position: fixed;
+  bottom: max(20px, env(safe-area-inset-bottom, 0px) + 12px);
+  right: max(20px, env(safe-area-inset-right, 0px) + 12px);
+  z-index: 200;
+  width: 36px; height: 36px;
+  border: none; border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.15);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+  color: rgba(255,255,255,0.55);
+  padding: 0;
+}
+#pause-btn:hover {
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.9);
+  transform: scale(1.1);
+}
+#pause-btn svg { width: 14px; height: 14px; display: block; }
+/* play icon hidden by default; shown when paused */
+#pause-btn .icon-play  { display: none; }
+#pause-btn .icon-pause { display: block; }
+#pause-btn.paused .icon-play  { display: block; }
+#pause-btn.paused .icon-pause { display: none; }
+
 .grid {
   position: fixed; inset: 0; z-index: 1;
   background-image:
@@ -303,6 +333,19 @@ html, body {
 <canvas id="canvas"></canvas>
 <canvas id="nova-canvas"></canvas>
 <div id="flash-veil"></div>
+
+<!-- FX pause button -->
+<button id="pause-btn" title="Pause / resume effects" aria-label="Pause effects">
+  <!-- pause icon (two vertical bars) -->
+  <svg class="icon-pause" viewBox="0 0 14 14" fill="currentColor">
+    <rect x="2" y="1" width="3.5" height="12" rx="1"/>
+    <rect x="8.5" y="1" width="3.5" height="12" rx="1"/>
+  </svg>
+  <!-- play icon (right-pointing triangle) -->
+  <svg class="icon-play" viewBox="0 0 14 14" fill="currentColor">
+    <path d="M3 1.5 L12 7 L3 12.5 Z"/>
+  </svg>
+</button>
 <div class="grid"></div>
 
 <div class="stage">
@@ -952,20 +995,39 @@ const SupernovaEngine = (() => {
     5: 3000,
   };
 
+  // ── Pause state ──
+  let fxPaused    = false;
+  let pauseOffset = 0;    // accumulated paused time
+  let pausedAt    = null; // timestamp when paused
+
+  // Is the explosion in whiteout phase? (lock pause during this window)
+  function isExplosionLocked() {
+    for (const [, state] of planets) {
+      if (state.phase !== 3 || !state._p3) continue;
+      const { VEIL_IN_MS, REVEAL_MS } = state._p3;
+      const elapsed = performance.now() - state.animStart - pauseOffset;
+      if (elapsed >= VEIL_IN_MS && elapsed <= REVEAL_MS + 1600) return true;
+    }
+    return false;
+  }
+
   function animate() {
     requestAnimationFrame(animate);
     if (!THREE_loaded) return;
+    if (fxPaused) { renderer.render(scene, camera); return; } // frozen frame
+
     const now = performance.now();
 
     for (const [, state] of planets) {
       if (state.phase === 0) continue;
-      const elapsed = now - state.animStart;
+      // elapsed excludes time spent paused
+      const elapsed = now - state.animStart - pauseOffset;
       const t = Math.min(elapsed / PHASE_DURATION[state.phase], 1);
 
       switch (state.phase) {
         case 1: updatePhase1(state, elapsed / 1000); break;
         case 2: updatePhase2(state, t); break;
-        case 3: updatePhase3(state, elapsed); break; // phase3 gets raw ms, not clamped t
+        case 3: updatePhase3(state, elapsed); break;
         case 4:
           if (t < 1) updatePhase4(state, t);
           else sustainPhase4(state);
@@ -987,8 +1049,9 @@ const SupernovaEngine = (() => {
     if (!THREE_loaded) return;
     const state = makePlanetState(sx, sy);
     const nextPhase = state.phase === 0 ? 1 : (state.phase % 5) + 1;
+    // animStart accounts for any paused time already accumulated
+    state.animStart = performance.now() - pauseOffset;
     state.phase = nextPhase;
-    state.animStart = performance.now();
 
     switch (nextPhase) {
       case 1: startPhase1(state); break;
@@ -1005,6 +1068,22 @@ const SupernovaEngine = (() => {
     if (state) { clearMeshes(state); state.phase = 0; }
   }
 
+  function pause() {
+    if (fxPaused || isExplosionLocked()) return false; // locked during whiteout
+    fxPaused  = true;
+    pausedAt  = performance.now();
+    return true;
+  }
+
+  function resume() {
+    if (!fxPaused) return;
+    fxPaused     = false;
+    pauseOffset += performance.now() - pausedAt;
+    pausedAt     = null;
+  }
+
+  function isPaused() { return fxPaused; }
+
   function onResize() { resize(); }
 
   // Wait for THREE to load then init
@@ -1014,7 +1093,37 @@ const SupernovaEngine = (() => {
   }
   setTimeout(tryInit, 0);
 
-  return { onSweep, resetPlanet, onResize };
+  return { onSweep, resetPlanet, onResize, pause, resume, isPaused };
+})();
+
+// ── FX Registry: all effect engines register here ──
+const FXRegistry = [SupernovaEngine];
+// Future: FXRegistry.push(NewModuleEngine);
+
+// ── Pause button wiring ──
+(function() {
+  const btn = document.getElementById('pause-btn');
+  let globalPaused = false;
+
+  function applyPause(paused) {
+    if (paused) {
+      // Try to pause all engines; any might reject (e.g. during whiteout)
+      const accepted = FXRegistry.every(fx => fx.pause() !== false);
+      if (!accepted) return; // at least one engine refused (whiteout lockout)
+    } else {
+      FXRegistry.forEach(fx => fx.resume());
+    }
+    globalPaused = paused;
+    btn.classList.toggle('paused', globalPaused);
+    try { localStorage.setItem('fx-paused', globalPaused ? '1' : '0'); } catch(e) {}
+  }
+
+  btn.addEventListener('click', () => applyPause(!globalPaused));
+
+  // Restore from localStorage
+  try {
+    if (localStorage.getItem('fx-paused') === '1') applyPause(true);
+  } catch(e) {}
 })();
 
 function checkSweep() {
