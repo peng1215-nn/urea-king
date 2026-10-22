@@ -1186,48 +1186,59 @@ const FXRegistry = [SupernovaEngine];
 
 // ── Coin Transition Engine ──────────────────────────────────────────────
 const CoinEngine = (function() {
-  const overlay   = document.getElementById('coin-overlay');
-  const coinCvs   = document.getElementById('coin-canvas');
+  const overlay = document.getElementById('coin-overlay');
+  const coinCvs = document.getElementById('coin-canvas');
 
   let renderer2, scene2, camera2, coinMesh, animId;
   let running = false;
+  let threeReady = false;
 
   function initRenderer() {
-    if (renderer2) return;
-    if (typeof THREE === 'undefined') return;
+    if (renderer2) return true;
+    if (typeof THREE === 'undefined') return false;
+
     renderer2 = new THREE.WebGLRenderer({ canvas: coinCvs, alpha: true, antialias: true });
-    renderer2.setPixelRatio(devicePixelRatio);
+    renderer2.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer2.setSize(innerWidth, innerHeight);
 
-    scene2 = new THREE.Scene();
+    scene2  = new THREE.Scene();
     camera2 = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 100);
-    camera2.position.set(0, 0, 5);
+    camera2.position.set(0, 0, 6);
 
-    // Coin: thin cylinder (gold face / silver rim)
-    const geo = new THREE.CylinderGeometry(1, 1, 0.12, 64);
+    // Coin geometry: thin cylinder, faces along Y axis by default
+    const geo  = new THREE.CylinderGeometry(1, 1, 0.1, 64);
+    // material index: 0=rim, 1=top face(heads), 2=bottom face(tails)
     const mats = [
-      // rim
-      new THREE.MeshStandardMaterial({ color: 0xc8a840, metalness: 0.9, roughness: 0.2 }),
-      // heads face (gold, subtle ♠ imprint via emissive)
-      new THREE.MeshStandardMaterial({ color: 0xf0c030, metalness: 1.0, roughness: 0.1, emissive: 0x332200, emissiveIntensity: 0.3 }),
-      // tails face (slightly cooler gold)
-      new THREE.MeshStandardMaterial({ color: 0xd4a820, metalness: 1.0, roughness: 0.15, emissive: 0x112233, emissiveIntensity: 0.2 }),
+      new THREE.MeshStandardMaterial({ color: 0xb8902a, metalness: 0.95, roughness: 0.2 }),
+      new THREE.MeshStandardMaterial({ color: 0xf5c518, metalness: 1.0,  roughness: 0.08 }),
+      new THREE.MeshStandardMaterial({ color: 0xd4a020, metalness: 1.0,  roughness: 0.12 }),
     ];
+    // Pre-set all materials as transparent so opacity changes work
+    mats.forEach(m => { m.transparent = true; m.opacity = 1; });
     coinMesh = new THREE.Mesh(geo, mats);
-    // Cylinder axis is Y by default → faces point along Y → tilt so faces point toward camera (Z)
+    // Tilt so the flat face points toward camera (+Z)
     coinMesh.rotation.x = Math.PI / 2;
     scene2.add(coinMesh);
 
-    // Lights
-    const amb = new THREE.AmbientLight(0xffffff, 0.5);
+    const amb = new THREE.AmbientLight(0xffffff, 0.6);
     scene2.add(amb);
-    const pt = new THREE.PointLight(0xfff4cc, 2.5, 20);
-    pt.position.set(3, 4, 5);
-    scene2.add(pt);
-    const pt2 = new THREE.PointLight(0xaaccff, 1.0, 20);
-    pt2.position.set(-4, -2, 3);
+    const pt1 = new THREE.PointLight(0xffe8a0, 3, 20);
+    pt1.position.set(3, 5, 5);
+    scene2.add(pt1);
+    const pt2 = new THREE.PointLight(0x88aaff, 1.2, 20);
+    pt2.position.set(-4, -2, 4);
     scene2.add(pt2);
+
+    threeReady = true;
+    return true;
   }
+
+  // Pre-init as soon as THREE loads
+  function tryPreInit() {
+    if (typeof THREE !== 'undefined') { initRenderer(); }
+    else { setTimeout(tryPreInit, 100); }
+  }
+  setTimeout(tryPreInit, 0);
 
   // Roll: 0–0.49 = heads, 0.49–0.98 = tails, 0.98–1.0 = edge
   function rollResult() {
@@ -1239,8 +1250,14 @@ const CoinEngine = (function() {
 
   function playCoin(dest) {
     if (running) return;
+    // If THREE not ready yet, fall back to direct navigation
+    if (!initRenderer()) { window.location.href = dest; return; }
     running = true;
-    initRenderer();
+
+    // Reset coin to center, make visible
+    coinMesh.position.set(0, -4, 0);
+    coinMesh.scale.setScalar(0.4);
+    coinMesh.rotation.z = 0;
 
     // Pause all other FX while coin plays
     FXRegistry.forEach(fx => fx.pause());
@@ -1331,12 +1348,7 @@ const CoinEngine = (function() {
       } else {
         opacity = 1;
       }
-      coinMesh.material && (coinMesh.material.opacity = opacity);
-      coinMesh.traverse(o => {
-        if (o.isMesh && Array.isArray(o.material)) {
-          o.material.forEach(m => { m.transparent = true; m.opacity = opacity; });
-        }
-      });
+      coinMesh.material.forEach(m => { m.opacity = opacity; });
 
       renderer2.render(scene2, camera2);
 
