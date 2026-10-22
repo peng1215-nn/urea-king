@@ -1,8 +1,56 @@
+// ── 声音提示 ──────────────────────────────────────────────
+let _knownRequestIds = new Set();
+let _audioCtx = null;
+
+function _getAudioCtx() {
+    if (!_audioCtx || _audioCtx.state === "closed") {
+        _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return _audioCtx;
+}
+
+function playChipRequestSound() {
+    try {
+        const ctx = _getAudioCtx();
+        // 两声短"叮"，间隔 180ms
+        [0, 0.18].forEach(delay => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = "sine";
+            osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+            gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + delay + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.35);
+            osc.start(ctx.currentTime + delay);
+            osc.stop(ctx.currentTime + delay + 0.35);
+        });
+    } catch (e) {
+        // 浏览器未授权音频，静默忽略
+    }
+}
+
+function _checkNewRequests(games) {
+    let hasNew = false;
+    games.forEach(game => {
+        (game.requests || []).forEach(req => {
+            if (req.status === "pending" && !_knownRequestIds.has(req.id)) {
+                hasNew = true;
+            }
+            _knownRequestIds.add(req.id);
+        });
+    });
+    if (hasNew) playChipRequestSound();
+}
+// ─────────────────────────────────────────────────────────
+
 async function loadGamePage() {
     const data = await fetchOngoingGames();
     if (!data.success) return;
 
     currentGames = data.games || [];
+    _checkNewRequests(currentGames);
 
     if (currentGames.length === 0) {
         showNoGameSection();
