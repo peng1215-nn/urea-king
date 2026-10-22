@@ -3,6 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js" defer></script>
 
 <style>
 :root {
@@ -499,10 +500,14 @@ const SupernovaEngine = (() => {
 
     THREE_loaded = true;
     animate();
-    // Wrap all text nodes into per-char spans for blast effect
+    // Wrap text into per-char spans immediately (no Matter dependency)
     wrapChars();
-    // Small delay to let layout settle before recording positions
-    setTimeout(initCharPositions, 200);
+    // Wait for Matter.js to load, then record positions & build bodies
+    function waitMatter() {
+      if (typeof Matter !== 'undefined') { setTimeout(initCharPositions, 200); }
+      else { setTimeout(waitMatter, 50); }
+    }
+    waitMatter();
   }
 
   function resize() {
@@ -676,20 +681,13 @@ const SupernovaEngine = (() => {
   // DOM full-screen white veil element
   const flashVeil = document.getElementById('flash-veil');
 
-  // ── Char-blast: shockwave ring sweeps through text, chars scatter then drift back ──
-  // Text containers to wrap into individual char spans
-  const CHAR_BLAST_SELS = [
-    '#coord',
-    '.wordmark-main',
-    '.wordmark-sub',
-    '.descriptor',
-    '.contact-link',
-  ];
+  // ── Physics char-blast: Matter.js bodies track each character ──
+  const CHAR_BLAST_SELS = ['#coord','.wordmark-main','.wordmark-sub','.descriptor','.contact-link'];
 
-  let charSpans = []; // { el, origX, origY, blasted }
+  let mEngine = null, mChars = []; // mChars: { el, body, ox, oy, blasted }
+  let mRafId  = null;
 
   function wrapChars() {
-    charSpans = [];
     CHAR_BLAST_SELS.forEach(sel => {
       const el = document.querySelector(sel);
       if (!el) return;
@@ -698,72 +696,121 @@ const SupernovaEngine = (() => {
       [...text].forEach(ch => {
         const span = document.createElement('span');
         span.textContent = ch;
-        span.style.display = 'inline-block';
-        span.style.position = 'relative'; // keeps layout, allows transform
+        span.style.cssText = 'display:inline-block;position:relative;will-change:transform;';
         el.appendChild(span);
       });
     });
   }
 
   function initCharPositions() {
-    // Record each span's centre in screen coords
-    charSpans = [];
+    // Tear down old engine if any
+    if (mEngine) { Matter.Engine.clear(mEngine); mEngine = null; }
+    mChars = [];
+
+    if (typeof Matter === 'undefined') return;
+
+    mEngine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
+
     CHAR_BLAST_SELS.forEach(sel => {
       const el = document.querySelector(sel);
       if (!el) return;
       el.querySelectorAll('span').forEach(span => {
-        const r = span.getBoundingClientRect();
-        charSpans.push({
-          el: span,
-          cx: r.left + r.width  / 2,
-          cy: r.top  + r.height / 2,
-          blasted: false,
+        const r   = span.getBoundingClientRect();
+        const cx  = r.left + r.width  / 2;
+        const cy  = r.top  + r.height / 2;
+        const body = Matter.Bodies.rectangle(cx, cy, Math.max(r.width, 4), Math.max(r.height, 4), {
+          frictionAir: 0.18,   // air damping — controls how fast it slows
+          restitution: 0,
+          isStatic: false,
+          collisionFilter: { mask: 0 }, // no collisions between chars
         });
+        Matter.Composite.add(mEngine.world, body);
+        mChars.push({ el: span, body, ox: cx, oy: cy, blasted: false, angle: 0 });
       });
     });
   }
 
-  // Called each frame during phase 3 after REVEAL_MS — pass shockwave radius in px
+  // Apply spring-like return force each tick
+  function tickPhysics() {
+    if (!mEngine || mChars.length === 0) return;
+    const STIFFNESS = 0.018; // spring strength toward origin
+    mChars.forEach(c => {
+      if (!c.blasted) return;
+      const b = c.body;
+      // Force toward origin (damped spring)
+      const dx = c.ox - b.position.x;
+      const dy = c.oy - b.position.y;
+      Matter.Body.applyForce(b, b.position, {
+        x: dx * STIFFNESS * b.mass,
+        y: dy * STIFFNESS * b.mass,
+      });
+    });
+    Matter.Engine.update(mEngine, 1000 / 60);
+
+    // Sync DOM
+    mChars.forEach(c => {
+      if (!c.blasted) return;
+      const b   = c.body;
+      const ddx = b.position.x - c.ox;
+      const ddy = b.position.y - c.oy;
+      const deg = b.angle * 180 / Math.PI;
+      c.el.style.transform = `translate(${ddx}px,${ddy}px) rotate(${deg}deg)`;
+
+      // Snap back when close enough and slow enough
+      const speed = Math.sqrt(b.velocity.x**2 + b.velocity.y**2);
+      if (Math.abs(ddx) < 0.5 && Math.abs(ddy) < 0.5 && speed < 0.3) {
+        c.blasted = false;
+        c.el.style.transform = '';
+        Matter.Body.setVelocity(b, { x: 0, y: 0 });
+        Matter.Body.setAngularVelocity(b, 0);
+        Matter.Body.setPosition(b, { x: c.ox, y: c.oy });
+        Matter.Body.setAngle(b, 0);
+      }
+    });
+  }
+
+  function startPhysicsLoop() {
+    if (mRafId) return;
+    function loop() { tickPhysics(); mRafId = requestAnimationFrame(loop); }
+    mRafId = requestAnimationFrame(loop);
+  }
+
+  // Called each frame: check if shockwave reached each char
   function updateCharBlast(epicX, epicY, shockR) {
-    charSpans.forEach(c => {
+    if (!mEngine) return;
+    startPhysicsLoop();
+    mChars.forEach(c => {
       if (c.blasted) return;
-      const dx = c.cx - epicX;
-      const dy = c.cy - epicY;
+      const dx   = c.ox - epicX;
+      const dy   = c.oy - epicY;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist > shockR) return; // wave hasn't reached this char yet
+      if (dist > shockR) return;
 
       c.blasted = true;
-      const el = c.el;
-
-      // Direction: away from epicentre + random spread
-      const angle  = Math.atan2(dy, dx) + (Math.random() - 0.5) * 1.2;
-      const force  = 120 + Math.random() * 260;
-      const fdx    = Math.cos(angle) * force;
-      const fdy    = Math.sin(angle) * force;
-      const rot    = (Math.random() - 0.5) * 720;
-      const sc     = 0.1 + Math.random() * 0.4;
-
-      // Snap to blasted — visible but scattered
-      el.style.transition = 'none';
-      el.style.transform  = `translate(${fdx}px,${fdy}px) rotate(${rot}deg) scale(${sc})`;
-
-      // Drift back with staggered ease, stays fully visible throughout
-      const delay    = 400 + Math.random() * 1800;
-      const duration = 1800 + Math.random() * 1200;
-      setTimeout(() => {
-        el.style.transition = `transform ${duration}ms cubic-bezier(0.22,0.61,0.36,1)`;
-        el.style.transform  = '';
-      }, delay);
+      // Impulse: away from epicentre + random spread
+      const a     = Math.atan2(dy, dx) + (Math.random() - 0.5) * 1.4;
+      const force = (0.012 + Math.random() * 0.022) * c.body.mass;
+      Matter.Body.applyForce(c.body, c.body.position, {
+        x: Math.cos(a) * force,
+        y: Math.sin(a) * force,
+      });
+      // Random spin
+      Matter.Body.setAngularVelocity(c.body, (Math.random() - 0.5) * 0.3);
     });
   }
 
   function resetCharBlast() {
-    charSpans.forEach(c => {
+    if (mRafId) { cancelAnimationFrame(mRafId); mRafId = null; }
+    mChars.forEach(c => {
       c.blasted = false;
-      c.el.style.transition = 'none';
-      c.el.style.transform  = '';
+      c.el.style.transform = '';
+      if (mEngine && c.body) {
+        Matter.Body.setVelocity(c.body, { x: 0, y: 0 });
+        Matter.Body.setAngularVelocity(c.body, 0);
+        Matter.Body.setPosition(c.body, { x: c.ox, y: c.oy });
+        Matter.Body.setAngle(c.body, 0);
+      }
     });
-    // Re-record positions (layout may have shifted)
     setTimeout(initCharPositions, 50);
   }
 
