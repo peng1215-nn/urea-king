@@ -157,6 +157,7 @@ def create_group_service(
             group_code=group_code,
             group_name=group_name,
             description=None,
+            invite_code_limit=27,
             created_at=now_columbus_naive(),
         )
 
@@ -435,5 +436,33 @@ def force_delete_group_service(group_id, expected_group_code):
     except Exception:
         db.rollback()
         return {"success": False, "message": "operationFailed"}
+    finally:
+        db.close()
+
+
+def update_invite_limit_service(group_id: int, limit: int):
+    db = SessionLocal()
+    try:
+        if limit < 1 or limit > 200:
+            return {"success": False, "message": "inviteLimitOutOfRange"}
+
+        group = db.query(Group).filter(Group.id == group_id).first()
+        if not group:
+            return {"success": False, "message": "groupNotFound"}
+
+        if group.group_code == ADMIN_GROUP_CODE:
+            return {"success": False, "message": "adminGroupInviteForbidden"}
+
+        group.invite_code_limit = limit
+        db.commit()
+
+        return {
+            "success": True,
+            "group_name": group.group_name,
+            "invite_code_limit": limit,
+        }
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "message": str(e)}
     finally:
         db.close()

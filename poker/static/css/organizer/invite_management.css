@@ -230,3 +230,10 @@ body {
         background-repeat: no-repeat !important;
     }
 }
+
+.invite-quota {
+    font-size: 13px;
+    color: rgba(200, 210, 255, 0.5);
+    white-space: nowrap;
+    align-self: center;
+}

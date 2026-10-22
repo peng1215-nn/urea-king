@@ -21,6 +21,8 @@ def get_invite_codes_service(group_id: int):
 
         return {
             "success": True,
+            "invite_code_limit": group.invite_code_limit,
+            "invite_code_count": len(codes),
             "codes": [
                 {
                     "id": c.id,
@@ -61,6 +63,13 @@ def create_invite_code_service(group_id: int, code: str):
 
         if existing:
             return {"success": False, "message": "inviteCodeExists"}
+
+        total_count = db.query(InvitationCode).filter(
+            InvitationCode.group_code == group.group_code,
+        ).count()
+
+        if total_count >= group.invite_code_limit:
+            return {"success": False, "message": "inviteCodeLimitReached"}
 
         invitation = InvitationCode(
             code=code,

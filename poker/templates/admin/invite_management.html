@@ -266,6 +266,53 @@
         <div class="action-panel">
 
             <div class="panel-title">
+                <i class="fa-solid fa-sliders"></i>
+                <h2 data-i18n="updateInviteLimit">修改邀请码上限</h2>
+            </div>
+
+            <p class="panel-description" data-i18n="updateInviteLimitDesc">
+                修改指定组的邀请码总数上限。默认为 27，范围 1–200。
+            </p>
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="invite-limit-group-id" data-i18n="selectGroup">选择组</label>
+                    <select id="invite-limit-group-id">
+                        <option value="" data-i18n="pleaseSelectGroup">请选择组别</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="invite-limit-value" data-i18n="inviteLimit">上限数量</label>
+                    <input
+                        type="number"
+                        id="invite-limit-value"
+                        min="1"
+                        max="200"
+                        placeholder="27"
+                        style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#e8eaf6;font-size:14px;"
+                    />
+                </div>
+
+            </div>
+
+            <button
+                id="update-invite-limit-button"
+                class="panel-button"
+                data-i18n="updateInviteLimit"
+                onclick="submitUpdateInviteLimit()"
+            >
+                修改上限
+            </button>
+
+            <div id="update-invite-limit-message" class="operation-message"></div>
+
+        </div>
+
+        <div class="action-panel">
+
+            <div class="panel-title">
                 <i class="fa-solid fa-ticket-simple"></i>
                 <h2 data-i18n="deleteInviteCode">删除邀请码</h2>
             </div>

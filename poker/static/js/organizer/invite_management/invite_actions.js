@@ -9,6 +9,16 @@ async function loadInviteCodes() {
         return;
     }
 
+    // 更新用量提示
+    const quota = document.getElementById("invite-quota");
+    if (quota && data.invite_code_limit !== undefined) {
+        const count = data.invite_code_count ?? (data.codes ? data.codes.length : 0);
+        const limit = data.invite_code_limit;
+        const atLimit = count >= limit;
+        quota.style.color = atLimit ? "#ff8a8a" : "rgba(200,210,255,0.5)";
+        quota.textContent = `${count} / ${limit}`;
+    }
+
     if (!data.codes || data.codes.length === 0) {
         list.innerHTML = `<div class="invite-loading">${t("noInviteCodes")}</div>`;
         return;

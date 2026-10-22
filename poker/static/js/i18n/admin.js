@@ -144,6 +144,11 @@ window.adminTranslations = {
 
         createInviteCode: "创建邀请码",
         createInviteCodeDesc: "为指定组别创建 organizer 或 user 身份的邀请码。管理员邀请码不通过此处创建。",
+        updateInviteLimit: "修改邀请码上限",
+        updateInviteLimitDesc: "修改指定组的邀请码总数上限。默认为 27，范围 1–200。",
+        inviteLimit: "上限数量",
+        inviteLimitUpdated: "邀请码上限已更新。",
+        inviteLimitOutOfRange: "上限数量须在 1 到 200 之间。",
         deleteInviteCode: "删除邀请码",
         deleteInviteCodeDesc: "仅显示未使用的邀请码。已使用邀请码不会出现在列表中。",
         inviteCode: "邀请码",
@@ -410,6 +415,11 @@ window.adminTranslations = {
 
         createInviteCode: "Create Invitation Code",
         createInviteCodeDesc: "Create an organizer or user invitation code for the selected group. Admin invitation codes are not created here.",
+        updateInviteLimit: "Update Invite Limit",
+        updateInviteLimitDesc: "Update the total invite code limit for the selected group. Default is 27, range 1–200.",
+        inviteLimit: "Limit",
+        inviteLimitUpdated: "Invite code limit updated.",
+        inviteLimitOutOfRange: "Limit must be between 1 and 200.",
         deleteInviteCode: "Delete Invitation Code",
         deleteInviteCodeDesc: "Only unused invitation codes are listed. Used invitation codes will not appear here.",
         inviteCode: "Invitation Code",

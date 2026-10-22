@@ -12,6 +12,7 @@ from poker.services.admin.invite_management import delete_invitation_code_servic
 from poker.services.admin.invite_management import get_deletable_group_options_service
 from poker.services.admin.invite_management import get_group_options_service
 from poker.services.admin.invite_management import get_unused_invitation_options_service
+from poker.services.admin.invite_management import update_invite_limit_service
 from poker.template_config import templates
 from poker.services.common.common import add_no_cache_headers
 
@@ -228,6 +229,31 @@ def delete_invitation_code(
                 f"role={result.get('role')}"
             ),
             new_value=None,
+            operator_id=request.session.get("user_id"),
+            operator_username=request.session.get("username"),
+        )
+
+    return result
+
+@router.post("/admin/update-invite-limit")
+def update_invite_limit(
+    request: Request,
+    group_id: int = Form(...),
+    limit: int = Form(...),
+):
+    if not require_admin(request):
+        return {"success": False, "message": "permissionDenied"}
+
+    result = update_invite_limit_service(group_id=group_id, limit=limit)
+
+    if result.get("success"):
+        write_audit_log(
+            request=request,
+            action="UPDATE_INVITE_LIMIT",
+            target_type="group",
+            target_id=group_id,
+            old_value=None,
+            new_value=f"invite_code_limit={limit}",
             operator_id=request.session.get("user_id"),
             operator_username=request.session.get("username"),
         )

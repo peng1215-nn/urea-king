@@ -30,6 +30,7 @@ class Group(Base):
     group_code = Column(String(50), unique=True, nullable=False, index=True)
     group_name = Column(String(100), nullable=True)
     description = Column(Text, nullable=True)
+    invite_code_limit = Column(Integer, nullable=False, default=27)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 

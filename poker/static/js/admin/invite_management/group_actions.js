@@ -25,6 +25,11 @@ async function loadGroupOptions() {
     const forceDeleteSelect = document.getElementById("force-delete-group-id");
     forceDeleteSelect.innerHTML = `<option value="">${t("pleaseSelectGroup")}</option>`;
 
+    const inviteLimitGroupSelect = document.getElementById("invite-limit-group-id");
+    if (inviteLimitGroupSelect) {
+        inviteLimitGroupSelect.innerHTML = `<option value="">${t("pleaseSelectGroup")}</option>`;
+    }
+
     const groupResult =
         await fetchGroupOptions();
 
@@ -46,6 +51,9 @@ async function loadGroupOptions() {
 
             createGroupSelect.appendChild(option);
             forceDeleteSelect.appendChild(option.cloneNode(true));
+            if (inviteLimitGroupSelect) {
+                inviteLimitGroupSelect.appendChild(option.cloneNode(true));
+            }
         });
     }
 
@@ -315,4 +323,44 @@ async function confirmForceDeleteGroup() {
         console.error(error);
         message.textContent = t("operationFailed");
     } finally { button.disabled = false; }
+}
+
+
+async function submitUpdateInviteLimit() {
+    const messageBox = document.getElementById("update-invite-limit-message");
+    messageBox.style.color = "#ff8a8a";
+    messageBox.innerText = "";
+
+    const groupId = document.getElementById("invite-limit-group-id").value;
+    const limitVal = document.getElementById("invite-limit-value").value.trim();
+
+    if (!groupId) {
+        messageBox.innerText = t("pleaseSelectGroup");
+        return;
+    }
+
+    const limit = parseInt(limitVal, 10);
+    if (!limitVal || isNaN(limit) || limit < 1 || limit > 200) {
+        messageBox.innerText = t("inviteLimitOutOfRange");
+        return;
+    }
+
+    const fd = new FormData();
+    fd.append("group_id", groupId);
+    fd.append("limit", limit);
+
+    try {
+        const res = await fetch("/admin/update-invite-limit", { method: "POST", body: fd });
+        const data = await res.json();
+
+        if (!data.success) {
+            messageBox.innerText = t(data.message || "operationFailed");
+            return;
+        }
+
+        messageBox.style.color = "#5CFFB2";
+        messageBox.innerText = t("inviteLimitUpdated");
+    } catch (e) {
+        messageBox.innerText = t("operationFailed");
+    }
 }
