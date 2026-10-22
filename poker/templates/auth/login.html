@@ -73,17 +73,18 @@
 <script src="/static/js/auth/login/forgot_password.js?v={{ static_version }}"></script>
 <script src="/static/js/auth/login/init.js?v={{ static_version }}"></script>
 
-<div onclick="history.back()" style="
+<a href="https://urea-king.com" style="
     position: fixed;
-    bottom: 24px;
-    right: 24px;
+    bottom: 28px;
+    right: 28px;
     font-family: monospace;
-    font-size: 16px;
-    color: rgba(160,120,220,0.25);
+    font-size: 13px;
+    color: rgba(180,140,255,0.7);
+    text-decoration: none;
+    letter-spacing: 0.1em;
     cursor: pointer;
-    user-select: none;
-    transition: color 0.2s;
-" onmouseover="this.style.color='rgba(180,140,240,0.5)'" onmouseout="this.style.color='rgba(160,120,220,0.25)'">←</div>
+    transition: color 0.2s, text-shadow 0.2s;
+" onmouseover="this.style.color='rgba(210,180,255,1)';this.style.textShadow='0 0 8px rgba(180,120,255,0.8)'" onmouseout="this.style.color='rgba(180,140,255,0.7)';this.style.textShadow='none'">← BACK</a>
 
 </body>
 </html>

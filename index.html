@@ -121,23 +121,7 @@ html, body {
   text-shadow: 0 0 8px rgba(180,120,255,0.9);
 }
 
-/* sweep-lit flicker on planet */
-@keyframes sweep-flash {
-  0%   { filter: brightness(2.8) drop-shadow(0 0 18px rgba(200,140,255,1)); }
-  35%  { filter: brightness(1.8) drop-shadow(0 0 10px rgba(160,100,255,0.7)); }
-  100% { filter: brightness(1)   drop-shadow(0 0 4px  rgba(140,80,230,0.3)); }
-}
-@keyframes label-flash {
-  0%   { color: #fff; text-shadow: 0 0 18px rgba(220,180,255,1), 0 0 40px rgba(180,120,255,0.9); letter-spacing: 4px; }
-  40%  { color: rgba(255,255,255,0.95); text-shadow: 0 0 10px rgba(180,120,255,0.7); letter-spacing: 3.5px; }
-  100% { color: rgba(255,255,255,0.9);  text-shadow: 0 0 8px rgba(180,120,255,0.9); letter-spacing: 3px; }
-}
-#radar-target.lit .enter-link {
-  animation: sweep-flash 0.7s ease-out forwards;
-}
-#radar-target.lit .planet-label {
-  animation: label-flash 0.7s ease-out forwards;
-}
+/* sweep-lit flicker handled by JS */
 
 /* ── contact admin ── */
 .contact-bar {
@@ -431,10 +415,23 @@ function checkSweep() {
       planetWrap.style.opacity = '1';
       setTimeout(() => { radarTarget.style.pointerEvents = 'auto'; }, 1400);
     } else if (btnShown) {
-      // subsequent passes: pulse the planet glow
-      radarTarget.classList.remove('lit');
-      void radarTarget.offsetWidth;
-      radarTarget.classList.add('lit');
+      // subsequent passes: flash planet and label via JS
+      const el = document.getElementById('enter-btn');
+      const lbl = document.querySelector('.planet-label');
+      el.style.transition = 'none';
+      lbl.style.transition = 'none';
+      el.style.filter = 'brightness(3) drop-shadow(0 0 20px rgba(210,150,255,1))';
+      lbl.style.color = '#fff';
+      lbl.style.textShadow = '0 0 20px rgba(220,180,255,1), 0 0 40px rgba(180,120,255,0.9)';
+      lbl.style.letterSpacing = '5px';
+      setTimeout(() => {
+        el.style.transition = 'filter 0.6s ease-out';
+        lbl.style.transition = 'all 0.6s ease-out';
+        el.style.filter = 'brightness(1) drop-shadow(0 0 4px rgba(140,80,230,0.3))';
+        lbl.style.color = 'rgba(255,255,255,0.9)';
+        lbl.style.textShadow = '0 0 8px rgba(180,120,255,0.9)';
+        lbl.style.letterSpacing = '3px';
+      }, 60);
     }
   }
 }
