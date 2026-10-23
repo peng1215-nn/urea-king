@@ -5,6 +5,8 @@ from poker.models import GroupMemberAlias
 from poker.models import InvitationCode
 from poker.models import User
 from poker.models import UserGroupRole
+from poker.core.validators import ALIAS_MAX, check_name
+from poker.core.errors import safe_error
 
 
 def _get_aliases(db, group_id: int) -> dict:
@@ -72,7 +74,7 @@ def get_organizer_members_service(group_id: int):
     except Exception as e:
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -82,7 +84,12 @@ def get_organizer_members_service(group_id: int):
 def save_member_alias_service(group_id: int, target_user_id: int, alias: str):
     db = SessionLocal()
     try:
-        alias = alias.strip()
+        alias, alias_error = check_name(alias, ALIAS_MAX)
+        if alias_error:
+            return {
+                "success": False,
+                "message": "textTooLong" if alias_error == "too_long" else "textInvalidChars",
+            }
         existing = db.query(GroupMemberAlias).filter(
             GroupMemberAlias.group_id == group_id,
             GroupMemberAlias.user_id == target_user_id,
@@ -107,7 +114,7 @@ def save_member_alias_service(group_id: int, target_user_id: int, alias: str):
         return {"success": True}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -158,7 +165,7 @@ def remove_member_service(group_id: int, target_user_id: int):
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:

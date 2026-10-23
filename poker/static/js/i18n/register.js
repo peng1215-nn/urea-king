@@ -17,20 +17,24 @@ window.registerTranslations = {
 
         usernameRule: "用户名必须以字母开头，且至少 5 位，只能包含字母、数字和下划线。",
         nicknameRequired: "昵称不能为空。",
-        passwordTooShort: "密码长度必须大于等于 6 位。",
+        passwordTooShort: "密码长度至少为 8 位。",
         passwordMismatch: "两次输入的密码不一致。",
         inviteCodeRequired: "请输入邀请码。",
 
         registerUsernameInvalid: "用户名必须以字母开头，且至少 5 位。",
         registerNicknameRequired: "昵称不能为空。",
-        registerPasswordTooShort: "密码长度至少为 6 位。",
+        registerPasswordTooShort: "密码长度至少为 8 位。",
         registerPasswordMismatch: "两次输入的密码不一致。",
+        registerNicknameTooLong: "昵称不能超过 30 个字符。",
+        registerNicknameInvalid: "昵称不能包含 < > 或不可见字符。",
+        registerPasswordTooLong: "密码不能超过 128 位。",
         registerUsernameExists: "用户名已存在。",
         registerInviteCodeNotFound: "邀请码不存在。",
         registerInviteCodeUsed: "邀请码已被使用。",
         registerInviteCodeNoGroup: "该邀请码未绑定组别，无法注册。",
         registerInviteCodeGroupNotFound: "邀请码对应的组不存在，请联系管理员。",
         registerFailed: "注册失败。",
+        registerTooManyAttempts: "尝试次数过多，请 15 分钟后再试。",
         registerSuccess: "注册成功，欢迎"
     },
 
@@ -52,20 +56,24 @@ window.registerTranslations = {
 
         usernameRule: "Username must start with a letter and be at least 5 characters.",
         nicknameRequired: "Nickname cannot be empty.",
-        passwordTooShort: "Password must be at least 6 characters.",
+        passwordTooShort: "Password must be at least 8 characters.",
         passwordMismatch: "Passwords do not match.",
         inviteCodeRequired: "Please enter invitation code.",
 
         registerUsernameInvalid: "Username must start with a letter and be at least 5 characters.",
         registerNicknameRequired: "Nickname cannot be empty.",
-        registerPasswordTooShort: "Password must be at least 6 characters.",
+        registerPasswordTooShort: "Password must be at least 8 characters.",
         registerPasswordMismatch: "Passwords do not match.",
+        registerNicknameTooLong: "Nickname cannot exceed 30 characters.",
+        registerNicknameInvalid: "Nickname cannot contain < > or invisible characters.",
+        registerPasswordTooLong: "Password cannot exceed 128 characters.",
         registerUsernameExists: "Username already exists.",
         registerInviteCodeNotFound: "Invitation code does not exist.",
         registerInviteCodeUsed: "Invitation code has already been used.",
         registerInviteCodeNoGroup: "This invitation code is not bound to a group.",
         registerInviteCodeGroupNotFound: "The group associated with this invitation code does not exist. Please contact an administrator.",
         registerFailed: "Registration failed.",
+        registerTooManyAttempts: "Too many attempts. Please try again in 15 minutes.",
         registerSuccess: "Registration successful. Welcome"
     }
 };

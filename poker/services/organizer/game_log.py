@@ -5,6 +5,7 @@ from poker.models import PokerGamePlayer
 from poker.models import ChipRequest
 from poker.models import User
 from poker.models import UserGroupRole
+from poker.core.errors import safe_error
 
 
 def _get_aliases(db, group_id: int) -> dict:
@@ -124,7 +125,7 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
             "total_pages": max(1, (total + PAGE_SIZE - 1) // PAGE_SIZE),
         }
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -294,7 +295,7 @@ def get_stats_service(group_id: int):
             },
         }
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -333,7 +334,7 @@ def delete_game_log_service(game_id: int, group_id: int):
         return {"success": True}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -399,7 +400,7 @@ def get_member_stats_service(group_id: int):
 
         return {"success": True, "members": members}
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -431,6 +432,6 @@ def get_member_trend_service(group_id: int, user_id: int):
 
         return {"success": True, "points": points}
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()

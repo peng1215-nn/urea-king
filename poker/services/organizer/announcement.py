@@ -1,5 +1,6 @@
 from database import SessionLocal
 from poker.models import Announcement
+from poker.core.errors import safe_error
 
 
 def get_announcements_service():
@@ -29,6 +30,6 @@ def get_announcements_service():
             ],
         }
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()

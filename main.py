@@ -1,11 +1,14 @@
-from datetime import datetime
 from utils.time import now_columbus_naive
-import os
-from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from starlette.middleware.sessions import SessionMiddleware
+
+# settings 会加载 .env 并校验必需的配置，必须最先导入
+from poker.core import settings
+from poker.core.logging_config import setup_logging
+from poker.core.errors import register_exception_handlers
+from poker.core.middleware import install_middleware
+from poker.routes.common.health import router as health_router
 
 from root.routes.index import router as root_index_router
 from poker.routes.admin.admin import router as admin_router
@@ -30,14 +33,22 @@ from poker.routes.user.game import router as user_game_router
 from poker.routes.user.misc import router as user_misc_router
 
 
-load_dotenv()
+setup_logging(settings.LOG_LEVEL)
 
 app = FastAPI()
 
-@app.middleware("http")
+register_exception_handlers(app)
+
+
+# 平台健康检查请求的 Host 不是我们的域名，这些路径不做域名跳转
+_HOST_AGNOSTIC_PATHS = ("/healthz", "/readyz")
+
+
 async def domain_router(request: Request, call_next):
     host = request.headers.get("host", "")
     path = request.url.path
+    if path in _HOST_AGNOSTIC_PATHS:
+        return await call_next(request)
     # non-poker domain: only allow "/" and static assets
     if not host.startswith("poker.") and not host.startswith("localhost") and not host.startswith("127."):
         if path == "/" or path.startswith("/static"):
@@ -45,6 +56,8 @@ async def domain_router(request: Request, call_next):
         return RedirectResponse(url="/")
     return await call_next(request)
 
+
+app.include_router(health_router)
 app.include_router(root_index_router)
 app.include_router(register_router)
 app.include_router(login_router)
@@ -68,16 +81,8 @@ app.include_router(user_game_router)
 app.include_router(user_misc_router)
 
 
-SESSION_SECRET_KEY = os.getenv(
-    "SESSION_SECRET_KEY",
-    "local-dev-secret-key"
-)
-
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=SESSION_SECRET_KEY,
-    max_age=60 * 60 * 24,
-)
+# ───── 中间件（顺序与说明见 poker/core/middleware.py 的 install_middleware）─────
+install_middleware(app, domain_router)
 
 app.mount(
     "/static/root",

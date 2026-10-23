@@ -9,6 +9,9 @@ from poker.models import Group
 from poker.models import UserGroupRole
 from poker.services.auth.login import login_user_service
 from poker.template_config import templates
+from fastapi.responses import JSONResponse
+from poker.core.rate_limit import login_failures_by_account, login_failures_by_ip, login_keys
+from poker.services.admin.audit_log import get_client_ip
 
 
 router = APIRouter()
@@ -37,11 +40,37 @@ def login_user(
     username: str = Form(...),
     password: str = Form(...),
 ):
-    return login_user_service(
+    ip = get_client_ip(request) or "unknown"
+    account_key, ip_key = login_keys(ip, username)
+
+    wait = max(
+        login_failures_by_account.retry_after(account_key),
+        login_failures_by_ip.retry_after(ip_key),
+    )
+
+    if wait:
+        return JSONResponse(
+            {
+                "success": False,
+                "error_code": "loginTooManyAttempts",
+                "retry_after": wait,
+            },
+            status_code=429,
+        )
+
+    result = login_user_service(
         request=request,
         username=username,
         password=password,
     )
+
+    if result.get("success"):
+        login_failures_by_account.reset(account_key)
+    elif result.get("error_code") in ("loginUserNotFound", "loginPasswordIncorrect"):
+        login_failures_by_account.hit(account_key)
+        login_failures_by_ip.hit(ip_key)
+
+    return result
 
 
 @router.get("/group-select", response_class=HTMLResponse)

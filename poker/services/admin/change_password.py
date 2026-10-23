@@ -2,6 +2,8 @@ from passlib.context import CryptContext
 
 from database import SessionLocal
 from poker.models import User
+from poker.core.validators import NICKNAME_MAX, check_name, check_password
+from poker.core.errors import safe_error
 
 
 pwd_context = CryptContext(
@@ -36,7 +38,7 @@ def get_current_account_service(user_id):
     except Exception as e:
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -58,10 +60,16 @@ def update_nickname_service(
                 "message": "nicknameRequired",
             }
 
-        if len(nickname) > 50:
+        nickname, nickname_error = check_name(nickname, NICKNAME_MAX)
+
+        if nickname_error:
             return {
                 "success": False,
-                "message": "nicknameTooLong",
+                "message": (
+                    "nicknameTooLong"
+                    if nickname_error == "too_long"
+                    else "nicknameInvalid"
+                ),
             }
 
         user = db.query(User).filter(
@@ -106,7 +114,7 @@ def update_nickname_service(
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -141,10 +149,16 @@ def update_password_service(
                 "message": "currentPasswordIncorrect",
             }
 
-        if len(new_password) < 6:
+        password_error = check_password(new_password)
+
+        if password_error:
             return {
                 "success": False,
-                "message": "newPasswordTooShort",
+                "message": (
+                    "newPasswordTooShort"
+                    if password_error == "too_short"
+                    else "newPasswordTooLong"
+                ),
             }
 
         if current_password == new_password:
@@ -175,7 +189,7 @@ def update_password_service(
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:

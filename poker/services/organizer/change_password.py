@@ -2,6 +2,8 @@ from passlib.context import CryptContext
 
 from database import SessionLocal
 from poker.models import User
+from poker.core.validators import NICKNAME_MAX, check_name, check_password
+from poker.core.errors import safe_error
 
 
 pwd_context = CryptContext(
@@ -29,7 +31,7 @@ def get_current_account_service(user_id):
         }
 
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
 
     finally:
         db.close()
@@ -44,8 +46,13 @@ def update_nickname_service(user_id, nickname):
         if not nickname:
             return {"success": False, "message": "nicknameRequired"}
 
-        if len(nickname) > 50:
-            return {"success": False, "message": "nicknameTooLong"}
+        nickname, nickname_error = check_name(nickname, NICKNAME_MAX)
+
+        if nickname_error:
+            return {
+                "success": False,
+                "message": "nicknameTooLong" if nickname_error == "too_long" else "nicknameInvalid",
+            }
 
         user = db.query(User).filter(User.id == user_id).first()
 
@@ -74,7 +81,7 @@ def update_nickname_service(user_id, nickname):
 
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
 
     finally:
         db.close()
@@ -97,8 +104,13 @@ def update_password_service(
         if not pwd_context.verify(current_password, user.password_hash):
             return {"success": False, "message": "currentPasswordIncorrect"}
 
-        if len(new_password) < 6:
-            return {"success": False, "message": "newPasswordTooShort"}
+        password_error = check_password(new_password)
+
+        if password_error:
+            return {
+                "success": False,
+                "message": "newPasswordTooShort" if password_error == "too_short" else "newPasswordTooLong",
+            }
 
         if current_password == new_password:
             return {"success": False, "message": "passwordNoChange"}
@@ -113,7 +125,7 @@ def update_password_service(
 
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
 
     finally:
         db.close()

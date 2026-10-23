@@ -4,6 +4,7 @@ from poker.models import Group
 from poker.models import User
 from poker.models import UserGroupRole
 from poker.services.admin.audit_log import write_audit_log
+from poker.core.errors import safe_error
 
 
 pwd_context = CryptContext(
@@ -91,7 +92,7 @@ def login_user_service(request, username, password):
         }
 
     except Exception as e:
-        print(e)
+        safe_error(e)
 
         return {
             "success": False,

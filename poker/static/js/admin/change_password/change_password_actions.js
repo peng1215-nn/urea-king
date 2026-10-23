@@ -94,7 +94,7 @@ async function savePassword() {
         return;
     }
 
-    if (newPwd.length < 6) {
+    if (newPwd.length < 8) {
         messageBox.innerText =
             t("newPasswordTooShort");
 

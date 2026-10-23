@@ -51,7 +51,7 @@ function validateRegisterForm(form) {
         return false;
     }
 
-    if (form.password.length < 6) {
+    if (form.password.length < 8) {
         showMessage(
             t("passwordTooShort"),
         );

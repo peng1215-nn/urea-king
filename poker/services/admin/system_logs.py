@@ -6,6 +6,7 @@ from poker.models import AuditLog
 from poker.models import User
 from sqlalchemy import or_
 from utils.time import now_columbus_naive
+from poker.core.errors import safe_error
 
 
 def _build_filtered_query(db, action=None, username=None):
@@ -106,7 +107,7 @@ def get_audit_logs_service(
     except Exception as e:
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -202,7 +203,7 @@ def delete_audit_logs_service(ids):
 
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
 
     finally:
         db.close()

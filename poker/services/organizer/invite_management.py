@@ -6,6 +6,7 @@ from database import SessionLocal
 from poker.models import Group
 from poker.models import InvitationCode
 from poker.models import UserGroupRole
+from poker.core.errors import safe_error
 
 
 def get_invite_codes_service(group_id: int):
@@ -37,7 +38,7 @@ def get_invite_codes_service(group_id: int):
             ],
         }
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -100,7 +101,7 @@ def create_invite_code_service(group_id: int, code: str):
         }
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -129,6 +130,6 @@ def delete_invite_code_service(invite_id: int, group_id: int):
         return {"success": True}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()

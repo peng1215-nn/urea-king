@@ -3,6 +3,8 @@ from utils.time import now_columbus_naive
 
 from database import SessionLocal
 from poker.models import Announcement
+from poker.core.validators import ANNOUNCEMENT_CONTENT_MAX, ANNOUNCEMENT_TITLE_MAX, check_text
+from poker.core.errors import safe_error
 
 
 def get_announcements_service():
@@ -38,7 +40,7 @@ def get_announcements_service():
     except Exception as e:
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -49,8 +51,18 @@ def create_announcement_service(title, content):
     db = SessionLocal()
 
     try:
-        title = title.strip()
-        content = content.strip()
+        title, title_error = check_text(title, ANNOUNCEMENT_TITLE_MAX)
+        content, content_error = check_text(content, ANNOUNCEMENT_CONTENT_MAX)
+
+        if title_error or content_error:
+            return {
+                "success": False,
+                "message": (
+                    "textTooLong"
+                    if "too_long" in (title_error, content_error)
+                    else "textInvalidChars"
+                ),
+            }
 
         if not title:
             return {
@@ -86,7 +98,7 @@ def create_announcement_service(title, content):
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -111,8 +123,18 @@ def update_announcement_service(
                 "message": "announcementNotFound",
             }
 
-        title = title.strip()
-        content = content.strip()
+        title, title_error = check_text(title, ANNOUNCEMENT_TITLE_MAX)
+        content, content_error = check_text(content, ANNOUNCEMENT_CONTENT_MAX)
+
+        if title_error or content_error:
+            return {
+                "success": False,
+                "message": (
+                    "textTooLong"
+                    if "too_long" in (title_error, content_error)
+                    else "textInvalidChars"
+                ),
+            }
 
         if not title:
             return {
@@ -142,7 +164,7 @@ def update_announcement_service(
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -176,7 +198,7 @@ def delete_announcement_service(announcement_id):
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:

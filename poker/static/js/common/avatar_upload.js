@@ -22,7 +22,7 @@ async function uploadAvatar() {
         const data = await response.json();
 
         if (!data.success) {
-            alert(data.message || "头像上传失败。");
+            alert(typeof t === "function" ? t(data.message || "avatarUploadFailed") : "头像上传失败。");
             return;
         }
 
@@ -36,6 +36,6 @@ async function uploadAvatar() {
 
     } catch (error) {
         console.error(error);
-        alert("头像上传失败。");
+        alert(typeof t === "function" ? t("avatarUploadFailed") : "头像上传失败。");
     }
 }

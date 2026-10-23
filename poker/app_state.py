@@ -10,4 +10,4 @@ PROJECT_LAUNCH_TIME = datetime(
 )
 
 SYSTEM_VERSION = "v0.1.0"
-DEPLOY_ENVIRONMENT = "Development"
+from poker.core.settings import DEPLOY_ENVIRONMENT  # noqa: E402,F401  由环境变量决定

@@ -1,3 +1,4 @@
+import io
 import os
 
 import cloudinary
@@ -7,9 +8,26 @@ from fastapi import APIRouter, File, Request, UploadFile
 
 from database import SessionLocal
 from poker.models import User
+from poker.core.errors import safe_error
 
 
 router = APIRouter()
+
+MAX_AVATAR_BYTES = 2 * 1024 * 1024
+
+
+def detect_image_type(data):
+    """按文件头判断真实格式，不信任客户端声明的类型和扩展名。"""
+    if data.startswith(b"\xff\xd8\xff"):
+        return "jpeg"
+    if data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "png"
+    if data[:6] in (b"GIF87a", b"GIF89a"):
+        return "gif"
+    if len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return "webp"
+    return None
+
 
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
@@ -28,11 +46,19 @@ async def upload_avatar(
     if not user_id:
         return {"success": False, "message": "未登录。"}
 
+    data = await avatar.read(MAX_AVATAR_BYTES + 1)
+
+    if len(data) > MAX_AVATAR_BYTES:
+        return {"success": False, "message": "avatarTooLarge"}
+
+    if detect_image_type(data) is None:
+        return {"success": False, "message": "avatarInvalidType"}
+
     db = SessionLocal()
 
     try:
         upload_result = cloudinary.uploader.upload(
-            avatar.file,
+            io.BytesIO(data),
             folder="urea_king_avatars",
             public_id=f"user_{user_id}",
             overwrite=True,
@@ -60,7 +86,7 @@ async def upload_avatar(
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:

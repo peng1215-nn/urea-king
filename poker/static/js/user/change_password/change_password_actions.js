@@ -31,7 +31,7 @@ async function savePassword() {
 
     if (!current) { messageBox.innerText = t("currentPasswordRequired"); return; }
     if (!newPwd) { messageBox.innerText = t("newPasswordRequired"); return; }
-    if (newPwd.length < 6) { messageBox.innerText = t("newPasswordTooShort"); return; }
+    if (newPwd.length < 8) { messageBox.innerText = t("newPasswordTooShort"); return; }
     if (newPwd !== confirm) { messageBox.innerText = t("newPasswordMismatch"); return; }
 
     const data = await apiUpdatePassword(current, newPwd, confirm);

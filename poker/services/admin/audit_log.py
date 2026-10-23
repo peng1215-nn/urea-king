@@ -3,6 +3,7 @@ from utils.time import now_columbus_naive
 
 from database import SessionLocal
 from poker.models import AuditLog
+import logging
 
 
 def get_client_ip(request):
@@ -49,7 +50,7 @@ def write_audit_log(
 
     except Exception as error:
         db.rollback()
-        print("AUDIT LOG ERROR:", error)
+        logging.getLogger("poker.audit").error("failed to write audit log", exc_info=error)
 
     finally:
         db.close()

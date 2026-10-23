@@ -9,6 +9,8 @@ from poker.models import InvitationCode
 from poker.models import User
 from poker.models import UserGroupRole
 from passlib.context import CryptContext
+import secrets
+from poker.core.errors import safe_error
 
 
 pwd_context = CryptContext(
@@ -54,7 +56,7 @@ def get_admin_stats_service():
     except Exception as e:
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -123,7 +125,7 @@ def get_admin_users_service():
     except Exception as e:
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -188,11 +190,21 @@ def update_user_role_service(
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
         db.close()
+
+
+_TEMP_PASSWORD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789"
+
+
+def generate_temporary_password(length=10):
+    """随机临时密码，去掉了 0/O、1/l/I 等容易看错的字符。"""
+    return "".join(
+        secrets.choice(_TEMP_PASSWORD_ALPHABET) for _ in range(length)
+    )
 
 
 def reset_user_password_service(target_user_id):
@@ -220,13 +232,16 @@ def reset_user_password_service(target_user_id):
                 "message": "不允许重置管理员密码。",
             }
 
-        user.password_hash = pwd_context.hash("000000")
+        temporary_password = generate_temporary_password()
+
+        user.password_hash = pwd_context.hash(temporary_password)
 
         db.commit()
 
+        # 临时密码只在本次响应里返回给管理员，不写入日志
         return {
             "success": True,
-            "message": "密码已重置为 000000。",
+            "temporary_password": temporary_password,
         }
 
     except Exception as e:
@@ -234,7 +249,7 @@ def reset_user_password_service(target_user_id):
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -285,7 +300,7 @@ def toggle_user_active_service(target_user_id):
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:

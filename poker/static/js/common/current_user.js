@@ -1,3 +1,30 @@
+// 会话失效（账号被禁用、被移出组或角色变更）时，后端返回 401 sessionExpired，
+// 这里统一跳回登录页，避免页面停在一堆“操作失败”的状态。
+(function hookSessionExpiry() {
+    if (window.__sessionExpiryHooked || !window.fetch) {
+        return;
+    }
+
+    window.__sessionExpiryHooked = true;
+
+    const originalFetch = window.fetch.bind(window);
+
+    window.fetch = async function (...args) {
+        const response = await originalFetch(...args);
+
+        if (response.status === 401) {
+            const data = await response.clone().json().catch(() => null);
+
+            if (data && data.message === "sessionExpired") {
+                window.location.href = "/login";
+            }
+        }
+
+        return response;
+    };
+})();
+
+
 async function loadCurrentUser() {
     try {
         const response =

@@ -6,6 +6,8 @@ from poker.models import Group
 from poker.models import InvitationCode
 from poker.models import UserGroupRole
 from poker.models import PokerGame, PokerGamePlayer, ChipRequest
+from poker.core.validators import GROUP_NAME_MAX, check_name
+from poker.core.errors import safe_error
 
 
 ADMIN_GROUP_CODE = "0"
@@ -34,7 +36,7 @@ def get_group_options_service():
     except Exception as e:
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -64,7 +66,7 @@ def get_deletable_group_options_service():
     except Exception as e:
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -104,7 +106,7 @@ def get_unused_invitation_options_service():
     except Exception as e:
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -119,7 +121,13 @@ def create_group_service(
 
     try:
         group_code = group_code.strip()
-        group_name = group_name.strip()
+        group_name, group_name_error = check_name(group_name, GROUP_NAME_MAX)
+
+        if group_name_error:
+            return {
+                "success": False,
+                "message": "textTooLong" if group_name_error == "too_long" else "textInvalidChars",
+            }
 
         if not group_code:
             return {
@@ -178,7 +186,7 @@ def create_group_service(
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -244,7 +252,7 @@ def delete_group_service(group_id):
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -363,7 +371,7 @@ def create_invitation_code_service(
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -410,7 +418,7 @@ def delete_invitation_code_service(invitation_id):
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:
@@ -473,6 +481,6 @@ def update_invite_limit_service(group_id: int, limit: int):
         }
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()

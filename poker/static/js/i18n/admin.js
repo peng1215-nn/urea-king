@@ -65,7 +65,7 @@ window.adminTranslations = {
         editUserInfoDesc: "仅支持修改所选用户在指定所属组下的身份。组别不可修改，身份相同则无需保存。",
         saveChanges: "保存修改",
         resetPassword: "重置密码",
-        resetPasswordDesc: "点击确认后，系统会将所选用户的登录密码重置为默认密码 000000。",
+        resetPasswordDesc: "点击确认后，系统会为所选用户生成一个随机临时密码，并只在本页面显示一次。",
         confirmResetPassword: "确认重置密码",
         toggleAccountStatus: "禁用 / 启用账号",
         toggleAccountStatusDesc: "通过账号状态控制该用户是否允许登录。",
@@ -124,7 +124,8 @@ window.adminTranslations = {
         loadUsersFailed: "加载用户列表失败：",
 
         passwordResetConfirmText: "确认重置 {username} 的密码？",
-        passwordResetSuccess: "密码已重置为 000000。",
+        passwordResetSuccess: "密码已重置，临时密码：",
+        passwordResetTempHint: "请把临时密码告知该用户，并提醒其登录后立即修改。此密码只显示这一次。",
         passwordResetFailed: "密码重置失败。",
 
         accountDisabled: "已禁用",
@@ -150,6 +151,18 @@ window.adminTranslations = {
         accountSuffix: "的账号？",
 
         operationFailed: "操作失败。",
+
+        avatarUploadFailed: "头像上传失败。",
+
+        avatarTooLarge: "头像不能超过 2 MB。",
+
+        avatarInvalidType: "只支持 JPG、PNG、WebP、GIF 格式的图片。",
+
+        sessionExpired: "登录状态已失效，请重新登录。",
+
+        forbiddenOrigin: "请求来源不被允许。",
+
+        notFound: "请求的内容不存在。",
         operationSuccess: "操作成功。",
         confirmAction: "确认账号状态操作",
         confirm: "确认",
@@ -307,12 +320,16 @@ window.adminTranslations = {
         confirmNewPasswordPlaceholder: "请再次输入新密码",
         changePasswordFormDesc: "修改密码需要输入当前密码。修改成功后将自动退出登录。",
         nicknameRequired: "请输入昵称。",
-        nicknameTooLong: "昵称不能超过 50 个字符。",
+        nicknameTooLong: "昵称不能超过 30 个字符。",
         nicknameUpdateSuccess: "昵称修改成功。",
         currentPasswordRequired: "请输入当前密码。",
         currentPasswordIncorrect: "当前密码不正确。",
         newPasswordRequired: "请输入新密码。",
-        newPasswordTooShort: "新密码至少需要 6 位。",
+        newPasswordTooShort: "新密码至少需要 8 位。",
+        newPasswordTooLong: "新密码不能超过 128 位。",
+        nicknameInvalid: "昵称不能包含 < > 或不可见字符。",
+        textTooLong: "内容超出长度限制。",
+        textInvalidChars: "内容包含不允许的字符（如 < > 或不可见字符）。",
         confirmNewPasswordRequired: "请确认新密码。",
         newPasswordMismatch: "两次输入的新密码不一致。",
         passwordUpdateSuccessLogout: "密码修改成功，请重新登录。",
@@ -389,7 +406,7 @@ window.adminTranslations = {
         editUserInfoDesc: "Only the selected user's role in the specified group can be modified. Group cannot be changed. No save is needed if the role is unchanged.",
         saveChanges: "Save Changes",
         resetPassword: "Reset Password",
-        resetPasswordDesc: "After confirmation, the selected user's login password will be reset to the default password 000000.",
+        resetPasswordDesc: "After confirmation, a random temporary password will be generated for the selected user and shown on this page only once.",
         confirmResetPassword: "Confirm Password Reset",
         toggleAccountStatus: "Disable / Enable Account",
         toggleAccountStatusDesc: "Control whether this user is allowed to log in through account status.",
@@ -448,7 +465,8 @@ window.adminTranslations = {
         loadUsersFailed: "Failed to load user list:",
 
         passwordResetConfirmText: "Confirm resetting {username}'s password?",
-        passwordResetSuccess: "Password has been reset to 000000.",
+        passwordResetSuccess: "Password reset. Temporary password: ",
+        passwordResetTempHint: "Share this temporary password with the user and ask them to change it right after signing in. It is shown only once.",
         passwordResetFailed: "Password reset failed.",
 
         accountDisabled: "Disabled",
@@ -474,6 +492,18 @@ window.adminTranslations = {
         accountSuffix: "'s account?",
 
         operationFailed: "Operation failed.",
+
+        avatarUploadFailed: "Avatar upload failed.",
+
+        avatarTooLarge: "Avatar must be 2 MB or smaller.",
+
+        avatarInvalidType: "Only JPG, PNG, WebP and GIF images are supported.",
+
+        sessionExpired: "Your session has expired. Please sign in again.",
+
+        forbiddenOrigin: "Request origin is not allowed.",
+
+        notFound: "The requested resource was not found.",
         operationSuccess: "Operation successful.",
         confirmAction: "Confirm Account Status Action",
         confirm: "Confirm",
@@ -630,13 +660,17 @@ window.adminTranslations = {
         confirmNewPasswordPlaceholder: "Enter new password again",
         changePasswordFormDesc: "Changing your password requires your current password. You will be logged out after success.",
         nicknameRequired: "Please enter a nickname.",
-        nicknameTooLong: "Nickname cannot exceed 50 characters.",
+        nicknameTooLong: "Nickname cannot exceed 30 characters.",
         nicknameUpdateSuccess: "Nickname updated successfully.",
 
         currentPasswordRequired: "Please enter your current password.",
         currentPasswordIncorrect: "Current password is incorrect.",
         newPasswordRequired: "Please enter a new password.",
-        newPasswordTooShort: "New password must be at least 6 characters.",
+        newPasswordTooShort: "New password must be at least 8 characters.",
+        newPasswordTooLong: "New password cannot exceed 128 characters.",
+        nicknameInvalid: "Nickname cannot contain < > or invisible characters.",
+        textTooLong: "The text exceeds the length limit.",
+        textInvalidChars: "The text contains characters that are not allowed (such as < > or invisible characters).",
         confirmNewPasswordRequired: "Please confirm the new password.",
         newPasswordMismatch: "The two new passwords do not match.",
         passwordUpdateSuccessLogout: "Password updated successfully. Please log in again.",

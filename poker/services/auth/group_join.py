@@ -8,6 +8,7 @@ from poker.models import InvitationCode
 from poker.models import User
 from poker.models import UserGroupRole
 from poker.services.admin.audit_log import write_audit_log
+from poker.core.errors import safe_error
 
 
 pwd_context = CryptContext(
@@ -143,7 +144,7 @@ def group_join_service(
 
         return {
             "success": False,
-            "message": str(e),
+            "message": safe_error(e),
         }
 
     finally:

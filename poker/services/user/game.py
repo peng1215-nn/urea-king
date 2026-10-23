@@ -6,6 +6,7 @@ from poker.models import PokerGame
 from poker.models import PokerGamePlayer
 from poker.models import User
 from poker.models import UserGroupRole
+from poker.core.errors import safe_error
 
 
 def get_user_ongoing_games_service(group_id: int, user_id: int):
@@ -92,7 +93,7 @@ def get_user_ongoing_games_service(group_id: int, user_id: int):
 
         return {"success": True, "games": result}
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -119,7 +120,7 @@ def get_chip_auth_settings_service(user_id: int):
 
         return {"success": True, "settings": settings}
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -142,7 +143,7 @@ def update_chip_auth_service(user_id: int, group_id: int, allow: int):
         return {"success": True}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -188,6 +189,6 @@ def submit_buyin_request_service(game_id: int, group_id: int, user_id: int, amou
         return {"success": True}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()

@@ -8,6 +8,8 @@ from poker.models import InvitationCode
 from poker.models import User
 from poker.models import UserGroupRole
 from poker.services.admin.audit_log import write_audit_log
+from poker.core.validators import NICKNAME_MAX, check_name, check_password
+from poker.core.errors import safe_error
 
 
 pwd_context = CryptContext(
@@ -42,10 +44,28 @@ def register_user_service(
             "error_code": "registerNicknameRequired",
         }
 
-    if len(password) < 6:
+    nickname, nickname_error = check_name(nickname, NICKNAME_MAX)
+
+    if nickname_error:
         return {
             "success": False,
-            "error_code": "registerPasswordTooShort",
+            "error_code": (
+                "registerNicknameTooLong"
+                if nickname_error == "too_long"
+                else "registerNicknameInvalid"
+            ),
+        }
+
+    password_error = check_password(password)
+
+    if password_error:
+        return {
+            "success": False,
+            "error_code": (
+                "registerPasswordTooShort"
+                if password_error == "too_short"
+                else "registerPasswordTooLong"
+            ),
         }
 
     if password != confirm_password:
@@ -140,7 +160,7 @@ def register_user_service(
         }
 
     except Exception as e:
-        print(e)
+        safe_error(e)
 
         db.rollback()
 

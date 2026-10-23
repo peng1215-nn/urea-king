@@ -6,6 +6,8 @@ from poker.models import PokerGame
 from poker.models import PokerGamePlayer
 from poker.models import User
 from poker.models import UserGroupRole
+from poker.core.validators import GAME_NAME_MAX, GAME_NOTE_MAX, check_name, check_text
+from poker.core.errors import safe_error
 
 
 MAX_PLAYERS = 10
@@ -61,7 +63,7 @@ def get_ongoing_games_service(group_id: int):
 
         return {"success": True, "games": result}
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -94,7 +96,7 @@ def get_game_history_service(group_id: int):
 
         return {"success": True, "games": result}
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -119,12 +121,19 @@ def get_group_members_for_game_service(group_id: int):
 
         return {"success": True, "members": members}
     except Exception as e:
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
 
 def start_game_service(group_id: int, organizer_id: int, name: str, preselected_user_ids: list):
+    name, name_error = check_name(name, GAME_NAME_MAX)
+    if name_error:
+        return {
+            "success": False,
+            "message": "textTooLong" if name_error == "too_long" else "textInvalidChars",
+        }
+
     db = SessionLocal()
     try:
         # 最多同时 3 个进行中的局
@@ -157,7 +166,7 @@ def start_game_service(group_id: int, organizer_id: int, name: str, preselected_
         game = PokerGame(
             group_id=group_id,
             organizer_id=organizer_id,
-            name=name.strip() if name else None,
+            name=name or None,
             status="ongoing",
             started_at=now_columbus_naive(),
         )
@@ -187,7 +196,7 @@ def start_game_service(group_id: int, organizer_id: int, name: str, preselected_
         return {"success": True, "game_id": game.id}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -264,7 +273,7 @@ def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organi
         return {"success": True, "rejoined": False}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -294,7 +303,7 @@ def remove_player_from_game_service(game_id: int, group_id: int, user_id: int):
         return {"success": True}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -330,7 +339,7 @@ def exit_player_from_game_service(game_id: int, group_id: int, user_id: int, cas
         return {"success": True}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -373,7 +382,7 @@ def approve_chip_request_service(request_id: int, game_id: int, group_id: int, r
         return {"success": True}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -407,7 +416,7 @@ def reject_chip_request_service(request_id: int, game_id: int, group_id: int, re
         return {"success": True}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -459,7 +468,7 @@ def organizer_buyin_service(game_id: int, group_id: int, user_id: int, amount: i
         return {"success": True}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -521,7 +530,7 @@ def organizer_proxy_buyin_service(game_id: int, group_id: int, organizer_id: int
         return {"success": True}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -536,6 +545,13 @@ def finish_game_service(
     force: bool = False,
     note: str = "",
 ):
+    note, note_error = check_text(note, GAME_NOTE_MAX)
+    if note_error:
+        return {
+            "success": False,
+            "message": "textTooLong" if note_error == "too_long" else "textInvalidChars",
+        }
+
     db = SessionLocal()
     try:
         game = db.query(PokerGame).filter(
@@ -581,7 +597,7 @@ def finish_game_service(
         game.is_balanced = is_balanced
         game.player_count = len([p for p in players if p.total_buy_in > 0 or (p.cash_out or 0) > 0])
         if note:
-            game.note = note.strip()
+            game.note = note
 
         db.commit()
 
@@ -607,7 +623,7 @@ def finish_game_service(
         }
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
@@ -698,6 +714,6 @@ def update_cash_out_service(game_id: int, group_id: int, user_id: int, cash_out:
         return {"success": True}
     except Exception as e:
         db.rollback()
-        return {"success": False, "message": str(e)}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
