@@ -19,7 +19,7 @@ def test_wrong_password_is_rate_limited(client, factory):
 
     for _ in range(5):
         response = client.post("/login", data={"username": "bob001", "password": "wrong-password"})
-        assert response.json()["error_code"] == "loginPasswordIncorrect"
+        assert response.json()["error_code"] == "loginInvalidCredentials"
 
     response = client.post("/login", data={"username": "bob001", "password": "wrong-password"})
     assert response.status_code == 429
@@ -168,3 +168,100 @@ def test_group_join_password_guessing_counts_toward_login_limit(client, factory)
 
     response = client.post("/login", data={"username": "gina001", "password": DEFAULT_PASSWORD})
     assert response.status_code == 429
+
+
+# ───────────── 不暴露用户名是否存在 ─────────────
+
+def test_unknown_user_and_wrong_password_get_same_message(client, factory):
+    user_id = factory.user("henry01")
+    group_id = factory.group("G1")
+    factory.role(user_id, group_id, "user")
+
+    unknown = client.post("/login", data={"username": "nobody99", "password": "whatever1"}).json()
+    wrong = client.post("/login", data={"username": "henry01", "password": "wrong-password"}).json()
+
+    assert unknown == wrong == {"success": False, "error_code": "loginInvalidCredentials"}
+
+
+def test_unknown_user_attempts_are_rate_limited_too(client):
+    for _ in range(5):
+        client.post("/login", data={"username": "nobody99", "password": "whatever1"})
+
+    assert client.post("/login", data={"username": "nobody99", "password": "whatever1"}).status_code == 429
+
+
+# ───────────── 改密码后其他设备的登录失效 ─────────────
+
+def _second_client():
+    from fastapi.testclient import TestClient
+
+    import main
+
+    return TestClient(main.app, base_url="http://localhost")
+
+
+def _login(test_client, username, group_id, password=DEFAULT_PASSWORD):
+    assert test_client.post("/login", data={"username": username, "password": password}).json()["success"] is True
+    assert test_client.post("/select-group", data={"group_id": group_id}).json()["success"] is True
+
+
+def test_changing_password_logs_out_other_devices(client, factory):
+    user_id = factory.user("ivan001")
+    group_id = factory.group("G1")
+    factory.role(user_id, group_id, "user")
+
+    phone = _second_client()
+    _login(client, "ivan001", group_id)
+    _login(phone, "ivan001", group_id)
+    assert phone.get("/current-user").json()["success"] is True
+
+    result = client.post(
+        "/user/change-password/update-password",
+        data={
+            "current_password": DEFAULT_PASSWORD,
+            "new_password": "NewPassw0rd9",
+            "confirm_password": "NewPassw0rd9",
+        },
+    ).json()
+    assert result["success"] is True, result
+
+    # 另一台设备上的旧登录立即失效
+    response = phone.get("/current-user")
+    assert response.status_code == 401
+    assert response.json()["message"] == "sessionExpired"
+
+    # 用新密码重新登录正常
+    _login(phone, "ivan001", group_id, password="NewPassw0rd9")
+    assert phone.get("/current-user").json()["success"] is True
+
+
+def test_admin_password_reset_logs_out_the_user(client, factory, login_as):
+    admin_group = factory.group("0", name="管理员")
+    admin_id = factory.user("admin001")
+    factory.role(admin_id, admin_group, "admin")
+
+    user_id = factory.user("judy001")
+    group_id = factory.group("G1")
+    factory.role(user_id, group_id, "user")
+
+    user_device = _second_client()
+    _login(user_device, "judy001", group_id)
+    assert user_device.get("/current-user").json()["success"] is True
+
+    login_as("admin001", admin_group)
+    assert client.post("/admin/reset-user-password", data={"target_user_id": user_id}).json()["success"] is True
+
+    assert user_device.get("/current-user").status_code == 401
+
+
+def test_session_without_password_fingerprint_is_rejected(client, factory, login_as):
+    """部署前签发的旧会话里没有密码指纹，应要求重新登录一次。"""
+    from poker.core import middleware
+
+    user_id = factory.user("kate001")
+    group_id = factory.group("G1")
+    factory.role(user_id, group_id, "user")
+    login_as("kate001", group_id)
+
+    middleware.clear_session_cache()
+    assert middleware._session_is_valid(user_id, group_id, "user", None) is False

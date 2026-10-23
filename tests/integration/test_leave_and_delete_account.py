@@ -267,7 +267,7 @@ def test_wrong_password_is_rejected_and_rate_limited(client, factory):
 
     for _ in range(5):
         result = _delete(client, "loner001", password="wrong-pass").json()
-        assert result["message"] == "loginPasswordIncorrect"
+        assert result["message"] == "loginInvalidCredentials"
 
     response = _delete(client, "loner001")
     assert response.status_code == 429
@@ -275,7 +275,7 @@ def test_wrong_password_is_rejected_and_rate_limited(client, factory):
 
 
 def test_unknown_username(client):
-    assert _delete(client, "nobody01").json()["message"] == "loginUserNotFound"
+    assert _delete(client, "nobody01").json()["message"] == "loginInvalidCredentials"
 
 
 def test_disabled_account_cannot_delete(client, factory):

@@ -126,7 +126,8 @@ async def origin_check(request, call_next):
 
 # ───────────────────────── 会话有效性核对 ─────────────────────────
 
-# 被禁用或被移出组的账号，最多在这段时间后失去访问权限
+# 被禁用、被移出组或改过密码的账号，最多在这段时间后失去访问权限
+# （改密码、重置密码的接口会主动清空缓存，立即生效）
 SESSION_CHECK_TTL = 15
 
 _session_cache = {}
@@ -136,14 +137,19 @@ _SKIP_PREFIXES = ("/static", "/healthz", "/readyz")
 _PUBLIC_PATHS = {"/", "/login", "/register", "/group-join", "/delete-account", "/account/delete"}
 
 
-def _session_is_valid(user_id, group_id, role):
+def _session_is_valid(user_id, group_id, role, pw_fp):
     from database import SessionLocal
+    from poker.core.security import fingerprint_matches
     from poker.models import User, UserGroupRole
 
     db = SessionLocal()
     try:
-        row = db.query(User.is_active).filter(User.id == user_id).first()
+        row = db.query(User.is_active, User.password_hash).filter(User.id == user_id).first()
         if row is None or row[0] == 0:
+            return False
+
+        # 密码改过（本人修改、管理员重置、注销）之后，之前的登录全部失效
+        if not fingerprint_matches(row[1], pw_fp):
             return False
 
         if role and group_id:
@@ -160,8 +166,8 @@ def _session_is_valid(user_id, group_id, role):
         db.close()
 
 
-def _cached_session_is_valid(user_id, group_id, role):
-    key = (user_id, group_id, role)
+def _cached_session_is_valid(user_id, group_id, role, pw_fp):
+    key = (user_id, group_id, role, pw_fp)
     now = time.monotonic()
 
     with _session_cache_lock:
@@ -169,7 +175,7 @@ def _cached_session_is_valid(user_id, group_id, role):
         if cached and cached[1] > now:
             return cached[0]
 
-    valid = _session_is_valid(user_id, group_id, role)
+    valid = _session_is_valid(user_id, group_id, role, pw_fp)
 
     with _session_cache_lock:
         if len(_session_cache) > 5000:
@@ -203,6 +209,7 @@ async def session_guard(request, call_next):
                 user_id,
                 request.session.get("current_group_id"),
                 request.session.get("current_role"),
+                request.session.get("pw_fp"),
             )
         except Exception:
             # 数据库暂时不可用时不在这里拦截，后续处理自己会报错

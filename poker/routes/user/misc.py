@@ -101,6 +101,8 @@ def update_password(
     )
     if result.get("success"):
         request.session.clear()
+        # 让其他设备上的旧登录立即失效
+        clear_session_cache()
     return result
 
 

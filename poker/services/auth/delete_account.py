@@ -16,6 +16,7 @@ from passlib.context import CryptContext
 
 from database import SessionLocal
 from poker.core.errors import safe_error
+from poker.core.security import verify_user_password
 from poker.models import Group, PokerGame, User, UserGroupRole
 from poker.services.common.common import user_in_ongoing_game
 from poker.services.common.group_purge import purge_group
@@ -52,11 +53,8 @@ def delete_account_service(username, password, confirm_text):
     try:
         user = db.query(User).filter(User.username == username).with_for_update().first()
 
-        if user is None:
-            return _fail("loginUserNotFound", credential_failed=True)
-
-        if not pwd_context.verify(password or "", user.password_hash):
-            return _fail("loginPasswordIncorrect", credential_failed=True)
+        if not verify_user_password(user, password):
+            return _fail("loginInvalidCredentials", credential_failed=True)
 
         if user.is_active == 0:
             return _fail("loginAccountDisabled")

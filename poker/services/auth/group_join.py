@@ -1,5 +1,4 @@
 from utils.time import now_columbus_naive
-from passlib.context import CryptContext
 
 from database import SessionLocal
 from poker.models import Group
@@ -8,12 +7,9 @@ from poker.models import User
 from poker.models import UserGroupRole
 from poker.services.admin.audit_log import write_audit_log
 from poker.core.errors import safe_error
+from poker.core.security import verify_user_password
 
 
-pwd_context = CryptContext(
-    schemes=["pbkdf2_sha256"],
-    deprecated="auto",
-)
 
 ADMIN_GROUP_CODE = "0"
 
@@ -43,10 +39,7 @@ def group_join_service(
             User.username == username
         ).first()
 
-        if not user:
-            return {"success": False, "message": "groupJoinAccountInvalid"}
-
-        if not pwd_context.verify(password, user.password_hash):
+        if not verify_user_password(user, password):
             return {"success": False, "message": "groupJoinAccountInvalid"}
 
         if int(user.is_active) != 1:

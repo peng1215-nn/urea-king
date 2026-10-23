@@ -61,7 +61,7 @@ def login_user(
 
     if result.get("success"):
         record_login_success(ip, username)
-    elif result.get("error_code") in ("loginUserNotFound", "loginPasswordIncorrect"):
+    elif result.get("error_code") == "loginInvalidCredentials":
         record_login_failure(ip, username)
 
     return result
