@@ -1,4 +1,4 @@
-from datetime import datetime
+from utils.time import now_columbus_naive
 from database import SessionLocal
 from poker.models import Group
 from poker.models import GroupMemberAlias
@@ -102,13 +102,13 @@ def save_member_alias_service(group_id: int, target_user_id: int, alias: str):
             return {"success": True}
         if existing:
             existing.alias = alias
-            existing.updated_at = datetime.utcnow()
+            existing.updated_at = now_columbus_naive()
         else:
             db.add(GroupMemberAlias(
                 group_id=group_id,
                 user_id=target_user_id,
                 alias=alias,
-                updated_at=datetime.utcnow(),
+                updated_at=now_columbus_naive(),
             ))
         db.commit()
         return {"success": True}
