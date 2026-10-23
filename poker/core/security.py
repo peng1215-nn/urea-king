@@ -10,10 +10,11 @@ from passlib.context import CryptContext
 from poker.core import settings
 
 
-_pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+# 全站唯一的密码哈希配置；其他地方都从这里导入，不要另建
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 # 用户名不存在时也做一次同样耗时的校验，避免通过响应时间判断用户名是否存在
-_DUMMY_HASH = _pwd_context.hash("dummy-password-for-timing")
+_DUMMY_HASH = pwd_context.hash("dummy-password-for-timing")
 
 
 def password_fingerprint(password_hash):
@@ -36,6 +37,6 @@ def fingerprint_matches(password_hash, fingerprint):
 def verify_user_password(user, password):
     """user 为 None 时也执行一次哈希校验，再返回 False。"""
     if user is None:
-        _pwd_context.verify(password or "", _DUMMY_HASH)
+        pwd_context.verify(password or "", _DUMMY_HASH)
         return False
-    return _pwd_context.verify(password or "", user.password_hash)
+    return pwd_context.verify(password or "", user.password_hash)

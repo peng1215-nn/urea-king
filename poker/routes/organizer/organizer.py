@@ -72,7 +72,7 @@ def organizer_members_api(request: Request):
     if not require_organizer(request):
         return {
             "success": False,
-            "message": "无权限访问。",
+            "message": "permissionDenied",
         }
 
     group_id = get_current_group_id(request)
@@ -80,7 +80,7 @@ def organizer_members_api(request: Request):
     if not group_id:
         return {
             "success": False,
-            "message": "未选择组别，请重新登录。",
+            "message": "noGroupSelected",
         }
 
     return get_organizer_members_service(group_id=int(group_id))
@@ -94,7 +94,7 @@ def remove_member(
     if not require_organizer(request):
         return {
             "success": False,
-            "message": "无权限访问。",
+            "message": "permissionDenied",
         }
 
     group_id = get_current_group_id(request)
@@ -102,7 +102,7 @@ def remove_member(
     if not group_id:
         return {
             "success": False,
-            "message": "未选择组别，请重新登录。",
+            "message": "noGroupSelected",
         }
 
     result = remove_member_service(
@@ -132,11 +132,11 @@ def save_member_alias(
     alias: str = Form(""),
 ):
     if not require_organizer(request):
-        return {"success": False, "message": "无权限访问。"}
+        return {"success": False, "message": "permissionDenied"}
 
     group_id = get_current_group_id(request)
     if not group_id:
-        return {"success": False, "message": "未选择组别，请重新登录。"}
+        return {"success": False, "message": "noGroupSelected"}
 
     return save_member_alias_service(
         group_id=int(group_id),

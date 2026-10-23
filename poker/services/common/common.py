@@ -20,7 +20,7 @@ def get_current_user_service(request):
     if not user_id:
         return {
             "success": False,
-            "message": "未登录。",
+            "message": "notLoggedIn",
         }
 
     db = SessionLocal()
@@ -33,7 +33,7 @@ def get_current_user_service(request):
         if not user:
             return {
                 "success": False,
-                "message": "用户不存在。",
+                "message": "userNotFound",
             }
 
         current_group_id = request.session.get(

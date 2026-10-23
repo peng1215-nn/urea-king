@@ -31,7 +31,9 @@ from poker.routes.auth.group_join import router as group_join_router
 from poker.routes.auth.delete_account import router as delete_account_router
 from poker.routes.user.dashboard import router as user_dashboard_router
 from poker.routes.user.game import router as user_game_router
-from poker.routes.user.misc import router as user_misc_router
+from poker.routes.user.announcement import router as user_announcement_router
+from poker.routes.user.change_password import router as user_change_password_router
+from poker.routes.user.game_log import router as user_game_log_router
 
 
 setup_logging(settings.LOG_LEVEL)
@@ -80,7 +82,9 @@ app.include_router(organizer_router)
 app.include_router(game_router)
 app.include_router(user_dashboard_router)
 app.include_router(user_game_router)
-app.include_router(user_misc_router)
+app.include_router(user_announcement_router)
+app.include_router(user_change_password_router)
+app.include_router(user_game_log_router)
 
 
 # ───── 中间件（顺序与说明见 poker/core/middleware.py 的 install_middleware）─────

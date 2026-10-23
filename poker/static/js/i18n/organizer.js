@@ -1,5 +1,13 @@
 const organizerTranslations = {
     zh: {
+        noGroupSelected: "未选择组别，请重新登录。",
+        notLoggedIn: "未登录。",
+        groupNotFound: "组别不存在。",
+        memberNotInGroup: "该成员不在本组中。",
+        cannotRemoveOrganizer: "不允许移除局头。",
+        invalidBuyType: "买入类型无效。",
+        playerNotInGame: "该玩家不在本局中。",
+        groupNameInvalid: "组名包含不允许的字符。",
         titleOrganizerDashboard: "UREAKING-POKER 局头控制台",
         titleMemberManagement: "UREAKING-POKER 成员管理",
         titleInviteManagement: "UREAKING-POKER 邀请码管理",
@@ -317,6 +325,14 @@ const organizerTranslations = {
     },
 
     en: {
+        noGroupSelected: "No group selected. Please sign in again.",
+        notLoggedIn: "You are not signed in.",
+        groupNotFound: "Group does not exist.",
+        memberNotInGroup: "This member is not in your group.",
+        cannotRemoveOrganizer: "The organizer cannot be removed.",
+        invalidBuyType: "Invalid buy-in type.",
+        playerNotInGame: "This player is not in the game.",
+        groupNameInvalid: "The group name contains characters that are not allowed.",
         titleOrganizerDashboard: "UREAKING-POKER Organizer Dashboard",
         titleMemberManagement: "UREAKING-POKER Member Management",
         titleInviteManagement: "UREAKING-POKER Invitation Management",

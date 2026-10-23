@@ -4,10 +4,8 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
 
-from database import SessionLocal
-from poker.models import Group
-from poker.models import UserGroupRole
 from poker.services.auth.login import login_user_service
+from poker.services.auth.login import select_group_service
 from poker.template_config import templates
 from fastapi.responses import JSONResponse
 from poker.core.rate_limit import login_retry_after, record_login_failure, record_login_success
@@ -86,55 +84,16 @@ def select_group(
     request: Request,
     group_id: int = Form(...),
 ):
-    db = SessionLocal()
+    user_id = request.session.get("user_id")
 
-    try:
-        user_id = request.session.get("user_id")
+    if not user_id:
+        return {"success": False, "error_code": "loginRequired"}
 
-        if not user_id:
-            return {
-                "success": False,
-                "error_code": "loginRequired",
-            }
+    result = select_group_service(user_id=user_id, group_id=group_id)
 
-        user_group_role = db.query(UserGroupRole).filter(
-            UserGroupRole.user_id == user_id,
-            UserGroupRole.group_id == group_id,
-        ).first()
+    if result.get("success"):
+        request.session["current_group_id"] = result.pop("group_id")
+        request.session["current_group_code"] = result.pop("group_code")
+        request.session["current_role"] = result["role"]
 
-        if not user_group_role:
-            return {
-                "success": False,
-                "error_code": "groupAccessDenied",
-            }
-
-        group = db.query(Group).filter(
-            Group.id == group_id,
-        ).first()
-
-        if not group:
-            return {
-                "success": False,
-                "error_code": "groupNotFound",
-            }
-
-        request.session["current_group_id"] = group.id
-        request.session["current_group_code"] = group.group_code
-        request.session["current_role"] = user_group_role.role
-
-        redirect_url = "/user-dashboard"
-
-        if user_group_role.role == "admin":
-            redirect_url = "/admin-dashboard"
-
-        elif user_group_role.role == "organizer":
-            redirect_url = "/organizer-dashboard"
-
-        return {
-            "success": True,
-            "role": user_group_role.role,
-            "redirect_url": redirect_url,
-        }
-
-    finally:
-        db.close()
+    return result

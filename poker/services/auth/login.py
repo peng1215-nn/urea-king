@@ -90,3 +90,40 @@ def login_user_service(request, username, password):
 
     finally:
         db.close()
+
+
+ROLE_HOME = {
+    "admin": "/admin-dashboard",
+    "organizer": "/organizer-dashboard",
+    "user": "/user-dashboard",
+}
+
+
+def select_group_service(user_id, group_id):
+    """登录后选择进入哪个组。返回该组信息和身份，由路由写入会话。"""
+    db = SessionLocal()
+
+    try:
+        user_group_role = db.query(UserGroupRole).filter(
+            UserGroupRole.user_id == user_id,
+            UserGroupRole.group_id == group_id,
+        ).first()
+
+        if not user_group_role:
+            return {"success": False, "error_code": "groupAccessDenied"}
+
+        group = db.query(Group).filter(Group.id == group_id).first()
+
+        if not group:
+            return {"success": False, "error_code": "groupNotFound"}
+
+        return {
+            "success": True,
+            "group_id": group.id,
+            "group_code": group.group_code,
+            "role": user_group_role.role,
+            "redirect_url": ROLE_HOME.get(user_group_role.role, "/user-dashboard"),
+        }
+
+    finally:
+        db.close()

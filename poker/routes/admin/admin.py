@@ -76,7 +76,7 @@ def admin_stats(request: Request):
     if not require_admin(request):
         return {
             "success": False,
-            "message": "无权限访问。",
+            "message": "permissionDenied",
         }
 
     return get_admin_stats_service()
@@ -87,7 +87,7 @@ def system_monitor_data(request: Request):
     if not require_admin(request):
         return {
             "success": False,
-            "message": "无权限访问。",
+            "message": "permissionDenied",
         }
 
     return get_system_monitor_service()
@@ -98,7 +98,7 @@ def get_users(request: Request):
     if not require_admin(request):
         return {
             "success": False,
-            "message": "无权限访问。",
+            "message": "permissionDenied",
         }
 
     return get_admin_users_service()
@@ -114,7 +114,7 @@ def update_user_role(
     if not require_admin(request):
         return {
             "success": False,
-            "message": "无权限访问。",
+            "message": "permissionDenied",
         }
 
     result = update_user_role_service(
@@ -149,7 +149,7 @@ def reset_user_password(
     if not require_admin(request):
         return {
             "success": False,
-            "message": "无权限访问。",
+            "message": "permissionDenied",
         }
 
     result = reset_user_password_service(
@@ -181,7 +181,7 @@ def toggle_user_active(
     if not require_admin(request):
         return {
             "success": False,
-            "message": "无权限访问。",
+            "message": "permissionDenied",
         }
 
     result = toggle_user_active_service(
