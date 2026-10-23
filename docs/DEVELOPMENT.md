@@ -96,6 +96,7 @@ Dependabot 每周检查一次 Python 依赖和 GitHub Actions 版本，有更新
 - **安全响应头**：CSP、`X-Frame-Options`、`nosniff` 等在 `poker/core/middleware.py` 中统一设置。新增外部资源（新的 CDN、图片域名）时，需要同步修改其中的 `CONTENT_SECURITY_POLICY`，否则会被浏览器拦截。
 - **前端渲染**：把任何来自服务器的字符串放进 `innerHTML` 之前，都要用 `escapeHtml()`（`poker/static/js/common/escape.js`）转义。
 - **错误信息**：服务层在 `except` 中使用 `safe_error(e)`，完整异常写入日志，前端只收到通用错误码。
+- **记账并发**：修改牌局数据的操作都先用 `_lock_ongoing_game()` 锁住这一局（开局、加人先 `_lock_group()` 再锁局），买入金额用 `_add_to_buy_in()` 在数据库里直接累加（`poker/services/organizer/game_management.py`）。新增修改牌局数据的操作时必须照此加锁。单次金额上限 `MAX_AMOUNT`（100 万）在 `poker/core/validators.py`。结算时服务器核对玩家名单必须与本局完全一致。数据库另有防重复与金额非负的约束（迁移 `d5e6f7a8b9c0`）。
 - **输入校验**：昵称、别名、牌局名、备注、组名、公告的长度和字符规则集中在 `poker/core/validators.py`。
 
 ## 日志

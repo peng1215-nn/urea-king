@@ -56,6 +56,7 @@ window.userTranslations = {
         requestApproved: "已批准",
         requestRejected: "已拒绝",
         invalidAmount: "请输入有效的数额。",
+        amountTooLarge: "单次金额不能超过 1,000,000。",
 
         // 牌局设置
         gameSettings: "牌局设置",
@@ -225,6 +226,7 @@ window.userTranslations = {
         requestApproved: "Approved",
         requestRejected: "Rejected",
         invalidAmount: "Please enter a valid amount.",
+        amountTooLarge: "A single amount cannot exceed 1,000,000.",
 
         // Game Settings
         gameSettings: "Game Settings",

@@ -6,6 +6,7 @@ from poker.models import PokerGamePlayer
 from poker.models import User
 from poker.models import UserGroupRole
 from poker.core.errors import safe_error
+from poker.core.validators import check_amount
 
 
 def get_user_ongoing_games_service(group_id: int, user_id: int):
@@ -150,11 +151,12 @@ def update_chip_auth_service(user_id: int, group_id: int, allow: int):
 def submit_buyin_request_service(game_id: int, group_id: int, user_id: int, amount: int):
     db = SessionLocal()
     try:
+        # 锁住这一局，避免申请和结算同时发生，在已结束的局里留下待处理申请
         game = db.query(PokerGame).filter(
             PokerGame.id == game_id,
             PokerGame.group_id == group_id,
             PokerGame.status == "ongoing",
-        ).first()
+        ).with_for_update().first()
 
         if not game:
             return {"success": False, "message": "gameNotFound"}
@@ -168,8 +170,9 @@ def submit_buyin_request_service(game_id: int, group_id: int, user_id: int, amou
         if not player:
             return {"success": False, "message": "notInGame"}
 
-        if amount <= 0:
-            return {"success": False, "message": "invalidAmount"}
+        amount_error = check_amount(amount)
+        if amount_error:
+            return {"success": False, "message": amount_error}
 
         user = db.query(User).filter(User.id == user_id).first()
 

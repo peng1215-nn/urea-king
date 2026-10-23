@@ -1,15 +1,41 @@
 from utils.time import now_columbus_naive
 from database import SessionLocal
 from poker.models import ChipRequest
+from poker.models import Group
 from poker.models import PokerGame
 from poker.models import PokerGamePlayer
 from poker.models import User
 from poker.models import UserGroupRole
-from poker.core.validators import GAME_NAME_MAX, GAME_NOTE_MAX, check_name, check_text
+from poker.core.validators import GAME_NAME_MAX, GAME_NOTE_MAX, check_amount, check_name, check_text
 from poker.core.errors import safe_error
 
 
 MAX_PLAYERS = 10
+
+
+# ───────────── 并发保护 ─────────────
+# 所有修改牌局数据的操作都先锁住这一局（SELECT ... FOR UPDATE），
+# 同一局的操作因此排队执行，不会互相覆盖。
+# 需要跨局检查的操作（开局、加人）先锁组再锁局，加锁顺序固定，避免死锁。
+
+def _lock_group(db, group_id):
+    db.query(Group.id).filter(Group.id == group_id).with_for_update().first()
+
+
+def _lock_ongoing_game(db, game_id, group_id):
+    return db.query(PokerGame).filter(
+        PokerGame.id == game_id,
+        PokerGame.group_id == group_id,
+        PokerGame.status == "ongoing",
+    ).with_for_update().first()
+
+
+def _add_to_buy_in(db, player_id, amount):
+    """在数据库里直接累加，不经过“读出来、加好、写回去”。"""
+    db.query(PokerGamePlayer).filter(PokerGamePlayer.id == player_id).update(
+        {PokerGamePlayer.total_buy_in: PokerGamePlayer.total_buy_in + amount},
+        synchronize_session=False,
+    )
 
 
 def get_ongoing_games_service(group_id: int):
@@ -135,6 +161,9 @@ def start_game_service(group_id: int, organizer_id: int, name: str, preselected_
 
     db = SessionLocal()
     try:
+        # 同一组同时只能有一个开局操作，避免同时开局绕过下面的检查
+        _lock_group(db, group_id)
+
         # 最多同时 3 个进行中的局
         ongoing_games = db.query(PokerGame).filter(
             PokerGame.group_id == group_id,
@@ -203,11 +232,9 @@ def start_game_service(group_id: int, organizer_id: int, name: str, preselected_
 def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organizer_id: int):
     db = SessionLocal()
     try:
-        game = db.query(PokerGame).filter(
-            PokerGame.id == game_id,
-            PokerGame.group_id == group_id,
-            PokerGame.status == "ongoing",
-        ).first()
+        # 要检查“不能同时在本组两个局里”，所以先锁组再锁局
+        _lock_group(db, group_id)
+        game = _lock_ongoing_game(db, game_id, group_id)
 
         if not game:
             return {"success": False, "message": "gameNotFound"}
@@ -280,11 +307,7 @@ def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organi
 def remove_player_from_game_service(game_id: int, group_id: int, user_id: int):
     db = SessionLocal()
     try:
-        game = db.query(PokerGame).filter(
-            PokerGame.id == game_id,
-            PokerGame.group_id == group_id,
-            PokerGame.status == "ongoing",
-        ).first()
+        game = _lock_ongoing_game(db, game_id, group_id)
 
         if not game:
             return {"success": False, "message": "gameNotFound"}
@@ -311,11 +334,7 @@ def exit_player_from_game_service(game_id: int, group_id: int, user_id: int, cas
     """玩家退出：记录 cash_out 并移出"""
     db = SessionLocal()
     try:
-        game = db.query(PokerGame).filter(
-            PokerGame.id == game_id,
-            PokerGame.group_id == group_id,
-            PokerGame.status == "ongoing",
-        ).first()
+        game = _lock_ongoing_game(db, game_id, group_id)
 
         if not game:
             return {"success": False, "message": "gameNotFound"}
@@ -328,8 +347,9 @@ def exit_player_from_game_service(game_id: int, group_id: int, user_id: int, cas
         if not player:
             return {"success": False, "message": "playerNotInGame"}
 
-        if cash_out < 0:
-            return {"success": False, "message": "invalidAmount"}
+        amount_error = check_amount(cash_out, allow_zero=True)
+        if amount_error:
+            return {"success": False, "message": amount_error}
 
         player.cash_out = cash_out
         player.net = cash_out - (player.total_buy_in or 0)
@@ -346,11 +366,7 @@ def exit_player_from_game_service(game_id: int, group_id: int, user_id: int, cas
 def approve_chip_request_service(request_id: int, game_id: int, group_id: int, resolver_id: int):
     db = SessionLocal()
     try:
-        game = db.query(PokerGame).filter(
-            PokerGame.id == game_id,
-            PokerGame.group_id == group_id,
-            PokerGame.status == "ongoing",
-        ).first()
+        game = _lock_ongoing_game(db, game_id, group_id)
 
         if not game:
             return {"success": False, "message": "gameNotFound"}
@@ -359,7 +375,7 @@ def approve_chip_request_service(request_id: int, game_id: int, group_id: int, r
             ChipRequest.id == request_id,
             ChipRequest.game_id == game_id,
             ChipRequest.status == "pending",
-        ).first()
+        ).with_for_update().first()
 
         if not req:
             return {"success": False, "message": "requestNotFound"}
@@ -375,7 +391,7 @@ def approve_chip_request_service(request_id: int, game_id: int, group_id: int, r
         req.status = "approved"
         req.resolved_at = now_columbus_naive()
         req.resolved_by = resolver_id
-        player.total_buy_in += req.amount
+        _add_to_buy_in(db, player.id, req.amount)
 
         db.commit()
         return {"success": True}
@@ -389,11 +405,7 @@ def approve_chip_request_service(request_id: int, game_id: int, group_id: int, r
 def reject_chip_request_service(request_id: int, game_id: int, group_id: int, resolver_id: int):
     db = SessionLocal()
     try:
-        game = db.query(PokerGame).filter(
-            PokerGame.id == game_id,
-            PokerGame.group_id == group_id,
-            PokerGame.status == "ongoing",
-        ).first()
+        game = _lock_ongoing_game(db, game_id, group_id)
 
         if not game:
             return {"success": False, "message": "gameNotFound"}
@@ -402,7 +414,7 @@ def reject_chip_request_service(request_id: int, game_id: int, group_id: int, re
             ChipRequest.id == request_id,
             ChipRequest.game_id == game_id,
             ChipRequest.status == "pending",
-        ).first()
+        ).with_for_update().first()
 
         if not req:
             return {"success": False, "message": "requestNotFound"}
@@ -423,17 +435,14 @@ def reject_chip_request_service(request_id: int, game_id: int, group_id: int, re
 def organizer_buyin_service(game_id: int, group_id: int, user_id: int, amount: int, buy_type: str = "normal"):
     db = SessionLocal()
     try:
-        game = db.query(PokerGame).filter(
-            PokerGame.id == game_id,
-            PokerGame.group_id == group_id,
-            PokerGame.status == "ongoing",
-        ).first()
+        game = _lock_ongoing_game(db, game_id, group_id)
 
         if not game:
             return {"success": False, "message": "gameNotFound"}
 
-        if amount <= 0:
-            return {"success": False, "message": "invalidAmount"}
+        amount_error = check_amount(amount)
+        if amount_error:
+            return {"success": False, "message": amount_error}
 
         if buy_type not in ("normal", "insurance", "anti"):
             return {"success": False, "message": "invalidBuyType"}
@@ -448,7 +457,7 @@ def organizer_buyin_service(game_id: int, group_id: int, user_id: int, amount: i
 
         user = db.query(User).filter(User.id == user_id).first()
 
-        player.total_buy_in += amount
+        _add_to_buy_in(db, player.id, amount)
 
         req = ChipRequest(
             game_id=game_id,
@@ -476,17 +485,14 @@ def organizer_proxy_buyin_service(game_id: int, group_id: int, organizer_id: int
     """局头代替玩家买入（需要玩家已授权 allow_organizer_chip_op）"""
     db = SessionLocal()
     try:
-        game = db.query(PokerGame).filter(
-            PokerGame.id == game_id,
-            PokerGame.group_id == group_id,
-            PokerGame.status == "ongoing",
-        ).first()
+        game = _lock_ongoing_game(db, game_id, group_id)
 
         if not game:
             return {"success": False, "message": "gameNotFound"}
 
-        if amount <= 0:
-            return {"success": False, "message": "invalidAmount"}
+        amount_error = check_amount(amount)
+        if amount_error:
+            return {"success": False, "message": amount_error}
 
         # 检查目标玩家是否授权了局头代买
         auth = db.query(UserGroupRole).filter(
@@ -510,7 +516,7 @@ def organizer_proxy_buyin_service(game_id: int, group_id: int, organizer_id: int
 
         target_user = db.query(User).filter(User.id == target_user_id).first()
 
-        player.total_buy_in += amount
+        _add_to_buy_in(db, player.id, amount)
 
         req = ChipRequest(
             game_id=game_id,
@@ -553,11 +559,7 @@ def finish_game_service(
 
     db = SessionLocal()
     try:
-        game = db.query(PokerGame).filter(
-            PokerGame.id == game_id,
-            PokerGame.group_id == group_id,
-            PokerGame.status == "ongoing",
-        ).first()
+        game = _lock_ongoing_game(db, game_id, group_id)
 
         if not game:
             return {"success": False, "message": "gameNotFound"}
@@ -566,11 +568,26 @@ def finish_game_service(
             PokerGamePlayer.game_id == game_id,
         ).all()
 
-        # 写入所有人的 cash_out
-        cash_out_map = {item["user_id"]: item["cash_out"] for item in player_cash_outs}
+        # 服务器自己核对：名单必须与本局玩家完全一致，每个金额都合法，
+        # 不信任前端传来的数据
+        cash_out_map = {}
+        for item in player_cash_outs or []:
+            if not isinstance(item, dict):
+                return {"success": False, "message": "settlementPlayersMismatch"}
+            uid = item.get("user_id")
+            co = item.get("cash_out")
+            if isinstance(uid, bool) or not isinstance(uid, int) or uid in cash_out_map:
+                return {"success": False, "message": "settlementPlayersMismatch"}
+            amount_error = check_amount(co, allow_zero=True)
+            if amount_error:
+                return {"success": False, "message": amount_error}
+            cash_out_map[uid] = co
+
+        if set(cash_out_map) != {p.user_id for p in players}:
+            return {"success": False, "message": "settlementPlayersMismatch"}
 
         for player in players:
-            co = cash_out_map.get(player.user_id, 0)
+            co = cash_out_map[player.user_id]
             player.cash_out = co
             player.net = co - player.total_buy_in
 
@@ -687,32 +704,3 @@ def _format_request(req, user):
         "status": req.status,
         "requested_at": req.requested_at.strftime("%Y-%m-%d %H:%M:%S") if req.requested_at else "",
     }
-
-
-def update_cash_out_service(game_id: int, group_id: int, user_id: int, cash_out: int):
-    db = SessionLocal()
-    try:
-        game = db.query(PokerGame).filter(
-            PokerGame.id == game_id,
-            PokerGame.group_id == group_id,
-        ).first()
-
-        if not game:
-            return {"success": False, "message": "gameNotFound"}
-
-        player = db.query(PokerGamePlayer).filter(
-            PokerGamePlayer.game_id == game_id,
-            PokerGamePlayer.user_id == user_id,
-        ).first()
-
-        if not player:
-            return {"success": False, "message": "playerNotInGame"}
-
-        player.cash_out = cash_out
-        db.commit()
-        return {"success": True}
-    except Exception as e:
-        db.rollback()
-        return {"success": False, "message": safe_error(e)}
-    finally:
-        db.close()
