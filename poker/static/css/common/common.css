@@ -401,3 +401,86 @@ body {
     cursor: pointer;
     text-decoration: underline dotted rgba(255,255,255,0.3);
 }
+
+
+/* ───── 无障碍：键盘焦点可见、尊重“减少动画”设置 ───── */
+
+:focus-visible {
+    outline: 2px solid #6b9fff;
+    outline-offset: 2px;
+}
+
+.menu-item:focus-visible {
+    outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+
+/* ───── 快速上手卡片 ───── */
+
+.onboarding-card {
+    margin: 0 0 28px;
+    padding: 20px 24px;
+    border-radius: 18px;
+    background: rgba(92, 141, 255, 0.08);
+    border: 1px solid rgba(92, 141, 255, 0.25);
+}
+
+.onboarding-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.onboarding-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.onboarding-dismiss {
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.onboarding-dismiss:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.onboarding-steps {
+    margin: 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.onboarding-steps a {
+    color: #a9c1ff;
+    font-size: 14px;
+    line-height: 1.6;
+    text-decoration: none;
+}
+
+.onboarding-steps a:hover {
+    text-decoration: underline;
+}

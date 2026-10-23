@@ -152,6 +152,18 @@ window.adminTranslations = {
 
         operationFailed: "操作失败。",
 
+        onboardingTitle: "快速上手",
+
+        onboardingDismiss: "知道了，不再显示",
+
+        onboardingAdmin1: "第一步：在邀请码管理里创建一个组",
+
+        onboardingAdmin2: "第二步：为这个组生成局头和玩家的邀请码，发给他们注册",
+
+        onboardingAdmin3: "第三步：在用户管理里查看账号、调整角色或禁用账号",
+
+        onboardingAdmin4: "之后：在牌局日志和系统日志里查看各组的使用情况",
+
         avatarUploadFailed: "头像上传失败。",
 
         avatarTooLarge: "头像不能超过 2 MB。",
@@ -492,6 +504,18 @@ window.adminTranslations = {
         accountSuffix: "'s account?",
 
         operationFailed: "Operation failed.",
+
+        onboardingTitle: "Getting started",
+
+        onboardingDismiss: "Got it, hide this",
+
+        onboardingAdmin1: "Step 1: Create a group in Invitation Management",
+
+        onboardingAdmin2: "Step 2: Generate invitation codes for organizers and players and send them out",
+
+        onboardingAdmin3: "Step 3: Review accounts, change roles or disable accounts in User Management",
+
+        onboardingAdmin4: "Then: Check activity in Game Logs and System Logs",
 
         avatarUploadFailed: "Avatar upload failed.",
 

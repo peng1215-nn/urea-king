@@ -149,3 +149,54 @@ document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener('DOMContentLoaded', doInject);
     window.addEventListener('resize', doInject);
 })();
+
+
+// 无障碍：侧边栏菜单项是带 onclick 的 div，补上键盘可达（Tab 聚焦、Enter / 空格触发）
+// 和读屏语义；弹窗标记为 dialog；没有 alt 的图片补空 alt。
+(function enhanceAccessibility() {
+    function run() {
+        document.querySelectorAll(".menu-item[onclick]").forEach(item => {
+            if (item.dataset.a11yReady) {
+                return;
+            }
+
+            item.dataset.a11yReady = "1";
+
+            if (!item.hasAttribute("tabindex")) {
+                item.setAttribute("tabindex", "0");
+            }
+
+            if (!item.hasAttribute("role")) {
+                item.setAttribute("role", "link");
+            }
+
+            if (item.classList.contains("active")) {
+                item.setAttribute("aria-current", "page");
+            }
+
+            item.addEventListener("keydown", event => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    item.click();
+                }
+            });
+        });
+
+        document
+            .querySelectorAll(".custom-modal-content, .logs-modal-content")
+            .forEach(dialog => {
+                dialog.setAttribute("role", "dialog");
+                dialog.setAttribute("aria-modal", "true");
+            });
+
+        document.querySelectorAll("img:not([alt])").forEach(img => {
+            img.setAttribute("alt", "");
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", run);
+    } else {
+        run();
+    }
+})();

@@ -129,3 +129,26 @@ select {
         display: none;
     }
 }
+
+
+/* ───── 无障碍：键盘焦点可见、尊重“减少动画”设置 ───── */
+
+:focus-visible {
+    outline: 2px solid #6b9fff;
+    outline-offset: 2px;
+}
+
+.menu-item:focus-visible {
+    outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

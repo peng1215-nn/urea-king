@@ -134,6 +134,18 @@ const organizerTranslations = {
 
                 operationFailed: "操作失败，请稍后重试。",
 
+                onboardingTitle: "快速上手",
+
+                onboardingDismiss: "知道了，不再显示",
+
+                onboardingOrganizer1: "第一步：在邀请码管理里生成邀请码，邀请玩家加入",
+
+                onboardingOrganizer2: "第二步：在成员管理里给成员设置备注名，方便辨认",
+
+                onboardingOrganizer3: "第三步：在牌局管理里开局、审批筹码申请，结束时结算",
+
+                onboardingOrganizer4: "之后：在牌局日志里查看历史战绩和统计",
+
                 avatarUploadFailed: "头像上传失败。",
 
                 avatarTooLarge: "头像不能超过 2 MB。",
@@ -436,6 +448,18 @@ const organizerTranslations = {
         pleaseSelectMember: "Please select a member first.",
 
                 operationFailed: "Operation failed. Please try again.",
+
+                onboardingTitle: "Getting started",
+
+                onboardingDismiss: "Got it, hide this",
+
+                onboardingOrganizer1: "Step 1: Generate invitation codes and invite players",
+
+                onboardingOrganizer2: "Step 2: Give members aliases in Member Management so they are easy to recognize",
+
+                onboardingOrganizer3: "Step 3: Start a game, approve chip requests and settle it in Game Management",
+
+                onboardingOrganizer4: "Then: Review history and statistics in Game Logs",
 
                 avatarUploadFailed: "Avatar upload failed.",
 
