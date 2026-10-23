@@ -1,8 +1,8 @@
 """
 运行环境与安全相关配置，统一从环境变量读取。
 
-生产环境判断：APP_ENV 显式指定时以它为准；否则在 Railway 上运行（存在
-RAILWAY_ENVIRONMENT_NAME / RAILWAY_ENVIRONMENT）即视为生产环境。
+生产环境判断：APP_ENV 显式指定时以它为准；否则在 Render（RENDER）或
+Railway（RAILWAY_ENVIRONMENT_NAME / RAILWAY_ENVIRONMENT）上运行即视为生产环境。
 """
 
 import logging
@@ -27,8 +27,10 @@ def _is_production():
     app_env = os.getenv("APP_ENV", "").strip().lower()
     if app_env:
         return app_env == "production"
+    # 托管平台会自动设置这些变量：Render 设置 RENDER=true，Railway 设置 RAILWAY_ENVIRONMENT_NAME
     return bool(
-        os.getenv("RAILWAY_ENVIRONMENT_NAME")
+        os.getenv("RENDER")
+        or os.getenv("RAILWAY_ENVIRONMENT_NAME")
         or os.getenv("RAILWAY_ENVIRONMENT")
     )
 
