@@ -59,7 +59,7 @@ ruff check . --fix      # 自动修复能修的问题
 | Lint | Ruff 检查 Python；`node --check` 检查所有 JS 语法 | 是 |
 | Tests | 启动 Postgres，执行迁移，运行全部测试 | 是 |
 | Tests 中的 `alembic check` | 模型与迁移是否一致 | 否（先只报告） |
-| Dependency audit | `pip-audit` 检查依赖已知漏洞 | 否（先只报告） |
+| Dependency audit | `pip-audit` 检查依赖已知漏洞，结果写在该次运行的 Summary 页面 | 否（只报告，不会变红） |
 
 Dependabot 每周检查一次 Python 依赖和 GitHub Actions 版本，有更新会自动开 PR。
 

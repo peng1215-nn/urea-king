@@ -88,8 +88,6 @@ jobs:
   audit:
     name: Dependency audit
     runs-on: ubuntu-latest
-    # 先只报告已知漏洞、不阻断合并；处理完现有问题后可以去掉这一行
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -97,7 +95,17 @@ jobs:
         with:
           python-version: "3.12"
 
+      # 只报告已知漏洞、不让检查变红：Render 设成“CI 通过后再部署”时，
+      # 任何一项检查失败都会挡住部署。漏洞清单写进本次运行的 Summary 页面。
       - name: pip-audit
+        continue-on-error: true
         run: |
           pip install pip-audit
-          pip-audit -r requirements.txt
+          set -o pipefail
+          {
+            echo "## Dependency audit"
+            echo
+            echo '```'
+            pip-audit -r requirements.txt 2>&1 || true
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
