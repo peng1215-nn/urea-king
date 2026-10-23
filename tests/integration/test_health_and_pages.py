@@ -37,3 +37,10 @@ def test_cross_origin_login_post_is_rejected(client):
         headers={"origin": "https://evil.example"},
     )
     assert response.status_code == 403
+
+
+def test_head_requests_are_supported(client):
+    # 在线监控服务和搜索引擎常用 HEAD 检查网站是否在线，不能返回 405
+    for path in ("/", "/healthz", "/readyz"):
+        response = client.head(path)
+        assert response.status_code == 200, path

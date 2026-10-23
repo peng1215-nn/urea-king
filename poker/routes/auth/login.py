@@ -22,7 +22,8 @@ def render_login_page(request: Request):
     )
 
 
-@router.get("/", response_class=HTMLResponse)
+# HEAD：在线监控、搜索引擎常用它检查页面是否存在
+@router.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def home(request: Request):
     return render_login_page(request)
 

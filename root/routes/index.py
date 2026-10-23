@@ -7,7 +7,8 @@ from root.template_config import templates
 router = APIRouter()
 
 
-@router.get("/")
+# HEAD：在线监控、搜索引擎常用它检查页面是否存在
+@router.api_route("/", methods=["GET", "HEAD"])
 async def index(request: Request):
     host = request.headers.get("host", "")
     if is_poker_host(host):

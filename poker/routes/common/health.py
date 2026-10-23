@@ -18,12 +18,12 @@ router = APIRouter()
 logger = logging.getLogger("poker.health")
 
 
-@router.get("/healthz", include_in_schema=False)
+@router.api_route("/healthz", methods=["GET", "HEAD"], include_in_schema=False)
 def healthz():
     return {"status": "ok"}
 
 
-@router.get("/readyz", include_in_schema=False)
+@router.api_route("/readyz", methods=["GET", "HEAD"], include_in_schema=False)
 def readyz():
     db = SessionLocal()
     try:
