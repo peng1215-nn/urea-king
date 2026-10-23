@@ -63,21 +63,23 @@ ruff check . --fix      # 自动修复能修的问题
 
 Dependabot 每周检查一次 Python 依赖和 GitHub Actions 版本，有更新会自动开 PR。
 
-## 部署（Railway）
+## 部署（Render）
 
 **必须设置的环境变量：**
 
 | 变量 | 说明 |
 |---|---|
-| `DATABASE_URL` | 引用 Railway Postgres 的连接地址。缺失时应用拒绝启动。 |
+| `DATABASE_URL` | PostgreSQL 连接地址。缺失时应用拒绝启动。 |
 | `SESSION_SECRET_KEY` | 会话签名密钥，足够长的随机字符串。生产环境缺失时应用拒绝启动。 |
 | `CLOUDINARY_*` | 头像上传 |
 
-**建议在 Railway 上开启的设置：**
+以上变量在 Render 控制台的服务页面 → **Environment** 中设置。Render 会自动设置 `RENDER=true`，应用据此识别生产环境（也可以用 `APP_ENV` 显式指定）。
 
-- **Healthcheck Path** 设为 `/healthz`：服务没有正常启动时不会切换流量。
-- **Wait for CI**：GitHub 上的 CI 没通过时不部署。
-- **数据库备份**：确认 Postgres 开启了自动备份，并至少演练过一次恢复。
+**建议在 Render 上开启的设置**（在服务的 **Settings** 中）：
+
+- **Health Check Path** 设为 `/healthz`：新版本没有正常启动时，Render 不会把流量切过去，旧版本继续服务。
+- **自动部署时机**：如果设置里有“CI 检查通过后再自动部署”的选项，等 GitHub 上的 CI 第一次跑通后再开启。
+- **数据库备份**：确认数据库所在套餐有自动备份，并至少演练过一次恢复。如果数据库是 Render 的免费 PostgreSQL，请留意它的到期时间（免费数据库有使用期限），到期前要升级或迁移。
 
 **健康检查接口：**
 
@@ -96,4 +98,4 @@ Dependabot 每周检查一次 Python 依赖和 GitHub Actions 版本，有更新
 
 ## 日志
 
-日志以 JSON 格式逐行输出到标准输出，Railway 会自动收集。每个请求都有一条 `request` 日志（方法、路径、状态码、耗时、用户 ID）和一个 `X-Request-ID` 响应头，排查问题时可以用它把日志串起来。用 `LOG_LEVEL` 调整日志级别。
+日志以 JSON 格式逐行输出到标准输出，Render 会自动收集，可以在服务页面的 **Logs** 中查看和搜索。每个请求都有一条 `request` 日志（方法、路径、状态码、耗时、用户 ID）和一个 `X-Request-ID` 响应头，排查问题时可以用它把日志串起来。用 `LOG_LEVEL` 调整日志级别。

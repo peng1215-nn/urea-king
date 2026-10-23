@@ -12,7 +12,7 @@ def test_readyz_checks_database(client):
 
 def test_healthz_works_with_platform_host_header(client):
     # 平台健康检查用的 Host 不是我们的域名，不能被跳转到首页
-    response = client.get("/healthz", headers={"host": "healthcheck.railway.app"})
+    response = client.get("/healthz", headers={"host": "internal-health-check.local"})
     assert response.status_code == 200
 
 

@@ -83,7 +83,7 @@ Different roles have different permissions and accessible pages.
 
 ## Deployment & Services
 
-* Railway
+* Render
 * Cloudinary
 
 ---
@@ -175,7 +175,8 @@ Currently supported languages:
 
 The project is deployed using:
 
-* Railway (application and PostgreSQL)
+* Render (web service)
+* PostgreSQL
 * Cloudinary (avatar storage)
 
 Environment variables are configured through the deployment platform. Health check endpoints: `/healthz` (liveness) and `/readyz` (database readiness).
