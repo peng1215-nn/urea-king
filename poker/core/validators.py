@@ -8,18 +8,19 @@
 import re
 
 
-# 控制字符、零宽字符、双向文本控制符（可被用来伪装显示内容）
+# 控制字符、零宽空格、双向文本控制符（可被用来伪装显示内容）。
+# 不包括 U+200C / U+200D：组合 emoji（如一家人、带火的心）依赖它们。
 _INVISIBLE_RE = re.compile(
     "[\x00-\x08\x0b\x0c\x0e-\x1f\x7f"
-    "​-‏‪-‮⁠-⁤⁦-⁩﻿]"
+    "\u200b\u200e\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff]"
 )
 _NEWLINE_RE = re.compile("[\r\n\t]")
 _ANGLE_RE = re.compile("[<>]")
 
 
 # 各字段长度上限（不超过数据库列宽）
-NICKNAME_MAX = 30
-ALIAS_MAX = 30
+NICKNAME_MAX = 50
+ALIAS_MAX = 50
 GAME_NAME_MAX = 50
 GROUP_NAME_MAX = 50
 GAME_NOTE_MAX = 500

@@ -166,9 +166,9 @@ window.adminTranslations = {
 
         avatarUploadFailed: "头像上传失败。",
 
-        avatarTooLarge: "头像不能超过 2 MB。",
+        avatarTooLarge: "图片太大（超过 10 MB），请换一张。",
 
-        avatarInvalidType: "只支持 JPG、PNG、WebP、GIF 格式的图片。",
+        avatarInvalidType: "只支持 JPG、PNG、WebP 格式的图片。",
 
         sessionExpired: "登录状态已失效，请重新登录。",
 
@@ -332,7 +332,7 @@ window.adminTranslations = {
         confirmNewPasswordPlaceholder: "请再次输入新密码",
         changePasswordFormDesc: "修改密码需要输入当前密码。修改成功后将自动退出登录。",
         nicknameRequired: "请输入昵称。",
-        nicknameTooLong: "昵称不能超过 30 个字符。",
+        nicknameTooLong: "昵称不能超过 50 个字符。",
         nicknameUpdateSuccess: "昵称修改成功。",
         currentPasswordRequired: "请输入当前密码。",
         currentPasswordIncorrect: "当前密码不正确。",
@@ -519,9 +519,9 @@ window.adminTranslations = {
 
         avatarUploadFailed: "Avatar upload failed.",
 
-        avatarTooLarge: "Avatar must be 2 MB or smaller.",
+        avatarTooLarge: "The image is too large (over 10 MB). Please choose another one.",
 
-        avatarInvalidType: "Only JPG, PNG, WebP and GIF images are supported.",
+        avatarInvalidType: "Only JPG, PNG and WebP images are supported.",
 
         sessionExpired: "Your session has expired. Please sign in again.",
 
@@ -684,7 +684,7 @@ window.adminTranslations = {
         confirmNewPasswordPlaceholder: "Enter new password again",
         changePasswordFormDesc: "Changing your password requires your current password. You will be logged out after success.",
         nicknameRequired: "Please enter a nickname.",
-        nicknameTooLong: "Nickname cannot exceed 30 characters.",
+        nicknameTooLong: "Nickname cannot exceed 50 characters.",
         nicknameUpdateSuccess: "Nickname updated successfully.",
 
         currentPasswordRequired: "Please enter your current password.",

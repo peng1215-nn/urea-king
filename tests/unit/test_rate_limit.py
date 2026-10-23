@@ -48,3 +48,34 @@ def test_memory_is_bounded():
 def test_login_keys_are_case_insensitive_for_username():
     assert login_keys("1.2.3.4", "Alice ") == login_keys("1.2.3.4", "alice")
     assert login_keys(None, "alice")[1] == "unknown"
+
+
+def test_trusted_login_expires():
+    from poker.core import rate_limit
+
+    rate_limit.clear_trusted_logins()
+    rate_limit.remember_trusted_login("1.1.1.1", "Alice", now=0)
+    assert rate_limit.is_trusted_login("1.1.1.1", "alice", now=10)
+    assert not rate_limit.is_trusted_login("2.2.2.2", "alice", now=10)
+    assert not rate_limit.is_trusted_login("1.1.1.1", "alice", now=rate_limit.TRUSTED_LOGIN_TTL + 1)
+    rate_limit.clear_trusted_logins()
+
+
+def test_username_limit_does_not_block_trusted_device():
+    from poker.core import rate_limit
+
+    rate_limit.clear_trusted_logins()
+    rate_limit.login_failures_by_username._events.clear()
+    rate_limit.login_failures_by_account._events.clear()
+    rate_limit.login_failures_by_ip._events.clear()
+
+    rate_limit.record_login_success("1.1.1.1", "owner")
+    for i in range(20):
+        rate_limit.record_login_failure(f"9.9.9.{i}", "owner")  # 攻击者轮换 IP 乱试
+
+    assert rate_limit.login_retry_after("8.8.8.8", "owner") > 0   # 陌生来源被挡
+    assert rate_limit.login_retry_after("1.1.1.1", "owner") == 0  # 账号主人的设备不受影响
+
+    rate_limit.clear_trusted_logins()
+    for limiter in (rate_limit.login_failures_by_username, rate_limit.login_failures_by_account, rate_limit.login_failures_by_ip):
+        limiter._events.clear()

@@ -44,7 +44,7 @@ async function saveAlias() {
         const data = await response.json();
 
         if (!data.success) {
-            messageBox.innerText = data.message || t("operationFailed");
+            messageBox.innerText = t(data.message || "operationFailed");
             return;
         }
 

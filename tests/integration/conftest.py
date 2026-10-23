@@ -49,6 +49,7 @@ def clean_state(migrated_db):
     ):
         limiter._events.clear()
 
+    rate_limit.clear_trusted_logins()
     middleware.clear_session_cache()
     yield
 

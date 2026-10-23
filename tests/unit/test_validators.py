@@ -18,8 +18,13 @@ def test_name_rejects_angle_brackets():
 
 def test_name_rejects_newlines_and_invisible_characters():
     assert check_name("abc\ndef", NICKNAME_MAX)[1] == "invalid_chars"
-    assert check_name("evil‮eman", NICKNAME_MAX)[1] == "invalid_chars"  # 文字方向反转
-    assert check_name("zero​width", NICKNAME_MAX)[1] == "invalid_chars"
+    assert check_name("evil\u202eeman", NICKNAME_MAX)[1] == "invalid_chars"  # 文字方向反转
+    assert check_name("zero\u200bwidth", NICKNAME_MAX)[1] == "invalid_chars"
+
+
+def test_name_allows_emoji_joined_with_zwj():
+    family = "\U0001F468\u200d\U0001F469\u200d\U0001F467"
+    assert check_name(family + " 一家人", NICKNAME_MAX)[1] is None
 
 
 def test_name_length_limit():

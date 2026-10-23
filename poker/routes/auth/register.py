@@ -61,6 +61,7 @@ def register_user(
     # 只统计邀请码相关的失败，防止暴力猜测邀请码
     if not result.get("success") and str(result.get("error_code", "")).startswith("registerInviteCode"):
         register_failures_by_ip.hit(ip)
-        invite_failures_global.hit(GLOBAL_KEY)
+        if result.get("error_code") == "registerInviteCodeNotFound":
+            invite_failures_global.hit(GLOBAL_KEY)
 
     return result

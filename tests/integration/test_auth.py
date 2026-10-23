@@ -124,3 +124,47 @@ def test_spoofed_forwarded_for_does_not_bypass_username_limit(client, factory):
         headers={"x-forwarded-for": "10.0.1.1"},
     )
     assert response.status_code == 429
+
+
+def test_owner_is_not_locked_out_by_someone_else_guessing(client, factory):
+    user_id = factory.user("frank01")
+    group_id = factory.group("G1")
+    factory.role(user_id, group_id, "user")
+
+    # 账号主人先在自己的设备上正常登录过一次
+    assert client.post("/login", data={"username": "frank01", "password": DEFAULT_PASSWORD}).json()["success"] is True
+
+    # 别人轮换伪造的 IP 乱试密码
+    for i in range(20):
+        client.post(
+            "/login",
+            data={"username": "frank01", "password": "wrong-password"},
+            headers={"x-forwarded-for": f"10.1.0.{i}"},
+        )
+
+    # 陌生来源被挡住，账号主人的设备照常登录
+    stranger = client.post(
+        "/login",
+        data={"username": "frank01", "password": DEFAULT_PASSWORD},
+        headers={"x-forwarded-for": "10.2.0.1"},
+    )
+    assert stranger.status_code == 429
+
+    owner = client.post("/login", data={"username": "frank01", "password": DEFAULT_PASSWORD})
+    assert owner.json()["success"] is True
+
+
+def test_group_join_password_guessing_counts_toward_login_limit(client, factory):
+    user_id = factory.user("gina001")
+    group_id = factory.group("G1")
+    factory.role(user_id, group_id, "user")
+
+    for _ in range(5):
+        response = client.post(
+            "/group-join",
+            data={"username": "gina001", "password": "wrong-password", "invite_code": "ANY"},
+        )
+        assert response.json()["message"] == "groupJoinAccountInvalid"
+
+    response = client.post("/login", data={"username": "gina001", "password": DEFAULT_PASSWORD})
+    assert response.status_code == 429

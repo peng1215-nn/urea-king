@@ -148,9 +148,9 @@ const organizerTranslations = {
 
                 avatarUploadFailed: "头像上传失败。",
 
-                avatarTooLarge: "头像不能超过 2 MB。",
+                avatarTooLarge: "图片太大（超过 10 MB），请换一张。",
 
-                avatarInvalidType: "只支持 JPG、PNG、WebP、GIF 格式的图片。",
+                avatarInvalidType: "只支持 JPG、PNG、WebP 格式的图片。",
 
                 sessionExpired: "登录状态已失效，请重新登录。",
 
@@ -166,7 +166,7 @@ const organizerTranslations = {
         newNicknamePlaceholder: "请输入新昵称",
         saveNickname: "保存昵称",
         nicknameRequired: "昵称不能为空。",
-        nicknameTooLong: "昵称不能超过 30 个字符。",
+        nicknameTooLong: "昵称不能超过 50 个字符。",
         nicknameNoChange: "新昵称与当前昵称相同。",
         nicknameExists: "该昵称已被使用。",
         nicknameUpdateSuccess: "昵称修改成功。",
@@ -463,9 +463,9 @@ const organizerTranslations = {
 
                 avatarUploadFailed: "Avatar upload failed.",
 
-                avatarTooLarge: "Avatar must be 2 MB or smaller.",
+                avatarTooLarge: "The image is too large (over 10 MB). Please choose another one.",
 
-                avatarInvalidType: "Only JPG, PNG, WebP and GIF images are supported.",
+                avatarInvalidType: "Only JPG, PNG and WebP images are supported.",
 
                 sessionExpired: "Your session has expired. Please sign in again.",
 
@@ -481,7 +481,7 @@ const organizerTranslations = {
         newNicknamePlaceholder: "Enter new nickname",
         saveNickname: "Save Nickname",
         nicknameRequired: "Nickname cannot be empty.",
-        nicknameTooLong: "Nickname cannot exceed 30 characters.",
+        nicknameTooLong: "Nickname cannot exceed 50 characters.",
         nicknameNoChange: "New nickname is the same as the current one.",
         nicknameExists: "This nickname is already taken.",
         nicknameUpdateSuccess: "Nickname updated successfully.",

@@ -13,7 +13,8 @@ from poker.core.errors import safe_error
 
 router = APIRouter()
 
-MAX_AVATAR_BYTES = 2 * 1024 * 1024
+# 前端会先把图片压缩到 512px 以内；这里的上限只是兜底
+MAX_AVATAR_BYTES = 10 * 1024 * 1024
 
 
 def detect_image_type(data):
@@ -22,8 +23,6 @@ def detect_image_type(data):
         return "jpeg"
     if data.startswith(b"\x89PNG\r\n\x1a\n"):
         return "png"
-    if data[:6] in (b"GIF87a", b"GIF89a"):
-        return "gif"
     if len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP":
         return "webp"
     return None

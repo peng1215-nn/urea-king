@@ -91,7 +91,7 @@ async function confirmResetPassword() {
 
         if (!data.success) {
             messageBox.innerText =
-                data.message || t("passwordResetFailed");
+                t(data.message || "passwordResetFailed");
 
             closeResetPasswordModal();
 

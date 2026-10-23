@@ -65,7 +65,7 @@ async function updateUserRole() {
 
         if (!data.success) {
             messageBox.innerText =
-                data.message || t("updateFailed");
+                t(data.message || "updateFailed");
 
             return;
         }

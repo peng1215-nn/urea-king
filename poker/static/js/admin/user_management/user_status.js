@@ -164,7 +164,7 @@ async function confirmToggleUserStatus() {
 
         if (!data.success) {
             messageBox.innerText =
-                data.message || t("operationFailed");
+                t(data.message || "operationFailed");
 
             closeUserStatusModal();
 
