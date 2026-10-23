@@ -44,7 +44,23 @@ window.loginTranslations = {
         enterInviteCode: "请输入邀请码",
         groupJoinAdminForbidden: "管理员账号不能加入其他组。",
 
-        loginNoGroupAvailable: "当前账号已不属于任何组，请使用邀请码加入新组。",
+        loginNoGroupAvailable: "当前账号已不属于任何组，请使用邀请码加入新组；如果不再使用，可以在登录页注销账号。",
+
+        accountDeleteLink: "注销账号",
+        accountDeleteTitle: "注销账号",
+        accountDeleteRuleUser: "普通用户：需要先在“修改资料”页面退出所有组。",
+        accountDeleteRuleOrganizer: "局头：你的组里不能还有其他成员；注销时该组和组内所有记录会一起删除。",
+        accountDeleteRuleKeep: "你在其他组参与过的牌局记录会保留，显示为“已注销用户”。注销后无法恢复。",
+        accountDeleteConfirmLabel: "请输入“注销”确认",
+        accountDeleteConfirmPlaceholder: "注销",
+        accountDeleteSubmit: "永久注销账号",
+        accountDeleteConfirmMismatch: "请在确认框中输入“注销”。",
+        accountDeleteAdminForbidden: "管理员账号不能注销。",
+        accountDeleteStillInGroup: "你仍是以下组的成员：{group}。请先登录，在“修改资料”页面退出这些组。",
+        accountDeleteGroupHasMembers: "你的组“{group}”里还有其他成员，请先移除所有成员后再注销。",
+        accountDeleteOngoingGame: "你还有进行中的牌局，结束后才能注销。",
+        accountDeleteFailed: "注销失败，请稍后再试。",
+        accountDeleteSuccess: "账号已注销。",
     },
 
     en: {
@@ -94,6 +110,22 @@ window.loginTranslations = {
         enterInviteCode: "Enter invitation code",
         groupJoinAdminForbidden: "Administrator accounts cannot join other groups.",
 
-        loginNoGroupAvailable: "Your account is not associated with any group. Please use an invitation code to join a new group.",
+        loginNoGroupAvailable: "Your account is not associated with any group. Please use an invitation code to join a new group, or delete the account from the login page if you no longer need it.",
+
+        accountDeleteLink: "Delete Account",
+        accountDeleteTitle: "Delete Account",
+        accountDeleteRuleUser: "Members: leave all your groups first on the Profile page.",
+        accountDeleteRuleOrganizer: "Organizers: your group must have no other members; the group and all its records are deleted with your account.",
+        accountDeleteRuleKeep: "Games you played in other groups are kept and shown as \"Deleted user\". This cannot be undone.",
+        accountDeleteConfirmLabel: "Type DELETE to confirm",
+        accountDeleteConfirmPlaceholder: "DELETE",
+        accountDeleteSubmit: "Permanently Delete Account",
+        accountDeleteConfirmMismatch: "Please type DELETE in the confirmation box.",
+        accountDeleteAdminForbidden: "Administrator accounts cannot be deleted.",
+        accountDeleteStillInGroup: "You are still a member of: {group}. Log in and leave these groups on the Profile page first.",
+        accountDeleteGroupHasMembers: "Your group \"{group}\" still has other members. Remove them all before deleting your account.",
+        accountDeleteOngoingGame: "You still have an ongoing game. You can delete your account after it ends.",
+        accountDeleteFailed: "Failed to delete the account. Please try again later.",
+        accountDeleteSuccess: "Your account has been deleted.",
     }
 };

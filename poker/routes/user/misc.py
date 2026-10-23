@@ -13,6 +13,9 @@ from poker.services.organizer.game_log import get_stats_service
 from poker.services.organizer.game_log import get_member_stats_service
 from poker.services.organizer.game_log import get_member_trend_service
 from poker.services.common.common import add_no_cache_headers
+from poker.services.common.account_lifecycle import leave_group_service
+from poker.services.admin.audit_log import write_audit_log
+from poker.core.middleware import clear_session_cache
 from poker.template_config import templates
 
 
@@ -152,3 +155,36 @@ def get_member_trend(request: Request, user_id: int):
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
     return get_member_trend_service(group_id=int(group_id), user_id=user_id)
+
+
+# 退出当前组（只有普通用户可以；局头的组需要管理员处理）
+@router.post("/user/leave-group")
+def leave_group(request: Request):
+    if not require_user(request):
+        return {"success": False, "message": "permissionDenied"}
+
+    user_id = get_user_id(request)
+    group_id = get_group_id(request)
+
+    result = leave_group_service(user_id, group_id)
+
+    if result.get("success"):
+        write_audit_log(
+            request=request,
+            action="LEAVE_GROUP",
+            target_type="group",
+            target_id=group_id,
+            old_value=f"group_code={result['group_code']}, group_name={result['group_name']}",
+            new_value=None,
+            operator_id=user_id,
+            operator_username=request.session.get("username"),
+        )
+        # 退出后当前会话所在的组已经无效，回到登录页重新选择
+        request.session.clear()
+        clear_session_cache()
+
+    return {
+        "success": result.get("success", False),
+        "message": "leaveGroupSuccess" if result.get("success") else result.get("message"),
+        "remaining_groups": result.get("remaining_groups"),
+    }

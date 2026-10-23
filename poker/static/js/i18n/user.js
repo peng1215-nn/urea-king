@@ -153,6 +153,16 @@ window.userTranslations = {
         joinOtherGroup: "加入其他组",
         joinOtherGroupDesc: "使用新的邀请码加入其他组，并在登录后选择不同组别身份。",
         joinGroupLogoutConfirm: "此操作会退出当前登录，是否确认？",
+        leaveGroup: "退出当前组",
+        leaveGroupDesc: "退出后你将不再是该组成员，看不到该组的内容。你参与过的牌局记录会保留。进行中的牌局结束后才能退出。",
+        leaveGroupConfirmTitle: "确认退出当前组？",
+        leaveGroupConfirmText: "退出后需要新的邀请码才能重新加入。如果这是你唯一的组，退出后将无法登录，可以用邀请码加入新组，或在登录页注销账号。",
+        leaveGroupConfirm: "确认退出",
+        leaveGroupSuccess: "已退出该组，正在返回登录页…",
+        leaveGroupNotMember: "你已经不是该组成员。",
+        leaveGroupOnlyUser: "只有普通成员可以退出组。",
+        leaveGroupOngoingGame: "你在该组还有进行中的牌局，结束后才能退出。",
+        leaveGroupFailed: "退出失败，请稍后再试。",
 
         // Modal
         changePasswordOrganizerDesc: "修改当前账户的昵称与密码。",
@@ -312,6 +322,16 @@ window.userTranslations = {
         joinOtherGroup: "Join Another Group",
         joinOtherGroupDesc: "Use a new invite code to join another group.",
         joinGroupLogoutConfirm: "This will log you out. Confirm?",
+        leaveGroup: "Leave This Group",
+        leaveGroupDesc: "You will no longer be a member and won't see this group's content. Games you played in are kept. You can't leave while you have an ongoing game here.",
+        leaveGroupConfirmTitle: "Leave this group?",
+        leaveGroupConfirmText: "You'll need a new invitation code to rejoin. If this is your only group, you won't be able to log in afterwards; you can join a new group with an invitation code or delete your account from the login page.",
+        leaveGroupConfirm: "Leave",
+        leaveGroupSuccess: "You left the group. Returning to the login page…",
+        leaveGroupNotMember: "You are no longer a member of this group.",
+        leaveGroupOnlyUser: "Only regular members can leave a group.",
+        leaveGroupOngoingGame: "You have an ongoing game in this group. You can leave after it ends.",
+        leaveGroupFailed: "Failed to leave the group. Please try again later.",
 
         // Modal
         changePasswordOrganizerDesc: "Update the nickname and password for your account.",

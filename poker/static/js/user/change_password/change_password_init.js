@@ -11,6 +11,7 @@ window.addEventListener("pageshow", function (e) {
         return;
     }
     closeJoinGroupModal();
+    closeLeaveGroupModal();
     applyLanguage();
     loadCurrentUser();
     loadCurrentAccount();
