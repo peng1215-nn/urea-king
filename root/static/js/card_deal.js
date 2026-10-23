@@ -87,41 +87,21 @@ const CardDealEngine = (function() {
   }
 
   let busy = false;
-  let preloadIframe = null;
 
-  function preload(dest) {
-    if (preloadIframe) return;
-    preloadIframe = document.createElement('iframe');
-    Object.assign(preloadIframe.style, {
-      position: 'fixed', inset: '0', width: '100%', height: '100%',
-      border: 'none', zIndex: '599',   // just below card overlay (600)
-      opacity: '0', pointerEvents: 'none',
-    });
-    preloadIframe.src = dest;
-    document.body.appendChild(preloadIframe);
-  }
-
-  function revealIframe() {
-    if (!preloadIframe) return;
-    // Slide card overlay away, reveal iframe underneath
-    overlay.style.transition = 'opacity 0.35s ease';
-    overlay.style.opacity = '0';
-    preloadIframe.style.transition = 'opacity 0.35s ease';
-    preloadIframe.style.opacity = '1';
-    preloadIframe.style.pointerEvents = 'auto';
-    // After transition, do a real navigation so URL bar updates
-    setTimeout(() => {
-      window.location.href = preloadIframe.src;
-    }, 360);
+  // 发牌结束：牌面留在屏幕上、背景变成完全不透明，然后直接跳转。
+  // 浏览器在新页面画出来之前会一直显示当前画面，所以中间不会露出首页。
+  // （以前用 iframe 预加载，但本站禁止页面被嵌入，iframe 会显示成禁止图标。）
+  function goTo(dest) {
+    overlay.style.transition = 'background-color 0.2s ease';
+    overlay.style.backgroundColor = 'rgb(0, 0, 0)';
+    overlay.style.backdropFilter = 'none';
+    window.location.href = dest;
   }
 
   function deal(dest) {
     if (busy) return;
     busy = true;
     ensureDOM();
-
-    // Start preloading the destination immediately
-    preload(dest);
 
     const [c1, c2] = randTwo();
     overlay.innerHTML = '';
@@ -142,9 +122,20 @@ const CardDealEngine = (function() {
     dealIn(el1, 80);
     dealIn(el2, 320);
 
-    // After 2.4s, crossfade to the preloaded page
-    setTimeout(revealIframe, 2400);
+    // 动画完成后直接跳转
+    setTimeout(() => goTo(dest), 2400);
   }
+
+  // 用户点浏览器“返回”回到首页时（页面从缓存恢复），收起发牌遮罩，允许再次点击
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted && overlay) {
+      overlay.style.display = 'none';
+      overlay.style.backgroundColor = '';
+      overlay.style.backdropFilter = '';
+      overlay.style.transition = '';
+      busy = false;
+    }
+  });
 
   return { deal };
 })();

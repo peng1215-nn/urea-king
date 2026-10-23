@@ -62,24 +62,3 @@ SESSION_HTTPS_ONLY = _env_bool("SESSION_HTTPS_ONLY", IS_PRODUCTION)
 SESSION_MAX_AGE = 60 * 60 * 24
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-
-# 允许把本站页面嵌入 iframe 的来源（除本站自身外）。首页点 POKER 时会先在 iframe 里预加载
-# poker 子站做过渡动画，所以需要允许主域名；其它网站一律不能嵌入（防点击劫持）。
-FRAME_ANCESTORS = os.getenv(
-    "FRAME_ANCESTORS",
-    "https://urea-king.com https://www.urea-king.com",
-).split()
-
-
-def _origin(url):
-    from urllib.parse import urlsplit
-
-    parts = urlsplit(url or "")
-    return f"{parts.scheme}://{parts.netloc}" if parts.scheme and parts.netloc else ""
-
-
-# 反过来，首页需要在 iframe 里加载 poker 子站（与首页的 POKER 链接同源，取自 POKER_URL）
-FRAME_SOURCES = [
-    origin for origin in [_origin(os.getenv("POKER_URL", "https://poker.urea-king.com"))]
-    if origin
-]

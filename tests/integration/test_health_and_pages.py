@@ -20,8 +20,7 @@ def test_login_page_has_security_headers(client):
     response = client.get("/login")
     assert response.status_code == 200
     assert "content-security-policy" in response.headers
-    # 只允许本站和主域名嵌入（首页的过渡动画需要），其它网站不行
-    assert "frame-ancestors 'self' https://urea-king.com" in response.headers["content-security-policy"]
+    assert response.headers["x-frame-options"] == "DENY"
     assert response.headers["x-content-type-options"] == "nosniff"
 
 

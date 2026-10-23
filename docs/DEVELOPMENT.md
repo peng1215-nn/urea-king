@@ -91,7 +91,7 @@ Dependabot 每周检查一次 Python 依赖和 GitHub Actions 版本，有更新
 - **登录限流**：15 分钟内，同一 IP + 用户名失败 5 次、同一 IP 失败 30 次、同一用户名（不论来源）失败 20 次后暂时锁定；曾在某个 IP 成功登录过的用户不受“同一用户名 20 次”这条限制，避免别人故意输错密码把账号主人锁在外面。“邀请码加入组”也要输入密码，同样计入。邀请码相关失败按 IP 限制 10 次；“邀请码不存在”全站合计不超过 300 次。客户端 IP 取自 `X-Forwarded-For`，可被伪造，所以都有不依赖 IP 的上限。计数保存在进程内存中，重启后清零；适用于当前的单实例部署，将来扩展到多个实例时需要改为共享存储（数据库或 Redis）。
 - **会话核对**：每个请求都会核对账号是否被禁用、是否仍在该组担任该角色（结果缓存 15 秒）。失效时页面跳转登录，接口返回 401 `sessionExpired`。
 - **CSRF**：所有修改类请求（POST 等）要求 `Origin` 或 `Referer` 与本站一致。
-- **安全响应头**：CSP（其中 `frame-ancestors` 只允许本站和主域名嵌入页面，主域名首页的过渡动画需要这样；可用环境变量 `FRAME_ANCESTORS` 调整）、`nosniff` 等在 `poker/core/middleware.py` 中统一设置。新增外部资源（新的 CDN、图片域名）时，需要同步修改其中的 `CONTENT_SECURITY_POLICY`，否则会被浏览器拦截。
+- **安全响应头**：CSP、`X-Frame-Options`、`nosniff` 等在 `poker/core/middleware.py` 中统一设置。新增外部资源（新的 CDN、图片域名）时，需要同步修改其中的 `CONTENT_SECURITY_POLICY`，否则会被浏览器拦截。
 - **前端渲染**：把任何来自服务器的字符串放进 `innerHTML` 之前，都要用 `escapeHtml()`（`poker/static/js/common/escape.js`）转义。
 - **错误信息**：服务层在 `except` 中使用 `safe_error(e)`，完整异常写入日志，前端只收到通用错误码。
 - **输入校验**：昵称、别名、牌局名、备注、组名、公告的长度和字符规则集中在 `poker/core/validators.py`。

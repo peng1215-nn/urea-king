@@ -24,11 +24,6 @@ logger = logging.getLogger("poker.request")
 
 # ───────────────────────── 安全响应头 ─────────────────────────
 
-# 首页点 POKER 时会在 iframe 里预加载 poker 子站，所以两边都要放行：
-#   frame-src：首页可以嵌入 poker 子站（settings.FRAME_SOURCES，来自 POKER_URL）；
-#   frame-ancestors：poker 页面只允许被本站和主域名嵌入（settings.FRAME_ANCESTORS）。
-# 不再发送 X-Frame-Options：它无法表达“允许另一个指定域名”，而现代浏览器以 frame-ancestors 为准。
-#
 # 页面用到的外部资源：cdnjs（脚本、Font Awesome 样式与字体）、
 # Google Fonts（首页）、Cloudinary（头像）。内联脚本和样式目前仍大量使用，
 # 因此暂时保留 'unsafe-inline'；主要收益是禁止向外站发请求、禁止被嵌入、
@@ -43,13 +38,13 @@ CONTENT_SECURITY_POLICY = "; ".join([
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-src " + " ".join(["'self'"] + settings.FRAME_SOURCES),
-    "frame-ancestors " + " ".join(["'self'"] + settings.FRAME_ANCESTORS),
+    "frame-ancestors 'none'",
 ])
 
 SECURITY_HEADERS = {
     "Content-Security-Policy": CONTENT_SECURITY_POLICY,
     "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
 }
