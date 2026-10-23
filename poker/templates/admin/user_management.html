@@ -193,7 +193,7 @@
             </div>
 
             <p class="panel-description" data-i18n="resetPasswordDesc">
-                点击确认后，系统会将所选用户的登录密码重置为默认密码 000000。
+                点击确认后，系统会为所选用户生成一个随机临时密码，并只在本页面显示一次。
             </p>
 
             <button
@@ -332,6 +332,7 @@
 
 </div>
 
+<script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>
 <script src="/static/js/common/current_user.js?v={{ static_version }}"></script>

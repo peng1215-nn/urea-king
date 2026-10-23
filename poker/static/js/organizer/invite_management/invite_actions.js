@@ -33,15 +33,15 @@ async function loadInviteCodes() {
         const statusClass = code.is_used ? "used" : "unused";
         const statusText = code.is_used ? t("inviteUsed") : t("inviteUnused");
         const usedBy = code.is_used
-            ? `<span>${t("usedBy")}：${code.used_by_username || "--"}</span><span>${t("usedAt")}：${code.used_at || "--"}</span>`
-            : `<span>${t("createdAt")}：${code.created_at}</span>`;
+            ? `<span>${t("usedBy")}：${escapeHtml(code.used_by_username || "--")}</span><span>${t("usedAt")}：${escapeHtml(code.used_at || "--")}</span>`
+            : `<span>${t("createdAt")}：${escapeHtml(code.created_at)}</span>`;
 
         const deleteBtn = !code.is_used
             ? `<button class="btn-delete-invite" onclick="deleteInviteCode(${code.id})">${t("delete")}</button>`
             : "";
 
         card.innerHTML = `
-            <div class="invite-code">${code.code}</div>
+            <div class="invite-code">${escapeHtml(code.code)}</div>
             <div class="invite-meta">${usedBy}</div>
             <span class="invite-status-badge ${statusClass}">${statusText}</span>
             ${deleteBtn}

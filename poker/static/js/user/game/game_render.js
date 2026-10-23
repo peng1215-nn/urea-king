@@ -31,8 +31,8 @@ function renderGameCard(game, container) {
     card.innerHTML = `
         <div class="user-game-header">
             <div class="user-game-info">
-                ${game.name ? `<span class="user-game-name">${game.name}</span>` : ""}
-                <span class="user-game-time"><i class="fa-regular fa-clock"></i> ${game.started_at}</span>
+                ${game.name ? `<span class="user-game-name">${escapeHtml(game.name)}</span>` : ""}
+                <span class="user-game-time"><i class="fa-regular fa-clock"></i> ${escapeHtml(game.started_at)}</span>
             </div>
         </div>
         <div class="user-players-list">
@@ -52,7 +52,7 @@ function renderPlayerRow(p, gameId) {
         : "";
 
     const avatarHtml = p.avatar_url
-        ? `<img src="${p.avatar_url}" class="player-avatar">`
+        ? `<img src="${escapeHtml(p.avatar_url)}" class="player-avatar" alt="">`
         : `<div class="player-avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
 
     // 申请买入按钮只对自己显示
@@ -74,8 +74,8 @@ function renderPlayerRow(p, gameId) {
                     const statusText = r.status === "approved" ? t("requestApproved")
                         : r.status === "rejected" ? t("requestRejected") : t("requestPending");
                     return `<div class="request-row">
-                        <span class="req-amount">${r.amount}</span>
-                        <span class="req-time">${r.requested_at}</span>
+                        <span class="req-amount">${escapeHtml(r.amount)}</span>
+                        <span class="req-time">${escapeHtml(r.requested_at)}</span>
                         <span class="req-status ${statusClass}">${statusText}</span>
                     </div>`;
                 }).join("")}
@@ -89,7 +89,7 @@ function renderPlayerRow(p, gameId) {
                 <div class="player-left">
                     ${avatarHtml}
                     <div class="player-info">
-                        <div class="player-name">${p.nickname} ${roleTag} ${meTag}</div>
+                        <div class="player-name">${escapeHtml(p.nickname)} ${roleTag} ${meTag}</div>
                         <div class="player-buyin">${t("buyIn")}：${p.total_buy_in}</div>
                     </div>
                 </div>

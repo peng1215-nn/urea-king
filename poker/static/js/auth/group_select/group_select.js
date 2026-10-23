@@ -32,10 +32,10 @@ function renderGroups() {
 
         card.innerHTML = `
             <div class="group-name">
-                ${group.group_code} - ${group.group_name || ""}
+                ${escapeHtml(group.group_code)} - ${escapeHtml(group.group_name || "")}
             </div>
 
-            <div class="group-role">${t("role")}：${group.role}
+            <div class="group-role">${t("role")}：${escapeHtml(group.role)}
             </div>
         `;
 

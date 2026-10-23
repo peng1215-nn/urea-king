@@ -1,9 +1,14 @@
+// 渲染时把用户对象存在这里，行上只放下标，避免把 JSON 拼进 onclick 属性导致注入
+let renderedUsers = [];
+
 function renderUsers(users) {
     const tableBody = document.getElementById("user-table-body");
 
     tableBody.innerHTML = "";
 
-    users.forEach((user) => {
+    renderedUsers = users;
+
+    users.forEach((user, index) => {
         const avatarUrl =
             user.avatar_url || "/static/images/default_avatar.jpg";
 
@@ -30,47 +35,47 @@ function renderUsers(users) {
                     : "";
 
         const row = `
-            <tr onclick='selectUser(${JSON.stringify(user)}, this)'>
+            <tr data-user-index="${index}" onclick="selectUser(renderedUsers[Number(this.dataset.userIndex)], this)">
 
-                <td title="${username}">
+                <td title="${escapeHtml(username)}">
                     <img
                         class="user-avatar"
-                        src="${avatarUrl}"
+                        src="${escapeHtml(avatarUrl)}"
                         alt="头像"
                     >
                 </td>
 
                 <td
                     class="${getMatchedClass(user, "nickname")}"
-                    title="${nickname}"
+                    title="${escapeHtml(nickname)}"
                 >
                     <span class="truncate-text nickname-truncate" >
-                        ${nickname}
+                        ${escapeHtml(nickname)}
                     </span>
                 </td>
 
-                <td title="${role}">
+                <td title="${escapeHtml(role)}">
                     <span
                         class="role-badge ${roleClass} ${getMatchedClass(user, "role")}"
                     >
                         <span class="truncate-text role-truncate">
-                            ${role}
+                            ${escapeHtml(role)}
                         </span>
                     </span>
                 </td>
 
                 <td
                     class="${getGroupMatchedClass(user)}"
-                    title="${groupName}"
+                    title="${escapeHtml(groupName)}"
                 >
                     <span class="truncate-text group-truncate">
-                        ${groupName}
+                        ${escapeHtml(groupName)}
                     </span>
                 </td>
 
-                <td title="${createdAt}">
+                <td title="${escapeHtml(createdAt)}">
                     <span class="truncate-text time-truncate">
-                        ${createdAt}
+                        ${escapeHtml(createdAt)}
                     </span>
                 </td>
 

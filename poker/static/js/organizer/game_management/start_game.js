@@ -33,8 +33,8 @@ async function openStartGameModal() {
         const roleLabel = isOrganizer ? t("organizer") : t("roleUser");
 
         item.innerHTML = `
-            <img class="member-select-avatar" src="${avatarUrl}" alt="头像">
-            <span class="member-select-name">${name}</span>
+            <img class="member-select-avatar" src="${escapeHtml(avatarUrl)}" alt="头像">
+            <span class="member-select-name">${escapeHtml(name)}</span>
             <span class="member-select-role">${roleLabel}</span>
             <div class="member-check"><i class="fa-solid fa-check" style="display:${isOrganizer ? 'block' : 'none'};"></i></div>
         `;

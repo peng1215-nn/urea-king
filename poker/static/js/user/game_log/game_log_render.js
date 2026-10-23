@@ -43,15 +43,15 @@ function renderGameCard(game, container) {
     const card = document.createElement("div");
     card.className = "log-card";
     const balanced = game.is_balanced ? `<span class="badge-balanced">${t("balanced")}</span>` : `<span class="badge-unbalanced">${t("unbalanced")}</span>`;
-    const title = game.name ? `<span class="log-game-name">${game.name}</span>` : "";
-    const noteHtml = game.note ? `<span class="log-game-note"><i class="fa-solid fa-note-sticky"></i> ${game.note}</span>` : "";
+    const title = game.name ? `<span class="log-game-name">${escapeHtml(game.name)}</span>` : "";
+    const noteHtml = game.note ? `<span class="log-game-note"><i class="fa-solid fa-note-sticky"></i> ${escapeHtml(game.note)}</span>` : "";
     card.innerHTML = `
         <div class="log-card-header" onclick="toggleDetail(this)">
             <div class="log-card-left">
                 ${title}
                 ${noteHtml}
-                <span class="log-time">${game.started_at} → ${game.ended_at}</span>
-                <span class="log-duration"><i class="fa-regular fa-clock"></i> ${game.duration}</span>
+                <span class="log-time">${escapeHtml(game.started_at)} → ${escapeHtml(game.ended_at)}</span>
+                <span class="log-duration"><i class="fa-regular fa-clock"></i> ${escapeHtml(game.duration)}</span>
             </div>
             <div class="log-card-right">
                 <span class="log-chips">${t("totalBuyIn")}：${game.total_buy_in}</span>
@@ -89,13 +89,13 @@ function renderPlayers(game) {
                     '<span class="detail-index">#' + (i+1) + '</span>' +
                     '<span class="detail-amount">' + d.amount + '</span>' +
                     '<span class="detail-type">' + (d.type === "insurance" ? t("buyInInsurance") : d.type === "anti" ? t("buyInAnti") : t("buyInNormal")) + '</span>' +
-                    '<span class="detail-time">' + d.time + '</span>' +
+                    '<span class="detail-time">' + escapeHtml(d.time) + '</span>' +
                     '</div>'
                 ).join("") +
             '</div>';
         }
         html += `<div class="log-player-row ${isWinner?"winner":""}">
-            <div class="log-player-name">${p.nickname} ${organizerBadge} ${winnerBadge}</div>
+            <div class="log-player-name">${escapeHtml(p.nickname)} ${organizerBadge} ${winnerBadge}</div>
             <div class="log-player-stats">
                 <span>${t("buyIn")}：${p.total_buy_in}</span>
                 <span>${t("cashOut")}：${p.cash_out}</span>
@@ -162,8 +162,8 @@ async function loadStats() {
             <div class="stats-row">
                 <div class="stats-row-icon ${r.color}"><i class="fa-solid ${r.icon}"></i></div>
                 <div class="stats-row-label">${r.label}</div>
-                <div class="stats-row-value">${r.value}</div>
-                <div class="stats-row-sub">${r.sub}</div>
+                <div class="stats-row-value">${escapeHtml(r.value)}</div>
+                <div class="stats-row-sub">${escapeHtml(r.sub)}</div>
             </div>
         `).join("") +
     `</div>`;
@@ -238,9 +238,9 @@ function renderMemberStatsTable(members, container) {
         const netClass = m.total_net > 0 ? "net-positive" : m.total_net < 0 ? "net-negative" : "net-zero";
         const netStr = m.total_net > 0 ? "+" + m.total_net : String(m.total_net);
         html += `
-            <tr class="member-row" onclick="openMemberTrendModal(${m.user_id}, '${m.nickname.replace(/'/g, "\\'")}')">
+            <tr class="member-row" data-user-id="${m.user_id}" data-nickname="${escapeHtml(m.nickname)}" onclick="openMemberTrendModal(Number(this.dataset.userId), this.dataset.nickname)">
                 <td class="rank-cell">${i + 1}</td>
-                <td class="name-cell">${m.nickname}</td>
+                <td class="name-cell">${escapeHtml(m.nickname)}</td>
                 <td>${m.game_count}</td>
                 <td style="color:#4caf7d">${m.win_rate}%（${m.win_count}${t("times")}）</td>
                 <td style="color:#e05c5c">${m.lose_rate !== undefined ? m.lose_rate + "%（" + m.lose_count + t("times") + "）" : "-"}</td>

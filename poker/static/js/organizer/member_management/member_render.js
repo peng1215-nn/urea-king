@@ -1,9 +1,14 @@
+// 渲染时把成员对象存在这里，行上只放下标，避免把 JSON 拼进 onclick 属性导致注入
+let renderedMembers = [];
+
 function renderMembers(members) {
     const tableBody = document.getElementById("user-table-body");
 
     tableBody.innerHTML = "";
 
-    members.forEach((member) => {
+    renderedMembers = members;
+
+    members.forEach((member, index) => {
         const avatarUrl =
             member.avatar_url || "/static/images/default_avatar.jpg";
 
@@ -23,29 +28,29 @@ function renderMembers(members) {
         const createdAt = member.created_at || "--";
 
         const row = `
-            <tr onclick='selectMember(${JSON.stringify(member)}, this)'>
+            <tr data-member-index="${index}" onclick="selectMember(renderedMembers[Number(this.dataset.memberIndex)], this)">
 
-                <td title="${username}">
+                <td title="${escapeHtml(username)}">
                     <img
                         class="user-avatar"
-                        src="${avatarUrl}"
+                        src="${escapeHtml(avatarUrl)}"
                         alt="头像"
                     >
                 </td>
 
                 <td
                     class="${getMemberMatchedClass(member, "nickname")}"
-                    title="${nickname}"
+                    title="${escapeHtml(nickname)}"
                 >
                     <span class="truncate-text nickname-truncate">
-                        ${nickname}
+                        ${escapeHtml(nickname)}
                     </span>
                 </td>
 
-                <td title="${role}">
+                <td title="${escapeHtml(role)}">
                     <span class="role-badge ${roleClass} ${getMemberMatchedClass(member, "role")}">
                         <span class="truncate-text role-truncate">
-                            ${role}
+                            ${escapeHtml(role)}
                         </span>
                     </span>
                 </td>
@@ -54,9 +59,9 @@ function renderMembers(members) {
                     ${statusHtml}
                 </td>
 
-                <td title="${createdAt}">
+                <td title="${escapeHtml(createdAt)}">
                     <span class="truncate-text time-truncate">
-                        ${createdAt}
+                        ${escapeHtml(createdAt)}
                     </span>
                 </td>
 

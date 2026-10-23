@@ -39,7 +39,7 @@ function loadChipAuthSettings() {
             }
             list.innerHTML = data.settings.map(s => `
                 <div class="chip-auth-row">
-                    <div class="chip-auth-group-name">${s.group_name}</div>
+                    <div class="chip-auth-group-name">${escapeHtml(s.group_name)}</div>
                     <label class="toggle-switch">
                         <input
                             type="checkbox"

@@ -15,7 +15,7 @@ function openFinishGameModal() {
 
         row.innerHTML = `
             <div class="finish-player-name">
-                ${name}${isOrganizer ? ` <span class="organizer-tag">${t("organizer")}</span>` : ""}
+                ${escapeHtml(name)}${isOrganizer ? ` <span class="organizer-tag">${t("organizer")}</span>` : ""}
             </div>
             <div class="finish-player-buyin">${t("buyIn")}：${player.total_buy_in}</div>
             <input
@@ -25,7 +25,7 @@ function openFinishGameModal() {
                 min="0"
                 data-i18n-placeholder="cashOutPlaceholder"
                 placeholder="${t("cashOutPlaceholder")}"
-                value="${player.cash_out !== null && player.cash_out !== undefined ? player.cash_out : ''}"
+                value="${player.cash_out !== null && player.cash_out !== undefined ? escapeHtml(player.cash_out) : ''}"
             >
         `;
 
@@ -73,12 +73,12 @@ function openSettlementModal(data) {
 
         row.innerHTML = `
             <div class="settlement-name">
-                ${name}${isOrganizer ? ` <span class="organizer-tag">${t("organizer")}</span>` : ""}
+                ${escapeHtml(name)}${isOrganizer ? ` <span class="organizer-tag">${t("organizer")}</span>` : ""}
             </div>
             <div class="settlement-cols">
-                <span>${t("buyIn")}：${buyIn}</span>
-                <span>${t("cashOut")}：${cashOut}</span>
-                <span class="${netClass}">${t("net")}：${net > 0 ? "+" : ""}${net}</span>
+                <span>${t("buyIn")}：${escapeHtml(buyIn)}</span>
+                <span>${t("cashOut")}：${escapeHtml(cashOut)}</span>
+                <span class="${netClass}">${t("net")}：${net > 0 ? "+" : ""}${escapeHtml(net)}</span>
             </div>
         `;
 

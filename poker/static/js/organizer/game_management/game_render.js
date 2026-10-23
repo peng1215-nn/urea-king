@@ -82,7 +82,7 @@ function renderGameTabs() {
         const hasPending = (game.requests || []).some(r => r.status === "pending");
         const tab = document.createElement("button");
         tab.className = "game-tab" + (index === currentGameIndex ? " active" : "");
-        tab.innerHTML = `${game.name || `#${index + 1}`}${hasPending ? ' <span class="tab-pending-dot">●</span>' : ""}`;
+        tab.innerHTML = `${game.name ? escapeHtml(game.name) : `#${index + 1}`}${hasPending ? ' <span class="tab-pending-dot">●</span>' : ""}`;
         tab.onclick = () => selectGameTab(index);
         tabContainer.appendChild(tab);
     });
@@ -182,9 +182,9 @@ function renderPlayerList() {
         }
 
         card.innerHTML = `
-            <img class="player-avatar" src="${avatarUrl}" alt="头像">
+            <img class="player-avatar" src="${escapeHtml(avatarUrl)}" alt="头像">
             <div class="player-info">
-                <div class="player-name">${name}${isOrganizer ? ` <span class="organizer-tag">${t("organizer")}</span>` : ""}</div>
+                <div class="player-name">${escapeHtml(name)}${isOrganizer ? ` <span class="organizer-tag">${t("organizer")}</span>` : ""}</div>
                 <div class="player-stats">${statsHtml}</div>
             </div>
             <div class="player-right">
@@ -215,10 +215,10 @@ function renderRequestList() {
         card.className = "request-card";
         card.innerHTML = `
             <div class="request-card-header">
-                <span class="request-user">${req.nickname || req.username}</span>
-                <span class="request-time">${req.requested_at}</span>
+                <span class="request-user">${escapeHtml(req.nickname || req.username)}</span>
+                <span class="request-time">${escapeHtml(req.requested_at)}</span>
             </div>
-            <div class="request-amount">${req.amount} ${t("chips")}</div>
+            <div class="request-amount">${escapeHtml(req.amount)} ${t("chips")}</div>
             <div class="request-actions">
                 <button class="btn-approve" onclick="approveRequest(${req.id})">${t("approve")}</button>
                 <button class="btn-reject" onclick="rejectRequest(${req.id})">${t("reject")}</button>

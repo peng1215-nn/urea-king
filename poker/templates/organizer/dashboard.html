@@ -70,6 +70,8 @@
 
     </div>
 
+    <div id="onboarding-slot" data-role="organizer" hidden></div>
+
     <div class="announcement-overview-card" onclick="window.location.href='/organizer-announcements'">
 
         <div class="announcement-overview-header">
@@ -241,9 +243,11 @@
 
 </div>
 
+<script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/dashboard/group_join.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/organizer.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/onboarding.js?v={{ static_version }}"></script>
 <script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
 <script src="/static/js/common/logout.js?v={{ static_version }}"></script>
 <script src="/static/js/common/sidebar.js?v={{ static_version }}"></script>
@@ -267,9 +271,9 @@
         const titleText = a.title.length > 30 ? a.title.slice(0, 30) + "..." : a.title;
         const contentText = a.content.length > 50 ? a.content.slice(0, 50) + "..." : a.content;
         item.innerHTML = `
-            <div class="announcement-preview-title">${titleText}</div>
-            <div class="announcement-preview-content">${contentText}</div>
-            <div class="announcement-preview-date">${a.updated_at || a.created_at}</div>
+            <div class="announcement-preview-title">${escapeHtml(titleText)}</div>
+            <div class="announcement-preview-content">${escapeHtml(contentText)}</div>
+            <div class="announcement-preview-date">${escapeHtml(a.updated_at || a.created_at)}</div>
         `;
         list.appendChild(item);
     }

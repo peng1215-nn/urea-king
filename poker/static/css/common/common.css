@@ -432,8 +432,10 @@ body {
     margin: 0 0 28px;
     padding: 20px 24px;
     border-radius: 18px;
-    background: rgba(92, 141, 255, 0.08);
-    border: 1px solid rgba(92, 141, 255, 0.25);
+    background: rgba(18, 24, 40, 0.94);
+    border: 1px solid rgba(92, 141, 255, 0.35);
+    position: relative;
+    z-index: 1;
 }
 
 .onboarding-header {

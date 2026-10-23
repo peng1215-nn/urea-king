@@ -1,13 +1,3 @@
-function escapeHtml(value) {
-    return String(value || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-
 function renderAnnouncements(announcements) {
     const list =
         document.getElementById("announcement-list");
