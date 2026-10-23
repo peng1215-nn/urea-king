@@ -133,7 +133,7 @@ _session_cache = {}
 _session_cache_lock = threading.Lock()
 
 _SKIP_PREFIXES = ("/static", "/healthz", "/readyz")
-_PUBLIC_PATHS = {"/", "/login", "/register", "/group-join"}
+_PUBLIC_PATHS = {"/", "/login", "/register", "/group-join", "/delete-account", "/account/delete"}
 
 
 def _session_is_valid(user_id, group_id, role):

@@ -28,6 +28,7 @@ from poker.routes.organizer.game_log import router as organizer_game_log_router
 from poker.routes.organizer.organizer import router as organizer_router
 from poker.routes.organizer.game_management import router as game_router
 from poker.routes.auth.group_join import router as group_join_router
+from poker.routes.auth.delete_account import router as delete_account_router
 from poker.routes.user.dashboard import router as user_dashboard_router
 from poker.routes.user.game import router as user_game_router
 from poker.routes.user.misc import router as user_misc_router
@@ -62,6 +63,7 @@ app.include_router(root_index_router)
 app.include_router(register_router)
 app.include_router(login_router)
 app.include_router(group_join_router)
+app.include_router(delete_account_router)
 app.include_router(admin_router)
 app.include_router(avatar_router)
 app.include_router(common_router)

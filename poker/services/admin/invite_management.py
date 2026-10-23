@@ -4,9 +4,9 @@ from database import SessionLocal
 from poker.models import Group
 from poker.models import InvitationCode
 from poker.models import UserGroupRole
-from poker.models import PokerGame, PokerGamePlayer, ChipRequest
 from poker.core.validators import GROUP_NAME_MAX, check_name
 from poker.core.errors import safe_error
+from poker.services.common.account_lifecycle import purge_group
 
 
 ADMIN_GROUP_CODE = "0"
@@ -435,24 +435,14 @@ def force_delete_group_service(group_id, expected_group_code):
         if expected_group_code != group.group_code:
             return {"success": False, "message": "forceGroupCodeMismatch"}
 
-        game_ids = [item[0] for item in db.query(PokerGame.id).filter(PokerGame.group_id == group.id).all()]
-        counts = {"games": len(game_ids)}
-        if game_ids:
-            counts["chip_requests"] = db.query(ChipRequest).filter(ChipRequest.game_id.in_(game_ids)).delete(synchronize_session=False)
-            counts["players"] = db.query(PokerGamePlayer).filter(PokerGamePlayer.game_id.in_(game_ids)).delete(synchronize_session=False)
-            db.query(PokerGame).filter(PokerGame.id.in_(game_ids)).delete(synchronize_session=False)
-        else:
-            counts["chip_requests"] = 0
-            counts["players"] = 0
-        counts["members"] = db.query(UserGroupRole).filter(UserGroupRole.group_id == group.id).delete(synchronize_session=False)
-        counts["invites"] = db.query(InvitationCode).filter(InvitationCode.group_code == group.group_code).delete(synchronize_session=False)
         code, name = group.group_code, group.group_name
-        db.delete(group)
+        # 共用的清理逻辑，同时删除组内备注名（之前遗漏，存在备注名时删除会失败）
+        counts = purge_group(db, group)
         db.commit()
         return {"success": True, "message": "forceGroupDeleteSuccess", "group_code": code, "group_name": name, "counts": counts}
-    except Exception:
+    except Exception as e:
         db.rollback()
-        return {"success": False, "message": "operationFailed"}
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()
 
