@@ -1,6 +1,7 @@
 from database import SessionLocal
 from poker.models import Group
 from poker.models import User
+from poker.models import PokerGame, PokerGamePlayer
 
 
 def add_no_cache_headers(response):
@@ -63,3 +64,16 @@ def get_current_user_service(request):
 
     finally:
         db.close()
+
+
+def user_in_ongoing_game(db, user_id, group_id=None):
+    """该用户是否在进行中的牌局里（可限定某个组）。用调用方的数据库会话。"""
+    query = db.query(PokerGamePlayer.id).join(
+        PokerGame, PokerGame.id == PokerGamePlayer.game_id
+    ).filter(
+        PokerGamePlayer.user_id == user_id,
+        PokerGame.status == "ongoing",
+    )
+    if group_id is not None:
+        query = query.filter(PokerGame.group_id == group_id)
+    return query.first() is not None

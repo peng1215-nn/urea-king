@@ -1,6 +1,6 @@
 """
 登录页的“注销账号”：输入用户名、密码和确认文字即可注销，不需要先登录。
-规则见 poker/services/common/account_lifecycle.py。
+规则见 poker/services/auth/delete_account.py。
 """
 
 from fastapi import APIRouter, Form, Request
@@ -10,7 +10,7 @@ from poker.core.middleware import clear_session_cache
 from poker.core.rate_limit import login_retry_after, record_login_failure
 from poker.routes.common.avatar import delete_avatar_for_user
 from poker.services.admin.audit_log import get_client_ip, write_audit_log
-from poker.services.common.account_lifecycle import delete_account_service
+from poker.services.auth.delete_account import delete_account_service
 from poker.template_config import templates
 
 

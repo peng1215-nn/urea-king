@@ -13,7 +13,7 @@ from poker.services.organizer.game_log import get_stats_service
 from poker.services.organizer.game_log import get_member_stats_service
 from poker.services.organizer.game_log import get_member_trend_service
 from poker.services.common.common import add_no_cache_headers
-from poker.services.common.account_lifecycle import leave_group_service
+from poker.services.user.leave_group import leave_group_service
 from poker.services.admin.audit_log import write_audit_log
 from poker.core.middleware import clear_session_cache
 from poker.template_config import templates
