@@ -66,14 +66,25 @@ class SlidingWindowLimiter:
 
 WINDOW = 15 * 60
 
-# 登录：同一 IP + 用户名 15 分钟内最多失败 5 次；同一 IP 最多失败 30 次
+# IP 取自 X-Forwarded-For，客户端可以伪造；所以每类限制都另有一道与 IP 无关的上限。
+
+# 登录：同一 IP + 用户名 15 分钟内最多失败 5 次；同一 IP 最多失败 30 次；
+# 同一用户名（不论来源）最多失败 20 次
 login_failures_by_account = SlidingWindowLimiter(5, WINDOW)
 login_failures_by_ip = SlidingWindowLimiter(30, WINDOW)
+login_failures_by_username = SlidingWindowLimiter(20, WINDOW)
 
-# 注册、用邀请码加入组：同一 IP 15 分钟内最多 10 次失败（防止暴力猜邀请码）
+# 注册、用邀请码加入组：同一 IP 15 分钟内最多 10 次失败；全站合计最多 100 次（防止暴力猜邀请码）
 register_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
 group_join_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
+invite_failures_global = SlidingWindowLimiter(100, WINDOW)
+
+GLOBAL_KEY = "global"
 
 
 def login_keys(ip, username):
     return (f"{ip}|{(username or '').strip().lower()}", ip or "unknown")
+
+
+def username_key(username):
+    return (username or "").strip().lower()

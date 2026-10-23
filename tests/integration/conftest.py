@@ -44,6 +44,8 @@ def clean_state(migrated_db):
         rate_limit.login_failures_by_ip,
         rate_limit.register_failures_by_ip,
         rate_limit.group_join_failures_by_ip,
+        rate_limit.login_failures_by_username,
+        rate_limit.invite_failures_global,
     ):
         limiter._events.clear()
 

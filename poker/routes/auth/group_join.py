@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse
 from poker.services.auth.group_join import group_join_service
 from poker.template_config import templates
 from fastapi.responses import JSONResponse
-from poker.core.rate_limit import group_join_failures_by_ip
+from poker.core.rate_limit import GLOBAL_KEY, group_join_failures_by_ip, invite_failures_global
 from poker.services.admin.audit_log import get_client_ip
 
 
@@ -32,7 +32,10 @@ def group_join(
     invite_code: str = Form(...),
 ):
     ip = get_client_ip(request) or "unknown"
-    wait = group_join_failures_by_ip.retry_after(ip)
+    wait = max(
+        group_join_failures_by_ip.retry_after(ip),
+        invite_failures_global.retry_after(GLOBAL_KEY),
+    )
 
     if wait:
         return JSONResponse(
@@ -53,5 +56,6 @@ def group_join(
 
     if not result.get("success"):
         group_join_failures_by_ip.hit(ip)
+        invite_failures_global.hit(GLOBAL_KEY)
 
     return result

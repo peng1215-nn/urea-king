@@ -103,3 +103,24 @@ def test_disabled_user_loses_access_immediately(client, factory, login_as):
     response = client.get("/current-user")
     assert response.status_code == 401
     assert response.json()["message"] == "sessionExpired"
+
+
+def test_spoofed_forwarded_for_does_not_bypass_username_limit(client, factory):
+    user_id = factory.user("erin001")
+    group_id = factory.group("G1")
+    factory.role(user_id, group_id, "user")
+
+    # 每次伪造不同的来源 IP，单个“IP+用户名”的计数永远到不了 5 次
+    for i in range(20):
+        client.post(
+            "/login",
+            data={"username": "erin001", "password": "wrong-password"},
+            headers={"x-forwarded-for": f"10.0.0.{i}"},
+        )
+
+    response = client.post(
+        "/login",
+        data={"username": "erin001", "password": "wrong-password"},
+        headers={"x-forwarded-for": "10.0.1.1"},
+    )
+    assert response.status_code == 429

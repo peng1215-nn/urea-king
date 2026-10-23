@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from poker.services.auth.register import register_user_service
 from poker.template_config import templates
 from fastapi.responses import JSONResponse
-from poker.core.rate_limit import register_failures_by_ip
+from poker.core.rate_limit import GLOBAL_KEY, invite_failures_global, register_failures_by_ip
 from poker.services.admin.audit_log import get_client_ip
 
 
@@ -34,7 +34,10 @@ def register_user(
     invite_code: str = Form(...),
 ):
     ip = get_client_ip(request) or "unknown"
-    wait = register_failures_by_ip.retry_after(ip)
+    wait = max(
+        register_failures_by_ip.retry_after(ip),
+        invite_failures_global.retry_after(GLOBAL_KEY),
+    )
 
     if wait:
         return JSONResponse(
@@ -58,5 +61,6 @@ def register_user(
     # 只统计邀请码相关的失败，防止暴力猜测邀请码
     if not result.get("success") and str(result.get("error_code", "")).startswith("registerInviteCode"):
         register_failures_by_ip.hit(ip)
+        invite_failures_global.hit(GLOBAL_KEY)
 
     return result

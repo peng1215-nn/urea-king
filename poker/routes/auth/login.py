@@ -10,7 +10,7 @@ from poker.models import UserGroupRole
 from poker.services.auth.login import login_user_service
 from poker.template_config import templates
 from fastapi.responses import JSONResponse
-from poker.core.rate_limit import login_failures_by_account, login_failures_by_ip, login_keys
+from poker.core.rate_limit import login_failures_by_account, login_failures_by_ip, login_failures_by_username, login_keys, username_key
 from poker.services.admin.audit_log import get_client_ip
 
 
@@ -42,10 +42,12 @@ def login_user(
 ):
     ip = get_client_ip(request) or "unknown"
     account_key, ip_key = login_keys(ip, username)
+    name_key = username_key(username)
 
     wait = max(
         login_failures_by_account.retry_after(account_key),
         login_failures_by_ip.retry_after(ip_key),
+        login_failures_by_username.retry_after(name_key),
     )
 
     if wait:
@@ -66,9 +68,11 @@ def login_user(
 
     if result.get("success"):
         login_failures_by_account.reset(account_key)
+        login_failures_by_username.reset(name_key)
     elif result.get("error_code") in ("loginUserNotFound", "loginPasswordIncorrect"):
         login_failures_by_account.hit(account_key)
         login_failures_by_ip.hit(ip_key)
+        login_failures_by_username.hit(name_key)
 
     return result
 
