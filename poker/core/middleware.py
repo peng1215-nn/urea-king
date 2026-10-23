@@ -24,7 +24,9 @@ logger = logging.getLogger("poker.request")
 
 # ───────────────────────── 安全响应头 ─────────────────────────
 
-# 是否允许被嵌入由 CSP 的 frame-ancestors 控制（只允许本站和主域名，见 settings.FRAME_ANCESTORS）。
+# 首页点 POKER 时会在 iframe 里预加载 poker 子站，所以两边都要放行：
+#   frame-src：首页可以嵌入 poker 子站（settings.FRAME_SOURCES，来自 POKER_URL）；
+#   frame-ancestors：poker 页面只允许被本站和主域名嵌入（settings.FRAME_ANCESTORS）。
 # 不再发送 X-Frame-Options：它无法表达“允许另一个指定域名”，而现代浏览器以 frame-ancestors 为准。
 #
 # 页面用到的外部资源：cdnjs（脚本、Font Awesome 样式与字体）、
@@ -41,6 +43,7 @@ CONTENT_SECURITY_POLICY = "; ".join([
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
+    "frame-src " + " ".join(["'self'"] + settings.FRAME_SOURCES),
     "frame-ancestors " + " ".join(["'self'"] + settings.FRAME_ANCESTORS),
 ])
 

@@ -69,3 +69,17 @@ FRAME_ANCESTORS = os.getenv(
     "FRAME_ANCESTORS",
     "https://urea-king.com https://www.urea-king.com",
 ).split()
+
+
+def _origin(url):
+    from urllib.parse import urlsplit
+
+    parts = urlsplit(url or "")
+    return f"{parts.scheme}://{parts.netloc}" if parts.scheme and parts.netloc else ""
+
+
+# 反过来，首页需要在 iframe 里加载 poker 子站（与首页的 POKER 链接同源，取自 POKER_URL）
+FRAME_SOURCES = [
+    origin for origin in [_origin(os.getenv("POKER_URL", "https://poker.urea-king.com"))]
+    if origin
+]
