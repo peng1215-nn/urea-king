@@ -6,7 +6,7 @@ from poker.models import InvitationCode
 from poker.models import UserGroupRole
 from poker.core.validators import GROUP_NAME_MAX, check_name
 from poker.core.errors import safe_error
-from poker.services.common.account_lifecycle import purge_group
+from poker.services.common.group_purge import purge_group
 
 
 ADMIN_GROUP_CODE = "0"
