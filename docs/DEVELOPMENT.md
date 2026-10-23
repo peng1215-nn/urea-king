@@ -86,6 +86,13 @@ Dependabot 每周检查一次 Python 依赖和 GitHub Actions 版本，有更新
 - `GET /healthz`：进程存活即返回 200。
 - `GET /readyz`：同时检查数据库连接，数据库不可用时返回 503。
 
+## 代码结构约定
+
+- `poker/routes/<身份>/xxx.py` 只处理请求与会话，业务逻辑和数据库操作放在对应的 `poker/services/<身份>/xxx.py`。
+- 多个身份共用的业务放在 `poker/services/common/`：账号资料（`account.py`）、公告读取（`announcement.py`）、牌局日志与统计（`game_log.py`）、头像（`avatar.py`）、删除整个组（`group_purge.py`）。不要让一个身份的路由去调用另一个身份目录下的业务代码。
+- 密码哈希只用 `poker/core/security.py` 里的 `pwd_context`。
+- 返回给前端的提示一律用翻译键（如 `groupNotFound`），并在 `poker/static/js/i18n/` 对应身份的文件里加上中英文。`tests/unit/test_i18n_keys.py` 会检查遗漏和直接写中文的情况。
+
 ## 安全相关的行为（改代码前请了解）
 
 - **登录限流**：15 分钟内，同一 IP + 用户名失败 5 次、同一 IP 失败 30 次、同一用户名（不论来源）失败 20 次后暂时锁定；曾在某个 IP 成功登录过的用户不受“同一用户名 20 次”这条限制，避免别人故意输错密码把账号主人锁在外面。“邀请码加入组”也要输入密码，同样计入。邀请码相关失败按 IP 限制 10 次；“邀请码不存在”全站合计不超过 300 次。客户端 IP 取自 `X-Forwarded-For`，可被伪造，所以都有不依赖 IP 的上限。计数保存在进程内存中，重启后清零；适用于当前的单实例部署，将来扩展到多个实例时需要改为共享存储（数据库或 Redis）。

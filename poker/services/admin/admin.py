@@ -7,15 +7,11 @@ from poker.models import Group
 from poker.models import InvitationCode
 from poker.models import User
 from poker.models import UserGroupRole
-from passlib.context import CryptContext
 import secrets
 from poker.core.errors import safe_error
+from poker.core.security import pwd_context
 
 
-pwd_context = CryptContext(
-    schemes=["pbkdf2_sha256"],
-    deprecated="auto",
-)
 
 
 def get_admin_stats_service():
@@ -145,7 +141,7 @@ def update_user_role_service(
         ]:
             return {
                 "success": False,
-                "message": "身份类型无效。",
+                "message": "roleInvalid",
             }
 
         user_group_role = db.query(UserGroupRole).filter(
@@ -156,19 +152,19 @@ def update_user_role_service(
         if not user_group_role:
             return {
                 "success": False,
-                "message": "该用户不属于所选组别。",
+                "message": "userNotInSelectedGroup",
             }
 
         if user_group_role.role == "admin":
             return {
                 "success": False,
-                "message": "管理员身份不可修改。",
+                "message": "adminRoleImmutable",
             }
 
         if user_group_role.role == new_role:
             return {
                 "success": False,
-                "message": "身份无需更改。",
+                "message": "roleNoChange",
             }
 
         old_role = user_group_role.role
@@ -179,7 +175,7 @@ def update_user_role_service(
 
         return {
             "success": True,
-            "message": "用户身份修改成功。",
+            "message": "roleUpdateSuccess",
             "old_role": old_role,
             "new_role": new_role,
         }
@@ -217,7 +213,7 @@ def reset_user_password_service(target_user_id):
         if not user:
             return {
                 "success": False,
-                "message": "用户不存在。",
+                "message": "userNotFound",
             }
 
         admin_role = db.query(UserGroupRole).filter(
@@ -228,7 +224,7 @@ def reset_user_password_service(target_user_id):
         if admin_role:
             return {
                 "success": False,
-                "message": "不允许重置管理员密码。",
+                "message": "adminPasswordResetForbidden",
             }
 
         temporary_password = generate_temporary_password()
@@ -266,7 +262,7 @@ def toggle_user_active_service(target_user_id):
         if not user:
             return {
                 "success": False,
-                "message": "用户不存在。",
+                "message": "userNotFound",
             }
 
         admin_role = db.query(UserGroupRole).filter(
@@ -277,7 +273,7 @@ def toggle_user_active_service(target_user_id):
         if admin_role:
             return {
                 "success": False,
-                "message": "不允许禁用管理员账号。",
+                "message": "adminDisableForbidden",
             }
 
         user.is_active = 0 if user.is_active == 1 else 1

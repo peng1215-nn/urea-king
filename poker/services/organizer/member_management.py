@@ -28,7 +28,7 @@ def get_organizer_members_service(group_id: int):
         if not group:
             return {
                 "success": False,
-                "message": "组别不存在。",
+                "message": "groupNotFound",
             }
 
         rows = (
@@ -131,13 +131,13 @@ def remove_member_service(group_id: int, target_user_id: int):
         if not record:
             return {
                 "success": False,
-                "message": "该成员不在本组中。",
+                "message": "memberNotInGroup",
             }
 
         if record.role == "organizer":
             return {
                 "success": False,
-                "message": "不允许移除局头。",
+                "message": "cannotRemoveOrganizer",
             }
 
         # 释放该成员使用的邀请码仓位
@@ -157,7 +157,7 @@ def remove_member_service(group_id: int, target_user_id: int):
 
         return {
             "success": True,
-            "message": "成员已移除。",
+            "message": "removeMemberSuccess",
         }
 
     except Exception as e:

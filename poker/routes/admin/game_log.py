@@ -4,11 +4,11 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
 
-from poker.services.organizer.game_log import get_game_logs_service
-from poker.services.organizer.game_log import get_stats_service
-from poker.services.organizer.game_log import delete_game_log_service
-from poker.services.organizer.game_log import get_member_stats_service
-from poker.services.organizer.game_log import get_member_trend_service
+from poker.services.common.game_log import get_game_logs_service
+from poker.services.common.game_log import get_stats_service
+from poker.services.common.game_log import delete_game_log_service
+from poker.services.common.game_log import get_member_stats_service
+from poker.services.common.game_log import get_member_trend_service
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
 

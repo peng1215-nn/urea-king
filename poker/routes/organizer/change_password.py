@@ -4,9 +4,9 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
 
-from poker.services.organizer.change_password import get_current_account_service
-from poker.services.organizer.change_password import update_nickname_service
-from poker.services.organizer.change_password import update_password_service
+from poker.services.common.account import get_current_account_service
+from poker.services.common.account import update_nickname_service
+from poker.services.common.account import update_password_service
 from poker.services.organizer.change_password import get_group_info_service
 from poker.services.organizer.change_password import update_group_name_service
 from poker.services.common.common import add_no_cache_headers
@@ -102,7 +102,7 @@ def get_group_info(request: Request):
         return {"success": False, "message": "permissionDenied"}
     group_id = request.session.get("current_group_id")
     if not group_id:
-        return {"success": False, "message": "未选择组别。"}
+        return {"success": False, "message": "noGroupSelected"}
     return get_group_info_service(group_id=int(group_id))
 
 
@@ -115,5 +115,5 @@ def update_group_name(
         return {"success": False, "message": "permissionDenied"}
     group_id = request.session.get("current_group_id")
     if not group_id:
-        return {"success": False, "message": "未选择组别。"}
+        return {"success": False, "message": "noGroupSelected"}
     return update_group_name_service(group_id=int(group_id), group_name=group_name)

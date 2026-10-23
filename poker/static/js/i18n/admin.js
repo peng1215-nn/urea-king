@@ -1,5 +1,11 @@
 window.adminTranslations = {
     zh: {
+        noGroupSelected: "未选择组别，请重新登录。",
+        roleInvalid: "身份类型无效。",
+        userNotInSelectedGroup: "该用户不属于所选组别。",
+        adminRoleImmutable: "管理员身份不可修改。",
+        roleUpdateSuccess: "用户身份修改成功。",
+        adminPasswordResetForbidden: "不允许重置管理员密码。",
         titleDashboard: "UREAKING-POKER 控制面板",
         titleSystemMonitor: "UREAKING-POKER 系统监控",
         titleUserManagement: "UREAKING-POKER 用户管理",
@@ -355,6 +361,12 @@ window.adminTranslations = {
     },
 
     en: {
+        noGroupSelected: "No group selected. Please sign in again.",
+        roleInvalid: "Invalid role.",
+        userNotInSelectedGroup: "This user does not belong to the selected group.",
+        adminRoleImmutable: "The administrator role cannot be changed.",
+        roleUpdateSuccess: "User role updated.",
+        adminPasswordResetForbidden: "Administrator passwords cannot be reset.",
         titleDashboard: "UREAKING-POKER Dashboard",
         titleSystemMonitor: "UREAKING-POKER System Monitor",
         titleUserManagement: "UREAKING-POKER User Management",

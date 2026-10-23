@@ -1,5 +1,9 @@
 window.userTranslations = {
     zh: {
+        noGroupSelected: "未选择组别，请重新登录。",
+        notLoggedIn: "未登录。",
+        groupNotFound: "组别不存在。",
+        recordNotFound: "记录不存在。",
         titleUserDashboard: "UREAKING-POKER 用户控制台",
         titleJoinGame: "UREAKING-POKER 加入牌局",
         titleGameLogs: "UREAKING-POKER 牌局日志",
@@ -170,6 +174,10 @@ window.userTranslations = {
     },
 
     en: {
+        noGroupSelected: "No group selected. Please sign in again.",
+        notLoggedIn: "You are not signed in.",
+        groupNotFound: "Group does not exist.",
+        recordNotFound: "Record not found.",
         titleUserDashboard: "UREAKING-POKER User Dashboard",
         titleJoinGame: "UREAKING-POKER Join Game",
         titleGameLogs: "UREAKING-POKER Game Logs",
