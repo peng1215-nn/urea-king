@@ -95,7 +95,7 @@ def test_user_pages_still_served(client, factory, login_as):
     group_id, _, _ = _setup(factory)
     login_as("alice001", group_id)
 
-    for path in ("/user-announcements", "/user-change-password", "/user-game-logs"):
+    for path in ("/user-dashboard", "/user-change-password", "/user-game-logs"):
         response = client.get(path, headers={"accept": "text/html"})
         assert response.status_code == 200, path
 
