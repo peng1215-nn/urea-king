@@ -11,8 +11,7 @@ window.loginTranslations = {
 
         loginUsernameRequired: "请输入用户名。",
         loginPasswordRequired: "请输入密码。",
-        loginUserNotFound: "用户不存在。",
-        loginPasswordIncorrect: "密码错误。",
+        loginInvalidCredentials: "用户名或密码错误。",
         loginTooManyAttempts: "尝试次数过多，请 15 分钟后再试。",
         loginSuccess: "登录成功，3秒后跳转。",
         loginFailed: "登录请求失败。",
@@ -75,8 +74,7 @@ window.loginTranslations = {
 
         loginUsernameRequired: "Please enter username.",
         loginPasswordRequired: "Please enter password.",
-        loginUserNotFound: "User does not exist.",
-        loginPasswordIncorrect: "Incorrect password.",
+        loginInvalidCredentials: "Incorrect username or password.",
         loginTooManyAttempts: "Too many attempts. Please try again in 15 minutes.",
         loginSuccess: "login success. Redirecting in 3 seconds.",
         loginFailed: "Login request failed.",

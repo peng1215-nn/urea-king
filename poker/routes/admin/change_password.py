@@ -9,6 +9,7 @@ from poker.services.admin.change_password import update_nickname_service
 from poker.services.admin.change_password import update_password_service
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
+from poker.core.middleware import clear_session_cache
 
 
 router = APIRouter()
@@ -103,5 +104,7 @@ def update_password(
 
     if result.get("success"):
         request.session.clear()
+        # 让其他设备上的旧登录立即失效
+        clear_session_cache()
 
     return result

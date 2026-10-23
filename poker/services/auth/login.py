@@ -1,16 +1,12 @@
-from passlib.context import CryptContext
 from database import SessionLocal
 from poker.models import Group
 from poker.models import User
 from poker.models import UserGroupRole
 from poker.services.admin.audit_log import write_audit_log
 from poker.core.errors import safe_error
+from poker.core.security import password_fingerprint, verify_user_password
 
 
-pwd_context = CryptContext(
-    schemes=["pbkdf2_sha256"],
-    deprecated="auto",
-)
 
 
 def login_user_service(request, username, password):
@@ -23,19 +19,11 @@ def login_user_service(request, username, password):
             User.username == username
         ).first()
 
-        if not user:
+        # 用户名不存在和密码错误给出同一个提示，避免被用来试探哪些用户名已注册
+        if not verify_user_password(user, password):
             return {
                 "success": False,
-                "error_code": "loginUserNotFound",
-            }
-
-        if not pwd_context.verify(
-            password,
-            user.password_hash,
-        ):
-            return {
-                "success": False,
-                "error_code": "loginPasswordIncorrect",
+                "error_code": "loginInvalidCredentials",
             }
 
         if user.is_active == 0:
@@ -62,6 +50,7 @@ def login_user_service(request, username, password):
 
         request.session["user_id"] = user.id
         request.session["username"] = user.username
+        request.session["pw_fp"] = password_fingerprint(user.password_hash)
         request.session.pop("current_group_id", None)
         request.session.pop("current_group_code", None)
         request.session.pop("current_role", None)

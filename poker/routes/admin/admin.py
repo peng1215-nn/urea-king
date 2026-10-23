@@ -12,6 +12,7 @@ from poker.services.admin.admin import update_user_role_service
 from poker.services.admin.admin import reset_user_password_service
 from poker.services.admin.admin import toggle_user_active_service
 from poker.services.admin.audit_log import write_audit_log
+from poker.core.middleware import clear_session_cache
 
 
 router = APIRouter()
@@ -156,6 +157,8 @@ def reset_user_password(
     )
 
     if result.get("success"):
+        # 被重置的用户在所有设备上的旧登录立即失效
+        clear_session_cache()
         write_audit_log(
             request=request,
             action="RESET_USER_PASSWORD",
