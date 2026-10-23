@@ -41,3 +41,41 @@
         padding: 26px 20px;
     }
 }
+
+/* 这一页内容比其他登录类页面多：允许滚动，并把卡片排得紧凑一些 */
+body {
+    overflow-y: auto;
+}
+
+.page {
+    padding-block: 24px;
+}
+
+.delete-account-card {
+    gap: 14px;
+    padding: 28px 38px;
+}
+
+.delete-account-card .title-area {
+    margin-bottom: 0;
+}
+
+.delete-account-card .title-area h1 {
+    font-size: 30px;
+}
+
+.delete-account-card input {
+    height: 40px;
+}
+
+.delete-account-back {
+    align-self: flex-start;
+    color: rgba(255, 255, 255, 0.78);
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.delete-account-back:hover {
+    color: white;
+    text-decoration: underline;
+}
