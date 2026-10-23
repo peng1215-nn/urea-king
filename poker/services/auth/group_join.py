@@ -1,4 +1,3 @@
-from datetime import datetime
 from utils.time import now_columbus_naive
 from passlib.context import CryptContext
 

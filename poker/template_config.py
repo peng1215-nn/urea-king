@@ -1,4 +1,3 @@
-from datetime import datetime
 from utils.time import now_columbus_naive
 
 from fastapi.templating import Jinja2Templates

@@ -83,7 +83,7 @@ Different roles have different permissions and accessible pages.
 
 ## Deployment & Services
 
-* Render
+* Railway
 * Cloudinary
 
 ---
@@ -132,12 +132,17 @@ The system supports many-to-many relationships between users and groups with rol
 
 The project uses several security mechanisms:
 
-* Password hashing
-* Session authentication
-* Environment variable isolation
-* Role-based permission checks
-* Admin operation restrictions
-* Account status control (`is_active`)
+* Password hashing (PBKDF2-SHA256) with an 8–128 character policy
+* Signed session cookies (`HttpOnly`, `SameSite=Lax`, `Secure` in production); the app refuses to start in production without `SESSION_SECRET_KEY`
+* Login, registration and invite-code rate limiting
+* Per-request session validation: disabled accounts and removed roles lose access within 15 seconds
+* CSRF protection via `Origin` / `Referer` checks on state-changing requests
+* Security headers: Content-Security-Policy, `X-Frame-Options`, `nosniff`, Referrer-Policy, HSTS in production
+* Output escaping for all server data rendered into HTML, plus server-side input validation
+* Generic error responses to clients, with full details written to structured logs
+* Avatar uploads validated by file signature and size
+* Random one-time temporary passwords for admin password resets
+* Role-based permission checks, group-level data isolation and an audit log
 
 Sensitive values such as:
 
@@ -146,7 +151,7 @@ Sensitive values such as:
 * CLOUDINARY_API_KEY
 * CLOUDINARY_API_SECRET
 
-are managed through environment variables and are not stored in the repository.
+are managed through environment variables and are not stored in the repository. See `.env.example`.
 
 ---
 
@@ -170,11 +175,16 @@ Currently supported languages:
 
 The project is deployed using:
 
-* Render (backend deployment)
-* PostgreSQL
-* Cloudinary
+* Railway (application and PostgreSQL)
+* Cloudinary (avatar storage)
 
-Environment variables are configured through the deployment platform.
+Environment variables are configured through the deployment platform. Health check endpoints: `/healthz` (liveness) and `/readyz` (database readiness).
+
+---
+
+# Development
+
+Local setup, migrations, tests, CI and deployment notes are documented in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ---
 

@@ -1,11 +1,8 @@
-import uuid
-from datetime import datetime
 from utils.time import now_columbus_naive
 
 from database import SessionLocal
 from poker.models import Group
 from poker.models import InvitationCode
-from poker.models import UserGroupRole
 from poker.core.errors import safe_error
 
 

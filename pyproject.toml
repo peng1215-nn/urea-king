@@ -1,0 +1,17 @@
+[tool.ruff]
+target-version = "py312"
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+# 先从“确定是错误”的规则开始（语法错误、未定义名称、未使用导入等），保证 CI 一开始就是绿的；
+# 以后可以逐步加入更多规则。
+select = ["E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+# 这些导入用于把模型注册到 Alembic 的 metadata，属于有意为之
+"migrations/env.py" = ["F401"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"

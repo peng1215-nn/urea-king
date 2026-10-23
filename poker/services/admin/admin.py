@@ -1,4 +1,3 @@
-from datetime import datetime
 from utils.time import now_columbus_naive
 from poker.app_state import DEPLOY_ENVIRONMENT
 from poker.app_state import PROJECT_LAUNCH_TIME
