@@ -64,9 +64,9 @@ def test_security_headers_are_set(client):
     response = client.get("/page")
     assert response.status_code == 200
     assert "connect-src 'self'" in response.headers["content-security-policy"]
-    assert "frame-ancestors 'none'" in response.headers["content-security-policy"]
+    csp = response.headers["content-security-policy"]
+    assert "frame-ancestors 'self' https://urea-king.com https://www.urea-king.com" in csp
     assert response.headers["x-content-type-options"] == "nosniff"
-    assert response.headers["x-frame-options"] == "DENY"
     assert response.headers["referrer-policy"] == "strict-origin-when-cross-origin"
     assert response.headers["x-request-id"]
 

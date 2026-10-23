@@ -137,7 +137,7 @@ The project uses several security mechanisms:
 * Login, registration and invite-code rate limiting
 * Per-request session validation: disabled accounts and removed roles lose access within 15 seconds
 * CSRF protection via `Origin` / `Referer` checks on state-changing requests
-* Security headers: Content-Security-Policy, `X-Frame-Options`, `nosniff`, Referrer-Policy, HSTS in production
+* Security headers: Content-Security-Policy (framing allowed only from the site's own domains), `nosniff`, Referrer-Policy, HSTS in production
 * Output escaping for all server data rendered into HTML, plus server-side input validation
 * Generic error responses to clients, with full details written to structured logs
 * Avatar uploads validated by file signature and size
