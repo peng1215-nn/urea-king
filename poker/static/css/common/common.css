@@ -486,3 +486,33 @@ body {
 .onboarding-steps a:hover {
     text-decoration: underline;
 }
+
+
+/* ───── 注销账号 ───── */
+
+.profile-card.danger-zone {
+    border-color: rgba(255, 100, 100, 0.35);
+}
+
+.profile-card.danger-zone .profile-card-header i {
+    color: #ff6b6b;
+}
+
+.modal-confirm-button.danger {
+    background: rgba(220, 60, 60, 0.9);
+    color: #ffffff;
+}
+
+.modal-confirm-button.danger:hover {
+    background: rgba(220, 60, 60, 1);
+}
+
+.modal-confirm-button.danger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#delete-account-modal .form-group {
+    margin-bottom: 14px;
+    text-align: left;
+}

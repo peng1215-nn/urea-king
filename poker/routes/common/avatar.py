@@ -90,3 +90,17 @@ async def upload_avatar(
 
     finally:
         db.close()
+
+def delete_avatar_for_user(user_id):
+    """注销时删除 Cloudinary 上的头像。失败只记日志，不影响注销本身。"""
+    import logging
+
+    try:
+        cloudinary.uploader.destroy(
+            f"urea_king_avatars/user_{user_id}",
+            invalidate=True,
+        )
+    except Exception:
+        logging.getLogger("poker.avatar").exception(
+            "failed to delete avatar", extra={"user_id": user_id}
+        )

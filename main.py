@@ -9,6 +9,7 @@ from poker.core.logging_config import setup_logging
 from poker.core.errors import register_exception_handlers
 from poker.core.middleware import install_middleware
 from poker.routes.common.health import router as health_router
+from poker.routes.common.account import router as account_router
 
 from root.routes.index import router as root_index_router
 from poker.routes.admin.admin import router as admin_router
@@ -58,6 +59,7 @@ async def domain_router(request: Request, call_next):
 
 
 app.include_router(health_router)
+app.include_router(account_router)
 app.include_router(root_index_router)
 app.include_router(register_router)
 app.include_router(login_router)
