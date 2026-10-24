@@ -2,6 +2,7 @@ from sqlalchemy import CheckConstraint
 from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
+from sqlalchemy import Index
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Text
@@ -41,6 +42,8 @@ class UserGroupRole(Base):
     __tablename__ = "poker_user_group_roles"
     __table_args__ = (
         UniqueConstraint("user_id", "group_id", name="uq_user_group_roles_user_group"),
+        # 查组内成员（按组查）；按用户查可以用上面的唯一约束
+        Index("ix_user_group_roles_group_id", "group_id"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
@@ -102,6 +105,8 @@ class PokerGame(Base):
     __tablename__ = "poker_games"
     __table_args__ = (
         CheckConstraint("status IN ('ongoing', 'finished')", name="ck_games_status"),
+        # 牌局日志、统计：按组 + 状态筛选，按结束时间排序
+        Index("ix_games_group_status_ended", "group_id", "status", "ended_at"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
@@ -125,6 +130,8 @@ class PokerGamePlayer(Base):
         UniqueConstraint("game_id", "user_id", name="uq_game_players_game_user"),
         CheckConstraint("total_buy_in >= 0", name="ck_game_players_buy_in_nonneg"),
         CheckConstraint("cash_out IS NULL OR cash_out >= 0", name="ck_game_players_cash_out_nonneg"),
+        # 个人走势、是否在进行中的牌局里：按用户查
+        Index("ix_game_players_user_id", "user_id"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
