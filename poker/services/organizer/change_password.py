@@ -4,8 +4,9 @@
 """
 
 from database import SessionLocal
-from poker.core.errors import safe_error
-from poker.core.validators import GROUP_NAME_MAX, check_name
+from core.errors import safe_error
+from core.validators import check_name
+from poker.core.validators import GROUP_NAME_MAX
 from poker.models import Group
 
 

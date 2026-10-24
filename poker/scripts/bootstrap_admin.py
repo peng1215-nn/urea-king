@@ -12,8 +12,8 @@ import re
 import sys
 
 from database import SessionLocal
-from poker.core.security import pwd_context
-from poker.core.validators import check_password
+from core.security import pwd_context
+from core.validators import check_password
 from poker.models import Group, User, UserGroupRole
 
 

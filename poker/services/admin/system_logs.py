@@ -5,8 +5,8 @@ from database import SessionLocal
 from poker.models import AuditLog
 from poker.models import User
 from sqlalchemy import or_
-from utils.time import now_columbus_naive
-from poker.core.errors import safe_error
+from core.time import now_columbus_naive
+from core.errors import safe_error
 
 
 def _build_filtered_query(db, action=None, username=None):

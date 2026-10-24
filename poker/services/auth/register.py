@@ -1,4 +1,4 @@
-from utils.time import now_columbus_naive
+from core.time import now_columbus_naive
 import re
 from database import SessionLocal
 from poker.models import Group
@@ -6,9 +6,10 @@ from poker.models import InvitationCode
 from poker.models import User
 from poker.models import UserGroupRole
 from poker.services.admin.audit_log import write_audit_log
-from poker.core.validators import NICKNAME_MAX, check_name, check_password
-from poker.core.errors import safe_error
-from poker.core.security import pwd_context
+from core.validators import check_name, check_password
+from poker.core.validators import NICKNAME_MAX
+from core.errors import safe_error
+from core.security import pwd_context
 
 
 

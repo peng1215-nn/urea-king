@@ -88,7 +88,7 @@ def test_register_rejects_short_password(client, factory):
 
 
 def test_disabled_user_loses_access_immediately(client, factory, login_as):
-    from poker.core import middleware
+    from core import middleware
 
     user_id = factory.user("dave001")
     group_id = factory.group("G1")
@@ -256,12 +256,14 @@ def test_admin_password_reset_logs_out_the_user(client, factory, login_as):
 
 def test_session_without_password_fingerprint_is_rejected(client, factory, login_as):
     """部署前签发的旧会话里没有密码指纹，应要求重新登录一次。"""
-    from poker.core import middleware
+    from core import middleware
 
     user_id = factory.user("kate001")
     group_id = factory.group("G1")
     factory.role(user_id, group_id, "user")
     login_as("kate001", group_id)
 
+    from poker.core.session import session_is_valid
+
     middleware.clear_session_cache()
-    assert middleware._session_is_valid(user_id, group_id, "user", None) is False
+    assert session_is_valid((user_id, group_id, "user", None)) is False

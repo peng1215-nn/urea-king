@@ -89,9 +89,26 @@ Dependabot 每周检查一次 Python 依赖和 GitHub Actions 版本，有更新
 
 ## 代码结构约定
 
+**平台与模块**
+
+```
+core/        所有模块共用的基础代码：配置、安全（密码哈希、会话指纹）、中间件（安全响应头、防跨站、
+             请求日志、会话核对的框架）、错误处理、出错告警、日志、通用校验、限流工具、时间
+root/        主域名首页
+poker/       poker 模块：自己的账号、管理员、数据表（poker_ 前缀）、页面和接口
+  core/      poker 自己的规则：会话核对方式（session.py）、限流规则、字段长度与金额上限
+main.py      把 core 和各模块组装成一个网站
+```
+
+- 各模块账号独立：每个模块有自己的用户表、管理员和会话核对方式，在 `main.py` 里通过 `install_middleware(..., session_key=..., session_validator=..., public_paths=...)` 交给 `core`。
+- `core/` 里不能引用任何模块（`poker` 等）的代码；模块可以引用 `core/`。
+- 新模块的数据表用自己的前缀，可以和 poker 放在同一个数据库。
+
+**模块内部**
+
 - `poker/routes/<身份>/xxx.py` 只处理请求与会话，业务逻辑和数据库操作放在对应的 `poker/services/<身份>/xxx.py`。
 - 多个身份共用的业务放在 `poker/services/common/`：账号资料（`account.py`）、公告读取（`announcement.py`）、牌局日志与统计（`game_log.py`）、头像（`avatar.py`）、删除整个组（`group_purge.py`）。不要让一个身份的路由去调用另一个身份目录下的业务代码。
-- 密码哈希只用 `poker/core/security.py` 里的 `pwd_context`。
+- 密码哈希只用 `core/security.py` 里的 `pwd_context`。
 - 返回给前端的提示一律用翻译键（如 `groupNotFound`），并在 `poker/static/js/i18n/` 对应身份的文件里加上中英文。`tests/unit/test_i18n_keys.py` 会检查遗漏和直接写中文的情况。
 
 ## 测试环境（staging）
@@ -119,15 +136,15 @@ alembic upgrade head && python -m poker.scripts.bootstrap_admin && uvicorn main:
 
 - **登录限流**：15 分钟内，同一 IP + 用户名失败 5 次、同一 IP 失败 30 次、同一用户名（不论来源）失败 20 次后暂时锁定；曾在某个 IP 成功登录过的用户不受“同一用户名 20 次”这条限制，避免别人故意输错密码把账号主人锁在外面。“邀请码加入组”也要输入密码，同样计入。邀请码相关失败按 IP 限制 10 次；“邀请码不存在”全站合计不超过 300 次。客户端 IP 取自 `X-Forwarded-For`，可被伪造，所以都有不依赖 IP 的上限。计数保存在进程内存中，重启后清零；适用于当前的单实例部署，将来扩展到多个实例时需要改为共享存储（数据库或 Redis）。
 - **会话核对**：每个请求都会核对账号是否被禁用、是否仍在该组担任该角色、密码是否改过（结果缓存 15 秒）。失效时页面跳转登录，接口返回 401 `sessionExpired`。
-- **改密码即登出所有设备**：登录时会话里存一个由密码哈希派生的指纹（`poker/core/security.py`）。本人改密码、管理员重置密码、注销账号后指纹不再匹配，所有设备上的旧登录立即失效。新增任何修改 `password_hash` 的接口时，记得调用 `clear_session_cache()`。
+- **改密码即登出所有设备**：登录时会话里存一个由密码哈希派生的指纹（`core/security.py`）。本人改密码、管理员重置密码、注销账号后指纹不再匹配，所有设备上的旧登录立即失效。新增任何修改 `password_hash` 的接口时，记得调用 `clear_session_cache()`。
 - **登录提示不暴露用户名**：用户名不存在和密码错误统一返回 `loginInvalidCredentials`，并且用户名不存在时同样执行一次密码哈希校验，响应时间一致。
 - **CSRF**：所有修改类请求（POST 等）要求 `Origin` 或 `Referer` 与本站一致。
-- **安全响应头**：CSP、`X-Frame-Options`、`nosniff` 等在 `poker/core/middleware.py` 中统一设置。新增外部资源（新的 CDN、图片域名）时，需要同步修改其中的 `CONTENT_SECURITY_POLICY`，否则会被浏览器拦截。
+- **安全响应头**：CSP、`X-Frame-Options`、`nosniff` 等在 `core/middleware.py` 中统一设置。新增外部资源（新的 CDN、图片域名）时，需要同步修改其中的 `CONTENT_SECURITY_POLICY`，否则会被浏览器拦截。
 - **不允许内联脚本**：安全策略（CSP）的 `script-src` 不含 `'unsafe-inline'`，页面里写 `onclick="..."` 或没有 `src` 的 `<script>` 块都会被浏览器拦截。按钮等事件改用属性，由 `poker/static/js/common/actions.js` 统一分发：`data-on-click="函数名"`，参数写在 `data-args`（JSON 数组，`"$this"`、`"$checked"`、`"$value"`、`"$event"` 会被替换），`data-stop` 阻止外层元素响应，`data-href` 点击跳转，`data-back` 返回上一页。被调用的函数必须是全局的 `function` 声明。`tests/unit/test_no_inline_scripts.py` 会检查。
 - **前端渲染**：把任何来自服务器的字符串放进 `innerHTML` 之前，都要用 `escapeHtml()`（`poker/static/js/common/escape.js`）转义。
 - **错误信息**：服务层在 `except` 中使用 `safe_error(e)`，完整异常写入日志，前端只收到通用错误码。
 - **记账并发**：修改牌局数据的操作都先用 `_lock_ongoing_game()` 锁住这一局（开局、加人先 `_lock_group()` 再锁局），买入金额用 `_add_to_buy_in()` 在数据库里直接累加（`poker/services/organizer/game_management.py`）。新增修改牌局数据的操作时必须照此加锁。单次金额上限 `MAX_AMOUNT`（100 万）在 `poker/core/validators.py`。结算时服务器核对玩家名单必须与本局完全一致。数据库另有防重复与金额非负的约束（迁移 `d5e6f7a8b9c0`）。
-- **输入校验**：昵称、别名、牌局名、备注、组名、公告的长度和字符规则集中在 `poker/core/validators.py`。
+- **输入校验**：通用的字符规则（名称、文本、密码长度）在 `core/validators.py`；poker 各字段的长度上限在 `poker/core/validators.py`。
 
 ## 日志
 

@@ -15,11 +15,11 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import JSONResponse, RedirectResponse
 
-from poker.core import settings
-from poker.core.settings import IS_PRODUCTION
+from core import settings
+from core.settings import IS_PRODUCTION
 
 
-logger = logging.getLogger("poker.request")
+logger = logging.getLogger("core.request")
 
 
 # ───────────────────────── 安全响应头 ─────────────────────────
@@ -136,40 +136,18 @@ _session_cache = {}
 _session_cache_lock = threading.Lock()
 
 _SKIP_PREFIXES = ("/static", "/healthz", "/readyz")
-_PUBLIC_PATHS = {"/", "/login", "/register", "/group-join", "/delete-account", "/account/delete"}
+
+# 各模块在 install_middleware() 时提供，存在 app.state 上（账号各模块独立，核对方式也由模块决定）：
+#   public_paths：登录失效时也照常打开的页面
+#   session_key：session -> 可哈希的键；返回 None 表示未登录，不核对
+#   session_validator：键 -> 是否仍然有效
 
 
-def _session_is_valid(user_id, group_id, role, pw_fp):
-    from database import SessionLocal
-    from poker.core.security import fingerprint_matches
-    from poker.models import User, UserGroupRole
-
-    db = SessionLocal()
-    try:
-        row = db.query(User.is_active, User.password_hash).filter(User.id == user_id).first()
-        if row is None or row[0] == 0:
-            return False
-
-        # 密码改过（本人修改、管理员重置、注销）之后，之前的登录全部失效
-        if not fingerprint_matches(row[1], pw_fp):
-            return False
-
-        if role and group_id:
-            membership = db.query(UserGroupRole.id).filter(
-                UserGroupRole.user_id == user_id,
-                UserGroupRole.group_id == group_id,
-                UserGroupRole.role == role,
-            ).first()
-            if membership is None:
-                return False
-
-        return True
-    finally:
-        db.close()
+def _session_is_valid(key, validator):
+    return validator(key)
 
 
-def _cached_session_is_valid(user_id, group_id, role, pw_fp):
-    key = (user_id, group_id, role, pw_fp)
+def _cached_session_is_valid(key, validator):
     now = time.monotonic()
 
     with _session_cache_lock:
@@ -177,7 +155,7 @@ def _cached_session_is_valid(user_id, group_id, role, pw_fp):
         if cached and cached[1] > now:
             return cached[0]
 
-    valid = _session_is_valid(user_id, group_id, role, pw_fp)
+    valid = _session_is_valid(key, validator)
 
     with _session_cache_lock:
         if len(_session_cache) > 5000:
@@ -199,20 +177,16 @@ def _wants_html(request):
 async def session_guard(request, call_next):
     path = request.url.path
 
-    if path.startswith(_SKIP_PREFIXES):
+    config = getattr(request.app.state, "session_guard", None)
+
+    if path.startswith(_SKIP_PREFIXES) or config is None:
         return await call_next(request)
 
-    user_id = request.session.get("user_id")
+    key = config["session_key"](request.session)
 
-    if user_id:
+    if key is not None:
         try:
-            valid = await run_in_threadpool(
-                _cached_session_is_valid,
-                user_id,
-                request.session.get("current_group_id"),
-                request.session.get("current_role"),
-                request.session.get("pw_fp"),
-            )
+            valid = await run_in_threadpool(_cached_session_is_valid, key, config["session_validator"])
         except Exception:
             # 数据库暂时不可用时不在这里拦截，后续处理自己会报错
             logger.exception("session check failed", extra={"path": path})
@@ -221,7 +195,7 @@ async def session_guard(request, call_next):
         if not valid:
             request.session.clear()
 
-            if path not in _PUBLIC_PATHS:
+            if path not in config["public_paths"]:
                 if _wants_html(request):
                     return RedirectResponse(url="/login", status_code=302)
                 return JSONResponse(
@@ -277,12 +251,21 @@ async def request_logging(request, call_next):
 
 # ───────────────────────── 注册 ─────────────────────────
 
-def install_middleware(app, domain_router=None):
+def install_middleware(app, domain_router=None, public_paths=(), session_key=None, session_validator=None):
     """
     Starlette 中后注册的在外层。请求进入时的执行顺序（外 → 内）：
       security_headers → SessionMiddleware → request_logging → domain_router
       → origin_check → session_guard → 路由
+
+    session_key / session_validator / public_paths 由模块提供，见 poker/core/session.py。
     """
+    if session_key is not None and session_validator is not None:
+        app.state.session_guard = {
+            "public_paths": frozenset(public_paths),
+            "session_key": session_key,
+            "session_validator": session_validator,
+        }
+
     app.add_middleware(BaseHTTPMiddleware, dispatch=session_guard)
     app.add_middleware(BaseHTTPMiddleware, dispatch=origin_check)
     if domain_router is not None:

@@ -1,4 +1,5 @@
-from poker.core.rate_limit import SlidingWindowLimiter, login_keys
+from core.rate_limit import SlidingWindowLimiter
+from poker.core.rate_limit import login_keys
 
 
 def test_blocks_after_max_events_within_window():
