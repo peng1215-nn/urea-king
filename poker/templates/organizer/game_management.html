@@ -57,7 +57,7 @@
 
             <button
                 class="start-game-button"
-                onclick="openStartGameModal()"
+                data-on-click="openStartGameModal"
                 data-i18n="startGame"
             >
                 开局
@@ -73,7 +73,7 @@
             <div id="game-tabs" class="game-tabs"></div>
             <button
                 class="btn-start-new-game"
-                onclick="openStartGameModal()"
+                data-on-click="openStartGameModal"
                 data-i18n="startGame"
             >
                 <i class="fa-solid fa-plus"></i>
@@ -105,7 +105,7 @@
 
             <button
                 class="finish-game-button"
-                onclick="openFinishGameModal()"
+                data-on-click="openFinishGameModal"
                 data-i18n="finishGame"
             >
                 结束牌局
@@ -124,7 +124,7 @@
                     </div>
                     <button
                         class="add-player-btn"
-                        onclick="openAddPlayerModal()"
+                        data-on-click="openAddPlayerModal"
                     >
                         <i class="fa-solid fa-plus"></i>
                         <span data-i18n="addPlayer">加入玩家</span>
@@ -191,8 +191,8 @@
         <div id="start-game-message" class="operation-message"></div>
 
         <div class="custom-modal-actions">
-            <button class="modal-confirm-button" onclick="confirmStartGame()" data-i18n="confirmStartGame">确认开局</button>
-            <button class="modal-cancel-button" onclick="closeStartGameModal()" data-i18n="cancel">取消</button>
+            <button class="modal-confirm-button" data-on-click="confirmStartGame" data-i18n="confirmStartGame">确认开局</button>
+            <button class="modal-cancel-button" data-on-click="closeStartGameModal" data-i18n="cancel">取消</button>
         </div>
 
     </div>
@@ -208,8 +208,8 @@
         <div id="add-player-message" class="operation-message"></div>
 
         <div class="custom-modal-actions">
-            <button class="modal-confirm-button" onclick="confirmAddPlayer()" data-i18n="confirm">确认</button>
-            <button class="modal-cancel-button" onclick="closeAddPlayerModal()" data-i18n="cancel">取消</button>
+            <button class="modal-confirm-button" data-on-click="confirmAddPlayer" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" data-on-click="closeAddPlayerModal" data-i18n="cancel">取消</button>
         </div>
 
     </div>
@@ -234,8 +234,8 @@
         <div id="finish-message" class="operation-message"></div>
 
         <div class="custom-modal-actions">
-            <button class="modal-confirm-button" id="finish-confirm-btn" onclick="confirmFinishGame()" data-i18n="finishAndCheck">结束并校验</button>
-            <button class="modal-cancel-button" onclick="closeFinishGameModal()" data-i18n="cancel">取消</button>
+            <button class="modal-confirm-button" id="finish-confirm-btn" data-on-click="confirmFinishGame" data-i18n="finishAndCheck">结束并校验</button>
+            <button class="modal-cancel-button" data-on-click="closeFinishGameModal" data-i18n="cancel">取消</button>
         </div>
 
     </div>
@@ -272,8 +272,8 @@
         <div id="organizer-buyin-message" class="operation-message"></div>
 
         <div class="custom-modal-actions">
-            <button class="modal-confirm-button" onclick="confirmOrganizerBuyin()" data-i18n="confirm">确认</button>
-            <button class="modal-cancel-button" onclick="closeOrganizerBuyinModal()" data-i18n="cancel">取消</button>
+            <button class="modal-confirm-button" data-on-click="confirmOrganizerBuyin" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" data-on-click="closeOrganizerBuyinModal" data-i18n="cancel">取消</button>
         </div>
 
     </div>
@@ -297,8 +297,8 @@
         </div>
         <div id="proxy-buyin-message" class="operation-message"></div>
         <div class="custom-modal-actions">
-            <button class="modal-confirm-button" onclick="confirmProxyBuyin()" data-i18n="confirm">确认</button>
-            <button class="modal-cancel-button" onclick="closeProxyBuyinModal()" data-i18n="cancel">取消</button>
+            <button class="modal-confirm-button" data-on-click="confirmProxyBuyin" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" data-on-click="closeProxyBuyinModal" data-i18n="cancel">取消</button>
         </div>
     </div>
 </div>
@@ -320,7 +320,7 @@
         <div id="settlement-player-list" class="settlement-player-list"></div>
 
         <div class="custom-modal-actions">
-            <button class="modal-confirm-button" onclick="closeSettlementModal()" data-i18n="confirm">确认</button>
+            <button class="modal-confirm-button" data-on-click="closeSettlementModal" data-i18n="confirm">确认</button>
         </div>
 
     </div>
@@ -331,12 +331,13 @@
         <h3 data-i18n="joinOtherGroup">加入其他组</h3>
         <p data-i18n="joinGroupLogoutConfirm">此操作会退出当前登录，是否确认？</p>
         <div class="custom-modal-actions">
-            <button class="modal-confirm-button" data-i18n="confirm" onclick="confirmJoinGroup()">确认</button>
-            <button class="modal-cancel-button" data-i18n="cancel" onclick="closeJoinGroupModal()">取消</button>
+            <button class="modal-confirm-button" data-i18n="confirm" data-on-click="confirmJoinGroup">确认</button>
+            <button class="modal-cancel-button" data-i18n="cancel" data-on-click="closeJoinGroupModal">取消</button>
         </div>
     </div>
 </div>
 
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/dashboard/group_join.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/organizer.js?v={{ static_version }}"></script>
@@ -359,8 +360,8 @@
         <h3 data-i18n="removePlayer">移出玩家</h3>
         <p data-i18n="removePlayerDesc">请选择操作类型：</p>
         <div class="remove-type-btns">
-            <button class="remove-type-btn" data-type="away" onclick="selectRemoveType('away')" data-i18n="playerAway">暂离</button>
-            <button class="remove-type-btn" data-type="exit" onclick="selectRemoveType('exit')" data-i18n="playerExit">退出</button>
+            <button class="remove-type-btn" data-type="away" data-on-click="selectRemoveType" data-args="[&quot;away&quot;]" data-i18n="playerAway">暂离</button>
+            <button class="remove-type-btn" data-type="exit" data-on-click="selectRemoveType" data-args="[&quot;exit&quot;]" data-i18n="playerExit">退出</button>
         </div>
         <div id="remove-player-exit-section" style="display:none; margin-top:16px;">
             <label style="font-size:13px; color:rgba(255,255,255,0.5); display:block; margin-bottom:8px;" data-i18n="playerExitCashout">该玩家剩余筹码（卖出金额）</label>
@@ -368,8 +369,8 @@
         </div>
         <div id="remove-player-message" class="operation-message" style="margin-top:12px;"></div>
         <div class="custom-modal-actions" style="margin-top:16px;">
-            <button class="modal-confirm-button" onclick="confirmRemovePlayer()" data-i18n="confirm">确认</button>
-            <button class="modal-cancel-button" onclick="closeRemovePlayerModal()" data-i18n="cancel">取消</button>
+            <button class="modal-confirm-button" data-on-click="confirmRemovePlayer" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" data-on-click="closeRemovePlayerModal" data-i18n="cancel">取消</button>
         </div>
     </div>
 </div>

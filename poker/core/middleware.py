@@ -25,12 +25,14 @@ logger = logging.getLogger("poker.request")
 # ───────────────────────── 安全响应头 ─────────────────────────
 
 # 页面用到的外部资源：cdnjs（脚本、Font Awesome 样式与字体）、
-# Google Fonts（首页）、Cloudinary（头像）。内联脚本和样式目前仍大量使用，
-# 因此暂时保留 'unsafe-inline'；主要收益是禁止向外站发请求、禁止被嵌入、
-# 禁止加载其它来源的脚本。
+# Google Fonts（首页）、Cloudinary（头像）。
+# 脚本：不允许任何内联脚本（<script> 块、onclick 等），只运行本站和 cdnjs 的脚本文件。
+#   页面上的点击等事件统一用 data-on-click 等属性，由 static/js/common/actions.js 分发。
+#   tests/unit/test_no_inline_scripts.py 会检查有没有人重新写回内联脚本。
+# 样式：仍允许内联样式（style="..."），内联样式无法执行代码，风险远小于内联脚本。
 CONTENT_SECURITY_POLICY = "; ".join([
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com",
+    "script-src 'self' https://cdnjs.cloudflare.com",
     "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com",
     "font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com",
     "img-src 'self' data: blob: https://res.cloudinary.com",

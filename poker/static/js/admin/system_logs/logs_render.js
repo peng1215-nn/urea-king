@@ -47,7 +47,7 @@ function renderLogs(logs) {
                     class="log-checkbox"
                     data-id="${log.id}"
                     ${window.systemLogsState.selectedIds.has(log.id) ? "checked" : ""}
-                    onchange="toggleLogSelection(${log.id}, this.checked)"
+                    data-on-change="toggleLogSelection" data-args="[${log.id},&quot;$checked&quot;]"
                 >
             </td>
 

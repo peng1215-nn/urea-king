@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-i18n="titleGameLogs">UREAKING-POKER</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
     <link rel="stylesheet" href="/static/css/organizer/game_log.css?v={{ static_version }}">
@@ -62,7 +63,7 @@
     <!-- 选择组 -->
     <div class="group-select-bar">
         <label data-i18n="selectGroup">选择组：</label>
-        <select id="admin-group-select" onchange="onGroupChange()">
+        <select id="admin-group-select" data-on-change="onGroupChange">
             <option value="" data-i18n="pleaseSelectGroup">请选择组别</option>
         </select>
     </div>
@@ -72,15 +73,15 @@
 
         <!-- 切换按钮 -->
         <div class="log-view-tabs">
-            <button id="btn-logs" class="log-view-tab active" onclick="switchView('logs')" data-i18n="gameLogList">牌局记录</button>
-            <button id="btn-stats" class="log-view-tab" onclick="switchView('stats')" data-i18n="statsPanel">统计面板</button>
-            <button id="btn-member-stats" class="log-view-tab" onclick="switchView('member-stats')" data-i18n="memberStats">成员统计</button>
+            <button id="btn-logs" class="log-view-tab active" data-on-click="switchView" data-args="[&quot;logs&quot;]" data-i18n="gameLogList">牌局记录</button>
+            <button id="btn-stats" class="log-view-tab" data-on-click="switchView" data-args="[&quot;stats&quot;]" data-i18n="statsPanel">统计面板</button>
+            <button id="btn-member-stats" class="log-view-tab" data-on-click="switchView" data-args="[&quot;member-stats&quot;]" data-i18n="memberStats">成员统计</button>
         </div>
 
         <!-- 牌局记录 -->
         <div id="view-logs">
             <div class="log-search-bar">
-                <input id="log-search-input" class="log-search-input" type="text" data-i18n-placeholder="searchGameLogs" placeholder="搜索牌局名称或备注…" oninput="onSearch()">
+                <input id="log-search-input" class="log-search-input" type="text" data-i18n-placeholder="searchGameLogs" placeholder="搜索牌局名称或备注…" data-on-input="onSearch">
                 <i class="fa-solid fa-magnifying-glass log-search-icon"></i>
             </div>
             <div id="game-log-list" class="game-log-list">
@@ -116,7 +117,7 @@
         </div>
         <div class="trend-summary" id="trend-summary"></div>
         <div class="custom-modal-actions">
-            <button class="modal-cancel-button" onclick="closeMemberTrendModal()" data-i18n="close">关闭</button>
+            <button class="modal-cancel-button" data-on-click="closeMemberTrendModal" data-i18n="close">关闭</button>
         </div>
     </div>
 </div>
@@ -127,8 +128,8 @@
         <h3 data-i18n="deleteGameLog">删除牌局记录</h3>
         <p data-i18n="deleteGameLogConfirm">删除后无法恢复，确认删除该牌局记录？</p>
         <div class="custom-modal-actions">
-            <button class="modal-confirm-button warning" onclick="confirmDeleteGame()" data-i18n="confirmDelete">确认删除</button>
-            <button class="modal-cancel-button" onclick="closeDeleteGameModal()" data-i18n="cancel">取消</button>
+            <button class="modal-confirm-button warning" data-on-click="confirmDeleteGame" data-i18n="confirmDelete">确认删除</button>
+            <button class="modal-cancel-button" data-on-click="closeDeleteGameModal" data-i18n="cancel">取消</button>
         </div>
     </div>
 </div>

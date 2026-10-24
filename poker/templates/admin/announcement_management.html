@@ -122,7 +122,7 @@
                     id="save-announcement-button"
                     class="panel-button"
                     data-i18n="publishAnnouncement"
-                    onclick="saveAnnouncement()"
+                    data-on-click="saveAnnouncement"
                 >
                     发布公告
                 </button>
@@ -131,7 +131,7 @@
                     id="cancel-edit-button"
                     class="panel-button secondary hidden"
                     data-i18n="cancelEdit"
-                    onclick="cancelEditAnnouncement()"
+                    data-on-click="cancelEditAnnouncement"
                 >
                     取消编辑
                 </button>
@@ -189,7 +189,7 @@
                     id="announcement-previous-button"
                     class="announcement-pagination-button"
                     data-i18n="previousPage"
-                    onclick="goToPreviousAnnouncementPage()"
+                    data-on-click="goToPreviousAnnouncementPage"
                 >
                     上一页
                 </button>
@@ -205,7 +205,7 @@
                     id="announcement-next-button"
                     class="announcement-pagination-button"
                     data-i18n="nextPage"
-                    onclick="goToNextAnnouncementPage()"
+                    data-on-click="goToNextAnnouncementPage"
                 >
                     下一页
                 </button>
@@ -241,7 +241,7 @@
             <button
                 class="modal-confirm-button"
                 data-i18n="confirm"
-                onclick="confirmDeleteAnnouncement()"
+                data-on-click="confirmDeleteAnnouncement"
             >
                 确认
             </button>
@@ -249,7 +249,7 @@
             <button
                 class="modal-cancel-button"
                 data-i18n="cancel"
-                onclick="closeDeleteAnnouncementModal()"
+                data-on-click="closeDeleteAnnouncementModal"
             >
                 取消
             </button>
@@ -260,6 +260,7 @@
 
 </div>
 
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>

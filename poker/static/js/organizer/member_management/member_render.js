@@ -28,7 +28,7 @@ function renderMembers(members) {
         const createdAt = member.created_at || "--";
 
         const row = `
-            <tr data-member-index="${index}" onclick="selectMember(renderedMembers[Number(this.dataset.memberIndex)], this)">
+            <tr data-member-index="${index}" data-on-click="selectMemberRow" data-args="[&quot;$this&quot;]">
 
                 <td title="${escapeHtml(username)}">
                     <img
@@ -82,4 +82,10 @@ function getMemberMatchedClass(member, fieldName) {
     }
 
     return "";
+}
+
+
+// 点击成员表格的一行（由 actions.js 调用）
+function selectMemberRow(row) {
+    selectMember(renderedMembers[Number(row.dataset.memberIndex)], row);
 }

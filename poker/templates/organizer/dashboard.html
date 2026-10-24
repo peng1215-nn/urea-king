@@ -33,7 +33,7 @@
                     id="language-toggle"
                     class="dashboard-language-toggle"
                     type="button"
-                    onclick="toggleLanguage()"
+                    data-on-click="toggleLanguage"
             >
                 ENGLISH
             </button>
@@ -57,7 +57,7 @@
                     type="file"
                     id="avatar-input"
                     accept="image/jpeg,image/png,image/webp"
-                    onchange="uploadAvatar()"
+                    data-on-change="uploadAvatar"
                     hidden
             >
 
@@ -72,7 +72,7 @@
 
     <div id="onboarding-slot" data-role="organizer" hidden></div>
 
-    <div class="announcement-overview-card" onclick="window.location.href='/organizer-announcements'">
+    <div class="announcement-overview-card" data-href="/organizer-announcements">
 
         <div class="announcement-overview-header">
             <div class="announcement-icon">
@@ -93,7 +93,7 @@
 
     <div class="modules">
 
-        <div class="module-card" onclick="window.location.href='/organizer-members'">
+        <div class="module-card" data-href="/organizer-members">
             <div class="module-title">
                 <div class="module-icon">
                     <i class="fa-solid fa-users"></i>
@@ -111,7 +111,7 @@
             </p>
         </div>
 
-        <div class="module-card" onclick="window.location.href='/organizer-games'">
+        <div class="module-card" data-href="/organizer-games">
             <div class="module-title">
                 <div class="module-icon green">
                     <i class="fa-solid fa-dice"></i>
@@ -129,7 +129,7 @@
             </p>
         </div>
 
-        <div class="module-card" onclick="window.location.href='/organizer-invite-management'">
+        <div class="module-card" data-href="/organizer-invite-management">
             <div class="module-title">
                 <div class="module-icon yellow">
                     <i class="fa-solid fa-ticket"></i>
@@ -147,7 +147,7 @@
             </p>
         </div>
 
-        <div class="module-card" onclick="window.location.href='/organizer-game-logs'">
+        <div class="module-card" data-href="/organizer-game-logs">
             <div class="module-title">
                 <div class="module-icon purple">
                     <i class="fa-regular fa-file-lines"></i>
@@ -165,7 +165,7 @@
             </p>
         </div>
 
-        <div class="module-card" onclick="openJoinGroupModal()">
+        <div class="module-card" data-on-click="openJoinGroupModal">
             <div class="module-title">
                 <div class="module-icon cyan">
                     <i class="fa-solid fa-plus"></i>
@@ -183,7 +183,7 @@
             </p>
         </div>
 
-        <div class="module-card" onclick="window.location.href='/organizer-change-password'">
+        <div class="module-card" data-href="/organizer-change-password">
             <div class="module-title">
                 <div class="module-icon red">
                     <i class="fa-solid fa-lock"></i>
@@ -224,7 +224,7 @@
             <button
                 class="modal-confirm-button"
                 data-i18n="confirm"
-                onclick="confirmJoinGroup()"
+                data-on-click="confirmJoinGroup"
             >
                 确认
             </button>
@@ -232,7 +232,7 @@
             <button
                 class="modal-cancel-button"
                 data-i18n="cancel"
-                onclick="closeJoinGroupModal()"
+                data-on-click="closeJoinGroupModal"
             >
                 取消
             </button>
@@ -243,6 +243,7 @@
 
 </div>
 
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/dashboard/group_join.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/organizer.js?v={{ static_version }}"></script>
@@ -253,47 +254,7 @@
 <script src="/static/js/common/sidebar.js?v={{ static_version }}"></script>
 <script src="/static/js/common/avatar_validation.js?v={{ static_version }}"></script>
 <script src="/static/js/common/avatar_upload.js?v={{ static_version }}"></script>
-<script>
-    async function loadAnnouncementPreview() {
-        const res = await fetch("/organizer/announcements");
-        const data = await res.json();
-        const list = document.getElementById("announcement-preview-list");
-
-        if (!data.success || !data.announcements || data.announcements.length === 0) {
-            list.innerHTML = `<div class="announcement-empty">${t("noAnnouncements")}</div>`;
-            return;
-        }
-
-        list.innerHTML = "";
-        const a = data.announcements[0];
-        const item = document.createElement("div");
-        item.className = "announcement-preview-item";
-        const titleText = a.title.length > 30 ? a.title.slice(0, 30) + "..." : a.title;
-        const contentText = a.content.length > 50 ? a.content.slice(0, 50) + "..." : a.content;
-        item.innerHTML = `
-            <div class="announcement-preview-title">${escapeHtml(titleText)}</div>
-            <div class="announcement-preview-content">${escapeHtml(contentText)}</div>
-            <div class="announcement-preview-date">${escapeHtml(a.updated_at || a.created_at)}</div>
-        `;
-        list.appendChild(item);
-    }
-
-    window.addEventListener("pageshow", function () {
-        closeJoinGroupModal();
-        applyLanguage();
-        loadCurrentUser();
-        loadAnnouncementPreview();
-    });
-
-    // 语言切换后重新渲染公告预览
-    const origApplyLanguage = window.applyLanguage;
-    if (typeof origApplyLanguage === "function") {
-        window.applyLanguage = function(lang) {
-            origApplyLanguage(lang);
-            loadAnnouncementPreview();
-        };
-    }
-</script>
+<script src="/static/js/organizer/dashboard/announcement_preview.js?v={{ static_version }}"></script>
 
 </body>
 </html>

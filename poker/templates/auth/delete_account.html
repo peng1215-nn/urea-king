@@ -59,7 +59,7 @@
         <div id="message-box" role="alert" aria-live="polite"></div>
 
         <button id="delete-account-button" class="group-join-button delete-account-button"
-                onclick="deleteAccount()" data-i18n="accountDeleteSubmit">
+                data-on-click="deleteAccount" data-i18n="accountDeleteSubmit">
             永久注销账号
         </button>
 
@@ -71,6 +71,7 @@
 
 </div>
 
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/login.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>

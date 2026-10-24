@@ -102,7 +102,7 @@
                 id="create-group-button"
                 class="panel-button"
                 data-i18n="createGroup"
-                onclick="createGroup()"
+                data-on-click="createGroup"
             >
                 创建组
             </button>
@@ -154,7 +154,7 @@
                 id="delete-group-button"
                 class="panel-button danger"
                 data-i18n="deleteGroup"
-                onclick="openDeleteGroupModal()"
+                data-on-click="openDeleteGroupModal"
             >
                 删除组
             </button>
@@ -170,7 +170,7 @@
             <div class="panel-title"><i class="fa-solid fa-triangle-exclamation"></i><h2 data-i18n="forceDeleteGroup">强制解散组</h2></div>
             <p class="panel-description" data-i18n="forceDeleteGroupDesc">永久删除组及全部关联牌局、筹码记录、邀请码和成员关系；保留用户账号。</p>
             <div class="form-group"><label data-i18n="selectGroup">选择组</label><select id="force-delete-group-id"><option value="" data-i18n="pleaseSelectGroup">请选择组别</option></select></div>
-            <button class="panel-button danger" onclick="openForceDeleteGroupModal()" data-i18n="forceDeleteGroup">强制解散组</button>
+            <button class="panel-button danger" data-on-click="openForceDeleteGroupModal" data-i18n="forceDeleteGroup">强制解散组</button>
             <div id="force-delete-group-message" class="operation-message"></div>
         </div>
 
@@ -251,7 +251,7 @@
                 id="create-invite-button"
                 class="panel-button"
                 data-i18n="createInviteCode"
-                onclick="createInvitationCode()"
+                data-on-click="createInvitationCode"
             >
                 创建邀请码
             </button>
@@ -301,7 +301,7 @@
                 id="update-invite-limit-button"
                 class="panel-button"
                 data-i18n="updateInviteLimit"
-                onclick="submitUpdateInviteLimit()"
+                data-on-click="submitUpdateInviteLimit"
             >
                 修改上限
             </button>
@@ -350,7 +350,7 @@
                 id="delete-invite-button"
                 class="panel-button danger"
                 data-i18n="deleteInviteCode"
-                onclick="openDeleteInviteModal()"
+                data-on-click="openDeleteInviteModal"
             >
                 删除邀请码
             </button>
@@ -384,7 +384,7 @@
             <button
                 class="modal-confirm-button"
                 data-i18n="confirm"
-                onclick="confirmDeleteGroup()"
+                data-on-click="confirmDeleteGroup"
             >
                 确认
             </button>
@@ -392,7 +392,7 @@
             <button
                 class="modal-cancel-button"
                 data-i18n="cancel"
-                onclick="closeDeleteGroupModal()"
+                data-on-click="closeDeleteGroupModal"
             >
                 取消
             </button>
@@ -421,7 +421,7 @@
             <button
                 class="modal-confirm-button"
                 data-i18n="confirm"
-                onclick="confirmDeleteInvitationCode()"
+                data-on-click="confirmDeleteInvitationCode"
             >
                 确认
             </button>
@@ -429,7 +429,7 @@
             <button
                 class="modal-cancel-button"
                 data-i18n="cancel"
-                onclick="closeDeleteInviteModal()"
+                data-on-click="closeDeleteInviteModal"
             >
                 取消
             </button>
@@ -446,12 +446,13 @@
         <p id="force-delete-group-text"></p>
         <div class="form-group"><label data-i18n="forceDeleteTypeCode">输入组编号确认永久删除</label><input id="force-delete-confirm-code" type="text" autocomplete="off"></div>
         <div class="custom-modal-actions">
-            <button id="force-delete-confirm-button" class="modal-confirm-button" onclick="confirmForceDeleteGroup()" data-i18n="confirm">确认</button>
-            <button class="modal-cancel-button" onclick="closeForceDeleteGroupModal()" data-i18n="cancel">取消</button>
+            <button id="force-delete-confirm-button" class="modal-confirm-button" data-on-click="confirmForceDeleteGroup" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" data-on-click="closeForceDeleteGroupModal" data-i18n="cancel">取消</button>
         </div>
     </div>
 </div>
 
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>

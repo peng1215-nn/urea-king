@@ -1,8 +1,8 @@
-<button class="hamburger-btn" onclick="toggleSidebar()" aria-label="menu">
+<button class="hamburger-btn" data-on-click="toggleSidebar" aria-label="menu">
     <i class="fa-solid fa-bars"></i>
 </button>
 
-<div class="sidebar-overlay" onclick="closeSidebar()"></div>
+<div class="sidebar-overlay" data-on-click="closeSidebar"></div>
 
 <div class="sidebar">
 
@@ -15,7 +15,7 @@
 
         <div
             class="menu-item {% if current_page == 'dashboard' %}active{% endif %}"
-            onclick="window.location.href='/organizer-dashboard'"
+            data-href="/organizer-dashboard"
         >
             <i class="fa-solid fa-house"></i>
             <span data-i18n="console">控制台</span>
@@ -23,7 +23,7 @@
 
         <div
             class="menu-item {% if current_page == 'member_management' %}active{% endif %}"
-            onclick="window.location.href='/organizer-members'"
+            data-href="/organizer-members"
         >
             <i class="fa-solid fa-users"></i>
             <span data-i18n="memberManagement">成员管理</span>
@@ -31,7 +31,7 @@
 
         <div
             class="menu-item {% if current_page == 'game_management' %}active{% endif %}"
-            onclick="window.location.href='/organizer-games'"
+            data-href="/organizer-games"
         >
             <i class="fa-solid fa-dice"></i>
             <span data-i18n="gameManagement">牌局管理</span>
@@ -57,7 +57,7 @@
 
         <div
             class="menu-item"
-            onclick="openJoinGroupModal()"
+            data-on-click="openJoinGroupModal"
         >
             <i class="fa-solid fa-plus"></i>
             <span data-i18n="joinOtherGroup">加入其他组</span>
@@ -74,7 +74,7 @@
 
         <div
             class="menu-item"
-            onclick="logout()"
+            data-on-click="logout"
         >
             <i class="fa-solid fa-right-from-bracket"></i>
             <span data-i18n="logout">退出登录</span>
