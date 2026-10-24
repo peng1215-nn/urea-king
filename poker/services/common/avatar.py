@@ -14,7 +14,8 @@ from poker.models import User
 from poker.core.errors import safe_error
 
 
-AVATAR_FOLDER = "urea_king_avatars"
+# 测试环境用另一个文件夹（环境变量 AVATAR_FOLDER），避免覆盖线上用户的头像
+AVATAR_FOLDER = os.getenv("AVATAR_FOLDER", "").strip() or "urea_king_avatars"
 
 # 前端会先把图片压缩到 512px 以内；这里的上限只是兜底
 MAX_AVATAR_BYTES = 10 * 1024 * 1024

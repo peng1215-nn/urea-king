@@ -1,8 +1,8 @@
 """
 运行环境与安全相关配置，统一从环境变量读取。
 
-生产环境判断：APP_ENV 显式指定时以它为准；否则在 Render（RENDER）或
-Railway（RAILWAY_ENVIRONMENT_NAME / RAILWAY_ENVIRONMENT）上运行即视为生产环境。
+生产环境判断：APP_ENV 显式指定时以它为准（production、staging 都按生产环境的安全设置运行）；
+否则在 Render（RENDER）或 Railway（RAILWAY_ENVIRONMENT_NAME / RAILWAY_ENVIRONMENT）上运行即视为生产环境。
 """
 
 import logging
@@ -23,10 +23,15 @@ def _env_bool(name, default):
     return value.strip().lower() in ("1", "true", "yes", "on")
 
 
+APP_ENV = os.getenv("APP_ENV", "").strip().lower()
+
+# 测试环境（staging）：和线上一样的安全设置，但单独标记，并在任何主机名下都提供 poker 应用
+IS_STAGING = APP_ENV == "staging"
+
+
 def _is_production():
-    app_env = os.getenv("APP_ENV", "").strip().lower()
-    if app_env:
-        return app_env == "production"
+    if APP_ENV:
+        return APP_ENV in ("production", "staging")
     # 托管平台会自动设置这些变量：Render 设置 RENDER=true，Railway 设置 RAILWAY_ENVIRONMENT_NAME
     return bool(
         os.getenv("RENDER")
@@ -37,7 +42,20 @@ def _is_production():
 
 IS_PRODUCTION = _is_production()
 
-DEPLOY_ENVIRONMENT = "Production" if IS_PRODUCTION else "Development"
+if IS_STAGING:
+    DEPLOY_ENVIRONMENT = "Staging"
+elif IS_PRODUCTION:
+    DEPLOY_ENVIRONMENT = "Production"
+else:
+    DEPLOY_ENVIRONMENT = "Development"
+
+
+def is_poker_host(host):
+    """
+    这个主机名是否直接提供 poker 应用（而不是主域名首页）。
+    线上：poker. 开头的子域名；测试环境：任何主机名（用 Render 分配的 onrender.com 地址）。
+    """
+    return IS_STAGING or (host or "").startswith("poker.")
 
 
 _DEV_SESSION_SECRET = "local-dev-secret-key"

@@ -94,6 +94,27 @@ Dependabot 每周检查一次 Python 依赖和 GitHub Actions 版本，有更新
 - 密码哈希只用 `poker/core/security.py` 里的 `pwd_context`。
 - 返回给前端的提示一律用翻译键（如 `groupNotFound`），并在 `poker/static/js/i18n/` 对应身份的文件里加上中英文。`tests/unit/test_i18n_keys.py` 会检查遗漏和直接写中文的情况。
 
+## 测试环境（staging）
+
+测试环境是一个独立的 Render 网站服务，从 `staging` 分支自动部署，使用独立的数据库。改动先合并到 `staging` 在测试网站上确认，再合并到 `main` 上线。
+
+测试服务需要的环境变量（与线上不同的部分）：
+
+| 变量 | 值 |
+|---|---|
+| `APP_ENV` | `staging`：安全设置与线上相同；任何主机名都直接提供 poker 应用；Sentry 中标记为 staging |
+| `DATABASE_URL` | 测试库的连接地址（不能用线上库） |
+| `SESSION_SECRET_KEY` | 新生成的随机值（不能与线上相同） |
+| `AVATAR_FOLDER` | 例如 `urea_king_avatars_staging`，避免覆盖线上用户的头像 |
+| `POKER_URL` | 测试网站自己的地址 |
+| `BOOTSTRAP_ADMIN_USERNAME` / `BOOTSTRAP_ADMIN_PASSWORD` | 空库第一次启动时创建管理员；库里已有管理员时不起作用 |
+
+测试服务的启动命令（免费实例没有 Pre-Deploy Command，所以写在一起）：
+
+```
+alembic upgrade head && python -m poker.scripts.bootstrap_admin && uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
 ## 安全相关的行为（改代码前请了解）
 
 - **登录限流**：15 分钟内，同一 IP + 用户名失败 5 次、同一 IP 失败 30 次、同一用户名（不论来源）失败 20 次后暂时锁定；曾在某个 IP 成功登录过的用户不受“同一用户名 20 次”这条限制，避免别人故意输错密码把账号主人锁在外面。“邀请码加入组”也要输入密码，同样计入。邀请码相关失败按 IP 限制 10 次；“邀请码不存在”全站合计不超过 300 次。客户端 IP 取自 `X-Forwarded-For`，可被伪造，所以都有不依赖 IP 的上限。计数保存在进程内存中，重启后清零；适用于当前的单实例部署，将来扩展到多个实例时需要改为共享存储（数据库或 Redis）。

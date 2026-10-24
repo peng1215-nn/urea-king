@@ -13,4 +13,6 @@ def get_index_context() -> dict:
 
 
 def is_poker_host(host: str) -> bool:
-    return host.startswith("poker.")
+    from poker.core.settings import is_poker_host as _is_poker_host
+
+    return _is_poker_host(host)
