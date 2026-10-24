@@ -93,39 +93,6 @@ def get_ongoing_games_service(group_id: int):
         db.close()
 
 
-def get_game_history_service(group_id: int):
-    db = SessionLocal()
-    try:
-        games = db.query(PokerGame).filter(
-            PokerGame.group_id == group_id,
-            PokerGame.status == "finished",
-        ).order_by(PokerGame.started_at.desc()).all()
-
-        result = []
-        for game in games:
-            players = db.query(PokerGamePlayer, User).join(
-                User, PokerGamePlayer.user_id == User.id
-            ).filter(PokerGamePlayer.game_id == game.id).all()
-
-            players_data = []
-            for p, u in players:
-                pd = _format_player(p, u)
-                if u.id == game.organizer_id:
-                    breakdown = _get_buyin_breakdown(db, game.id, u.id)
-                    pd["buy_in_normal"] = breakdown["normal"]
-                    pd["buy_in_insurance"] = breakdown["insurance"]
-                    pd["buy_in_anti"] = breakdown["anti"]
-                players_data.append(pd)
-
-            result.append({**_format_game(game), "players": players_data})
-
-        return {"success": True, "games": result}
-    except Exception as e:
-        return {"success": False, "message": safe_error(e)}
-    finally:
-        db.close()
-
-
 def get_group_members_for_game_service(group_id: int):
     db = SessionLocal()
     try:

@@ -22,6 +22,13 @@ def _display(nickname: str, alias: str) -> str:
 PAGE_SIZE = 5
 
 
+def _game_label(game):
+    """牌局的显示名：有名字用名字，否则用开始日期。"""
+    if game is None:
+        return ""
+    return game.name or (game.started_at.strftime("%Y-%m-%d") if game.started_at else "")
+
+
 def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = None, q: str = ""):
     db = SessionLocal()
     try:
@@ -41,17 +48,30 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
 
         games = db.query(PokerGame).filter(*base_filter).order_by(PokerGame.ended_at.desc()).offset((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).all()
 
+        # 一次取出本页所有牌局的玩家和买入记录，避免每局、每个玩家各查一次数据库
+        game_ids = [game.id for game in games]
+
+        players_by_game = {}
+        requests_by_player = {}
+        if game_ids:
+            for p, u in db.query(PokerGamePlayer, User).join(
+                User, PokerGamePlayer.user_id == User.id
+            ).filter(PokerGamePlayer.game_id.in_(game_ids)).order_by(PokerGamePlayer.id).all():
+                players_by_game.setdefault(p.game_id, []).append((p, u))
+
+            for r in db.query(ChipRequest).filter(
+                ChipRequest.game_id.in_(game_ids),
+                ChipRequest.status == "approved",
+            ).order_by(ChipRequest.requested_at.asc(), ChipRequest.id.asc()).all():
+                requests_by_player.setdefault((r.game_id, r.user_id), []).append(r)
+
         result = []
         for game in games:
-            players = db.query(PokerGamePlayer, User).join(
-                User, PokerGamePlayer.user_id == User.id
-            ).filter(PokerGamePlayer.game_id == game.id).all()
-
             players_data = []
             top_winner = None
             top_net = None
 
-            for p, u in players:
+            for p, u in players_by_game.get(game.id, []):
                 net = p.net if p.net is not None else 0
                 is_org = p.user_id == game.organizer_id
                 raw_nick = p.nickname or u.username
@@ -65,11 +85,7 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
                 }
 
                 # 每笔买入明细
-                all_requests = db.query(ChipRequest).filter(
-                    ChipRequest.game_id == game.id,
-                    ChipRequest.user_id == p.user_id,
-                    ChipRequest.status == "approved",
-                ).order_by(ChipRequest.requested_at.asc()).all()
+                all_requests = requests_by_player.get((game.id, p.user_id), [])
 
                 # 局头看所有人明细，普通用户只看自己
                 show_details = (viewer_user_id is None) or (p.user_id == viewer_user_id)
@@ -83,7 +99,7 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
                 ] if show_details else []
 
                 if is_org:
-                    breakdown = _get_buyin_breakdown(db, game.id, p.user_id)
+                    breakdown = _sum_by_type(all_requests)
                     pd["buy_in_normal"] = breakdown["normal"]
                     pd["buy_in_insurance"] = breakdown["insurance"]
                     pd["buy_in_anti"] = breakdown["anti"]
@@ -147,6 +163,7 @@ def get_stats_service(group_id: int):
         ).all()
 
         game_ids = [g.id for g in finished_games]
+        games_by_id = {g.id: g for g in finished_games}
 
         if not game_ids:
             return {"success": True, "stats": None}
@@ -226,8 +243,7 @@ def get_stats_service(group_id: int):
             if net > best_single_net:
                 best_single_net = net
                 best_single_nickname = _display(p.nickname or u.username, aliases.get(p.user_id, ""))
-                game_obj = db.query(PokerGame).filter(PokerGame.id == p.game_id).first()
-                best_single = game_obj.name or (game_obj.started_at.strftime("%Y-%m-%d") if game_obj and game_obj.started_at else "")
+                best_single = _game_label(games_by_id.get(p.game_id))
 
         # 最惨单局亏损
         worst_single = None
@@ -239,9 +255,8 @@ def get_stats_service(group_id: int):
             net = p.net if p.net is not None else 0
             if net < worst_single_net:
                 worst_single_net = net
-                worst_single_nickname = p.nickname or u.username
-                game_obj = db.query(PokerGame).filter(PokerGame.id == p.game_id).first()
-                worst_single = game_obj.name or (game_obj.started_at.strftime("%Y-%m-%d") if game_obj and game_obj.started_at else "")
+                worst_single_nickname = _display(p.nickname or u.username, aliases.get(p.user_id, ""))
+                worst_single = _game_label(games_by_id.get(p.game_id))
 
         # 每个玩家水上率水下率
         player_rates = []
@@ -300,18 +315,21 @@ def get_stats_service(group_id: int):
         db.close()
 
 
+def _sum_by_type(requests) -> dict:
+    breakdown = {"normal": 0, "insurance": 0, "anti": 0}
+    for r in requests:
+        t = r.type if r.type in breakdown else "normal"
+        breakdown[t] += r.amount
+    return breakdown
+
+
 def _get_buyin_breakdown(db, game_id: int, user_id: int) -> dict:
     requests = db.query(ChipRequest).filter(
         ChipRequest.game_id == game_id,
         ChipRequest.user_id == user_id,
         ChipRequest.status == "approved",
     ).all()
-
-    breakdown = {"normal": 0, "insurance": 0, "anti": 0}
-    for r in requests:
-        t = r.type if r.type in breakdown else "normal"
-        breakdown[t] += r.amount
-    return breakdown
+    return _sum_by_type(requests)
 
 
 def delete_game_log_service(game_id: int, group_id: int):
