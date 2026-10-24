@@ -11,7 +11,7 @@ import cloudinary.uploader
 
 from database import SessionLocal
 from poker.models import User
-from poker.core.errors import safe_error
+from core.errors import safe_error
 
 
 # 测试环境用另一个文件夹（环境变量 AVATAR_FOLDER），避免覆盖线上用户的头像

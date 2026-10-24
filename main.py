@@ -1,14 +1,16 @@
-from utils.time import now_columbus_naive
+from core.time import now_columbus_naive
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 # settings 会加载 .env 并校验必需的配置，必须最先导入
-from poker.core import settings
-from poker.core.logging_config import setup_logging
-from poker.core.error_reporting import setup_error_reporting
-from poker.core.errors import register_exception_handlers
-from poker.core.middleware import install_middleware
+from core import settings
+from core.logging_config import setup_logging
+from core.error_reporting import setup_error_reporting
+from core.errors import register_exception_handlers
+from core.middleware import install_middleware
+from poker.core import session as poker_session
+from poker.template_config import render_error_page
 from poker.routes.common.health import router as health_router
 
 from root.routes.index import router as root_index_router
@@ -42,7 +44,7 @@ setup_error_reporting()
 
 app = FastAPI()
 
-register_exception_handlers(app)
+register_exception_handlers(app, error_page_renderer=render_error_page)
 
 
 # 平台健康检查请求的 Host 不是我们的域名，这些路径不做域名跳转
@@ -89,8 +91,14 @@ app.include_router(user_change_password_router)
 app.include_router(user_game_log_router)
 
 
-# ───── 中间件（顺序与说明见 poker/core/middleware.py 的 install_middleware）─────
-install_middleware(app, domain_router)
+# ───── 中间件（顺序与说明见 core/middleware.py 的 install_middleware）─────
+install_middleware(
+    app,
+    domain_router,
+    public_paths=poker_session.PUBLIC_PATHS,
+    session_key=poker_session.session_key,
+    session_validator=poker_session.session_is_valid,
+)
 
 app.mount(
     "/static/root",

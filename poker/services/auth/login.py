@@ -3,8 +3,8 @@ from poker.models import Group
 from poker.models import User
 from poker.models import UserGroupRole
 from poker.services.admin.audit_log import write_audit_log
-from poker.core.errors import safe_error
-from poker.core.security import password_fingerprint, verify_user_password
+from core.errors import safe_error
+from core.security import password_fingerprint, verify_user_password
 
 
 

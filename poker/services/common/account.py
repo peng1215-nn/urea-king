@@ -5,9 +5,10 @@
 
 from database import SessionLocal
 from poker.models import User
-from poker.core.validators import NICKNAME_MAX, check_name, check_password
-from poker.core.errors import safe_error
-from poker.core.security import pwd_context
+from core.validators import check_name, check_password
+from poker.core.validators import NICKNAME_MAX
+from core.errors import safe_error
+from core.security import pwd_context
 
 
 

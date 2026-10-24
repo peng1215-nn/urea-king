@@ -1,9 +1,10 @@
-from utils.time import now_columbus_naive
+from core.time import now_columbus_naive
 
 from database import SessionLocal
 from poker.models import Announcement
-from poker.core.validators import ANNOUNCEMENT_CONTENT_MAX, ANNOUNCEMENT_TITLE_MAX, check_text
-from poker.core.errors import safe_error
+from core.validators import check_text
+from poker.core.validators import ANNOUNCEMENT_CONTENT_MAX, ANNOUNCEMENT_TITLE_MAX
+from core.errors import safe_error
 
 
 def get_announcements_service():

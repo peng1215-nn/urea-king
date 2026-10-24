@@ -1,4 +1,4 @@
-from poker.core import settings
+from core import settings
 
 
 def test_production_serves_poker_only_on_poker_subdomain(monkeypatch):

@@ -6,7 +6,7 @@
 """
 
 from database import SessionLocal
-from poker.core.errors import safe_error
+from core.errors import safe_error
 from poker.models import Group, GroupMemberAlias, InvitationCode, User, UserGroupRole
 from poker.services.common.common import user_in_ongoing_game
 

@@ -1,4 +1,4 @@
-from utils.time import now_columbus_naive
+from core.time import now_columbus_naive
 from poker.app_state import DEPLOY_ENVIRONMENT
 from poker.app_state import PROJECT_LAUNCH_TIME
 from poker.app_state import SYSTEM_VERSION
@@ -8,8 +8,8 @@ from poker.models import InvitationCode
 from poker.models import User
 from poker.models import UserGroupRole
 import secrets
-from poker.core.errors import safe_error
-from poker.core.security import pwd_context
+from core.errors import safe_error
+from core.security import pwd_context
 
 
 

@@ -9,7 +9,7 @@ from poker.services.common.account import update_nickname_service
 from poker.services.common.account import update_password_service
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
-from poker.core.middleware import clear_session_cache
+from core.middleware import clear_session_cache
 
 
 router = APIRouter()

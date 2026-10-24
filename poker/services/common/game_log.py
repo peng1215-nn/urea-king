@@ -5,7 +5,7 @@ from poker.models import PokerGamePlayer
 from poker.models import ChipRequest
 from poker.models import User
 from poker.models import UserGroupRole
-from poker.core.errors import safe_error
+from core.errors import safe_error
 
 
 def _get_aliases(db, group_id: int) -> dict:

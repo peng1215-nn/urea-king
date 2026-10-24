@@ -1,4 +1,4 @@
-from poker.core import error_reporting
+from core import error_reporting
 
 
 def test_disabled_without_dsn(monkeypatch):

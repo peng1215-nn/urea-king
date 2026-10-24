@@ -11,7 +11,7 @@ from poker.services.organizer.change_password import get_group_info_service
 from poker.services.organizer.change_password import update_group_name_service
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
-from poker.core.middleware import clear_session_cache
+from core.middleware import clear_session_cache
 
 
 router = APIRouter()

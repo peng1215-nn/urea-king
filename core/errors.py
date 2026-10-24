@@ -11,7 +11,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import JSONResponse
 
 
-logger = logging.getLogger("poker.error")
+logger = logging.getLogger("core.error")
 
 
 def safe_error(exc=None, message="operationFailed"):
@@ -31,18 +31,16 @@ _STATUS_MESSAGES = {
 
 
 def _render_error_page(request, status_code):
-    from poker.template_config import templates
-
-    return templates.TemplateResponse(
-        request=request,
-        name="common/error.html",
-        context={"status_code": status_code},
-        status_code=status_code,
-    )
+    """错误页由模块在 register_exception_handlers() 时提供：(request, status_code) -> Response。"""
+    renderer = getattr(request.app.state, "error_page_renderer", None)
+    if renderer is None:
+        raise RuntimeError("no error page renderer configured")
+    return renderer(request, status_code)
 
 
 async def http_exception_handler(request, exc):
-    if _wants_html(request) and exc.status_code in (404, 405):
+    has_page = getattr(request.app.state, "error_page_renderer", None) is not None
+    if _wants_html(request) and exc.status_code in (404, 405) and has_page:
         response = _render_error_page(request, exc.status_code)
     else:
         response = JSONResponse(
@@ -74,6 +72,7 @@ async def unhandled_exception_handler(request, exc):
     )
 
 
-def register_exception_handlers(app):
+def register_exception_handlers(app, error_page_renderer=None):
+    app.state.error_page_renderer = error_page_renderer
     app.add_exception_handler(StarletteHTTPException, http_exception_handler)
     app.add_exception_handler(Exception, unhandled_exception_handler)

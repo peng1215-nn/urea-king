@@ -1,5 +1,5 @@
-from poker.core.validators import (
-    NICKNAME_MAX,
+from poker.core.validators import NICKNAME_MAX
+from core.validators import (
     PASSWORD_MAX,
     PASSWORD_MIN,
     check_name,

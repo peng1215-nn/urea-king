@@ -10,10 +10,10 @@ Sentry 再按设置给你发邮件。
 import logging
 import os
 
-from poker.core import settings
+from core import settings
 
 
-logger = logging.getLogger("poker.error_reporting")
+logger = logging.getLogger("core.error_reporting")
 
 
 def setup_error_reporting():

@@ -1,6 +1,6 @@
 import os
 
-from poker.core import settings
+from core import settings
 
 DEFAULT_ADMIN_EMAIL = "admin@urea-king.com"
 
