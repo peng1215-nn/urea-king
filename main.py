@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 # settings 会加载 .env 并校验必需的配置，必须最先导入
 from poker.core import settings
 from poker.core.logging_config import setup_logging
+from poker.core.error_reporting import setup_error_reporting
 from poker.core.errors import register_exception_handlers
 from poker.core.middleware import install_middleware
 from poker.routes.common.health import router as health_router
@@ -37,6 +38,7 @@ from poker.routes.user.game_log import router as user_game_log_router
 
 
 setup_logging(settings.LOG_LEVEL)
+setup_error_reporting()
 
 app = FastAPI()
 
