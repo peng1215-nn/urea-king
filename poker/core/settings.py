@@ -50,6 +50,20 @@ else:
     DEPLOY_ENVIRONMENT = "Development"
 
 
+DEFAULT_ROOT_URL = "https://urea-king.com"
+DEFAULT_POKER_URL = "https://poker.urea-king.com"
+
+
+def root_url():
+    """主域名首页地址（登录页左下角的返回按钮）。测试环境默认留在本站。"""
+    return os.getenv("ROOT_URL", "").strip() or ("/" if IS_STAGING else DEFAULT_ROOT_URL)
+
+
+def poker_url():
+    """首页“进入 poker”的地址。测试环境默认留在本站。"""
+    return os.getenv("POKER_URL", "").strip() or ("/login" if IS_STAGING else DEFAULT_POKER_URL)
+
+
 def is_poker_host(host):
     """
     这个主机名是否直接提供 poker 应用（而不是主域名首页）。

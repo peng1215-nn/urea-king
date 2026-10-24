@@ -44,3 +44,7 @@ def test_head_requests_are_supported(client):
     for path in ("/", "/healthz", "/readyz"):
         response = client.head(path)
         assert response.status_code == 200, path
+
+
+def test_login_back_link_points_to_main_site(client):
+    assert 'href="https://urea-king.com"' in client.get("/login").text
