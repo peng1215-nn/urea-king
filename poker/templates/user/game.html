@@ -20,7 +20,7 @@
             <p id="current-group-text"></p>
         </div>
         <div class="topbar-actions">
-            <button class="game-settings-btn" onclick="openGameSettings()" data-i18n-title="gameSettings" title="牌局设置">
+            <button class="game-settings-btn" data-on-click="openGameSettings" data-i18n-title="gameSettings" title="牌局设置">
                 <i class="fa-solid fa-sliders"></i>
             </button>
             <img id="avatar-preview" class="avatar" src="/static/images/default_avatar.jpg" alt="avatar">
@@ -48,8 +48,8 @@
         </div>
         <div id="buyin-message" class="operation-message"></div>
         <div class="custom-modal-actions">
-            <button class="modal-confirm-button" onclick="confirmBuyin()" data-i18n="confirm">确认</button>
-            <button class="modal-cancel-button" onclick="closeBuyinModal()" data-i18n="cancel">取消</button>
+            <button class="modal-confirm-button" data-on-click="confirmBuyin" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" data-on-click="closeBuyinModal" data-i18n="cancel">取消</button>
         </div>
     </div>
 </div>
@@ -59,7 +59,7 @@
     <div class="custom-modal-content settings-modal-content">
         <div class="settings-modal-header">
             <h3><i class="fa-solid fa-sliders"></i> <span data-i18n="gameSettings">牌局设置</span></h3>
-            <button class="settings-close-btn" onclick="closeGameSettings()"><i class="fa-solid fa-xmark"></i></button>
+            <button class="settings-close-btn" data-on-click="closeGameSettings"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div class="settings-section">
@@ -73,7 +73,7 @@
         <!-- 未来可在此添加更多设置区块 -->
 
         <div class="settings-modal-footer">
-            <button class="settings-apply-btn" onclick="applyGameSettings()" data-i18n="apply">应用</button>
+            <button class="settings-apply-btn" data-on-click="applyGameSettings" data-i18n="apply">应用</button>
         </div>
 
     </div>
@@ -84,12 +84,13 @@
         <h3 data-i18n="joinOtherGroup">加入其他组</h3>
         <p data-i18n="joinGroupLogoutConfirm">此操作会退出当前登录，是否确认？</p>
         <div class="custom-modal-actions">
-            <button class="modal-confirm-button" onclick="confirmJoinGroup()" data-i18n="confirm">确认</button>
-            <button class="modal-cancel-button" onclick="closeJoinGroupModal()" data-i18n="cancel">取消</button>
+            <button class="modal-confirm-button" data-on-click="confirmJoinGroup" data-i18n="confirm">确认</button>
+            <button class="modal-cancel-button" data-on-click="closeJoinGroupModal" data-i18n="cancel">取消</button>
         </div>
     </div>
 </div>
 
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/user/game/game_settings.js?v={{ static_version }}"></script>
 <script src="/static/js/user/dashboard/group_join.js?v={{ static_version }}"></script>

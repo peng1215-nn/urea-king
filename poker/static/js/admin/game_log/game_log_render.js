@@ -71,7 +71,7 @@ function renderGameCard(game, container) {
     const title = game.name ? `<span class="log-game-name">${escapeHtml(game.name)}</span>` : "";
     const noteHtml = game.note ? `<span class="log-game-note"><i class="fa-solid fa-note-sticky"></i> ${escapeHtml(game.note)}</span>` : "";
     card.innerHTML = `
-        <div class="log-card-header" onclick="toggleDetail(this)">
+        <div class="log-card-header" data-on-click="toggleDetail" data-args="[&quot;$this&quot;]">
             <div class="log-card-left">
                 ${title}
                 ${noteHtml}
@@ -81,8 +81,8 @@ function renderGameCard(game, container) {
             <div class="log-card-right">
                 <span class="log-chips">${t("totalBuyIn")}：${game.total_buy_in}</span>
                 ${balanced}
-                <button class="btn-export-log" onclick="event.stopPropagation(); exportGameCard(${game.id})">${t("export")}</button>
-                <button class="btn-delete-log" onclick="event.stopPropagation(); openDeleteGameModal(${game.id})">${t("delete")}</button>
+                <button class="btn-export-log" data-on-click="exportGameCard" data-args="[${game.id}]" data-stop>${t("export")}</button>
+                <button class="btn-delete-log" data-on-click="openDeleteGameModal" data-args="[${game.id}]" data-stop>${t("delete")}</button>
                 <i class="fa-solid fa-chevron-down log-chevron"></i>
             </div>
         </div>
@@ -231,15 +231,15 @@ function renderMemberStatsTable(members, container) {
     let html = `<div class="member-stats-table-wrap"><table class="member-stats-table"><thead><tr>
         <th>${t("memberRank")}</th>
         <th>${t("memberNickname")}</th>
-        <th class="sortable" onclick="sortMemberStats('game_count')">${t("memberGames")} ${arrow("game_count")}</th>
-        <th class="sortable" onclick="sortMemberStats('win_rate')" style="color:#4caf7d">${t("memberWinRate")} ${arrow("win_rate")}</th>
-        <th class="sortable" onclick="sortMemberStats('lose_rate')" style="color:#e05c5c">${t("memberLoseRate")} ${arrow("lose_rate")}</th>
-        <th class="sortable" onclick="sortMemberStats('total_net')">${t("memberTotalNet")} ${arrow("total_net")}</th>
+        <th class="sortable" data-on-click="sortMemberStats" data-args="[&quot;game_count&quot;]">${t("memberGames")} ${arrow("game_count")}</th>
+        <th class="sortable" data-on-click="sortMemberStats" data-args="[&quot;win_rate&quot;]" style="color:#4caf7d">${t("memberWinRate")} ${arrow("win_rate")}</th>
+        <th class="sortable" data-on-click="sortMemberStats" data-args="[&quot;lose_rate&quot;]" style="color:#e05c5c">${t("memberLoseRate")} ${arrow("lose_rate")}</th>
+        <th class="sortable" data-on-click="sortMemberStats" data-args="[&quot;total_net&quot;]">${t("memberTotalNet")} ${arrow("total_net")}</th>
     </tr></thead><tbody>`;
     sorted.forEach((m, i) => {
         const netClass = m.total_net > 0 ? "net-positive" : m.total_net < 0 ? "net-negative" : "net-zero";
         const netStr = m.total_net > 0 ? "+" + m.total_net : String(m.total_net);
-        html += `<tr class="member-row" data-user-id="${m.user_id}" data-nickname="${escapeHtml(m.nickname)}" onclick="openMemberTrendModal(Number(this.dataset.userId), this.dataset.nickname)">
+        html += `<tr class="member-row" data-user-id="${m.user_id}" data-nickname="${escapeHtml(m.nickname)}" data-on-click="openMemberTrendFromRow" data-args="[&quot;$this&quot;]">
             <td class="rank-cell">${i + 1}</td>
             <td class="name-cell">${escapeHtml(m.nickname)}</td>
             <td>${m.game_count}</td>
@@ -315,4 +315,10 @@ function renderTrendChart(points, canvas) {
         <span>${t("memberWinRate")}：${winRate}%</span>
         <span class="${netClass}">${t("memberTotalNet")}：${netStr}</span>
     `;
+}
+
+
+// 点击成员统计的一行，打开该成员的走势（由 actions.js 调用）
+function openMemberTrendFromRow(row) {
+    openMemberTrendModal(Number(row.dataset.userId), row.dataset.nickname);
 }

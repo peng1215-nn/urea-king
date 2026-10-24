@@ -57,7 +57,7 @@ function renderPlayerRow(p, gameId) {
 
     // 申请买入按钮只对自己显示
     const buyinBtn = p.is_me
-        ? `<button class="btn-submit-buyin" onclick="openBuyinModal(${gameId})">
+        ? `<button class="btn-submit-buyin" data-on-click="openBuyinModal" data-args="[${gameId}]">
                <i class="fa-solid fa-plus"></i> ${t("submitBuyinRequest")}
            </button>`
         : "";

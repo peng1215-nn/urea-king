@@ -35,7 +35,7 @@ function renderUsers(users) {
                     : "";
 
         const row = `
-            <tr data-user-index="${index}" onclick="selectUser(renderedUsers[Number(this.dataset.userIndex)], this)">
+            <tr data-user-index="${index}" data-on-click="selectUserRow" data-args="[&quot;$this&quot;]">
 
                 <td title="${escapeHtml(username)}">
                     <img
@@ -110,4 +110,10 @@ function getGroupMatchedClass(user) {
     }
 
     return "";
+}
+
+
+// 点击用户表格的一行（由 actions.js 调用）
+function selectUserRow(row) {
+    selectUser(renderedUsers[Number(row.dataset.userIndex)], row);
 }

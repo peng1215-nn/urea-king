@@ -37,7 +37,7 @@ async function loadInviteCodes() {
             : `<span>${t("createdAt")}：${escapeHtml(code.created_at)}</span>`;
 
         const deleteBtn = !code.is_used
-            ? `<button class="btn-delete-invite" onclick="deleteInviteCode(${code.id})">${t("delete")}</button>`
+            ? `<button class="btn-delete-invite" data-on-click="deleteInviteCode" data-args="[${code.id}]">${t("delete")}</button>`
             : "";
 
         card.innerHTML = `

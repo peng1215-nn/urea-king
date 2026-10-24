@@ -66,9 +66,10 @@
         <p>Something went wrong on our side. Please try again later.</p>
     {% endif %}
     <div class="actions">
-        <button type="button" onclick="history.back()">返回上一页 · Back</button>
+        <button type="button" data-back>返回上一页 · Back</button>
         <a class="primary" href="/">回到首页 · Home</a>
     </div>
 </main>
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 </body>
 </html>

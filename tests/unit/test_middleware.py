@@ -65,6 +65,11 @@ def test_security_headers_are_set(client):
     assert response.status_code == 200
     assert "connect-src 'self'" in response.headers["content-security-policy"]
     assert "frame-ancestors 'none'" in response.headers["content-security-policy"]
+    script_src = next(
+        part for part in response.headers["content-security-policy"].split(";")
+        if part.strip().startswith("script-src")
+    )
+    assert "'unsafe-inline'" not in script_src
     assert response.headers["x-content-type-options"] == "nosniff"
     assert response.headers["x-frame-options"] == "DENY"
     assert response.headers["referrer-policy"] == "strict-origin-when-cross-origin"

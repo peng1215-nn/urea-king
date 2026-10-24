@@ -56,14 +56,14 @@ function renderAnnouncements(announcements) {
             <div class="announcement-actions">
                 <button
                     class="announcement-action-button edit"
-                    onclick="startEditAnnouncement(${announcement.id})"
+                    data-on-click="startEditAnnouncement" data-args="[${announcement.id}]"
                 >
                     ${t("edit")}
                 </button>
 
                 <button
                     class="announcement-action-button delete"
-                    onclick="openDeleteAnnouncementModal(${announcement.id})"
+                    data-on-click="openDeleteAnnouncementModal" data-args="[${announcement.id}]"
                 >
                     ${t("delete")}
                 </button>

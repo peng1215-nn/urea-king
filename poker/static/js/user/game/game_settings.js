@@ -45,7 +45,7 @@ function loadChipAuthSettings() {
                             type="checkbox"
                             data-group-id="${s.group_id}"
                             ${s.allow_organizer_chip_op ? 'checked' : ''}
-                            onchange="onToggleChange(${s.group_id}, this.checked)"
+                            data-on-change="onToggleChange" data-args="[${s.group_id},&quot;$checked&quot;]"
                         >
                         <span class="toggle-slider"></span>
                     </label>
