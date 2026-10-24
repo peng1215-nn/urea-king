@@ -3,11 +3,6 @@ async function fetchOngoingGames() {
     return await res.json();
 }
 
-async function fetchGameHistory() {
-    const res = await fetch("/organizer/game/history");
-    return await res.json();
-}
-
 async function fetchGroupMembers() {
     const res = await fetch("/organizer/game/members");
     return await res.json();

@@ -11,7 +11,6 @@ from poker.services.common.common import add_no_cache_headers
 from poker.services.organizer.game_management import add_player_to_game_service
 from poker.services.organizer.game_management import approve_chip_request_service
 from poker.services.organizer.game_management import finish_game_service
-from poker.services.organizer.game_management import get_game_history_service
 from poker.services.organizer.game_management import get_group_members_for_game_service
 from poker.services.organizer.game_management import get_ongoing_games_service
 from poker.services.organizer.game_management import organizer_buyin_service
@@ -61,18 +60,6 @@ def get_ongoing_games(request: Request):
         return {"success": False, "message": "noGroupSelected"}
 
     return get_ongoing_games_service(group_id=int(group_id))
-
-
-@router.get("/organizer/game/history")
-def get_game_history(request: Request):
-    if not require_organizer(request):
-        return {"success": False, "message": "permissionDenied"}
-
-    group_id = get_group_id(request)
-    if not group_id:
-        return {"success": False, "message": "noGroupSelected"}
-
-    return get_game_history_service(group_id=int(group_id))
 
 
 @router.get("/organizer/game/members")
