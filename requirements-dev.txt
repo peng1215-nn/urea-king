@@ -1,5 +1,5 @@
 # 开发与测试依赖（线上部署只安装 requirements.txt）
 -r requirements.txt
-pytest==8.3.5
+pytest==9.0.3
 httpx==0.28.1
 ruff==0.16.8
