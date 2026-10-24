@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-logger = logging.getLogger("poker.settings")
+logger = logging.getLogger("core.settings")
 
 
 def _env_bool(name, default):

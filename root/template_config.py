@@ -1,6 +1,6 @@
 from fastapi.templating import Jinja2Templates
 
-from utils.time import now_columbus_naive
+from core.time import now_columbus_naive
 
 
 templates = Jinja2Templates(

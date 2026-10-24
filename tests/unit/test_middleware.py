@@ -8,8 +8,8 @@ from starlette.responses import HTMLResponse, JSONResponse
 from starlette.routing import Route
 from starlette.testclient import TestClient
 
-from poker.core import middleware
-from poker.core.errors import register_exception_handlers
+from core import middleware
+from core.errors import register_exception_handlers
 
 
 BASE = "http://poker.test"
@@ -46,6 +46,10 @@ def session_valid(monkeypatch):
     middleware.clear_session_cache()
 
 
+def _error_page(request, status_code):
+    return HTMLResponse(f"<h1>{status_code}</h1>", status_code=status_code)
+
+
 @pytest.fixture
 def client(session_valid):
     app = Starlette(routes=[
@@ -55,8 +59,13 @@ def client(session_valid):
         Route("/login", login_page),
         Route("/boom", boom),
     ])
-    register_exception_handlers(app)
-    middleware.install_middleware(app)
+    register_exception_handlers(app, error_page_renderer=_error_page)
+    middleware.install_middleware(
+        app,
+        public_paths=("/login",),
+        session_key=lambda session: session.get("user_id"),
+        session_validator=lambda key: True,
+    )
     return TestClient(app, base_url=BASE, raise_server_exceptions=False)
 
 

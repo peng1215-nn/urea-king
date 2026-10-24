@@ -51,7 +51,7 @@ def setup_logging(level="INFO"):
         root.setLevel(level)
     else:
         root.setLevel(logging.INFO)
-        logging.getLogger("poker.settings").warning("invalid LOG_LEVEL %r, using INFO", level)
+        logging.getLogger("core.settings").warning("invalid LOG_LEVEL %r, using INFO", level)
 
     # uvicorn 的访问日志与我们的请求日志重复，降低其级别
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)

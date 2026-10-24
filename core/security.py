@@ -7,7 +7,7 @@ import hmac
 
 from passlib.context import CryptContext
 
-from poker.core import settings
+from core import settings
 
 
 # 全站唯一的密码哈希配置；其他地方都从这里导入，不要另建

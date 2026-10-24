@@ -12,7 +12,7 @@ from poker.services.admin.admin import update_user_role_service
 from poker.services.admin.admin import reset_user_password_service
 from poker.services.admin.admin import toggle_user_active_service
 from poker.services.admin.audit_log import write_audit_log
-from poker.core.middleware import clear_session_cache
+from core.middleware import clear_session_cache
 
 
 router = APIRouter()

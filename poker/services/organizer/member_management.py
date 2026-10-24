@@ -1,12 +1,13 @@
-from utils.time import now_columbus_naive
+from core.time import now_columbus_naive
 from database import SessionLocal
 from poker.models import Group
 from poker.models import GroupMemberAlias
 from poker.models import InvitationCode
 from poker.models import User
 from poker.models import UserGroupRole
-from poker.core.validators import ALIAS_MAX, check_name
-from poker.core.errors import safe_error
+from core.validators import check_name
+from poker.core.validators import ALIAS_MAX
+from core.errors import safe_error
 
 
 def _get_aliases(db, group_id: int) -> dict:

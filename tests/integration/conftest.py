@@ -32,7 +32,7 @@ def clean_state(migrated_db):
     from sqlalchemy import text
 
     from database import Base, engine
-    from poker.core import middleware, rate_limit
+    from core import middleware, rate_limit
     import poker.models  # noqa: F401  确保所有表都注册进 metadata
 
     tables = ", ".join(t.name for t in Base.metadata.sorted_tables)

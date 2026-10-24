@@ -1,6 +1,6 @@
 from database import SessionLocal
 from poker.models import Announcement
-from poker.core.errors import safe_error
+from core.errors import safe_error
 
 
 def get_announcements_service():

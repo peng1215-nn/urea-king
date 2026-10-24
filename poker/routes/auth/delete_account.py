@@ -6,7 +6,7 @@
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from poker.core.middleware import clear_session_cache
+from core.middleware import clear_session_cache
 from poker.core.rate_limit import login_retry_after, record_login_failure
 from poker.services.common.avatar import delete_avatar_for_user
 from poker.services.admin.audit_log import get_client_ip, write_audit_log

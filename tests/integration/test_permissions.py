@@ -67,7 +67,7 @@ def test_cannot_select_a_group_you_do_not_belong_to(client, factory):
 
 
 def test_removed_organizer_loses_access(client, factory, login_as):
-    from poker.core import middleware
+    from core import middleware
 
     group_id = factory.group("G1")
     org_id = _member(factory, "org00002", group_id, "organizer")

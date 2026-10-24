@@ -1,4 +1,4 @@
-from utils.time import now_columbus_naive
+from core.time import now_columbus_naive
 
 from database import SessionLocal
 from poker.models import AuditLog

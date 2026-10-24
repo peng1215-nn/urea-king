@@ -8,7 +8,7 @@ from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy import UniqueConstraint
 from database import Base
-from utils.time import now_columbus_naive
+from core.time import now_columbus_naive
 
 
 class User(Base):

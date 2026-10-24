@@ -14,12 +14,12 @@ import secrets
 
 
 from database import SessionLocal
-from poker.core.errors import safe_error
-from poker.core.security import verify_user_password
+from core.errors import safe_error
+from core.security import verify_user_password
 from poker.models import Group, PokerGame, User, UserGroupRole
 from poker.services.common.common import user_in_ongoing_game
 from poker.services.common.group_purge import purge_group
-from poker.core.security import pwd_context
+from core.security import pwd_context
 
 
 

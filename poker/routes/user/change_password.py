@@ -12,7 +12,7 @@ from poker.services.common.account import update_password_service
 from poker.services.common.common import add_no_cache_headers
 from poker.services.user.leave_group import leave_group_service
 from poker.services.admin.audit_log import write_audit_log
-from poker.core.middleware import clear_session_cache
+from core.middleware import clear_session_cache
 from poker.template_config import templates
 
 
