@@ -72,6 +72,7 @@ Dependabot 每周检查一次 Python 依赖和 GitHub Actions 版本，有更新
 | `DATABASE_URL` | PostgreSQL 连接地址。缺失时应用拒绝启动。 |
 | `SESSION_SECRET_KEY` | 会话签名密钥，足够长的随机字符串。生产环境缺失时应用拒绝启动。 |
 | `CLOUDINARY_*` | 头像上传 |
+| `SENTRY_DSN` | 可选。出错告警：填了之后，网站报错会发到 Sentry 并邮件提醒 |
 
 以上变量在 Render 控制台的服务页面 → **Environment** 中设置。Render 会自动设置 `RENDER=true`，应用据此识别生产环境（也可以用 `APP_ENV` 显式指定）。
 
