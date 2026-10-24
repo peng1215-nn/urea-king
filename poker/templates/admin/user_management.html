@@ -57,7 +57,7 @@
             <button
                 class="search-button"
                 data-i18n="search"
-                onclick="searchUsers()"
+                data-on-click="searchUsers"
             >
                 搜索
             </button>
@@ -65,7 +65,7 @@
             <button
                 class="clear-button"
                 data-i18n="clear"
-                onclick="clearSearch()"
+                data-on-click="clearSearch"
             >
                 清除
             </button>
@@ -173,7 +173,7 @@
                 id="update-user-button"
                 class="panel-button"
                 data-i18n="saveChanges"
-                onclick="updateUserRole()"
+                data-on-click="updateUserRole"
             >
                 保存修改
             </button>
@@ -200,7 +200,7 @@
                 id="reset-password-button"
                 class="panel-button warning"
                 data-i18n="confirmResetPassword"
-                onclick="openResetPasswordModal()"
+                data-on-click="openResetPasswordModal"
             >
                 确认重置密码
             </button>
@@ -242,7 +242,7 @@
                 id="toggle-user-status-button"
                 class="panel-button danger"
                 data-i18n="disableAccount"
-                onclick="openToggleUserStatusModal()"
+                data-on-click="openToggleUserStatusModal"
             >
                 禁用账号
             </button>
@@ -276,7 +276,7 @@
             <button
                 class="modal-confirm-button"
                 data-i18n="confirm"
-                onclick="confirmResetPassword()"
+                data-on-click="confirmResetPassword"
             >
                 确认
             </button>
@@ -284,7 +284,7 @@
             <button
                 class="modal-cancel-button"
                 data-i18n="cancel"
-                onclick="closeResetPasswordModal()"
+                data-on-click="closeResetPasswordModal"
             >
                 取消
             </button>
@@ -313,7 +313,7 @@
             <button
                 class="modal-confirm-button"
                 data-i18n="confirm"
-                onclick="confirmToggleUserStatus()"
+                data-on-click="confirmToggleUserStatus"
             >
                 确认
             </button>
@@ -321,7 +321,7 @@
             <button
                 class="modal-cancel-button"
                 data-i18n="cancel"
-                onclick="closeUserStatusModal()"
+                data-on-click="closeUserStatusModal"
             >
                 取消
             </button>
@@ -332,6 +332,7 @@
 
 </div>
 
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>

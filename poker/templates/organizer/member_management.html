@@ -58,7 +58,7 @@
             <button
                 class="search-button"
                 data-i18n="search"
-                onclick="searchMembers()"
+                data-on-click="searchMembers"
             >
                 搜索
             </button>
@@ -66,7 +66,7 @@
             <button
                 class="clear-button"
                 data-i18n="clear"
-                onclick="clearSearch()"
+                data-on-click="clearSearch"
             >
                 清除
             </button>
@@ -163,7 +163,7 @@
                     id="alias-save-button"
                     class="panel-button"
                     data-i18n="saveAlias"
-                    onclick="saveAlias()"
+                    data-on-click="saveAlias"
                 >
                     保存备注
                 </button>
@@ -191,7 +191,7 @@
                 id="remove-member-button"
                 class="panel-button danger"
                 data-i18n="confirmRemoveMember"
-                onclick="openRemoveMemberModal()"
+                data-on-click="openRemoveMemberModal"
             >
                 移除成员
             </button>
@@ -226,7 +226,7 @@
             <button
                 class="modal-confirm-button"
                 data-i18n="confirm"
-                onclick="confirmRemoveMember()"
+                data-on-click="confirmRemoveMember"
             >
                 确认
             </button>
@@ -234,7 +234,7 @@
             <button
                 class="modal-cancel-button"
                 data-i18n="cancel"
-                onclick="closeRemoveMemberModal()"
+                data-on-click="closeRemoveMemberModal"
             >
                 取消
             </button>
@@ -245,6 +245,7 @@
 
 </div>
 
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/organizer.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>
@@ -278,7 +279,7 @@
             <button
                 class="modal-confirm-button"
                 data-i18n="confirm"
-                onclick="confirmJoinGroup()"
+                data-on-click="confirmJoinGroup"
             >
                 确认
             </button>
@@ -286,7 +287,7 @@
             <button
                 class="modal-cancel-button"
                 data-i18n="cancel"
-                onclick="closeJoinGroupModal()"
+                data-on-click="closeJoinGroupModal"
             >
                 取消
             </button>

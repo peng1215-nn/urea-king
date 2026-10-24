@@ -156,27 +156,27 @@ function renderPlayerList() {
             if (isOrganizer) {
                 actionsHtml = `
                     <div class="player-action-row">
-                        <button class="btn-small btn-buyin" onclick="openOrganizerBuyinModal(${player.user_id})">${t("buyInChips")}</button>
+                        <button class="btn-small btn-buyin" data-on-click="openOrganizerBuyinModal" data-args="[${player.user_id}]">${t("buyInChips")}</button>
                     </div>
                     <div class="player-action-row">
-                        <button class="btn-small btn-remove" onclick="removePlayer(${player.user_id})">${t("removeFromGame")}</button>
+                        <button class="btn-small btn-remove" data-on-click="removePlayer" data-args="[${player.user_id}]">${t("removeFromGame")}</button>
                     </div>
                 `;
             } else {
                 const proxyBtn = player.allow_organizer_chip_op
-                    ? `<button class="btn-small btn-proxy-buyin" onclick="openProxyBuyinModal(${player.user_id})">${t("proxyBuyin")}</button>`
+                    ? `<button class="btn-small btn-proxy-buyin" data-on-click="openProxyBuyinModal" data-args="[${player.user_id}]">${t("proxyBuyin")}</button>`
                     : "";
                 actionsHtml = `
                     ${proxyBtn ? `<div class="player-action-row">${proxyBtn}</div>` : ""}
                     <div class="player-action-row">
-                        <button class="btn-small btn-remove" onclick="removePlayer(${player.user_id})">${t("removeFromGame")}</button>
+                        <button class="btn-small btn-remove" data-on-click="removePlayer" data-args="[${player.user_id}]">${t("removeFromGame")}</button>
                     </div>
                 `;
             }
         } else {
             actionsHtml = `
                 <div class="player-action-row">
-                    <button class="btn-small btn-rejoin" onclick="rejoinPlayer(${player.user_id})">${t("rejoin")}</button>
+                    <button class="btn-small btn-rejoin" data-on-click="rejoinPlayer" data-args="[${player.user_id}]">${t("rejoin")}</button>
                 </div>
             `;
         }
@@ -220,8 +220,8 @@ function renderRequestList() {
             </div>
             <div class="request-amount">${escapeHtml(req.amount)} ${t("chips")}</div>
             <div class="request-actions">
-                <button class="btn-approve" onclick="approveRequest(${req.id})">${t("approve")}</button>
-                <button class="btn-reject" onclick="rejectRequest(${req.id})">${t("reject")}</button>
+                <button class="btn-approve" data-on-click="approveRequest" data-args="[${req.id}]">${t("approve")}</button>
+                <button class="btn-reject" data-on-click="rejectRequest" data-args="[${req.id}]">${t("reject")}</button>
             </div>
         `;
         container.appendChild(card);

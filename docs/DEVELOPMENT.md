@@ -123,6 +123,7 @@ alembic upgrade head && python -m poker.scripts.bootstrap_admin && uvicorn main:
 - **登录提示不暴露用户名**：用户名不存在和密码错误统一返回 `loginInvalidCredentials`，并且用户名不存在时同样执行一次密码哈希校验，响应时间一致。
 - **CSRF**：所有修改类请求（POST 等）要求 `Origin` 或 `Referer` 与本站一致。
 - **安全响应头**：CSP、`X-Frame-Options`、`nosniff` 等在 `poker/core/middleware.py` 中统一设置。新增外部资源（新的 CDN、图片域名）时，需要同步修改其中的 `CONTENT_SECURITY_POLICY`，否则会被浏览器拦截。
+- **不允许内联脚本**：安全策略（CSP）的 `script-src` 不含 `'unsafe-inline'`，页面里写 `onclick="..."` 或没有 `src` 的 `<script>` 块都会被浏览器拦截。按钮等事件改用属性，由 `poker/static/js/common/actions.js` 统一分发：`data-on-click="函数名"`，参数写在 `data-args`（JSON 数组，`"$this"`、`"$checked"`、`"$value"`、`"$event"` 会被替换），`data-stop` 阻止外层元素响应，`data-href` 点击跳转，`data-back` 返回上一页。被调用的函数必须是全局的 `function` 声明。`tests/unit/test_no_inline_scripts.py` 会检查。
 - **前端渲染**：把任何来自服务器的字符串放进 `innerHTML` 之前，都要用 `escapeHtml()`（`poker/static/js/common/escape.js`）转义。
 - **错误信息**：服务层在 `except` 中使用 `safe_error(e)`，完整异常写入日志，前端只收到通用错误码。
 - **记账并发**：修改牌局数据的操作都先用 `_lock_ongoing_game()` 锁住这一局（开局、加人先 `_lock_group()` 再锁局），买入金额用 `_add_to_buy_in()` 在数据库里直接累加（`poker/services/organizer/game_management.py`）。新增修改牌局数据的操作时必须照此加锁。单次金额上限 `MAX_AMOUNT`（100 万）在 `poker/core/validators.py`。结算时服务器核对玩家名单必须与本局完全一致。数据库另有防重复与金额非负的约束（迁移 `d5e6f7a8b9c0`）。

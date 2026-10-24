@@ -32,7 +32,7 @@
                 id="language-toggle"
                 class="dashboard-language-toggle"
                 type="button"
-                onclick="toggleLanguage()"
+                data-on-click="toggleLanguage"
             >
                 ENGLISH
             </button>
@@ -56,7 +56,7 @@
                 type="file"
                 id="avatar-input"
                 accept="image/jpeg,image/png,image/webp"
-                onchange="uploadAvatar()"
+                data-on-change="uploadAvatar"
                 hidden
             >
 
@@ -139,7 +139,7 @@
 
     <div class="modules">
 
-        <div class="module-card" onclick="window.location.href='/system-monitor'">
+        <div class="module-card" data-href="/system-monitor">
             <div class="module-title">
                 <div class="module-icon">
                     <i class="fa-solid fa-chart-line"></i>
@@ -152,7 +152,7 @@
             </p>
         </div>
 
-        <div class="module-card" onclick="window.location.href='/user-management'">
+        <div class="module-card" data-href="/user-management">
             <div class="module-title">
                 <div class="module-icon green">
                     <i class="fa-regular fa-user"></i>
@@ -165,7 +165,7 @@
             </p>
         </div>
 
-        <div class="module-card" onclick="window.location.href='/invite-management'">
+        <div class="module-card" data-href="/invite-management">
             <div class="module-title">
                 <div class="module-icon orange">
                     <i class="fa-solid fa-ticket"></i>
@@ -178,7 +178,7 @@
             </p>
         </div>
 
-        <div class="module-card" onclick="window.location.href='/admin-game-logs'">
+        <div class="module-card" data-href="/admin-game-logs">
             <div class="module-title">
                 <div class="module-icon cyan">
                     <i class="fa-solid fa-book"></i>
@@ -191,7 +191,7 @@
             </p>
         </div>
 
-        <div class="module-card" onclick="window.location.href='/system-logs'">
+        <div class="module-card" data-href="/system-logs">
             <div class="module-title">
                 <div class="module-icon purple">
                     <i class="fa-regular fa-file-lines"></i>
@@ -204,7 +204,7 @@
             </p>
         </div>
 
-        <div class="module-card" onclick="window.location.href='/announcement-management'">
+        <div class="module-card" data-href="/announcement-management">
             <div class="module-title">
                 <div class="module-icon yellow">
                     <i class="fa-solid fa-bullhorn"></i>
@@ -217,7 +217,7 @@
             </p>
         </div>
 
-        <div class="module-card" onclick="window.location.href='/change-password'">
+        <div class="module-card" data-href="/change-password">
             <div class="module-title">
                 <div class="module-icon red">
                     <i class="fa-solid fa-lock"></i>
@@ -234,6 +234,7 @@
 
 </div>
 
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>

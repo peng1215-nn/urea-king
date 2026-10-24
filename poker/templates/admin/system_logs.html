@@ -213,7 +213,7 @@
                 <button
                     class="filter-button"
                     data-i18n="search"
-                    onclick="searchLogs()"
+                    data-on-click="searchLogs"
                 >
                     查询
                 </button>
@@ -221,7 +221,7 @@
                 <button
                     class="filter-button secondary"
                     data-i18n="clear"
-                    onclick="clearLogFilters()"
+                    data-on-click="clearLogFilters"
                 >
                     清除
                 </button>
@@ -229,7 +229,7 @@
                 <button
                     class="filter-button outline"
                     data-i18n="exportLogs"
-                    onclick="exportLogs()"
+                    data-on-click="exportLogs"
                 >
                     导出
                 </button>
@@ -237,7 +237,7 @@
                 <button
                     id="bulk-delete-button"
                     class="filter-button danger"
-                    onclick="openBulkDeleteModal()"
+                    data-on-click="openBulkDeleteModal"
                     disabled
                 >
                     <span data-i18n="bulkDelete">批量删除</span>
@@ -265,7 +265,7 @@
                         <input
                             type="checkbox"
                             id="select-all-logs"
-                            onchange="toggleSelectAll(this.checked)"
+                            data-on-change="toggleSelectAll" data-args="[&quot;$checked&quot;]"
                         >
                     </th>
                     <th data-i18n="operator">操作者</th>
@@ -304,7 +304,7 @@
             id="previous-page-button"
             class="pagination-button"
             data-i18n="previousPage"
-            onclick="goToPreviousPage()"
+            data-on-click="goToPreviousPage"
         >
             上一页
         </button>
@@ -320,7 +320,7 @@
             id="next-page-button"
             class="pagination-button"
             data-i18n="nextPage"
-            onclick="goToNextPage()"
+            data-on-click="goToNextPage"
         >
             下一页
         </button>
@@ -338,12 +338,13 @@
             <span data-i18n="bulkDeleteConfirmSuffix">条日志？删除后无法恢复。</span>
         </p>
         <div class="logs-modal-actions">
-            <button class="filter-button secondary" data-i18n="cancel" onclick="closeBulkDeleteModal()">取消</button>
-            <button class="filter-button danger" id="bulk-delete-confirm" data-i18n="confirmDelete" onclick="confirmBulkDelete()">确认删除</button>
+            <button class="filter-button secondary" data-i18n="cancel" data-on-click="closeBulkDeleteModal">取消</button>
+            <button class="filter-button danger" id="bulk-delete-confirm" data-i18n="confirmDelete" data-on-click="confirmBulkDelete">确认删除</button>
         </div>
     </div>
 </div>
 
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/admin.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>

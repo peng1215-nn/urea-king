@@ -63,7 +63,7 @@
 
         <button
             class="group-join-button"
-            onclick="groupJoin()"
+            data-on-click="groupJoin"
             data-i18n="groupJoinSubmit"
         >
             加入组
@@ -79,6 +79,7 @@
 
 </div>
 
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/login.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>

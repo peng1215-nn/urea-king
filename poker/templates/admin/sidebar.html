@@ -1,8 +1,8 @@
-<button class="hamburger-btn" onclick="toggleSidebar()" aria-label="menu">
+<button class="hamburger-btn" data-on-click="toggleSidebar" aria-label="menu">
     <i class="fa-solid fa-bars"></i>
 </button>
 
-<div class="sidebar-overlay" onclick="closeSidebar()"></div>
+<div class="sidebar-overlay" data-on-click="closeSidebar"></div>
 
 <div class="sidebar">
 
@@ -15,7 +15,7 @@
 
         <div
                 class="menu-item {% if current_page == 'dashboard' %}active{% endif %}"
-                onclick="window.location.href='/admin-dashboard'"
+                data-href="/admin-dashboard"
         >
             <i class="fa-solid fa-house"></i>
 
@@ -26,7 +26,7 @@
 
         <div
                 class="menu-item {% if current_page == 'system_monitor' %}active{% endif %}"
-                onclick="window.location.href='/system-monitor'"
+                data-href="/system-monitor"
         >
             <i class="fa-solid fa-chart-line"></i>
 
@@ -37,7 +37,7 @@
 
         <div
                 class="menu-item {% if current_page == 'user_management' %}active{% endif %}"
-                onclick="window.location.href='/user-management'"
+                data-href="/user-management"
         >
             <i class="fa-regular fa-user"></i>
 
@@ -48,7 +48,7 @@
 
         <div
                 class="menu-item {% if current_page == 'invite_management' %}active{% endif %}"
-                onclick="window.location.href='/invite-management'"
+                data-href="/invite-management"
         >
             <i class="fa-solid fa-ticket"></i>
 
@@ -59,7 +59,7 @@
 
         <div
                 class="menu-item {% if current_page == 'game_logs' %}active{% endif %}"
-                onclick="window.location.href='/admin-game-logs'"
+                data-href="/admin-game-logs"
         >
             <i class="fa-solid fa-book"></i>
             <span data-i18n="gameLogs">
@@ -69,7 +69,7 @@
 
         <div
                 class="menu-item {% if current_page == 'system_logs' %}active{% endif %}"
-                onclick="window.location.href='/system-logs'"
+                data-href="/system-logs"
         >
             <i class="fa-regular fa-file-lines"></i>
 
@@ -80,7 +80,7 @@
 
         <div
                 class="menu-item {% if current_page == 'announcement_management' %}active{% endif %}"
-                onclick="window.location.href='/announcement-management'"
+                data-href="/announcement-management"
         >
             <i class="fa-solid fa-bullhorn"></i>
 
@@ -91,7 +91,7 @@
 
         <div
                 class="menu-item {% if current_page == 'change_password' %}active{% endif %}"
-                onclick="window.location.href='/change-password'"
+                data-href="/change-password"
         >
             <i class="fa-solid fa-lock"></i>
 
@@ -102,7 +102,7 @@
 
         <div
             class="menu-item"
-            onclick="logout()"
+            data-on-click="logout"
         >
             <i class="fa-solid fa-right-from-bracket"></i>
 
