@@ -17,12 +17,15 @@ async function register() {
         const data = await response.json();
 
         if (data.success === true) {
+            // 注册成功：显示"请查收验证邮件"提示，隐藏表单
             showMessage(
-                `${t(data.error_code || "registerSuccess")} ${data.nickname}。`,
+                t("registerSuccess"),
                 true,
             );
 
-            redirectToLogin();
+            // 隐藏注册按钮，避免重复提交
+            const btn = document.querySelector(".register-button");
+            if (btn) btn.style.display = "none";
 
             return;
         }

@@ -32,6 +32,13 @@ def login_user_service(request, username, password):
                 "error_code": "loginAccountDisabled",
             }
 
+        # 邮箱未验证则不允许登录
+        if not user.email_verified:
+            return {
+                "success": False,
+                "error_code": "loginEmailNotVerified",
+            }
+
         group_roles = db.query(
             UserGroupRole,
             Group,
@@ -41,12 +48,6 @@ def login_user_service(request, username, password):
         ).filter(
             UserGroupRole.user_id == user.id,
         ).all()
-
-        if not group_roles:
-            return {
-                "success": False,
-                "error_code": "loginNoGroupAvailable",
-            }
 
         request.session["user_id"] = user.id
         request.session["username"] = user.username
@@ -78,6 +79,8 @@ def login_user_service(request, username, password):
                 }
                 for user_group_role, group in group_roles
             ],
+            # 没有任何组时，前端引导用户创建或加入
+            "has_groups": len(group_roles) > 0,
         }
 
     except Exception as e:

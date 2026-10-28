@@ -12,6 +12,12 @@ function getRegisterFormData() {
                 .value
                 .trim(),
 
+        email:
+            document
+                .getElementById("email")
+                .value
+                .trim(),
+
         password:
             document
                 .getElementById("password")
@@ -21,12 +27,6 @@ function getRegisterFormData() {
             document
                 .getElementById("confirm-password")
                 .value,
-
-        inviteCode:
-            document
-                .getElementById("invite-code")
-                .value
-                .trim(),
     };
 }
 
@@ -46,6 +46,15 @@ function validateRegisterForm(form) {
     if (form.nickname.length === 0) {
         showMessage(
             t("nicknameRequired"),
+        );
+
+        return false;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(form.email)) {
+        showMessage(
+            t("emailInvalid"),
         );
 
         return false;
@@ -71,14 +80,6 @@ function validateRegisterForm(form) {
         return false;
     }
 
-    if (form.inviteCode.length === 0) {
-        showMessage(
-            t("inviteCodeRequired"),
-        );
-
-        return false;
-    }
-
     return true;
 }
 
@@ -97,6 +98,11 @@ function buildRegisterFormData(form) {
     );
 
     formData.append(
+        "email",
+        form.email,
+    );
+
+    formData.append(
         "password",
         form.password,
     );
@@ -104,11 +110,6 @@ function buildRegisterFormData(form) {
     formData.append(
         "confirm_password",
         form.confirmPassword,
-    );
-
-    formData.append(
-        "invite_code",
-        form.inviteCode,
     );
 
     return formData;

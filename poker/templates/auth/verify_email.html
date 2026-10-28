@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邮箱验证 - UREAKING POKER</title>
+    <link rel="stylesheet" href="/static/css/auth/common.css?v={{ static_version }}">
+    <style>
+        .verify-card {
+            max-width: 420px;
+            margin: 80px auto;
+            padding: 40px 32px;
+            text-align: center;
+        }
+        .verify-icon {
+            font-size: 56px;
+            margin-bottom: 24px;
+        }
+        .verify-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        .verify-msg {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+        .verify-btn {
+            display: inline-block;
+            padding: 12px 32px;
+            background: #fff;
+            color: #111;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-title">Ureaking</div>
+</div>
+
+<div class="page">
+<div class="verify-card">
+{% if success %}
+    <div class="verify-icon">✅</div>
+    <div class="verify-title">邮箱验证成功</div>
+    <p class="verify-msg">您的邮箱已验证，现在可以登录了。</p>
+    <a href="/login" class="verify-btn">前往登录</a>
+{% elif error_code == "verifyTokenUsed" %}
+    <div class="verify-icon">🔒</div>
+    <div class="verify-title">链接已使用</div>
+    <p class="verify-msg">该验证链接已被使用过了。如果您的邮箱尚未验证，请重新注册或联系支持。</p>
+    <a href="/login" class="verify-btn">返回登录</a>
+{% elif error_code == "verifyTokenExpired" %}
+    <div class="verify-icon">⏰</div>
+    <div class="verify-title">链接已过期</div>
+    <p class="verify-msg">验证链接已过期（有效期 15 分钟）。请重新注册以获取新的验证邮件。</p>
+    <a href="/register" class="verify-btn">重新注册</a>
+{% else %}
+    <div class="verify-icon">❌</div>
+    <div class="verify-title">验证失败</div>
+    <p class="verify-msg">验证链接无效或已过期。请检查链接是否完整，或重新注册。</p>
+    <a href="/register" class="verify-btn">重新注册</a>
+{% endif %}
+</div>
+</div>
+
+</body>
+</html>

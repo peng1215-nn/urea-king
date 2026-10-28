@@ -31,3 +31,29 @@
     font-size: 14px;
     opacity: 0.72;
 }
+
+.group-action-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    letter-spacing: 0.3px;
+}
+
+.group-action-btn:hover {
+    background: rgba(92, 141, 255, 0.32);
+}
+
+.group-action-btn.secondary {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.group-action-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.14);
+}

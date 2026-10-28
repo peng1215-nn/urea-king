@@ -12,12 +12,26 @@ function renderGroups() {
     );
 
     if (groups.length === 0) {
-        groupList.innerHTML =
-            `<div class="group-card">${t("noAvailableGroup")}</div>`;
+        // 未加入任何组，引导用户创建或加入
+        groupList.innerHTML = `
+            <div class="group-card" style="text-align:center;color:#aaa;font-size:14px;margin-bottom:12px;">
+                ${t("noAvailableGroup")}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
+                <button class="group-action-btn" onclick="window.location.href='/create-group'">
+                    🎯 ${t("createGroupBtn") || "创建自己的组（局头）"}
+                </button>
+                <button class="group-action-btn secondary" onclick="window.location.href='/group-join'">
+                    🤝 ${t("joinGroupBtn") || "使用邀请码加入组"}
+                </button>
+            </div>
+        `;
 
+        sessionStorage.removeItem("login_no_group");
         return;
     }
 
+    sessionStorage.removeItem("login_no_group");
     groupList.innerHTML = "";
 
     groups.forEach(group => {
