@@ -5,6 +5,7 @@ from poker.core.rate_limit import register_failures_by_ip
 from poker.services.admin.audit_log import get_client_ip
 from poker.services.auth.register import register_user_service, verify_email_service
 from poker.services.auth.resend_verify import resend_verify_email_service
+from poker.services.auth.change_email import change_email_service
 from poker.template_config import templates
 
 router = APIRouter()
@@ -54,6 +55,16 @@ def register_user(
 @router.post("/resend-verify-email")
 def resend_verify_email(request: Request, email: str = Form(...)):
     return resend_verify_email_service(email)
+
+
+@router.post("/change-email")
+def change_email(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    new_email: str = Form(...),
+):
+    return change_email_service(username, password, new_email)
 
 
 @router.get("/verify-email", response_class=HTMLResponse)

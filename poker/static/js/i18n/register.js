@@ -46,6 +46,21 @@ window.registerTranslations = {
         resendDailyLimit: "今日发送次数已达上限，请明天再试。",
         resendEmailRequired: "请输入邮箱地址。",
         resendFailed: "发送失败，请稍后重试。",
+
+        changeEmailTitle: "修改注册邮箱",
+        changeEmailNewPlaceholder: "请输入新邮箱地址",
+        changeEmailUsernamePlaceholder: "请输入用户名",
+        changeEmailPasswordPlaceholder: "请输入密码",
+        changeEmailSubmit: "确认修改",
+        changeEmailCancel: "取消",
+        changeEmailSuccess: "邮箱已修改，验证邮件已发送至新邮箱，请查收。",
+        changeEmailInvalidEmail: "请输入有效的邮箱地址。",
+        changeEmailEmailExists: "该邮箱已被其他账号使用。",
+        changeEmailWrongCredentials: "用户名或密码错误。",
+        changeEmailUserRequired: "请输入用户名。",
+        changeEmailPasswordRequired: "请输入密码。",
+        changeEmailFailed: "修改失败，请稍后重试。",
+        changeEmailTooFrequent: "操作过于频繁，请 {wait} 分钟后再试。",
     },
 
     en: {
@@ -95,5 +110,20 @@ window.registerTranslations = {
         resendDailyLimit: "Daily limit reached. Please try again tomorrow.",
         resendEmailRequired: "Please enter your email address.",
         resendFailed: "Failed to send. Please try again later.",
+
+        changeEmailTitle: "Change Registration Email",
+        changeEmailNewPlaceholder: "Enter new email address",
+        changeEmailUsernamePlaceholder: "Enter your username",
+        changeEmailPasswordPlaceholder: "Enter your password",
+        changeEmailSubmit: "Confirm Change",
+        changeEmailCancel: "Cancel",
+        changeEmailSuccess: "Email updated. A verification email has been sent to your new address.",
+        changeEmailInvalidEmail: "Please enter a valid email address.",
+        changeEmailEmailExists: "This email is already used by another account.",
+        changeEmailWrongCredentials: "Username or password is incorrect.",
+        changeEmailUserRequired: "Please enter your username.",
+        changeEmailPasswordRequired: "Please enter your password.",
+        changeEmailFailed: "Update failed. Please try again later.",
+        changeEmailTooFrequent: "Too many requests. Please try again in {wait} minutes.",
     }
 };

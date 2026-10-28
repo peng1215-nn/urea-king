@@ -83,8 +83,10 @@ input {
 
 .bottom-links {
     display: flex;
-    justify-content: center;
-    margin-top: 10px;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
     font-size: 13px;
 }
 
