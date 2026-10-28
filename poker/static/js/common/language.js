@@ -16,6 +16,10 @@ function getTranslations(language) {
         return window.loginTranslations[language];
     }
 
+    if (window.forgotPasswordTranslations) {
+        return window.forgotPasswordTranslations[language];
+    }
+
     if (window.registerTranslations) {
         return window.registerTranslations[language];
     }
