@@ -35,6 +35,17 @@ window.registerTranslations = {
         registerFailed: "注册失败，请稍后重试。",
         registerTooManyAttempts: "尝试次数过多，请 15 分钟后再试。",
         registerSuccess: "注册成功！验证邮件已发送至您的邮箱，请点击邮件中的链接完成验证后再登录。",
+
+        resendVerifyTitle: "重发验证邮件",
+        resendEmailPlaceholder: "请输入注册时的邮箱",
+        resendSubmit: "发送",
+        resendCancel: "取消",
+        resendSent: "验证邮件已发送，请查收（15 分钟内有效）。",
+        resendAlreadyVerified: "该邮箱已完成验证，请直接登录。",
+        resendTooFrequent: "发送过于频繁，请 {wait} 分钟后再试。",
+        resendDailyLimit: "今日发送次数已达上限，请明天再试。",
+        resendEmailRequired: "请输入邮箱地址。",
+        resendFailed: "发送失败，请稍后重试。",
     },
 
     en: {
@@ -73,5 +84,16 @@ window.registerTranslations = {
         registerFailed: "Registration failed. Please try again.",
         registerTooManyAttempts: "Too many attempts. Please try again in 15 minutes.",
         registerSuccess: "Registration successful! A verification email has been sent. Please click the link in the email to verify your address before logging in.",
+
+        resendVerifyTitle: "Resend Verification Email",
+        resendEmailPlaceholder: "Enter your registration email",
+        resendSubmit: "Send",
+        resendCancel: "Cancel",
+        resendSent: "Verification email sent. Please check your inbox (valid for 15 minutes).",
+        resendAlreadyVerified: "This email is already verified. Please log in directly.",
+        resendTooFrequent: "Too many requests. Please try again in {wait} minutes.",
+        resendDailyLimit: "Daily limit reached. Please try again tomorrow.",
+        resendEmailRequired: "Please enter your email address.",
+        resendFailed: "Failed to send. Please try again later.",
     }
 };

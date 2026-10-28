@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from poker.core.rate_limit import register_failures_by_ip
 from poker.services.admin.audit_log import get_client_ip
 from poker.services.auth.register import register_user_service, verify_email_service
+from poker.services.auth.resend_verify import resend_verify_email_service
 from poker.template_config import templates
 
 router = APIRouter()
@@ -48,6 +49,11 @@ def register_user(
         register_failures_by_ip.hit(ip)
 
     return result
+
+
+@router.post("/resend-verify-email")
+def resend_verify_email(request: Request, email: str = Form(...)):
+    return resend_verify_email_service(email)
 
 
 @router.get("/verify-email", response_class=HTMLResponse)
