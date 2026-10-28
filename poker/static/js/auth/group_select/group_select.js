@@ -18,14 +18,21 @@ function renderGroups() {
                 ${t("noAvailableGroup")}
             </div>
             <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
-                <button class="group-action-btn" onclick="window.location.href='/create-group'">
+                <button class="group-action-btn" id="btn-create-group">
                     🎯 ${t("createGroupBtn") || "创建自己的组（局头）"}
                 </button>
-                <button class="group-action-btn secondary" onclick="window.location.href='/group-join'">
+                <button class="group-action-btn secondary" id="btn-join-group">
                     🤝 ${t("joinGroupBtn") || "使用邀请码加入组"}
                 </button>
             </div>
         `;
+
+        document.getElementById("btn-create-group").addEventListener("click", function () {
+            window.location.href = "/create-group";
+        });
+        document.getElementById("btn-join-group").addEventListener("click", function () {
+            window.location.href = "/group-join";
+        });
 
         sessionStorage.removeItem("login_no_group");
         return;
