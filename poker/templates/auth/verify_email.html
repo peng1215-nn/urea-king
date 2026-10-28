@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="pageTitle">邮箱验证 - UREAKING POKER</title>
+    <link rel="stylesheet" href="/static/css/auth/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/common/language_base.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/auth/language.css?v={{ static_version }}">
+    <style>
+        .verify-card {
+            max-width: 420px;
+            margin: 80px auto;
+            padding: 40px 32px;
+            text-align: center;
+        }
+        .verify-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 32px;
+        }
+        .verify-icon.success { background: #4caf50; }
+        .verify-icon.warn    { background: #888; }
+        .verify-icon.error   { background: #c0392b; }
+        .verify-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        .verify-msg {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+        .verify-btn {
+            display: inline-block;
+            padding: 12px 32px;
+            background: #fff;
+            color: #111;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-title">Ureaking</div>
+</div>
+
+<div class="page">
+<div class="verify-card">
+
+{% if success %}
+    <div class="verify-icon success">✓</div>
+    <div class="verify-title" data-i18n="verifySuccessTitle">邮箱验证成功</div>
+    <p class="verify-msg" data-i18n="verifySuccessMsg">您的邮箱已验证，现在可以登录了。</p>
+    <a href="/login" class="verify-btn" data-i18n="goLogin">前往登录</a>
+
+{% elif error_code == "verifyTokenUsed" %}
+    <div class="verify-icon warn">🔒</div>
+    <div class="verify-title" data-i18n="verifyUsedTitle">链接已使用</div>
+    <p class="verify-msg" data-i18n="verifyUsedMsg">该验证链接已被使用过了。如果您的邮箱尚未验证，请重新注册或联系支持。</p>
+    <a href="/login" class="verify-btn" data-i18n="backLogin">返回登录</a>
+
+{% elif error_code == "verifyTokenExpired" %}
+    <div class="verify-icon warn">⏰</div>
+    <div class="verify-title" data-i18n="verifyExpiredTitle">链接已过期</div>
+    <p class="verify-msg" data-i18n="verifyExpiredMsg">验证链接已过期（有效期 15 分钟）。请重新注册以获取新的验证邮件。</p>
+    <a href="/register" class="verify-btn" data-i18n="reRegister">重新注册</a>
+
+{% else %}
+    <div class="verify-icon error">✕</div>
+    <div class="verify-title" data-i18n="verifyInvalidTitle">验证失败</div>
+    <p class="verify-msg" data-i18n="verifyInvalidMsg">验证链接无效或已过期。请检查链接是否完整，或重新注册。</p>
+    <a href="/register" class="verify-btn" data-i18n="reRegister">重新注册</a>
+{% endif %}
+
+</div>
+</div>
+
+{% include "common/language_switcher.html" %}
+
+<script src="/static/js/i18n/verify_email.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+
+</body>
+</html>

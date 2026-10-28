@@ -76,18 +76,13 @@
         </div>
 
         <div class="form-group">
-            <label
-                for="invite-code"
-                data-i18n="inviteCode"
-            >
-                邀请码
-            </label>
+            <label for="email" data-i18n="email">邮箱</label>
 
             <input
-                type="text"
-                id="invite-code"
-                placeholder="请输入邀请码"
-                data-i18n-placeholder="enterInviteCode"
+                type="email"
+                id="email"
+                placeholder="请输入邮箱地址"
+                data-i18n-placeholder="enterEmail"
             >
         </div>
 
@@ -102,9 +97,9 @@
         </button>
 
         <div class="bottom-links">
-            <a href="/login" data-i18n="backToLogin">
-                返回登录
-            </a>
+            <a href="/login" data-i18n="backToLogin">返回登录</a>
+            <a href="#" id="resend-trigger" data-i18n="resendVerifyTitle">重发验证邮件</a>
+            <a href="#" id="change-email-trigger" data-i18n="changeEmailTitle">修改注册邮箱</a>
         </div>
 
     </div>
@@ -120,6 +115,8 @@
 <script src="/static/js/auth/register/redirect.js?v={{ static_version }}"></script>
 <script src="/static/js/auth/register/register.js?v={{ static_version }}"></script>
 <script src="/static/js/auth/register/init.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/register/resend_verify.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/register/change_email.js?v={{ static_version }}"></script>
 
 </body>
 </html>

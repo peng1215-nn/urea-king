@@ -20,6 +20,8 @@ body::before {
     flex-direction: column;
     gap: 18px;
     overflow-y: auto;
+    position: relative;
+    z-index: 2;
 }
 
 
@@ -81,9 +83,19 @@ input {
 
 .bottom-links {
     display: flex;
+    flex-direction: row;
     justify-content: center;
-    margin-top: 10px;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
     font-size: 13px;
+}
+
+.bottom-links a + a::before {
+    content: "|";
+    margin-right: 16px;
+    color: rgba(255, 255, 255, 0.25);
+    pointer-events: none;
 }
 
 

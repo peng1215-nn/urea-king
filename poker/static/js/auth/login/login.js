@@ -28,9 +28,16 @@ async function login() {
                 JSON.stringify(data.groups || [])
             );
 
+            // 没有任何组时引导创建或加入
+            if (!data.has_groups) {
+                sessionStorage.setItem("login_no_group", "1");
+            } else {
+                sessionStorage.removeItem("login_no_group");
+            }
+
             setTimeout(() => {
                 window.location.href = "/group-select";
-                }, 3000);
+            }, 1500);
 
             return;
         }

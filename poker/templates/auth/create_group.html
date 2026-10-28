@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建组 - UREAKING POKER</title>
+    <link rel="stylesheet" href="/static/css/auth/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/auth/register.css?v={{ static_version }}">
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-title">Ureaking</div>
+</div>
+
+<div class="page">
+<div class="register-card">
+
+    <div class="title-area">
+        <h1>UREAKING</h1>
+        <p class="login-poker-sub">POKER</p>
+    </div>
+
+    <p style="color:#aaa;font-size:13px;margin-bottom:20px;text-align:center;">
+        创建自己的组，成为局头。每个账号只能创建一个组。<br>
+        成员加入需使用邀请码。
+    </p>
+
+    <div class="form-group">
+        <label for="group-name">组名</label>
+        <input type="text" id="group-name" placeholder="请输入组名（最多 50 字符）" maxlength="50">
+    </div>
+
+    <div id="message-box"></div>
+
+    <button class="register-button" id="cg-btn">
+        创建组
+    </button>
+
+    <div class="bottom-links" id="bottom-links">
+        <a href="/group-select">返回选组</a>
+    </div>
+
+</div>
+</div>
+
+<script src="/static/js/auth/create_group/create_group.js?v={{ static_version }}"></script>
+
+</body>
+</html>

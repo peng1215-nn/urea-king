@@ -7,17 +7,47 @@ function renderGroups() {
     const groupList =
         document.getElementById("group-list");
 
-    const groups = JSON.parse(
-        sessionStorage.getItem("available_groups") || "[]"
-    );
+    // 优先使用服务器端注入的最新数据（避免 CSP，用 data 属性传递）
+    // 降级到 sessionStorage（登录时缓存）
+    let groups;
+    try {
+        const raw = groupList.dataset.serverGroups;
+        groups = raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        groups = null;
+    }
+    if (!groups) {
+        groups = JSON.parse(sessionStorage.getItem("available_groups") || "[]");
+    }
 
     if (groups.length === 0) {
-        groupList.innerHTML =
-            `<div class="group-card">${t("noAvailableGroup")}</div>`;
+        // 未加入任何组，引导用户创建或加入
+        groupList.innerHTML = `
+            <div class="group-card" style="text-align:center;color:#aaa;font-size:14px;margin-bottom:12px;">
+                ${t("noAvailableGroup")}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
+                <button class="group-action-btn" id="btn-create-group">
+                    🎯 ${t("createGroupBtn") || "创建自己的组（局头）"}
+                </button>
+                <button class="group-action-btn secondary" id="btn-join-group">
+                    🤝 ${t("joinGroupBtn") || "使用邀请码加入组"}
+                </button>
+            </div>
+        `;
 
+        document.getElementById("btn-create-group").addEventListener("click", function () {
+            window.location.href = "/create-group";
+        });
+        document.getElementById("btn-join-group").addEventListener("click", function () {
+            window.location.href = "/group-join";
+        });
+
+        sessionStorage.removeItem("login_no_group");
         return;
     }
 
+    sessionStorage.removeItem("login_no_group");
     groupList.innerHTML = "";
 
     groups.forEach(group => {

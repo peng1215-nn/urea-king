@@ -47,6 +47,7 @@ def bootstrap_admin(username, password):
             password_hash=pwd_context.hash(password),
             nickname=username,
             is_active=1,
+            email_verified=1,  # 管理员账号跳过邮箱验证
         )
         db.add(user)
         db.flush()

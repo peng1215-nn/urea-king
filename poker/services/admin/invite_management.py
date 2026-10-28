@@ -165,7 +165,7 @@ def create_group_service(
             group_code=group_code,
             group_name=group_name,
             description=None,
-            invite_code_limit=27,
+            invite_code_limit=17,
             created_at=now_columbus_naive(),
         )
 

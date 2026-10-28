@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
 
 from poker.services.auth.login import login_user_service
-from poker.services.auth.login import select_group_service
+from poker.services.auth.login import select_group_service, get_user_groups_service
 from poker.template_config import templates
 from fastapi.responses import JSONResponse
 from poker.core.rate_limit import login_retry_after, record_login_failure, record_login_success
@@ -68,15 +68,20 @@ def login_user(
 
 @router.get("/group-select", response_class=HTMLResponse)
 def group_select_page(request: Request):
-    if not request.session.get("user_id"):
+    user_id = request.session.get("user_id")
+    if not user_id:
         return RedirectResponse(
             url="/login",
             status_code=302,
         )
 
+    groups = get_user_groups_service(user_id=user_id)
+
+    import json
     return templates.TemplateResponse(
         request=request,
         name="auth/group_select.html",
+        context={"server_groups": json.dumps(groups)},
     )
 
 

@@ -26,9 +26,9 @@
             <p class="login-poker-sub">POKER</p>
         </div>
 
+        {% if not is_logged_in %}
         <div class="form-group">
             <label for="username" data-i18n="username">用户名</label>
-
             <input
                 type="text"
                 id="username"
@@ -39,7 +39,6 @@
 
         <div class="form-group">
             <label for="password" data-i18n="password">密码</label>
-
             <input
                 type="password"
                 id="password"
@@ -47,6 +46,7 @@
                 data-i18n-placeholder="enterPassword"
             >
         </div>
+        {% endif %}
 
         <div class="form-group">
             <label for="invite-code" data-i18n="inviteCode">邀请码</label>
@@ -70,9 +70,15 @@
         </button>
 
         <div class="bottom-links">
+            {% if is_logged_in %}
+            <a href="/group-select" data-i18n="backToGroupSelect">
+                返回选组
+            </a>
+            {% else %}
             <a href="/login" data-i18n="backToLogin">
                 返回登录
             </a>
+            {% endif %}
         </div>
 
     </div>

@@ -8,7 +8,17 @@ from poker.models import User, UserGroupRole
 
 
 # 不需要登录也能访问的页面：登录状态失效时这些页面照常打开，不跳转
-PUBLIC_PATHS = ("/", "/login", "/register", "/group-join", "/delete-account", "/account/delete")
+PUBLIC_PATHS = (
+    "/",
+    "/login",
+    "/register",
+    "/verify-email",
+    "/forgot-password",
+    "/reset-password",
+    "/group-join",
+    "/delete-account",
+    "/account/delete",
+)
 
 
 def session_key(session):

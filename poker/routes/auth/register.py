@@ -1,22 +1,18 @@
-from fastapi import APIRouter
-from fastapi import Form
-from fastapi import Request
-from fastapi.responses import HTMLResponse
-from poker.services.auth.register import register_user_service
-from poker.template_config import templates
-from fastapi.responses import JSONResponse
-from poker.core.rate_limit import GLOBAL_KEY, invite_failures_global, register_failures_by_ip
-from poker.services.admin.audit_log import get_client_ip
+from fastapi import APIRouter, Form, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 
+from poker.core.rate_limit import register_failures_by_ip
+from poker.services.admin.audit_log import get_client_ip
+from poker.services.auth.register import register_user_service, verify_email_service
+from poker.services.auth.resend_verify import resend_verify_email_service
+from poker.services.auth.change_email import change_email_service
+from poker.template_config import templates
 
 router = APIRouter()
 
 
 def render_register_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="auth/register.html",
-    )
+    return templates.TemplateResponse(request=request, name="auth/register.html")
 
 
 @router.get("/register", response_class=HTMLResponse)
@@ -29,23 +25,15 @@ def register_user(
     request: Request,
     username: str = Form(...),
     nickname: str = Form(...),
+    email: str = Form(...),
     password: str = Form(...),
     confirm_password: str = Form(...),
-    invite_code: str = Form(...),
 ):
     ip = get_client_ip(request) or "unknown"
-    wait = max(
-        register_failures_by_ip.retry_after(ip),
-        invite_failures_global.retry_after(GLOBAL_KEY),
-    )
-
+    wait = register_failures_by_ip.retry_after(ip)
     if wait:
         return JSONResponse(
-            {
-                "success": False,
-                "error_code": "registerTooManyAttempts",
-                "retry_after": wait,
-            },
+            {"success": False, "error_code": "registerTooManyAttempts", "retry_after": wait},
             status_code=429,
         )
 
@@ -53,15 +41,38 @@ def register_user(
         request=request,
         username=username,
         nickname=nickname,
+        email=email,
         password=password,
         confirm_password=confirm_password,
-        invite_code=invite_code,
     )
 
-    # 只统计邀请码相关的失败，防止暴力猜测邀请码
-    if not result.get("success") and str(result.get("error_code", "")).startswith("registerInviteCode"):
+    if not result.get("success"):
         register_failures_by_ip.hit(ip)
-        if result.get("error_code") == "registerInviteCodeNotFound":
-            invite_failures_global.hit(GLOBAL_KEY)
 
     return result
+
+
+@router.post("/resend-verify-email")
+def resend_verify_email(request: Request, email: str = Form(...)):
+    return resend_verify_email_service(email)
+
+
+@router.post("/change-email")
+def change_email(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    new_email: str = Form(...),
+):
+    return change_email_service(username, password, new_email)
+
+
+@router.get("/verify-email", response_class=HTMLResponse)
+def verify_email_page(request: Request, token: str = ""):
+    """用户点击邮件链接后到达此页面，自动完成验证。"""
+    result = verify_email_service(token)
+    return templates.TemplateResponse(
+        request=request,
+        name="auth/verify_email.html",
+        context={"success": result.get("success"), "error_code": result.get("error_code", "")},
+    )

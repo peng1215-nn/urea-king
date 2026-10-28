@@ -21,8 +21,11 @@ class User(Base):
     nickname = Column(String(50), nullable=True)
     avatar_url = Column(String(255), nullable=True)
     invitation_code = Column(String(100), nullable=True)
+    email = Column(String(255), unique=True, nullable=True, index=True)
+    email_verified = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime, default=now_columbus_naive)
     is_active = Column(Integer, nullable=False, default=1)
+    deleted_at = Column(DateTime, nullable=True)
 
 
 class Group(Base):
@@ -34,6 +37,7 @@ class Group(Base):
     group_name = Column(String(100), nullable=True)
     description = Column(Text, nullable=True)
     invite_code_limit = Column(Integer, nullable=False, default=27)
+    created_by_user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=True)
     created_at = Column(DateTime, default=now_columbus_naive)
 
 
@@ -176,3 +180,17 @@ class ChipRequest(Base):
     requested_at = Column(DateTime, nullable=False, default=now_columbus_naive)
     resolved_at = Column(DateTime, nullable=True)
     resolved_by = Column(Integer, ForeignKey("poker_users.id"), nullable=True)
+
+
+class EmailVerification(Base):
+
+    __tablename__ = "poker_email_verifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False, index=True)
+    token = Column(String(128), unique=True, nullable=False, index=True)
+    # 'verify_email' | 'reset_password'
+    purpose = Column(String(30), nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    used = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, default=now_columbus_naive)

@@ -7,8 +7,10 @@ window.groupSelectTranslations = {
         pageTitle: "UREAKING-POKER 选择组别",
         selectGroup: "选择进入的组别",
         role: "身份",
-        noAvailableGroup: "没有可进入的组别。",
+        noAvailableGroup: "您还没有加入任何组。",
         groupSelectFailed: "组别选择失败。",
+        createGroupBtn: "创建自己的组（成为局头）",
+        joinGroupBtn: "使用邀请码加入已有组",
     },
 
     en: {
@@ -18,7 +20,9 @@ window.groupSelectTranslations = {
         pageTitle: "UREAKING-POKER Group Select",
         selectGroup: "Select a group to enter",
         role: "Role",
-        noAvailableGroup: "No available groups.",
+        noAvailableGroup: "You haven't joined any group yet.",
         groupSelectFailed: "Failed to select group.",
+        createGroupBtn: "Create your own group (become organizer)",
+        joinGroupBtn: "Join an existing group with invite code",
     }
 };
