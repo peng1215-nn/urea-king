@@ -6,7 +6,7 @@
 
 (function () {
     const t = (key, vars) => {
-        const lang = window.__lang || "zh";
+        const lang = localStorage.getItem("language") || "zh";
         const map = window.registerTranslations?.[lang] || {};
         let str = map[key] || key;
         if (vars) {
