@@ -39,6 +39,7 @@ window.loginTranslations = {
         groupJoinSuccess: "加入成功，请重新登录后选择组。",
         groupJoinSubmit: "加入组",
         backToLogin: "返回登录",
+        backToGroupSelect: "返回选组",
 
         inviteCode: "邀请码",
         enterInviteCode: "请输入邀请码",
@@ -105,6 +106,7 @@ window.loginTranslations = {
         groupJoinSuccess: "Joined successfully. Please log in again and select a group.",
         groupJoinSubmit: "Join Group",
         backToLogin: "Back to Login",
+        backToGroupSelect: "Back to Group Select",
 
         inviteCode: "Invitation Code",
         enterInviteCode: "Enter invitation code",

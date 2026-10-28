@@ -1,12 +1,7 @@
 async function groupJoin() {
-    const username =
-        document.getElementById("username")
-            .value
-            .trim();
-
-    const password =
-        document.getElementById("password")
-            .value;
+    const usernameEl = document.getElementById("username");
+    const passwordEl = document.getElementById("password");
+    const isLoggedIn = !usernameEl; // 已登录时账号密码字段不存在
 
     const inviteCode =
         document.getElementById("invite-code")
@@ -19,18 +14,18 @@ async function groupJoin() {
     messageBox.innerText = "";
     messageBox.style.color = "#ff7b7b";
 
-    if (!username) {
-        messageBox.innerText =
-            t("groupJoinUsernameRequired");
+    if (!isLoggedIn) {
+        const username = usernameEl.value.trim();
+        const password = passwordEl.value;
 
-        return;
-    }
-
-    if (!password) {
-        messageBox.innerText =
-            t("groupJoinPasswordRequired");
-
-        return;
+        if (!username) {
+            messageBox.innerText = t("groupJoinUsernameRequired");
+            return;
+        }
+        if (!password) {
+            messageBox.innerText = t("groupJoinPasswordRequired");
+            return;
+        }
     }
 
     if (!inviteCode) {
@@ -42,8 +37,10 @@ async function groupJoin() {
 
     const formData = new FormData();
 
-    formData.append("username", username);
-    formData.append("password", password);
+    if (!isLoggedIn) {
+        formData.append("username", usernameEl.value.trim());
+        formData.append("password", passwordEl.value);
+    }
     formData.append("invite_code", inviteCode);
 
     try {
@@ -74,7 +71,7 @@ async function groupJoin() {
 
         setTimeout(
             function () {
-                window.location.href = "/login";
+                window.location.href = isLoggedIn ? "/group-select" : "/login";
             },
             1400
         );
