@@ -83,11 +83,19 @@ input {
 
 .bottom-links {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     margin-top: 16px;
     font-size: 13px;
+}
+
+.bottom-links a + a::before {
+    content: "|";
+    margin-right: 16px;
+    color: rgba(255, 255, 255, 0.25);
+    pointer-events: none;
 }
 
 
