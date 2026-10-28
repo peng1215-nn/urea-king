@@ -49,6 +49,7 @@ def _register(client, **overrides):
     data = {
         "username": "newuser1",
         "nickname": "新玩家",
+        "email": "newuser1@example.com",
         "password": "GoodPass123",
         "confirm_password": "GoodPass123",
         "invite_code": "INVITE1",
@@ -57,12 +58,29 @@ def _register(client, **overrides):
     return client.post("/register", data=data)
 
 
+def _verify_email_for(username):
+    """直接在数据库中标记用户邮箱已验证（测试环境无法真实发邮件）"""
+    from database import SessionLocal
+    from poker.models import User
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.username == username).first()
+        if user:
+            user.email_verified = 1
+            db.commit()
+    finally:
+        db.close()
+
+
 def test_register_with_invite_code_then_login(client, factory):
     factory.group("G1")
     factory.invite("INVITE1", "G1", role="user")
 
     response = _register(client)
     assert response.json()["success"] is True, response.json()
+
+    _verify_email_for("newuser1")
 
     response = client.post("/login", data={"username": "newuser1", "password": "GoodPass123"})
     assert response.json()["success"] is True
