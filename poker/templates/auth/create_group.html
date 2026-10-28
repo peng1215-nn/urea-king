@@ -37,7 +37,7 @@
 
     <div id="message-box"></div>
 
-    <button class="register-button" id="cg-btn" onclick="createGroup()">
+    <button class="register-button" id="cg-btn">
         创建组
     </button>
 
@@ -104,6 +104,8 @@ async function createGroup() {
         btn.textContent = "创建组";
     }
 }
+
+document.getElementById("cg-btn").addEventListener("click", createGroup);
 </script>
 
 </body>
