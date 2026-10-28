@@ -1,151 +1,14 @@
-// ── SupernovaEngine: WebGL-based 5-phase supernova + 3D starfield ──
+// ── SupernovaEngine: WebGL-based 5-phase supernova ──
 const SupernovaEngine = (() => {
-  let renderer, scene, camera;
+  let renderer, scene, camera, composer;
   let novaCanvas, W2, H2;
   let THREE_loaded = false;
-
-  // ── 3D Starfield state ──
-  let starPoints, starGeo, starPositions, starCount;
-  let starOrigPositions;   // rest positions for push-back
-  let starVelocities;      // for shockwave displacement
-  let cameraTarget = new THREE.Vector3(0, 0, 0); // smooth parallax target
-  let mouseNorm   = { x: 0, y: 0 };              // -1..1
 
   // Per-planet state
   const planets = new Map(); // key: "x,y" → { phase, animT, animating, mesh refs... }
 
-  // ── Starfield: build 3000 stars in a 3D sphere shell ──
-  function initStarfield() {
-    starCount = 3000;
-    starPositions     = new Float32Array(starCount * 3);
-    starOrigPositions = new Float32Array(starCount * 3);
-    starVelocities    = new Float32Array(starCount * 3);
-    const sizes  = new Float32Array(starCount);
-    const alphas = new Float32Array(starCount);
-
-    // Camera at z=0, looks toward -z, far=3000.
-    // Spread stars across the full frustum at varying depths.
-    // At z=-d with FOV 60, visible half-height = d * tan(30°) ≈ d * 0.577
-    for (let i = 0; i < starCount; i++) {
-      const depth = 80 + Math.random() * 2800;      // 80 … 2880 in front of camera
-      const z     = -depth;
-      // visible half-extents at this depth
-      const halfH = depth * 0.577;
-      const halfW = halfH * (W2 / H2 || 1.8);
-      // spread 20% wider than frustum so edges fill in
-      const x = (Math.random() - 0.5) * halfW * 2.4;
-      const y = (Math.random() - 0.5) * halfH * 2.4;
-
-      starPositions[i*3]    = x;
-      starPositions[i*3+1]  = y;
-      starPositions[i*3+2]  = z;
-      starOrigPositions[i*3]   = x;
-      starOrigPositions[i*3+1] = y;
-      starOrigPositions[i*3+2] = z;
-      starVelocities[i*3] = starVelocities[i*3+1] = starVelocities[i*3+2] = 0;
-
-      // Closer = bigger + brighter
-      const depthFactor = 1 - depth / 3000;
-      sizes[i]  = (1.5 + depthFactor * 4.0 + Math.random() * 2.0);
-      alphas[i] = 0.15 + depthFactor * 0.75 + Math.random() * 0.1;
-    }
-
-    starGeo = new THREE.BufferGeometry();
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-    starGeo.setAttribute('size',     new THREE.BufferAttribute(sizes, 1));
-    starGeo.setAttribute('alpha',    new THREE.BufferAttribute(alphas, 1));
-
-    // Custom shader: per-star size + alpha, soft round disc
-    const starMat = new THREE.ShaderMaterial({
-      uniforms: { globalAlpha: { value: 1.0 } },
-      vertexShader: `
-        attribute float size;
-        attribute float alpha;
-        varying float vAlpha;
-        void main() {
-          vAlpha = alpha;
-          vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-          // perspective scaling: bigger size / closer depth
-          gl_PointSize = size * (600.0 / -mvPos.z);
-          gl_Position  = projectionMatrix * mvPos;
-        }
-      `,
-      fragmentShader: `
-        uniform float globalAlpha;
-        varying float vAlpha;
-        void main() {
-          float d = length(gl_PointCoord - vec2(0.5));
-          if (d > 0.5) discard;
-          float soft = 1.0 - smoothstep(0.18, 0.5, d);
-          gl_FragColor = vec4(1.0, 1.0, 1.0, soft * vAlpha * globalAlpha);
-        }
-      `,
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    });
-
-    starPoints = new THREE.Points(starGeo, starMat);
-    scene.add(starPoints);
-  }
-
-  // Push stars outward from a screen position when shockwave hits
-  function shockwaveStars(sx, sy, strength) {
-    const world = toWorldPerspective(sx, sy);
-    for (let i = 0; i < starCount; i++) {
-      const dx = starOrigPositions[i*3]   - world.x;
-      const dy = starOrigPositions[i*3+1] - world.y;
-      const dist = Math.sqrt(dx*dx + dy*dy) + 1;
-      const force = (strength * 12000) / (dist * dist + 4000);
-      starVelocities[i*3]   += (dx / dist) * force;
-      starVelocities[i*3+1] += (dy / dist) * force;
-    }
-  }
-
-  function updateStarfield(novaActive) {
-    if (!starPoints) return;
-    const pos = starGeo.attributes.position.array;
-    let anyMoved = false;
-    for (let i = 0; i < starCount; i++) {
-      const vx = starVelocities[i*3], vy = starVelocities[i*3+1];
-      if (Math.abs(vx) < 0.001 && Math.abs(vy) < 0.001) continue;
-      anyMoved = true;
-      pos[i*3]   += vx;
-      pos[i*3+1] += vy;
-      // spring back + dampen
-      pos[i*3]   += (starOrigPositions[i*3]   - pos[i*3])   * 0.04;
-      pos[i*3+1] += (starOrigPositions[i*3+1] - pos[i*3+1]) * 0.04;
-      starVelocities[i*3]   *= 0.88;
-      starVelocities[i*3+1] *= 0.88;
-    }
-    if (anyMoved) starGeo.attributes.position.needsUpdate = true;
-
-    // Dim stars during whiteout
-    let targetAlpha = 1.0;
-    for (const [, state] of planets) {
-      if (state.phase === 3 && state._p3) {
-        const elapsed = performance.now() - state.animStart - pauseOffset;
-        const { VEIL_IN_MS, REVEAL_MS } = state._p3;
-        if (elapsed > VEIL_IN_MS - 300 && elapsed < REVEAL_MS + 1200) {
-          const ramp = Math.min((elapsed - (VEIL_IN_MS-300)) / 500, 1);
-          const fade = elapsed < REVEAL_MS ? ramp : 1 - (elapsed - REVEAL_MS) / 1200;
-          targetAlpha = Math.max(0, 1 - fade * 0.85);
-        }
-      }
-    }
-    starPoints.material.uniforms.globalAlpha.value +=
-      (targetAlpha - starPoints.material.uniforms.globalAlpha.value) * 0.06;
-  }
-
-  // Smooth parallax: nudge camera x/y toward mouse (camera always looks down -Z)
-  function updateParallax() {
-    if (!camera) return;
-    const targetX = mouseNorm.x * 30;
-    const targetY = mouseNorm.y * 18;
-    camera.position.x += (targetX - camera.position.x) * 0.025;
-    camera.position.y += (targetY - camera.position.y) * 0.025;
-    // no lookAt — camera rotation stays default (toward -Z)
-  }
+  // EffectComposer / UnrealBloom polyfill via manual ping-pong bloom
+  // (use additive blending + glow layers to simulate bloom without addon dependency)
 
   function init() {
     novaCanvas = document.getElementById('nova-canvas');
@@ -159,24 +22,8 @@ const SupernovaEngine = (() => {
     renderer.outputEncoding = THREE.sRGBEncoding;
 
     scene  = new THREE.Scene();
-    // Perspective camera: FOV 60, near 0.1, far 3000
-    camera = new THREE.PerspectiveCamera(60, W2 / H2, 0.1, 3000);
-    camera.position.set(0, 0, 0);
-
-    initStarfield();
-
-    // Mouse parallax
-    window.addEventListener('mousemove', e => {
-      mouseNorm.x =  (e.clientX / W2 - 0.5) * 2;
-      mouseNorm.y = -(e.clientY / H2 - 0.5) * 2;
-    });
-    // Gyroscope on mobile
-    if (window.DeviceOrientationEvent) {
-      window.addEventListener('deviceorientation', e => {
-        if (e.gamma != null) mouseNorm.x =  Math.max(-1, Math.min(1, e.gamma / 20));
-        if (e.beta  != null) mouseNorm.y = -Math.max(-1, Math.min(1, (e.beta - 45) / 20));
-      });
-    }
+    camera = new THREE.OrthographicCamera(-W2/2, W2/2, H2/2, -H2/2, -1000, 1000);
+    camera.position.z = 100;
 
     THREE_loaded = true;
     animate();
@@ -187,26 +34,14 @@ const SupernovaEngine = (() => {
     W2 = novaCanvas.width  = window.innerWidth;
     H2 = novaCanvas.height = window.innerHeight;
     renderer.setSize(W2, H2);
-    camera.aspect = W2 / H2;
+    camera.left  = -W2/2; camera.right = W2/2;
+    camera.top   =  H2/2; camera.bottom = -H2/2;
     camera.updateProjectionMatrix();
   }
 
-  // Convert screen coords to Three.js world coords at z=0 plane (perspective)
+  // Convert screen coords to Three.js world coords (orthographic, origin at center)
   function toWorld(sx, sy) {
-    // For supernova effects, keep them at z=0 relative to camera look-at
-    const fovRad = (60 * Math.PI) / 180;
-    const h = 2 * Math.tan(fovRad / 2) * 600; // at z=-600 from camera
-    const w = h * (W2 / H2);
-    return new THREE.Vector2(
-      (sx / W2 - 0.5) * w,
-      -(sy / H2 - 0.5) * h
-    );
-  }
-
-  // Same but returns THREE.Vector3 for shockwave use
-  function toWorldPerspective(sx, sy) {
-    const v = toWorld(sx, sy);
-    return v;
+    return new THREE.Vector2(sx - W2/2, -(sy - H2/2));
   }
 
   // ── Phase objects pool ──
@@ -223,8 +58,7 @@ const SupernovaEngine = (() => {
       shockwaves: [],  // rings for phase 3
     };
     const wp = toWorld(sx, sy);
-    // Place effects at z=-600 (same plane used in toWorld)
-    state.group.position.set(wp.x, wp.y, -600);
+    state.group.position.set(wp.x, wp.y, 0);
     scene.add(state.group);
     planets.set(key, state);
     return state;
@@ -665,10 +499,6 @@ const SupernovaEngine = (() => {
   function animate() {
     requestAnimationFrame(animate);
     if (!THREE_loaded) return;
-
-    updateParallax();
-    updateStarfield();
-
     if (fxPaused) { renderer.render(scene, camera); return; } // frozen frame
 
     const now = performance.now();
@@ -682,15 +512,7 @@ const SupernovaEngine = (() => {
       switch (state.phase) {
         case 1: updatePhase1(state, elapsed / 1000); break;
         case 2: updatePhase2(state, t); break;
-        case 3: {
-          updatePhase3(state, elapsed);
-          // Trigger star shockwave at the moment of explosion reveal
-          if (!state._shockwaveFired && elapsed > state._p3?.REVEAL_MS) {
-            state._shockwaveFired = true;
-            shockwaveStars(state.sx, state.sy, 1.0);
-          }
-          break;
-        }
+        case 3: updatePhase3(state, elapsed); break;
         case 4:
           if (t < 1) updatePhase4(state, t);
           else sustainPhase4(state);
@@ -715,7 +537,6 @@ const SupernovaEngine = (() => {
     // animStart accounts for any paused time already accumulated
     state.animStart = performance.now() - pauseOffset;
     state.phase = nextPhase;
-    state._shockwaveFired = false; // reset for phase 3
 
     switch (nextPhase) {
       case 1: startPhase1(state); break;
