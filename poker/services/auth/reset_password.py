@@ -12,12 +12,15 @@ from poker.core.email import send_reset_password
 from poker.models import EmailVerification, User
 
 TOKEN_TTL_MINUTES = 15
+RESET_INTERVAL_MINUTES = 5
+RESET_MAX_PER_DAY = 5
 
 
 def forgot_password_service(email: str):
     """
     接收邮箱，查用户，生成 reset token，发邮件。
     无论邮箱是否存在都返回相同提示，防止枚举账号。
+    频率限制：5 分钟间隔，每 24 小时最多 5 次。
     """
     email = email.strip().lower()
     db = SessionLocal()
@@ -27,12 +30,50 @@ def forgot_password_service(email: str):
             # 静默成功，不暴露账号是否存在
             return {"success": True}
 
+        now = now_columbus_naive()
+
+        # 5 分钟间隔限制
+        cutoff_5min = now - timedelta(minutes=RESET_INTERVAL_MINUTES)
+        recent = (
+            db.query(EmailVerification)
+            .filter(
+                EmailVerification.user_id == user.id,
+                EmailVerification.purpose == "reset_password",
+                EmailVerification.created_at >= cutoff_5min,
+            )
+            .first()
+        )
+        if recent:
+            wait_seconds = int(
+                (recent.created_at + timedelta(minutes=RESET_INTERVAL_MINUTES) - now)
+                .total_seconds()
+            )
+            return {
+                "success": False,
+                "error_code": "resetTooFrequent",
+                "wait_seconds": max(wait_seconds, 1),
+            }
+
+        # 24 小时内次数限制
+        cutoff_24h = now - timedelta(hours=24)
+        count_today = (
+            db.query(EmailVerification)
+            .filter(
+                EmailVerification.user_id == user.id,
+                EmailVerification.purpose == "reset_password",
+                EmailVerification.created_at >= cutoff_24h,
+            )
+            .count()
+        )
+        if count_today >= RESET_MAX_PER_DAY:
+            return {"success": False, "error_code": "resetDailyLimit"}
+
         token = secrets.token_urlsafe(64)
         record = EmailVerification(
             user_id=user.id,
             token=token,
             purpose="reset_password",
-            expires_at=now_columbus_naive() + timedelta(minutes=TOKEN_TTL_MINUTES),
+            expires_at=now + timedelta(minutes=TOKEN_TTL_MINUTES),
             used=0,
         )
         db.add(record)
