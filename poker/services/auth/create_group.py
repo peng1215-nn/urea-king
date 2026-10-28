@@ -60,7 +60,7 @@ def create_group_service(request, user_id: int, group_name: str):
         new_group = Group(
             group_code=group_code,
             group_name=group_name,
-            invite_code_limit=27,
+            invite_code_limit=17,
             created_by_user_id=user_id,
             created_at=now_columbus_naive(),
         )
