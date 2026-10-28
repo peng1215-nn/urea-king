@@ -7,9 +7,18 @@ function renderGroups() {
     const groupList =
         document.getElementById("group-list");
 
-    const groups = JSON.parse(
-        sessionStorage.getItem("available_groups") || "[]"
-    );
+    // 优先使用服务器端注入的最新数据（避免 CSP，用 data 属性传递）
+    // 降级到 sessionStorage（登录时缓存）
+    let groups;
+    try {
+        const raw = groupList.dataset.serverGroups;
+        groups = raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        groups = null;
+    }
+    if (!groups) {
+        groups = JSON.parse(sessionStorage.getItem("available_groups") || "[]");
+    }
 
     if (groups.length === 0) {
         // 未加入任何组，引导用户创建或加入

@@ -130,3 +130,33 @@ def select_group_service(user_id, group_id):
 
     finally:
         db.close()
+
+
+def get_user_groups_service(user_id):
+    """获取用户加入的所有组（用于 group_select 页面服务端渲染）。"""
+    db = SessionLocal()
+    try:
+        group_roles = db.query(
+            UserGroupRole,
+            Group,
+        ).join(
+            Group,
+            UserGroupRole.group_id == Group.id,
+        ).filter(
+            UserGroupRole.user_id == user_id,
+        ).all()
+
+        return [
+            {
+                "group_id": group.id,
+                "group_code": group.group_code,
+                "group_name": group.group_name,
+                "role": user_group_role.role,
+            }
+            for user_group_role, group in group_roles
+        ]
+    except Exception as e:
+        safe_error(e)
+        return []
+    finally:
+        db.close()
