@@ -4,7 +4,8 @@
 需要在环境变量中配置：
   RESEND_API_KEY   — Resend API key（必填）
   EMAIL_FROM       — 发件人地址，如 noreply@urea-king.com（必填）
-  POKER_URL        — 用于生成邮件中的链接，如 https://poker.urea-king.com
+  SITE_URL         — 本站完整域名，用于生成邮件链接，如 https://urea-king-staging.onrender.com
+                     （不配置则回退到 POKER_URL，再回退到默认值）
 """
 
 import logging
@@ -16,7 +17,11 @@ logger = logging.getLogger(__name__)
 
 resend.api_key = os.environ.get("RESEND_API_KEY", "")
 _FROM = os.environ.get("EMAIL_FROM", "noreply@urea-king.com")
-_POKER_URL = os.environ.get("POKER_URL", "https://poker.urea-king.com").rstrip("/")
+# SITE_URL 专门用于邮件链接，与首页 POKER 按钮跳转用的 POKER_URL 独立
+_POKER_URL = (
+    os.environ.get("SITE_URL")
+    or os.environ.get("POKER_URL", "https://poker.urea-king.com")
+).rstrip("/")
 
 
 def _send(to: str, subject: str, html: str) -> bool:
