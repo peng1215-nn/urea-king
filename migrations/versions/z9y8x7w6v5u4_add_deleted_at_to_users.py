@@ -1,6 +1,6 @@
 """add deleted_at to poker_users for post-deletion email cooldown
 
-Revision ID: a1b2c3d4e5f6
+Revision ID: z9y8x7w6v5u4
 Revises: f7a8b9c0d1e2
 Create Date: 2026-10-28 20:15:00.000000
 
@@ -12,7 +12,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision = "a1b2c3d4e5f6"
+revision = "z9y8x7w6v5u4"
 down_revision = "f7a8b9c0d1e2"
 branch_labels = None
 depends_on = None
