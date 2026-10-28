@@ -110,6 +110,7 @@ def delete_account_service(username, password, confirm_text):
         user.nickname = DELETED_NICKNAME
         user.avatar_url = None
         user.invitation_code = None
+        user.email = f"deleted#{user_id}@deleted"  # 释放邮箱，允许同一邮箱重新注册
         user.password_hash = pwd_context.hash(secrets.token_urlsafe(32))
         user.is_active = 0
 
