@@ -17,20 +17,24 @@ const SupernovaEngine = (() => {
   // ── Starfield: build 3000 stars in a 3D sphere shell ──
   function initStarfield() {
     starCount = 3000;
-    starPositions    = new Float32Array(starCount * 3);
+    starPositions     = new Float32Array(starCount * 3);
     starOrigPositions = new Float32Array(starCount * 3);
-    starVelocities   = new Float32Array(starCount * 3);
-    const sizes      = new Float32Array(starCount);
-    const alphas     = new Float32Array(starCount);
+    starVelocities    = new Float32Array(starCount * 3);
+    const sizes  = new Float32Array(starCount);
+    const alphas = new Float32Array(starCount);
 
+    // Camera at z=0, looks toward -z, far=3000.
+    // Spread stars across the full frustum at varying depths.
+    // At z=-d with FOV 60, visible half-height = d * tan(30°) ≈ d * 0.577
     for (let i = 0; i < starCount; i++) {
-      // Distribute evenly on a sphere shell, varying depth in Z
-      const theta = Math.random() * Math.PI * 2;
-      const phi   = Math.acos(2 * Math.random() - 1);
-      const r     = 800 + Math.random() * 1200; // 800–2000 units deep
-      const x = r * Math.sin(phi) * Math.cos(theta);
-      const y = r * Math.sin(phi) * Math.sin(theta);
-      const z = -r * 0.45 + Math.random() * r * 0.25 - 600; // keep behind camera
+      const depth = 80 + Math.random() * 2800;      // 80 … 2880 in front of camera
+      const z     = -depth;
+      // visible half-extents at this depth
+      const halfH = depth * 0.577;
+      const halfW = halfH * (W2 / H2 || 1.8);
+      // spread 20% wider than frustum so edges fill in
+      const x = (Math.random() - 0.5) * halfW * 2.4;
+      const y = (Math.random() - 0.5) * halfH * 2.4;
 
       starPositions[i*3]    = x;
       starPositions[i*3+1]  = y;
@@ -40,10 +44,10 @@ const SupernovaEngine = (() => {
       starOrigPositions[i*3+2] = z;
       starVelocities[i*3] = starVelocities[i*3+1] = starVelocities[i*3+2] = 0;
 
-      // Bigger/brighter for closer stars
-      const depthFactor = 1 - Math.abs(z) / 2600;
-      sizes[i]  = 1.0 + depthFactor * 3.5 + Math.random() * 1.5;
-      alphas[i] = 0.25 + depthFactor * 0.65 + Math.random() * 0.1;
+      // Closer = bigger + brighter
+      const depthFactor = 1 - depth / 3000;
+      sizes[i]  = (1.5 + depthFactor * 4.0 + Math.random() * 2.0);
+      alphas[i] = 0.15 + depthFactor * 0.75 + Math.random() * 0.1;
     }
 
     starGeo = new THREE.BufferGeometry();
@@ -60,9 +64,10 @@ const SupernovaEngine = (() => {
         varying float vAlpha;
         void main() {
           vAlpha = alpha;
-          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          gl_PointSize = size * (900.0 / -mvPosition.z);
-          gl_Position  = projectionMatrix * mvPosition;
+          vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+          // perspective scaling: bigger size / closer depth
+          gl_PointSize = size * (600.0 / -mvPos.z);
+          gl_Position  = projectionMatrix * mvPos;
         }
       `,
       fragmentShader: `
@@ -71,7 +76,7 @@ const SupernovaEngine = (() => {
         void main() {
           float d = length(gl_PointCoord - vec2(0.5));
           if (d > 0.5) discard;
-          float soft = 1.0 - smoothstep(0.2, 0.5, d);
+          float soft = 1.0 - smoothstep(0.18, 0.5, d);
           gl_FragColor = vec4(1.0, 1.0, 1.0, soft * vAlpha * globalAlpha);
         }
       `,
@@ -132,14 +137,14 @@ const SupernovaEngine = (() => {
       (targetAlpha - starPoints.material.uniforms.globalAlpha.value) * 0.06;
   }
 
-  // Smooth parallax: nudge camera toward mouse
+  // Smooth parallax: nudge camera x/y toward mouse (camera always looks down -Z)
   function updateParallax() {
     if (!camera) return;
-    const targetX = mouseNorm.x * 38;
-    const targetY = mouseNorm.y * 22;
+    const targetX = mouseNorm.x * 30;
+    const targetY = mouseNorm.y * 18;
     camera.position.x += (targetX - camera.position.x) * 0.025;
     camera.position.y += (targetY - camera.position.y) * 0.025;
-    camera.lookAt(0, 0, -600);
+    // no lookAt — camera rotation stays default (toward -Z)
   }
 
   function init() {
