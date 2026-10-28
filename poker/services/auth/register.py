@@ -3,6 +3,8 @@ import secrets
 from datetime import timedelta
 
 from core.time import now_columbus_naive
+
+DELETE_COOLDOWN_HOURS = 24
 from core.validators import check_name, check_password
 from core.errors import safe_error
 from core.security import pwd_context
@@ -69,8 +71,19 @@ def register_user_service(
         if db.query(User).filter(User.username == username).first():
             return {"success": False, "error_code": "registerUsernameExists"}
 
-        if db.query(User).filter(User.email == email).first():
-            return {"success": False, "error_code": "registerEmailExists"}
+        existing = db.query(User).filter(User.email == email).first()
+        if existing:
+            # 邮箱存在：区分"注销冷却中"和"真正被占用"
+            if existing.is_active == 0 and existing.deleted_at is not None:
+                cooldown_cutoff = now_columbus_naive() - timedelta(hours=DELETE_COOLDOWN_HOURS)
+                if existing.deleted_at > cooldown_cutoff:
+                    # 注销不足 24 小时，禁止重新注册
+                    return {"success": False, "error_code": "registerEmailCooldown"}
+                # 超过 24 小时：允许重新注册，清空旧记录的邮箱让本次注册通过唯一约束
+                existing.email = f"deleted#{existing.id}@deleted"
+                db.flush()
+            else:
+                return {"success": False, "error_code": "registerEmailExists"}
 
         new_user = User(
             username=username,

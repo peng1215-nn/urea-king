@@ -25,6 +25,7 @@ class User(Base):
     email_verified = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime, default=now_columbus_naive)
     is_active = Column(Integer, nullable=False, default=1)
+    deleted_at = Column(DateTime, nullable=True)
 
 
 class Group(Base):
