@@ -12,6 +12,10 @@ window.verifyEmailTranslations = {
         reRegister: "重新注册",
         verifyInvalidTitle: "验证失败",
         verifyInvalidMsg: "验证链接无效或已过期。请检查链接是否完整，或重新注册。",
+        verifyTokenInvalid: "验证链接无效，请重新注册。",
+        verifyTokenUsed: "该验证链接已使用。",
+        verifyTokenExpired: "验证链接已过期，请重新注册。",
+        verifyFailed: "验证失败，请稍后重试。",
     },
     en: {
         pageTitle: "Email Verification - UREAKING POKER",
@@ -26,6 +30,10 @@ window.verifyEmailTranslations = {
         reRegister: "Register Again",
         verifyInvalidTitle: "Verification Failed",
         verifyInvalidMsg: "The verification link is invalid or has expired. Please check the link or register again.",
+        verifyTokenInvalid: "The verification link is invalid. Please register again.",
+        verifyTokenUsed: "This verification link has already been used.",
+        verifyTokenExpired: "The verification link has expired. Please register again.",
+        verifyFailed: "Verification failed. Please try again later.",
     }
 };
 

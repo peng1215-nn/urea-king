@@ -11,6 +11,12 @@ window.groupSelectTranslations = {
         groupSelectFailed: "组别选择失败。",
         createGroupBtn: "创建自己的组（成为局头）",
         joinGroupBtn: "使用邀请码加入已有组",
+        createGroupNameRequired: "请输入组名。",
+        createGroupNameTooLong: "组名不能超过 50 个字符。",
+        createGroupNotVerified: "请先验证邮箱。",
+        createGroupAlreadyOwner: "您已经是某个组的局头。",
+        createGroupFailed: "创建失败，请稍后重试。",
+        createGroupNameInvalid: "组名包含非法字符。",
     },
 
     en: {
@@ -24,5 +30,11 @@ window.groupSelectTranslations = {
         groupSelectFailed: "Failed to select group.",
         createGroupBtn: "Create your own group (become organizer)",
         joinGroupBtn: "Join an existing group with invite code",
+        createGroupNameRequired: "Please enter a group name.",
+        createGroupNameTooLong: "Group name cannot exceed 50 characters.",
+        createGroupNotVerified: "Please verify your email first.",
+        createGroupAlreadyOwner: "You are already an organizer of a group.",
+        createGroupFailed: "Failed to create group. Please try again later.",
+        createGroupNameInvalid: "Group name contains invalid characters.",
     }
 };

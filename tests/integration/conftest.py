@@ -89,6 +89,7 @@ class Factory:
                 password_hash=self._pwd.hash(password),
                 nickname=nickname or username,
                 is_active=is_active,
+                email_verified=1,
             )
             db.add(user)
             db.commit()
