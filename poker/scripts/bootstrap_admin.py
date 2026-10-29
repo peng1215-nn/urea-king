@@ -14,6 +14,7 @@ import sys
 from database import SessionLocal
 from core.security import pwd_context
 from core.validators import check_password
+from core.models import UserModule
 from poker.models import Group, User, UserGroupRole
 
 
@@ -53,6 +54,7 @@ def bootstrap_admin(username, password):
         db.flush()
 
         db.add(UserGroupRole(user_id=user.id, group_id=group.id, role="admin"))
+        db.add(UserModule(user_id=user.id, module="poker"))
         db.commit()
         return "created"
     except Exception:
