@@ -43,42 +43,50 @@ def _send(to: str, subject: str, html: str) -> bool:
 
 
 def send_verify_email(to: str, token: str) -> bool:
-    """发送邮箱验证邮件。"""
+    """发送邮箱验证邮件（中英双语）。"""
     link = f"{_POKER_URL}/verify-email?token={token}"
     html = f"""
     <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;">
       <h2 style="letter-spacing:2px;">UREAKING POKER</h2>
-      <p>感谢注册！请点击下方链接验证您的邮箱：</p>
+      <p>感谢注册！请点击下方链接验证您的邮箱：<br>
+         <span style="color:#888;font-size:13px;">Thank you for registering! Please click the link below to verify your email:</span>
+      </p>
       <p style="margin:24px 0;">
         <a href="{link}"
-           style="background:#fff;color:#111;padding:12px 28px;border-radius:8px;
+           style="background:#111;color:#fff;padding:12px 28px;border-radius:8px;
                   text-decoration:none;font-weight:bold;font-size:15px;">
-          验证邮箱
+          验证邮箱 / Verify Email
         </a>
       </p>
-      <p style="color:#888;font-size:13px;">链接 15 分钟内有效，且只能使用一次。<br>
-         如果您没有注册过 Ureaking Poker，请忽略此邮件。</p>
+      <p style="color:#888;font-size:13px;">
+        链接 15 分钟内有效，且只能使用一次。如果您没有注册过 Ureaking Poker，请忽略此邮件。<br>
+        The link is valid for 15 minutes and can only be used once. If you did not register for Ureaking Poker, please ignore this email.
+      </p>
     </div>
     """
-    return _send(to, "验证您的 Ureaking Poker 邮箱", html)
+    return _send(to, "验证您的 Ureaking Poker 邮箱 / Verify Your Ureaking Poker Email", html)
 
 
 def send_reset_password(to: str, token: str) -> bool:
-    """发送密码重置邮件。"""
+    """发送密码重置邮件（中英双语）。"""
     link = f"{_POKER_URL}/reset-password?token={token}"
     html = f"""
     <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;">
       <h2 style="letter-spacing:2px;">UREAKING POKER</h2>
-      <p>我们收到了您的密码重置请求，请点击下方链接设置新密码：</p>
+      <p>我们收到了您的密码重置请求，请点击下方链接设置新密码：<br>
+         <span style="color:#888;font-size:13px;">We received a password reset request. Please click the link below to set a new password:</span>
+      </p>
       <p style="margin:24px 0;">
         <a href="{link}"
-           style="background:#fff;color:#111;padding:12px 28px;border-radius:8px;
+           style="background:#111;color:#fff;padding:12px 28px;border-radius:8px;
                   text-decoration:none;font-weight:bold;font-size:15px;">
-          重置密码
+          重置密码 / Reset Password
         </a>
       </p>
-      <p style="color:#888;font-size:13px;">链接 15 分钟内有效，且只能使用一次。<br>
-         如果您没有发起过密码重置请求，请忽略此邮件。</p>
+      <p style="color:#888;font-size:13px;">
+        链接 15 分钟内有效，且只能使用一次。如果您没有发起过密码重置请求，请忽略此邮件。<br>
+        The link is valid for 15 minutes and can only be used once. If you did not request a password reset, please ignore this email.
+      </p>
     </div>
     """
-    return _send(to, "重置您的 Ureaking Poker 密码", html)
+    return _send(to, "重置您的 Ureaking Poker 密码 / Reset Your Ureaking Poker Password", html)
