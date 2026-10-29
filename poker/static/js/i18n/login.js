@@ -62,6 +62,9 @@ window.loginTranslations = {
         accountDeleteOngoingGame: "你还有进行中的牌局，结束后才能注销。",
         accountDeleteFailed: "注销失败，请稍后再试。",
         accountDeleteSuccess: "账号已注销。",
+
+        platformAccountHint: "已有平台账号？",
+        platformAccountSuffix: "直接登录即可，无需重新注册。",
     },
 
     en: {
@@ -129,5 +132,8 @@ window.loginTranslations = {
         accountDeleteOngoingGame: "You still have an ongoing game. You can delete your account after it ends.",
         accountDeleteFailed: "Failed to delete the account. Please try again later.",
         accountDeleteSuccess: "Your account has been deleted.",
+
+        platformAccountHint: "Already have a platform account?",
+        platformAccountSuffix: "Just sign in — no need to register again.",
     }
 };
