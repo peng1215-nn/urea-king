@@ -1,6 +1,9 @@
 window.verifyEmailTranslations = {
     zh: {
         pageTitle: "邮箱验证 - UREAKING POKER",
+        verifyPendingTitle: "确认验证邮箱",
+        verifyPendingMsg: "点击下方按钮完成邮箱验证。",
+        verifyConfirmBtn: "确认验证",
         verifySuccessTitle: "邮箱验证成功",
         verifySuccessMsg: "您的邮箱已验证，现在可以登录了。",
         goLogin: "前往登录",
@@ -19,6 +22,9 @@ window.verifyEmailTranslations = {
     },
     en: {
         pageTitle: "Email Verification - UREAKING POKER",
+        verifyPendingTitle: "Confirm Email Verification",
+        verifyPendingMsg: "Click the button below to complete email verification.",
+        verifyConfirmBtn: "Confirm Verification",
         verifySuccessTitle: "Email Verified",
         verifySuccessMsg: "Your email has been verified. You can now log in.",
         goLogin: "Go to Login",

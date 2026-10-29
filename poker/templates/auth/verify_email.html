@@ -48,6 +48,8 @@
             font-weight: 700;
             text-decoration: none;
             font-size: 15px;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -60,7 +62,16 @@
 <div class="page">
 <div class="verify-card">
 
-{% if success %}
+{% if pending %}
+    <div class="verify-icon success">✉</div>
+    <div class="verify-title" data-i18n="verifyPendingTitle">确认验证邮箱</div>
+    <p class="verify-msg" data-i18n="verifyPendingMsg">点击下方按钮完成邮箱验证。</p>
+    <form method="post" action="/verify-email">
+        <input type="hidden" name="token" value="{{ token }}">
+        <button type="submit" class="verify-btn" data-i18n="verifyConfirmBtn">确认验证</button>
+    </form>
+
+{% elif success %}
     <div class="verify-icon success">✓</div>
     <div class="verify-title" data-i18n="verifySuccessTitle">邮箱验证成功</div>
     <p class="verify-msg" data-i18n="verifySuccessMsg">您的邮箱已验证，现在可以登录了。</p>

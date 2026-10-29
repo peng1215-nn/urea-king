@@ -69,7 +69,17 @@ def change_email(
 
 @router.get("/verify-email", response_class=HTMLResponse)
 def verify_email_page(request: Request, token: str = ""):
-    """用户点击邮件链接后到达此页面，自动完成验证。"""
+    """用户点击邮件链接后到达此页面，展示确认按钮（不自动验证，防止安全扫描消耗 token）。"""
+    return templates.TemplateResponse(
+        request=request,
+        name="auth/verify_email.html",
+        context={"pending": True, "token": token},
+    )
+
+
+@router.post("/verify-email", response_class=HTMLResponse)
+def verify_email_confirm(request: Request, token: str = Form("")):
+    """用户点击确认按钮后才真正验证 token。"""
     result = verify_email_service(token)
     return templates.TemplateResponse(
         request=request,
