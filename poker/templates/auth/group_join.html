@@ -8,6 +8,8 @@
 
     <link rel="stylesheet" href="/static/css/auth/common.css?v={{ static_version }}">
     <link rel="stylesheet" href="/static/css/auth/group_join.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/common/language_base.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/auth/language.css?v={{ static_version }}">
 
 </head>
 
@@ -84,6 +86,8 @@
     </div>
 
 </div>
+
+{% include "common/language_switcher.html" %}
 
 <script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>

@@ -1,6 +1,6 @@
 function getCurrentLanguage() {
     return (
-        localStorage.getItem("language")
+        localStorage.getItem("lang")
         || "zh"
     );
 }
@@ -26,6 +26,14 @@ function getTranslations(language) {
 
     if (window.groupSelectTranslations) {
         return window.groupSelectTranslations[language];
+    }
+
+    if (window.createGroupTranslations) {
+        return window.createGroupTranslations[language];
+    }
+
+    if (window.verifyEmailTranslations) {
+        return window.verifyEmailTranslations[language];
     }
 
      if (window.userTranslations) {
@@ -60,7 +68,7 @@ function t(key) {
 
 function setLanguage(language) {
     localStorage.setItem(
-        "language",
+        "lang",
         language
     );
 
