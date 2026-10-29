@@ -44,44 +44,63 @@ def upgrade() -> None:
         FROM poker_users
     """)
 
-    # 3. 删除旧表上指向 poker_users 的外键，改指向 platform_users
-    #    （SQLite 不支持 DROP CONSTRAINT，用 batch_alter_table 兼容处理）
+    # 3. 删除各表上指向 poker_users 的旧外键，再添加指向 platform_users 的新外键
+    #    PostgreSQL 需要显式 drop_constraint 才能删旧表
     with op.batch_alter_table("poker_groups") as batch_op:
-        batch_op.alter_column("created_by_user_id",
-                              existing_type=sa.Integer(),
-                              nullable=True)
+        batch_op.drop_constraint("poker_groups_created_by_user_id_fkey", type_="foreignkey")
+        batch_op.create_foreign_key(
+            "poker_groups_created_by_user_id_fkey",
+            "platform_users", ["created_by_user_id"], ["id"]
+        )
 
     with op.batch_alter_table("poker_user_group_roles") as batch_op:
-        batch_op.alter_column("user_id",
-                              existing_type=sa.Integer(),
-                              nullable=False)
+        batch_op.drop_constraint("poker_user_group_roles_user_id_fkey", type_="foreignkey")
+        batch_op.create_foreign_key(
+            "poker_user_group_roles_user_id_fkey",
+            "platform_users", ["user_id"], ["id"]
+        )
 
     with op.batch_alter_table("poker_games") as batch_op:
-        batch_op.alter_column("organizer_id",
-                              existing_type=sa.Integer(),
-                              nullable=False)
+        batch_op.drop_constraint("poker_games_organizer_id_fkey", type_="foreignkey")
+        batch_op.create_foreign_key(
+            "poker_games_organizer_id_fkey",
+            "platform_users", ["organizer_id"], ["id"]
+        )
 
     with op.batch_alter_table("poker_game_players") as batch_op:
-        batch_op.alter_column("user_id",
-                              existing_type=sa.Integer(),
-                              nullable=False)
+        batch_op.drop_constraint("poker_game_players_user_id_fkey", type_="foreignkey")
+        batch_op.create_foreign_key(
+            "poker_game_players_user_id_fkey",
+            "platform_users", ["user_id"], ["id"]
+        )
 
     with op.batch_alter_table("poker_group_member_aliases") as batch_op:
-        batch_op.alter_column("user_id",
-                              existing_type=sa.Integer(),
-                              nullable=False)
+        batch_op.drop_constraint("poker_group_member_aliases_user_id_fkey", type_="foreignkey")
+        batch_op.create_foreign_key(
+            "poker_group_member_aliases_user_id_fkey",
+            "platform_users", ["user_id"], ["id"]
+        )
 
     with op.batch_alter_table("poker_chip_requests") as batch_op:
-        batch_op.alter_column("user_id",
-                              existing_type=sa.Integer(),
-                              nullable=False)
+        batch_op.drop_constraint("poker_chip_requests_user_id_fkey", type_="foreignkey")
+        batch_op.drop_constraint("poker_chip_requests_resolved_by_fkey", type_="foreignkey")
+        batch_op.create_foreign_key(
+            "poker_chip_requests_user_id_fkey",
+            "platform_users", ["user_id"], ["id"]
+        )
+        batch_op.create_foreign_key(
+            "poker_chip_requests_resolved_by_fkey",
+            "platform_users", ["resolved_by"], ["id"]
+        )
 
     with op.batch_alter_table("poker_email_verifications") as batch_op:
-        batch_op.alter_column("user_id",
-                              existing_type=sa.Integer(),
-                              nullable=False)
+        batch_op.drop_constraint("poker_email_verifications_user_id_fkey", type_="foreignkey")
+        batch_op.create_foreign_key(
+            "poker_email_verifications_user_id_fkey",
+            "platform_users", ["user_id"], ["id"]
+        )
 
-    # 4. 删除 poker_users 旧表
+    # 4. 删除 poker_users 旧表（外键已全部迁走，可以安全删除）
     op.drop_table("poker_users")
 
 
