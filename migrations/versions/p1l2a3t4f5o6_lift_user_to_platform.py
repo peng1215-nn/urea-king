@@ -1,6 +1,6 @@
 """lift user to platform layer
 
-Revision ID: a1b2c3d4e5f6
+Revision ID: p1l2a3t4f5o6
 Revises: z9y8x7w6v5u4
 Create Date: 2026-10-29
 
@@ -11,7 +11,7 @@ Create Date: 2026-10-29
 from alembic import op
 import sqlalchemy as sa
 
-revision = "a1b2c3d4e5f6"
+revision = "p1l2a3t4f5o6"
 down_revision = "z9y8x7w6v5u4"
 branch_labels = None
 depends_on = None
