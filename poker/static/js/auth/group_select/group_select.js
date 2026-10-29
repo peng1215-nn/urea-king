@@ -71,6 +71,26 @@ function renderGroups() {
 
         groupList.appendChild(card);
     });
+
+    // 有组的用户也可以加入其他组或创建新组
+    const extraBtns = document.createElement("div");
+    extraBtns.style.cssText = "display:flex;flex-direction:column;gap:12px;margin-top:16px;";
+    extraBtns.innerHTML = `
+        <button class="group-action-btn secondary" id="btn-join-group">
+            🤝 ${t("joinGroupBtn") || "使用邀请码加入组"}
+        </button>
+        <button class="group-action-btn secondary" id="btn-create-group">
+            🎯 ${t("createGroupBtn") || "创建自己的组（局头）"}
+        </button>
+    `;
+    groupList.appendChild(extraBtns);
+
+    document.getElementById("btn-join-group").addEventListener("click", function () {
+        window.location.href = "/group-join";
+    });
+    document.getElementById("btn-create-group").addEventListener("click", function () {
+        window.location.href = "/create-group";
+    });
 }
 
 
