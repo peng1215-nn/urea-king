@@ -5,7 +5,7 @@ User 是平台统一账号，不属于任何单一模块。
 各模块（poker 等）的 user_id 外键指向这里的 platform_users 表。
 """
 
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Column, DateTime, Integer, String, UniqueConstraint
 from database import Base
 from core.time import now_columbus_naive
 
@@ -24,3 +24,23 @@ class User(Base):
     is_active = Column(Integer, nullable=False, default=1)
     created_at = Column(DateTime, default=now_columbus_naive)
     deleted_at = Column(DateTime, nullable=True)
+
+
+class UserModule(Base):
+    """记录用户在哪些平台模块有账号。
+
+    一个用户首次在某模块完成注册验证或首次登录时插入一行。
+    同一 (user_id, module) 组合唯一，不会重复记录。
+    module 取值：'poker' | 'mahjong' | ...（各模块自己的标识符）
+    """
+
+    __tablename__ = "platform_user_modules"
+    __table_args__ = (
+        UniqueConstraint("user_id", "module", name="uq_user_modules_user_module"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    module = Column(String(50), nullable=False)
+    joined_at = Column(DateTime, nullable=False, default=now_columbus_naive)
+    is_active = Column(Integer, nullable=False, default=1)

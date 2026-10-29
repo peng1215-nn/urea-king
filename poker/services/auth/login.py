@@ -2,6 +2,7 @@ from database import SessionLocal
 from poker.models import Group
 from poker.models import User
 from poker.models import UserGroupRole
+from core.models import UserModule
 from poker.services.admin.audit_log import write_audit_log
 from core.errors import safe_error
 from core.security import password_fingerprint, verify_user_password
@@ -48,6 +49,15 @@ def login_user_service(request, username, password):
         ).filter(
             UserGroupRole.user_id == user.id,
         ).all()
+
+        # 首次登录 poker 模块 → 补插模块记录（已从其他模块来的用户）
+        already = db.query(UserModule).filter(
+            UserModule.user_id == user.id,
+            UserModule.module == "poker",
+        ).first()
+        if not already:
+            db.add(UserModule(user_id=user.id, module="poker"))
+            db.commit()
 
         request.session["user_id"] = user.id
         request.session["username"] = user.username

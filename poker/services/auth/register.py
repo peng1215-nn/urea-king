@@ -12,6 +12,7 @@ from database import SessionLocal
 from poker.core.validators import NICKNAME_MAX
 from poker.core.email import send_verify_email
 from poker.models import EmailVerification, User
+from core.models import UserModule
 from poker.services.admin.audit_log import write_audit_log
 
 TOKEN_TTL_MINUTES = 15
@@ -159,6 +160,14 @@ def verify_email_service(token: str):
         user = db.query(User).filter(User.id == record.user_id).first()
         if user:
             user.email_verified = 1
+
+            # 首次完成邮箱验证 → 记录用户加入 poker 模块
+            already = db.query(UserModule).filter(
+                UserModule.user_id == user.id,
+                UserModule.module == "poker",
+            ).first()
+            if not already:
+                db.add(UserModule(user_id=user.id, module="poker"))
 
         db.commit()
         return {"success": True}
