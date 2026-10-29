@@ -5,6 +5,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 from database import Base
+import core.models  # noqa: F401  确保 platform_users 表注册进 metadata
 from poker.models import User
 from poker.models import Group
 from poker.models import UserGroupRole

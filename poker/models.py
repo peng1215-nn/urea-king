@@ -10,22 +10,8 @@ from sqlalchemy import UniqueConstraint
 from database import Base
 from core.time import now_columbus_naive
 
-
-class User(Base):
-
-    __tablename__ = "poker_users"
-
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(50), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)
-    nickname = Column(String(50), nullable=True)
-    avatar_url = Column(String(255), nullable=True)
-    invitation_code = Column(String(100), nullable=True)
-    email = Column(String(255), unique=True, nullable=True, index=True)
-    email_verified = Column(Integer, nullable=False, default=0)
-    created_at = Column(DateTime, default=now_columbus_naive)
-    is_active = Column(Integer, nullable=False, default=1)
-    deleted_at = Column(DateTime, nullable=True)
+# User 已提升到平台层，从 core.models 导入以便各模块复用
+from core.models import User  # noqa: F401
 
 
 class Group(Base):
@@ -37,7 +23,7 @@ class Group(Base):
     group_name = Column(String(100), nullable=True)
     description = Column(Text, nullable=True)
     invite_code_limit = Column(Integer, nullable=False, default=27)
-    created_by_user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=True)
+    created_by_user_id = Column(Integer, ForeignKey("platform_users.id"), nullable=True)
     created_at = Column(DateTime, default=now_columbus_naive)
 
 
@@ -51,7 +37,7 @@ class UserGroupRole(Base):
     )
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("platform_users.id"), nullable=False)
     group_id = Column(Integer, ForeignKey("poker_groups.id"), nullable=False)
     role = Column(String(30), nullable=False, default="user")
     allow_organizer_chip_op = Column(Integer, nullable=False, default=0)
@@ -115,7 +101,7 @@ class PokerGame(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     group_id = Column(Integer, ForeignKey("poker_groups.id"), nullable=False, index=True)
-    organizer_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False)
+    organizer_id = Column(Integer, ForeignKey("platform_users.id"), nullable=False)
     status = Column(String(20), nullable=False, default="ongoing")
     name = Column(String(100), nullable=True)
     started_at = Column(DateTime, nullable=False, default=now_columbus_naive)
@@ -140,7 +126,7 @@ class PokerGamePlayer(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     game_id = Column(Integer, ForeignKey("poker_games.id"), nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("platform_users.id"), nullable=False)
     nickname = Column(String(50), nullable=True)
     total_buy_in = Column(Integer, nullable=False, default=0)
     cash_out = Column(Integer, nullable=True)
@@ -158,7 +144,7 @@ class GroupMemberAlias(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     group_id = Column(Integer, ForeignKey("poker_groups.id"), nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("platform_users.id"), nullable=False, index=True)
     alias = Column(String(50), nullable=False)
     updated_at = Column(DateTime, default=now_columbus_naive, onupdate=now_columbus_naive)
 
@@ -172,14 +158,14 @@ class ChipRequest(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     game_id = Column(Integer, ForeignKey("poker_games.id"), nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("platform_users.id"), nullable=False)
     nickname = Column(String(50), nullable=True)
     type = Column(String(20), nullable=False, default="normal")
     amount = Column(Integer, nullable=False)
     status = Column(String(20), nullable=False, default="pending")
     requested_at = Column(DateTime, nullable=False, default=now_columbus_naive)
     resolved_at = Column(DateTime, nullable=True)
-    resolved_by = Column(Integer, ForeignKey("poker_users.id"), nullable=True)
+    resolved_by = Column(Integer, ForeignKey("platform_users.id"), nullable=True)
 
 
 class EmailVerification(Base):
@@ -187,7 +173,7 @@ class EmailVerification(Base):
     __tablename__ = "poker_email_verifications"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("poker_users.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("platform_users.id"), nullable=False, index=True)
     token = Column(String(128), unique=True, nullable=False, index=True)
     # 'verify_email' | 'reset_password'
     purpose = Column(String(30), nullable=False)

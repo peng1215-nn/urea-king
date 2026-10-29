@@ -110,3 +110,18 @@ input {
     color: white;
     text-decoration: underline;
 }
+.platform-hint {
+    margin-top: 18px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
+    text-align: center;
+}
+
+.platform-hint a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: underline;
+}
+
+.platform-hint a:hover {
+    color: white;
+}

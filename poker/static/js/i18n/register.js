@@ -61,6 +61,9 @@ window.registerTranslations = {
         changeEmailPasswordRequired: "请输入密码。",
         changeEmailFailed: "修改失败，请稍后重试。",
         changeEmailTooFrequent: "操作过于频繁，请 {wait} 分钟后再试。",
+        platformAccountHint: "已有平台账号？无需重新注册，直接",
+        platformAccountLogin: "登录",
+        platformAccountSuffix: "即可。",
     },
 
     en: {
@@ -125,5 +128,8 @@ window.registerTranslations = {
         changeEmailPasswordRequired: "Please enter your password.",
         changeEmailFailed: "Update failed. Please try again later.",
         changeEmailTooFrequent: "Too many requests. Please try again in {wait} minutes.",
+        platformAccountHint: "Already have a platform account? No need to register again, just",
+        platformAccountLogin: "sign in",
+        platformAccountSuffix: ".",
     }
 };
