@@ -8,7 +8,7 @@ from poker.core.rate_limit import (
     resend_verify_failures_by_ip,
 )
 from poker.services.admin.audit_log import get_client_ip
-from poker.services.auth.register import register_user_service, verify_email_service
+from poker.services.auth.register import register_user_service, verify_email_service, verify_target_service
 from poker.services.auth.resend_verify import resend_verify_email_service
 from poker.services.auth.change_email import change_email_service
 from poker.template_config import templates
@@ -104,11 +104,18 @@ def change_email(
 
 @router.get("/verify-email", response_class=HTMLResponse)
 def verify_email_page(request: Request, token: str = ""):
-    """用户点击邮件链接后到达此页面，展示确认按钮（不自动验证，防止安全扫描消耗 token）。"""
+    """用户点击邮件链接后到达此页面，展示确认按钮（不自动验证，防止安全扫描消耗 token）。
+    页面上写明即将验证哪个账号的哪个邮箱，防止被骗点了别人账号的验证链接。"""
+    target = verify_target_service(token)
     return templates.TemplateResponse(
         request=request,
         name="auth/verify_email.html",
-        context={"pending": True, "token": token},
+        context={
+            "pending": "error_code" not in target,
+            "token": token,
+            "target": target,
+            "error_code": target.get("error_code", ""),
+        },
     )
 
 

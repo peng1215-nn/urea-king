@@ -67,6 +67,8 @@ def _verify_email_for(username):
     try:
         user = db.query(User).filter(User.username == username).first()
         if user:
+            user.email = user.pending_email or user.email
+            user.pending_email = None
             user.email_verified = 1
             db.commit()
     finally:

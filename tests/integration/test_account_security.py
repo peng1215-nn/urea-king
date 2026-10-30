@@ -33,7 +33,7 @@ def _set_user(user_id, **fields):
 
 def _unverified_user(factory, username, email):
     user_id = factory.user(username)
-    _set_user(user_id, email=email, email_verified=0)
+    _set_user(user_id, email=None, pending_email=email, email_verified=0)
     return user_id
 
 
@@ -358,35 +358,67 @@ def test_change_email_has_daily_limit(client, factory):
     assert result["error_code"] == "changeEmailDailyLimit"
 
 
-def test_unverified_account_holds_email_for_24_hours_only(client, monkeypatch):
-    from datetime import timedelta
+def test_squatted_email_cannot_block_the_real_owner(client, monkeypatch):
+    """别人先用你的邮箱注册（收不到验证邮件）也占不住：你照样能注册，先验证的归你。"""
+    from database import SessionLocal
+    from poker.models import EmailVerification, User
+    from poker.services.auth import register
+    from poker.services.auth.register import verify_email_service
 
-    from core.time import now_columbus_naive
+    monkeypatch.setattr(register, "send_verify_email", lambda to, token: True)
+    form = {"email": "victim@example.com", "password": "GoodPass123", "confirm_password": "GoodPass123"}
+
+    assert client.post("/register", data={**form, "username": "squatter1", "nickname": "squat"}).json()["success"] is True
+    # 抢注之后，真正的主人马上就能注册，不用等
+    assert client.post("/register", data={**form, "username": "realowner", "nickname": "owner"}).json()["success"] is True
+
+    db = SessionLocal()
+    try:
+        owner = db.query(User).filter(User.username == "realowner").first()
+        squatter = db.query(User).filter(User.username == "squatter1").first()
+        owner_token = db.query(EmailVerification.token).filter(EmailVerification.user_id == owner.id).scalar()
+        squatter_token = db.query(EmailVerification.token).filter(EmailVerification.user_id == squatter.id).scalar()
+        owner_id, squatter_id = owner.id, squatter.id
+    finally:
+        db.close()
+
+    assert verify_email_service(owner_token)["success"] is True
+    # 抢注账号的验证链接（即使被骗点了）也不能再把邮箱验证到它名下
+    assert verify_email_service(squatter_token)["success"] is False
+
+    db = SessionLocal()
+    try:
+        assert db.query(User).get(owner_id).email == "victim@example.com"
+        assert db.query(User).get(squatter_id).email is None
+        assert db.query(User).get(squatter_id).email_verified == 0
+    finally:
+        db.close()
+
+    # 邮箱验证过之后，再用它注册才会提示已被注册
+    again = client.post("/register", data={**form, "username": "another1", "nickname": "another"}).json()
+    assert again["error_code"] == "registerEmailExists"
+
+
+def test_verify_page_shows_which_account(client, monkeypatch):
     from database import SessionLocal
     from poker.models import EmailVerification, User
     from poker.services.auth import register
 
     monkeypatch.setattr(register, "send_verify_email", lambda to, token: True)
-    form = {"nickname": "squat", "email": "victim@example.com", "password": "GoodPass123", "confirm_password": "GoodPass123"}
-
-    assert client.post("/register", data={**form, "username": "squatter1"}).json()["success"] is True
-    # 24 小时内：邮箱仍被未验证的账号占着
-    second = client.post("/register", data={**form, "username": "realowner", "nickname": "owner"}).json()
-    assert second["error_code"] == "registerEmailExists"
-
-    # 超过 24 小时仍未验证：真正的主人可以注册
+    client.post("/register", data={
+        "username": "pageuser1", "nickname": "pageuser", "email": "page@example.com",
+        "password": "GoodPass123", "confirm_password": "GoodPass123",
+    })
     db = SessionLocal()
     try:
-        squatter = db.query(User).filter(User.username == "squatter1").first()
-        old = now_columbus_naive() - timedelta(hours=25)
-        squatter.created_at = old
-        db.query(EmailVerification).filter(EmailVerification.user_id == squatter.id).update({"created_at": old})
-        db.commit()
+        user = db.query(User).filter(User.username == "pageuser1").first()
+        token = db.query(EmailVerification.token).filter(EmailVerification.user_id == user.id).scalar()
     finally:
         db.close()
 
-    third = client.post("/register", data={**form, "username": "realowner", "nickname": "owner"}).json()
-    assert third["success"] is True, third
+    page = client.get("/verify-email", params={"token": token}).text
+    assert "pageuser1" in page
+    assert "pa***@example.com" in page
 
 
 def test_nickname_must_be_unique_at_registration(client, factory, monkeypatch):

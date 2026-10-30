@@ -112,6 +112,7 @@ def delete_account_service(username, password, confirm_text):
         user.invitation_code = None
         # 保留 email 字段不清空：注册时通过 deleted_at 判断冷却期，24h 后才能重注册
         # 24h 过后如需彻底释放邮箱，可另起清理任务，当前先靠注册时检查冷却期
+        user.pending_email = None
         user.password_hash = pwd_context.hash(secrets.token_urlsafe(32))
         user.is_active = 0
         user.deleted_at = now_columbus_naive()

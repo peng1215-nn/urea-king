@@ -27,10 +27,20 @@ def resend_verify_email_service(email: str, background_tasks=None) -> dict:
 
     db = SessionLocal()
     try:
-        user = db.query(User).filter(User.email == email).first()
+        # 邮箱已经被某个账号验证过：不再给任何账号发验证邮件（静默返回"已发送"）
+        if db.query(User.id).filter(User.email == email).first():
+            return {"success": True, "error_code": "resendSent"}
+
+        # 在等验证这个邮箱的账号；多个时取最新注册的那个（真正的主人通常是后来注册的那个）
+        user = (
+            db.query(User)
+            .filter(User.pending_email == email, User.email_verified == 0, User.is_active == 1)
+            .order_by(User.id.desc())
+            .first()
+        )
 
         # 故意不区分"邮箱不存在"和"已验证"，防止邮箱枚举
-        if not user or user.is_active == 0:
+        if not user:
             return {"success": True, "error_code": "resendSent"}  # 假装发送成功
 
         # 已验证、发送太频繁、超出每日上限时都静默返回"已发送"，

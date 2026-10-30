@@ -19,7 +19,10 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     nickname = Column(String(50), nullable=True)
     avatar_url = Column(String(255), nullable=True)
+    # 已验证的邮箱：全站唯一。只有验证成功的账号才占用邮箱
     email = Column(String(255), unique=True, nullable=True, index=True)
+    # 注册或更换后、还没验证的邮箱：不占用，可以同时出现在多个账号上，谁先验证归谁
+    pending_email = Column(String(255), nullable=True, index=True)
     email_verified = Column(Integer, nullable=False, default=0)
     is_active = Column(Integer, nullable=False, default=1)
     created_at = Column(DateTime, default=now_columbus_naive)

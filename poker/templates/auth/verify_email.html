@@ -51,7 +51,19 @@
             border: none;
             cursor: pointer;
         }
-    </style>
+    
+.verify-target {
+    margin: 0 auto 22px;
+    padding: 12px 16px;
+    max-width: 360px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 14px;
+    line-height: 1.8;
+    text-align: left;
+    word-break: break-all;
+}
+</style>
 </head>
 <body>
 
@@ -65,7 +77,11 @@
 {% if pending %}
     <div class="verify-icon success">✉</div>
     <div class="verify-title" data-i18n="verifyPendingTitle">确认验证邮箱</div>
-    <p class="verify-msg" data-i18n="verifyPendingMsg">点击下方按钮完成邮箱验证。</p>
+    <p class="verify-msg" data-i18n="verifyPendingMsg">请确认下面是你注册的账号和邮箱，再点击确认。如果不是你注册的账号，请不要确认。</p>
+    <div class="verify-target">
+        <div><span data-i18n="verifyAccountLabel">账号</span>：<strong>{{ target.username }}</strong></div>
+        <div><span data-i18n="verifyEmailLabel">邮箱</span>：<strong>{{ target.email }}</strong></div>
+    </div>
     <form method="post" action="/verify-email">
         <input type="hidden" name="token" value="{{ token }}">
         <button type="submit" class="verify-btn" data-i18n="verifyConfirmBtn">确认验证</button>
@@ -81,6 +97,12 @@
     <div class="verify-icon warn">🔒</div>
     <div class="verify-title" data-i18n="verifyUsedTitle">链接已使用</div>
     <p class="verify-msg" data-i18n="verifyUsedMsg">该验证链接已被使用过了。如果您的邮箱尚未验证，请重新注册或联系支持。</p>
+    <a href="/login" class="verify-btn" data-i18n="backLogin">返回登录</a>
+
+{% elif error_code == "verifyEmailTaken" %}
+    <div class="verify-icon warn">🔒</div>
+    <div class="verify-title" data-i18n="verifyEmailTakenTitle">邮箱已被验证</div>
+    <p class="verify-msg" data-i18n="verifyEmailTakenMsg">这个邮箱已经被另一个账号验证过了，不能再用于这个账号。如果那个账号是你的，请直接登录；如果不是，请用找回密码重置它的密码。</p>
     <a href="/login" class="verify-btn" data-i18n="backLogin">返回登录</a>
 
 {% elif error_code == "verifyTokenExpired" %}

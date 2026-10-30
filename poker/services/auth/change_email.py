@@ -14,7 +14,6 @@ import secrets
 from datetime import timedelta
 
 from core.errors import safe_error
-from poker.services.auth.email_claims import release_stale_unverified_email
 from core.security import verify_user_password
 from core.time import now_columbus_naive
 from database import SessionLocal
@@ -83,8 +82,8 @@ def change_email_service(username: str, password: str, new_email: str, backgroun
         if sent_today >= CHANGE_EMAIL_MAX_PER_DAY:
             return {"success": False, "error_code": "changeEmailDailyLimit"}
 
-        # 新邮箱不能被其他账号占用（超过 24 小时未验证的账号占用的邮箱会被收回）
-        if not release_stale_unverified_email(db, new_email, exclude_user_id=user.id):
+        # 新邮箱不能已被别的账号验证过（未验证账号的邮箱不占用，不会挡住这里）
+        if db.query(User.id).filter(User.email == new_email, User.id != user.id).first():
             return {"success": False, "error_code": "changeEmailEmailExists"}
 
         # 发往旧邮箱的验证链接全部作废，避免换邮箱后用旧链接把新邮箱标记为已验证
@@ -94,8 +93,8 @@ def change_email_service(username: str, password: str, new_email: str, backgroun
             EmailVerification.used == 0,
         ).update({"used": 1}, synchronize_session=False)
 
-        # 更新邮箱
-        user.email = new_email
+        # 更新待验证邮箱（验证成功后才成为正式邮箱）
+        user.pending_email = new_email
 
         token = secrets.token_urlsafe(64)
         verification = EmailVerification(
