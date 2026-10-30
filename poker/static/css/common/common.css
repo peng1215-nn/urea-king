@@ -389,6 +389,9 @@ body {
 
     .main {
         overflow-x: hidden;
+        /* flex 子元素默认不会比内容更窄：内容过宽时 .main 会被撑出屏幕，被裁掉的部分也滑不到 */
+        min-width: 0;
+        max-width: 100vw;
     }
 
 }

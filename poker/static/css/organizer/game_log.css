@@ -465,3 +465,33 @@ body {
         background-repeat: no-repeat !important;
     }
 }
+
+/* 手机上牌局卡片的标题行：左边（名称、时间）和右边（买入、核对、按钮）上下排，
+   右边的内容自动换行，不会把“导出”按钮挤出屏幕 */
+@media (max-width: 768px) {
+    .log-card { min-width: 0; }
+    .log-card-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 14px 14px;
+        gap: 10px;
+    }
+    .log-card-left,
+    .log-card-right {
+        min-width: 0;
+        width: 100%;
+    }
+    .log-card-left { gap: 6px 12px; }
+    .log-card-right {
+        flex-wrap: wrap;
+        flex-shrink: 1;
+        gap: 8px;
+    }
+    .log-card-right .log-chevron { margin-left: auto; }
+    .btn-export-log {
+        min-height: 34px;
+        padding: 6px 14px;
+    }
+    .log-card-detail { padding: 0 12px 12px; }
+    .log-player-stats { gap: 6px 14px; }
+}
