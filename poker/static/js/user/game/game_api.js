@@ -10,3 +10,10 @@ async function apiSubmitBuyinRequest(gameId, amount) {
     const res = await fetch("/user/game/buyin-request", { method: "POST", body: fd });
     return await res.json();
 }
+
+async function apiWithdrawBuyinRequest(requestId) {
+    const fd = new FormData();
+    fd.append("request_id", requestId);
+    const res = await fetch("/user/game/buyin-request/withdraw", { method: "POST", body: fd });
+    return await res.json();
+}

@@ -49,6 +49,10 @@ window.userTranslations = {
         // 公告
         announcements: "公告",
         announcementsDesc: "查看管理员发布的最新公告。",
+        viewAll: "查看全部",
+        viewAllAnnouncements: "查看全部公告",
+        allAnnouncements: "全部公告",
+        announcementEdited: "已编辑",
 
         me: "我",
 
@@ -87,6 +91,16 @@ window.userTranslations = {
         requestPending: "待审批",
         requestApproved: "已批准",
         requestRejected: "已拒绝",
+        // 撤回买入申请
+        requestWithdrawn: "已撤回",
+        withdrawRequest: "撤回",
+        withdrawRequestTitle: "撤回买入申请",
+        withdrawRequestDesc: "确认撤回这笔 {amount} 的买入申请？撤回后局头不会再看到它，买入不受影响。",
+        confirmWithdraw: "确认撤回",
+        withdrawing: "撤回中…",
+        withdrawRequestSuccess: "申请已撤回",
+        requestNotFound: "这笔申请不存在。",
+        requestAlreadyHandled: "这笔申请已被局头处理",
         invalidAmount: "请输入有效的数额。",
         amountTooLarge: "单次金额不能超过 1,000,000。",
 
@@ -256,6 +270,10 @@ window.userTranslations = {
         // Announcements
         announcements: "Announcements",
         announcementsDesc: "View the latest announcements from the admin.",
+        viewAll: "View all",
+        viewAllAnnouncements: "View all announcements",
+        allAnnouncements: "All announcements",
+        announcementEdited: "edited",
 
         me: "Me",
 
@@ -294,6 +312,16 @@ window.userTranslations = {
         requestPending: "Pending",
         requestApproved: "Approved",
         requestRejected: "Rejected",
+        // Withdraw buy-in request
+        requestWithdrawn: "Withdrawn",
+        withdrawRequest: "Withdraw",
+        withdrawRequestTitle: "Withdraw buy-in request",
+        withdrawRequestDesc: "Withdraw your buy-in request of {amount}? The organizer will no longer see it, and your buy-in stays the same.",
+        confirmWithdraw: "Withdraw",
+        withdrawing: "Withdrawing…",
+        withdrawRequestSuccess: "Request withdrawn",
+        requestNotFound: "This request was not found.",
+        requestAlreadyHandled: "The organizer has already handled this request",
         invalidAmount: "Please enter a valid amount.",
         amountTooLarge: "A single amount cannot exceed 1,000,000.",
 

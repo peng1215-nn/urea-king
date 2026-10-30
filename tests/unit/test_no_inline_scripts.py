@@ -73,6 +73,7 @@ def test_every_action_has_a_function():
 def test_pages_with_actions_load_the_dispatcher():
     for path in TEMPLATES:
         text = _read(path)
-        if path.name in ("sidebar.html", "language_switcher.html") or "root" in path.parts[-3:-1]:
+        # 被其他页面 include 的片段，由所在页面加载 actions.js
+        if path.name in ("sidebar.html", "language_switcher.html", "account_email_card.html") or "root" in path.parts[-3:-1]:
             continue
         assert "/static/js/common/actions.js" in text, _rel(path)

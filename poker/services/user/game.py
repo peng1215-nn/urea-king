@@ -38,6 +38,7 @@ def _my_requests(db, game_id, user_id):
       self      自己提交的申请
       proxy     局头代买（没有经过申请，直接记为已批准）
     rejected 的记录再用 rejected_by 区分：organizer 局头拒绝 | auto 离开牌局或牌局结束时自动拒绝。
+    withdrawn 是自己撤回的申请（resolved_by 是自己），只算 self，不会被当成代买或自动拒绝。
     """
     reqs = db.query(ChipRequest).filter(
         ChipRequest.game_id == game_id,
@@ -259,6 +260,52 @@ def submit_buyin_request_service(game_id: int, group_id: int, user_id: int, amou
         record_game_event(db, game_id, "buyin_requested", actor_user_id=user_id, target_user_id=user_id, amount=amount, buy_type="normal")
         db.commit()
 
+        return {"success": True}
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "message": safe_error(e)}
+    finally:
+        db.close()
+
+def withdraw_buyin_request_service(request_id: int, group_id: int, user_id: int):
+    """
+    玩家撤回自己还没审批的买入申请。
+    和局头批准/拒绝一样，先锁这一局、再锁这条申请，加锁顺序一致；
+    同时发生时只有一方成功，另一方看到的状态已经不是 pending。
+    """
+    db = SessionLocal()
+    try:
+        req = db.query(ChipRequest).filter(ChipRequest.id == request_id).first()
+        if not req or req.user_id != user_id:
+            return {"success": False, "message": "requestNotFound"}
+
+        game = db.query(PokerGame).filter(
+            PokerGame.id == req.game_id,
+            PokerGame.group_id == group_id,
+            PokerGame.status == "ongoing",
+        ).with_for_update().first()
+        if not game:
+            return {"success": False, "message": "gameNotFound"}
+
+        req = db.query(ChipRequest).filter(
+            ChipRequest.id == request_id,
+            ChipRequest.game_id == game.id,
+            ChipRequest.user_id == user_id,
+        ).with_for_update().populate_existing().first()
+        if not req:
+            return {"success": False, "message": "requestNotFound"}
+        if req.status != "pending":
+            # 已经被局头批准/拒绝，或牌局结束、离开牌局时自动拒绝，或之前已经撤回
+            return {"success": False, "message": "requestAlreadyHandled"}
+
+        req.status = "withdrawn"
+        req.resolved_at = now_columbus_naive()
+        req.resolved_by = user_id
+        record_game_event(
+            db, game.id, "buyin_withdrawn",
+            actor_user_id=user_id, target_user_id=user_id, amount=req.amount, buy_type=req.type,
+        )
+        db.commit()
         return {"success": True}
     except Exception as e:
         db.rollback()

@@ -6,6 +6,7 @@ from fastapi.responses import RedirectResponse
 
 from poker.services.user.game import get_user_ongoing_games_service
 from poker.services.user.game import submit_buyin_request_service
+from poker.services.user.game import withdraw_buyin_request_service
 from poker.services.user.game import get_chip_auth_settings_service
 from poker.services.user.game import update_chip_auth_service
 from poker.services.common.common import add_no_cache_headers
@@ -111,4 +112,26 @@ def submit_buyin_request(
         group_id=int(group_id),
         user_id=int(user_id),
         amount=amount,
+    )
+
+
+@router.post("/user/game/buyin-request/withdraw")
+def withdraw_buyin_request(
+    request: Request,
+    request_id: int = Form(...),
+):
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
+
+    group_id = get_group_id(request)
+    user_id = get_user_id(request)
+
+    if not group_id or not user_id:
+        return {"success": False, "message": "noGroupSelected"}
+
+    return withdraw_buyin_request_service(
+        request_id=request_id,
+        group_id=int(group_id),
+        user_id=int(user_id),
     )

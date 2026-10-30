@@ -143,6 +143,69 @@ def register_user_service(
         db.close()
 
 
+# 邮件链接的两种用途：注册后验证邮箱、已验证账号更换邮箱。两者共用验证确认页
+EMAIL_TOKEN_PURPOSES = ("verify_email", "change_email")
+
+
+def _release_pending_email(db, target, except_user_id):
+    """邮箱已归某个账号所有：其他还在等验证这个邮箱的账号（注册的或更换邮箱的）都作废。"""
+    others = db.query(User).filter(
+        User.pending_email == target,
+        User.id != except_user_id,
+    ).all()
+    for other in others:
+        other.pending_email = None
+        db.query(EmailVerification).filter(
+            EmailVerification.user_id == other.id,
+            EmailVerification.purpose.in_(EMAIL_TOKEN_PURPOSES),
+            EmailVerification.used == 0,
+        ).update({"used": 1}, synchronize_session=False)
+
+
+def _confirm_email_change(db, record, user):
+    """已验证账号点了更换邮箱的确认链接：新邮箱生效，旧邮箱收到通知。"""
+    target = user.pending_email
+    if not user.email_verified or not target:
+        record.used = 1
+        db.commit()
+        return {"success": False, "error_code": "verifyTokenInvalid", "purpose": "change_email"}
+
+    # 和注册验证一样，按编号顺序锁住和这个邮箱有关的账号，同时验证时排队执行
+    db.query(User.id).filter(
+        (User.pending_email == target) | (User.email == target)
+    ).order_by(User.id).with_for_update().all()
+
+    if email_blocked_by_other(db, target, exclude_user_id=user.id):
+        record.used = 1
+        user.pending_email = None
+        db.commit()
+        return {"success": False, "error_code": "verifyEmailTaken", "purpose": "change_email"}
+
+    old_email = user.email
+    user.email = target
+    user.pending_email = None
+    record.used = 1
+
+    _release_pending_email(db, target, user.id)
+
+    # 发往旧邮箱的找回密码链接、其他更换邮箱的链接全部作废
+    db.query(EmailVerification).filter(
+        EmailVerification.user_id == user.id,
+        EmailVerification.purpose.in_(("reset_password", "change_email")),
+        EmailVerification.used == 0,
+    ).update({"used": 1}, synchronize_session=False)
+
+    db.commit()
+    return {
+        "success": True,
+        "purpose": "change_email",
+        "old_email": old_email,
+        "new_email": target,
+        "username": user.username,
+        "user_id": user.id,
+    }
+
+
 def verify_target_service(token: str):
     """验证确认页显示"即将验证哪个账号的哪个邮箱"，防止被骗点了别人账号的验证链接。"""
     from poker.core.email import mask_email
@@ -151,18 +214,22 @@ def verify_target_service(token: str):
     try:
         record = db.query(EmailVerification).filter(
             EmailVerification.token == token,
-            EmailVerification.purpose == "verify_email",
+            EmailVerification.purpose.in_(EMAIL_TOKEN_PURPOSES),
         ).first() if token else None
         if record is None:
             return {"error_code": "verifyTokenInvalid"}
+        purpose = record.purpose
         if record.used:
-            return {"error_code": "verifyTokenUsed"}
+            return {"error_code": "verifyTokenUsed", "purpose": purpose}
         if record.expires_at < now_columbus_naive():
-            return {"error_code": "verifyTokenExpired"}
+            return {"error_code": "verifyTokenExpired", "purpose": purpose}
         user = db.query(User).filter(User.id == record.user_id).first()
-        if user is None or not user.pending_email:
-            return {"error_code": "verifyTokenInvalid"}
-        return {"username": user.username, "email": mask_email(user.pending_email)}
+        if user is None or not user.pending_email or user.is_active == 0:
+            return {"error_code": "verifyTokenInvalid", "purpose": purpose}
+        # 更换邮箱的链接只对已验证的账号有效
+        if purpose == "change_email" and not user.email_verified:
+            return {"error_code": "verifyTokenInvalid", "purpose": purpose}
+        return {"username": user.username, "email": mask_email(user.pending_email), "purpose": purpose}
     finally:
         db.close()
 
@@ -175,7 +242,7 @@ def verify_email_service(token: str):
             db.query(EmailVerification)
             .filter(
                 EmailVerification.token == token,
-                EmailVerification.purpose == "verify_email",
+                EmailVerification.purpose.in_(EMAIL_TOKEN_PURPOSES),
             )
             .with_for_update()
             .first()
@@ -185,14 +252,17 @@ def verify_email_service(token: str):
             return {"success": False, "error_code": "verifyTokenInvalid"}
 
         if record.used:
-            return {"success": False, "error_code": "verifyTokenUsed"}
+            return {"success": False, "error_code": "verifyTokenUsed", "purpose": record.purpose}
 
         if record.expires_at < now_columbus_naive():
-            return {"success": False, "error_code": "verifyTokenExpired"}
+            return {"success": False, "error_code": "verifyTokenExpired", "purpose": record.purpose}
 
         user = db.query(User).filter(User.id == record.user_id).with_for_update().first()
         if user is None or user.is_active == 0:
             return {"success": False, "error_code": "verifyTokenInvalid"}
+
+        if record.purpose == "change_email":
+            return _confirm_email_change(db, record, user)
 
         if not user.email_verified:
             target = user.pending_email
@@ -216,18 +286,7 @@ def verify_email_service(token: str):
             user.email_verified = 1
 
             # 其他还在等验证同一个邮箱的账号（如抢注的）不再能验证它
-            others = db.query(User).filter(
-                User.pending_email == target,
-                User.id != user.id,
-                User.email_verified == 0,
-            ).all()
-            for other in others:
-                other.pending_email = None
-                db.query(EmailVerification).filter(
-                    EmailVerification.user_id == other.id,
-                    EmailVerification.purpose == "verify_email",
-                    EmailVerification.used == 0,
-                ).update({"used": 1}, synchronize_session=False)
+            _release_pending_email(db, target, user.id)
 
         record.used = 1
         if user:

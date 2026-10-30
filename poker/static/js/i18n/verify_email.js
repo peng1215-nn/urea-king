@@ -25,6 +25,15 @@ window.verifyEmailTranslations = {
         verifyTokenUsed: "该验证链接已使用或已失效。",
         verifyTokenExpired: "验证链接已过期，请重新获取验证邮件。",
         verifyFailed: "验证失败，请稍后重试。",
+        changePendingTitle: "确认更换邮箱",
+        changePendingMsg: "确认后，这个账号的邮箱会换成下面的新邮箱，以后找回密码的邮件也会发到这里。如果不是你本人申请的，请不要确认。",
+        changeNewEmailLabel: "新邮箱",
+        changeConfirmBtn: "确认更换",
+        changeSuccessTitle: "邮箱已更换",
+        changeSuccessMsg: "新邮箱已经生效，原邮箱会收到一封通知。",
+        changeLinkInvalidTitle: "链接已失效",
+        changeLinkInvalidMsg: "这个更换邮箱的链接已过期、已使用，或已被更新的申请取代（有效期 30 分钟，只有最新一封有效）。邮箱没有更换，请回到个人资料页重新申请。",
+        backHome: "返回网站",
     },
     en: {
         pageTitle: "Email Verification - UREAKING POKER",
@@ -52,6 +61,15 @@ window.verifyEmailTranslations = {
         verifyTokenUsed: "This verification link has already been used or is no longer valid.",
         verifyTokenExpired: "The verification link has expired. Please request a new verification email.",
         verifyFailed: "Verification failed. Please try again later.",
+        changePendingTitle: "Confirm Email Change",
+        changePendingMsg: "After you confirm, this account's email will change to the new address below, and password reset emails will go there. If you didn't request this, don't confirm.",
+        changeNewEmailLabel: "New email",
+        changeConfirmBtn: "Confirm Change",
+        changeSuccessTitle: "Email Changed",
+        changeSuccessMsg: "Your new email is now in use. A notice has been sent to your previous address.",
+        changeLinkInvalidTitle: "Link No Longer Valid",
+        changeLinkInvalidMsg: "This email change link has expired, been used, or been replaced by a newer request (valid for 30 minutes; only the latest one works). Your email was not changed — please request again from your profile page.",
+        backHome: "Back to site",
     }
 };
 

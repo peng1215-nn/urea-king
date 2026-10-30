@@ -509,3 +509,40 @@ body {
 .onboarding-steps a:hover {
     text-decoration: underline;
 }
+
+/* 个人资料页“更换邮箱”卡片：等待确认的提示 */
+.ae-pending {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 4px 0 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255, 196, 0, 0.08);
+    border: 1px solid rgba(255, 196, 0, 0.3);
+    color: #ffd666;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.ae-pending span {
+    flex: 1 1 200px;
+    min-width: 0;
+    word-break: break-all;
+}
+
+.ae-cancel-btn {
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: transparent;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+#account-email-card .form-input {
+    font-size: 16px;
+}

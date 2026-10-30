@@ -1,0 +1,35 @@
+<!-- 更换邮箱（三种身份的个人资料页共用；文字由 account_email.js 按语言填写） -->
+<div class="profile-card" id="account-email-card">
+    <div class="profile-card-header">
+        <i class="fa-solid fa-envelope"></i>
+        <h2 data-ae="aeTitle">更换邮箱</h2>
+    </div>
+    <p data-ae="aeDesc">找回密码的邮件会发到这个邮箱。更换时需要输入当前密码，并在新邮箱里点确认链接后才生效。</p>
+
+    <div class="form-group">
+        <label data-ae="aeCurrentEmail">当前邮箱</label>
+        <input type="text" id="ae-current-email" class="form-input" readonly>
+    </div>
+
+    <div id="ae-pending" class="ae-pending" hidden>
+        <span id="ae-pending-text"></span>
+        <button type="button" class="ae-cancel-btn" data-on-click="cancelAccountEmailChange" data-ae="aeCancel">取消更换</button>
+    </div>
+
+    <form id="ae-form" novalidate>
+        <div class="form-group">
+            <label for="ae-new-email" data-ae="aeNewEmail">新邮箱</label>
+            <input type="email" id="ae-new-email" class="form-input" maxlength="254"
+                   autocomplete="email" autocapitalize="off" spellcheck="false" inputmode="email">
+        </div>
+
+        <div class="form-group">
+            <label for="ae-password" data-ae="aePassword">当前密码</label>
+            <input type="password" id="ae-password" class="form-input" maxlength="256" autocomplete="current-password">
+        </div>
+
+        <div id="ae-message" class="operation-message" role="alert" aria-live="polite"></div>
+
+        <button type="submit" id="ae-submit" class="btn-save" data-ae="aeSubmit">发送确认邮件</button>
+    </form>
+</div>

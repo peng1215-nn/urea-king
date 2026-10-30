@@ -7,7 +7,8 @@ from poker.core.rate_limit import (
     reserve_login_attempt,
     resend_verify_failures_by_ip,
 )
-from poker.services.admin.audit_log import get_client_ip
+from poker.core.email import dispatch, mask_email, send_email_changed_notice
+from poker.services.admin.audit_log import get_client_ip, write_audit_log
 from poker.services.auth.register import register_user_service, verify_email_service, verify_target_service
 from poker.services.auth.resend_verify import resend_verify_email_service
 from poker.services.auth.change_email import change_email_service
@@ -115,16 +116,46 @@ def verify_email_page(request: Request, token: str = ""):
             "token": token,
             "target": target,
             "error_code": target.get("error_code", ""),
+            "purpose": target.get("purpose", "verify_email"),
         },
     )
 
 
 @router.post("/verify-email", response_class=HTMLResponse)
-def verify_email_confirm(request: Request, token: str = Form("", max_length=256)):
+def verify_email_confirm(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    token: str = Form("", max_length=256),
+):
     """用户点击确认按钮后才真正验证 token。"""
     result = verify_email_service(token)
+    purpose = result.get("purpose", "verify_email")
+    if result.get("success") and purpose == "change_email":
+        # 更换邮箱生效：通知原邮箱，并记一条审计日志
+        if result.get("old_email"):
+            dispatch(
+                background_tasks,
+                send_email_changed_notice,
+                result["old_email"],
+                result.get("username", ""),
+                result.get("new_email", ""),
+            )
+        write_audit_log(
+            request=request,
+            action="EMAIL_CHANGED",
+            target_type="user",
+            target_id=result.get("user_id"),
+            old_value=mask_email(result.get("old_email") or ""),
+            new_value=mask_email(result.get("new_email") or ""),
+            operator_id=result.get("user_id"),
+            operator_username=result.get("username"),
+        )
     return templates.TemplateResponse(
         request=request,
         name="auth/verify_email.html",
-        context={"success": result.get("success"), "error_code": result.get("error_code", "")},
+        context={
+            "success": result.get("success"),
+            "error_code": result.get("error_code", ""),
+            "purpose": purpose,
+        },
     )

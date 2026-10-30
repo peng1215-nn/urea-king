@@ -125,3 +125,46 @@ def send_reset_password(to: str, token: str) -> bool:
     </div>
     """
     return _send(to, "重置您的 Ureaking Poker 密码 / Reset Your Ureaking Poker Password", html)
+
+
+def send_change_email_confirm(to: str, token: str, username: str = "") -> bool:
+    """更换邮箱：发到新邮箱的确认链接（中英双语）。"""
+    link = f"{_POKER_URL}/verify-email?token={token}"
+    html = f"""
+    <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;">
+      <h2 style="letter-spacing:2px;">UREAKING POKER</h2>
+      <p>账号 <strong>{html_escape(username)}</strong> 申请把登录邮箱更换为这个邮箱。请点击下方链接确认：<br>
+         <span style="color:#888;font-size:13px;">The account <strong>{html_escape(username)}</strong> asked to use this address as its email. Please click the link below to confirm:</span>
+      </p>
+      <p style="margin:24px 0;">
+        <a href="{link}"
+           style="background:#111;color:#fff;padding:12px 28px;border-radius:8px;
+                  text-decoration:none;font-weight:bold;font-size:15px;">
+          确认更换邮箱 / Confirm Email Change
+        </a>
+      </p>
+      <p style="color:#888;font-size:13px;">
+        链接 30 分钟内有效，且只能使用一次。确认之前原邮箱继续有效。如果不是你本人操作，请忽略此邮件。<br>
+        The link is valid for 30 minutes and can only be used once. Your current email stays in use until you confirm. If you didn't request this, please ignore this email.
+      </p>
+    </div>
+    """
+    return _send(to, "确认更换 Ureaking Poker 邮箱 / Confirm Your New Ureaking Poker Email", html)
+
+
+def send_email_changed_notice(to: str, username: str, new_email: str) -> bool:
+    """更换邮箱生效后，通知原邮箱（新邮箱只显示打码后的地址）。"""
+    masked = html_escape(mask_email(new_email))
+    html = f"""
+    <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;">
+      <h2 style="letter-spacing:2px;">UREAKING POKER</h2>
+      <p>账号 <strong>{html_escape(username)}</strong> 的登录邮箱已更换为 <strong>{masked}</strong>，以后找回密码的邮件会发到新邮箱。<br>
+         <span style="color:#888;font-size:13px;">The email of account <strong>{html_escape(username)}</strong> has been changed to <strong>{masked}</strong>. Password reset emails will go to the new address from now on.</span>
+      </p>
+      <p style="color:#888;font-size:13px;">
+        如果不是你本人操作，你的账号可能已被他人登录，请尽快联系管理员。<br>
+        If you didn't do this, someone else may have signed in to your account. Please contact the administrator as soon as possible.
+      </p>
+    </div>
+    """
+    return _send(to, "你的 Ureaking Poker 邮箱已更换 / Your Ureaking Poker Email Was Changed", html)

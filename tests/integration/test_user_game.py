@@ -155,3 +155,198 @@ def test_user_api_with_other_role_is_still_permission_denied(client, table, logi
     response = client.get("/user/game/ongoing")
     assert response.status_code == 200
     assert response.json() == {"success": False, "message": "permissionDenied"}
+
+
+# ───────────────────────── 撤回买入申请 ─────────────────────────
+
+def _request_row(req_id):
+    from database import SessionLocal
+    from poker.models import ChipRequest
+
+    db = SessionLocal()
+    try:
+        r = db.query(ChipRequest).filter(ChipRequest.id == req_id).first()
+        return {"status": r.status, "resolved_by": r.resolved_by, "resolved_at": r.resolved_at}
+    finally:
+        db.close()
+
+
+def _events(game_id, event_type):
+    from database import SessionLocal
+    from poker.models import GameEvent
+
+    db = SessionLocal()
+    try:
+        return [
+            (e.actor_user_id, e.target_user_id, e.amount)
+            for e in db.query(GameEvent).filter(
+                GameEvent.game_id == game_id, GameEvent.event_type == event_type,
+            ).all()
+        ]
+    finally:
+        db.close()
+
+
+def _buy_in(game_id, user_id):
+    from database import SessionLocal
+    from poker.models import PokerGame, PokerGamePlayer
+
+    db = SessionLocal()
+    try:
+        player = db.query(PokerGamePlayer).filter(
+            PokerGamePlayer.game_id == game_id, PokerGamePlayer.user_id == user_id,
+        ).first()
+        game = db.query(PokerGame).filter(PokerGame.id == game_id).first()
+        return player.total_buy_in or 0, game.total_buy_in or 0
+    finally:
+        db.close()
+
+
+def test_player_withdraws_pending_request(table):
+    from poker.services.user.game import submit_buyin_request_service, withdraw_buyin_request_service
+
+    t = table
+    before = _buy_in(t["game"], t["alice"])
+    assert submit_buyin_request_service(t["game"], t["group"], t["alice"], 100)["success"]
+    req_id = _pending_id(t["game"], t["alice"])
+
+    assert withdraw_buyin_request_service(req_id, t["group"], t["alice"]) == {"success": True}
+
+    row = _request_row(req_id)
+    assert row["status"] == "withdrawn"
+    assert row["resolved_by"] == t["alice"]
+    assert row["resolved_at"] is not None
+    assert _events(t["game"], "buyin_withdrawn") == [(t["alice"], t["alice"], 100)]
+    assert _buy_in(t["game"], t["alice"]) == before
+
+    # 记录里显示为自己撤回，不会被当成代买或自动拒绝
+    me = next(p for p in _ongoing(t, t["alice"])["games"][0]["players"] if p["is_me"])
+    request = me["requests"][0]
+    assert request["status"] == "withdrawn"
+    assert request["source"] == "self"
+    assert "rejected_by" not in request
+
+    # 撤回后可以重新提交；同一条不能撤回两次
+    assert withdraw_buyin_request_service(req_id, t["group"], t["alice"])["message"] == "requestAlreadyHandled"
+    assert submit_buyin_request_service(t["game"], t["group"], t["alice"], 50)["success"]
+
+
+def test_cannot_withdraw_someone_elses_request(table):
+    from poker.services.user.game import submit_buyin_request_service, withdraw_buyin_request_service
+
+    t = table
+    assert submit_buyin_request_service(t["game"], t["group"], t["alice"], 100)["success"]
+    req_id = _pending_id(t["game"], t["alice"])
+
+    assert withdraw_buyin_request_service(req_id, t["group"], t["bob"])["message"] == "requestNotFound"
+    assert withdraw_buyin_request_service(999999, t["group"], t["alice"])["message"] == "requestNotFound"
+    assert _request_row(req_id)["status"] == "pending"
+    assert _events(t["game"], "buyin_withdrawn") == []
+
+
+def test_cannot_withdraw_from_another_group(factory, table):
+    from poker.services.user.game import submit_buyin_request_service, withdraw_buyin_request_service
+
+    t = table
+    other = factory.group("G2")
+    factory.role(t["alice"], other, "user")
+    assert submit_buyin_request_service(t["game"], t["group"], t["alice"], 100)["success"]
+    req_id = _pending_id(t["game"], t["alice"])
+
+    assert withdraw_buyin_request_service(req_id, other, t["alice"])["message"] == "gameNotFound"
+    assert _request_row(req_id)["status"] == "pending"
+
+
+def test_cannot_withdraw_approved_or_rejected_request(table):
+    from poker.services.organizer import game_management as gm
+    from poker.services.user.game import submit_buyin_request_service, withdraw_buyin_request_service
+
+    t = table
+    assert submit_buyin_request_service(t["game"], t["group"], t["alice"], 100)["success"]
+    approved = _pending_id(t["game"], t["alice"])
+    assert gm.approve_chip_request_service(approved, t["game"], t["group"], t["org"])["success"]
+    assert withdraw_buyin_request_service(approved, t["group"], t["alice"])["message"] == "requestAlreadyHandled"
+    assert _request_row(approved)["status"] == "approved"
+
+    assert submit_buyin_request_service(t["game"], t["group"], t["alice"], 50)["success"]
+    rejected = _pending_id(t["game"], t["alice"])
+    assert gm.reject_chip_request_service(rejected, t["game"], t["group"], t["org"])["success"]
+    assert withdraw_buyin_request_service(rejected, t["group"], t["alice"])["message"] == "requestAlreadyHandled"
+    assert _request_row(rejected)["status"] == "rejected"
+
+    assert _events(t["game"], "buyin_withdrawn") == []
+    assert _buy_in(t["game"], t["alice"])[0] == 100
+
+
+def test_organizer_cannot_approve_withdrawn_request(table):
+    from poker.services.organizer import game_management as gm
+    from poker.services.user.game import submit_buyin_request_service, withdraw_buyin_request_service
+
+    t = table
+    assert submit_buyin_request_service(t["game"], t["group"], t["alice"], 100)["success"]
+    req_id = _pending_id(t["game"], t["alice"])
+    assert withdraw_buyin_request_service(req_id, t["group"], t["alice"])["success"]
+
+    assert gm.approve_chip_request_service(req_id, t["game"], t["group"], t["org"])["message"] == "requestNotFound"
+    assert gm.reject_chip_request_service(req_id, t["game"], t["group"], t["org"])["message"] == "requestNotFound"
+    assert _request_row(req_id)["status"] == "withdrawn"
+    assert _buy_in(t["game"], t["alice"])[0] == 0
+
+    # 局头的待审批列表里也不再出现
+    for game in gm.get_ongoing_games_service(t["group"])["games"]:
+        assert all(r["id"] != req_id for r in game.get("requests", []))
+
+
+def test_withdraw_and_approve_race_has_one_winner(table):
+    import threading
+
+    from poker.services.organizer import game_management as gm
+    from poker.services.user.game import submit_buyin_request_service, withdraw_buyin_request_service
+
+    t = table
+    assert submit_buyin_request_service(t["game"], t["group"], t["alice"], 100)["success"]
+    req_id = _pending_id(t["game"], t["alice"])
+
+    barrier = threading.Barrier(2)
+    results = {}
+
+    def withdraw():
+        barrier.wait()
+        results["withdraw"] = withdraw_buyin_request_service(req_id, t["group"], t["alice"])
+
+    def approve():
+        barrier.wait()
+        results["approve"] = gm.approve_chip_request_service(req_id, t["game"], t["group"], t["org"])
+
+    threads = [threading.Thread(target=withdraw), threading.Thread(target=approve)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=30)
+
+    winners = [k for k, r in results.items() if r["success"]]
+    assert len(winners) == 1, results
+    if winners[0] == "withdraw":
+        assert results["approve"]["message"] == "requestNotFound"
+        assert _buy_in(t["game"], t["alice"])[0] == 0
+    else:
+        assert results["withdraw"]["message"] == "requestAlreadyHandled"
+        assert _buy_in(t["game"], t["alice"])[0] == 100
+
+
+def test_withdraw_over_http(client, table, login_as):
+    from poker.services.user.game import submit_buyin_request_service
+
+    t = table
+    assert submit_buyin_request_service(t["game"], t["group"], t["alice"], 100)["success"]
+    req_id = _pending_id(t["game"], t["alice"])
+
+    assert client.post("/user/game/buyin-request/withdraw", data={"request_id": req_id}).status_code == 401
+
+    login_as("bobby001", t["group"])
+    assert client.post("/user/game/buyin-request/withdraw", data={"request_id": req_id}).json()["message"] == "requestNotFound"
+    client.get("/logout")
+
+    login_as("alice001", t["group"])
+    assert client.post("/user/game/buyin-request/withdraw", data={"request_id": req_id}).json() == {"success": True}
+    assert _request_row(req_id)["status"] == "withdrawn"

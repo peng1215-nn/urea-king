@@ -12,6 +12,7 @@
   buyin_approved       局头批准申请
   buyin_rejected       局头拒绝申请
   buyin_auto_rejected  玩家离开牌局或牌局结束时，未审批的申请被自动拒绝
+  buyin_withdrawn      玩家撤回自己未审批的申请（不影响买入）
   organizer_buyin      局头给自己买入
   proxy_buyin          局头代玩家买入（玩家已开启授权）
   game_finished        牌局结束（details：每位玩家的买入、卖出、盈亏，是否平衡、是否强制结束）
@@ -33,6 +34,7 @@ EVENT_TYPES = (
     "buyin_approved",
     "buyin_rejected",
     "buyin_auto_rejected",
+    "buyin_withdrawn",
     "organizer_buyin",
     "proxy_buyin",
     "game_finished",

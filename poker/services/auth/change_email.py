@@ -17,7 +17,7 @@ from core.errors import safe_error
 from core.security import verify_user_password
 from core.time import now_columbus_naive
 from database import SessionLocal
-from poker.core.email import dispatch, send_verify_email
+from poker.core.email import dispatch, send_change_email_confirm, send_verify_email
 from poker.models import EmailVerification, User
 from poker.services.auth.email_owner import email_blocked_by_other
 
@@ -120,5 +120,151 @@ def change_email_service(username: str, password: str, new_email: str, backgroun
         db.rollback()
         return {"success": False, "error_code": "changeEmailFailed"}
 
+    finally:
+        db.close()
+
+
+# ── 已验证账号更换邮箱（个人资料页） ──
+#
+# 流程：输入当前密码和新邮箱 → 给新邮箱发确认链接 → 点链接确认后新邮箱才生效。
+# 确认之前旧邮箱照常使用（找回密码仍发到旧邮箱）；生效后旧邮箱会收到一封通知。
+
+ACCOUNT_EMAIL_TOKEN_TTL_MINUTES = 30
+EMAIL_MAX_LENGTH = 254
+
+
+def get_account_email_service(user_id: int) -> dict:
+    """个人资料页显示：当前邮箱，以及正在等待确认的新邮箱。"""
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user is None or user.is_active == 0:
+            return {"success": False, "message": "userNotFound"}
+
+        pending = user.pending_email if user.email_verified else None
+        if pending:
+            # 确认链接都已过期或作废时，不再显示“等待确认”
+            alive = db.query(EmailVerification.id).filter(
+                EmailVerification.user_id == user.id,
+                EmailVerification.purpose == "change_email",
+                EmailVerification.used == 0,
+                EmailVerification.expires_at >= now_columbus_naive(),
+            ).first()
+            if alive is None:
+                pending = None
+
+        return {
+            "success": True,
+            "email": user.email if user.email_verified else "",
+            "pending_email": pending or "",
+        }
+    except Exception as e:
+        return {"success": False, "message": safe_error(e)}
+    finally:
+        db.close()
+
+
+def request_email_change_service(user_id: int, password: str, new_email: str, background_tasks=None) -> dict:
+    """
+    返回的 message：
+      accountEmailSent 已发送确认邮件 | accountEmailWrongPassword 当前密码不对（路由据此计入失败次数）
+      其余为输入或频率问题。
+    """
+    new_email = (new_email or "").strip().lower()
+
+    if not password:
+        return {"success": False, "message": "accountEmailPasswordRequired"}
+    if len(new_email) > EMAIL_MAX_LENGTH or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", new_email):
+        return {"success": False, "message": "accountEmailInvalid"}
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == user_id).with_for_update().first()
+        if user is None or user.is_active == 0 or user.deleted_at is not None:
+            return {"success": False, "message": "userNotFound"}
+
+        if not verify_user_password(user, password):
+            return {"success": False, "message": "accountEmailWrongPassword"}
+
+        if not user.email_verified:
+            # 能登录的账号都已验证过邮箱；未验证的走注册页的“修改注册邮箱”
+            return {"success": False, "message": "accountEmailNotVerified"}
+
+        if new_email == (user.email or "").lower():
+            return {"success": False, "message": "accountEmailSame"}
+
+        now = now_columbus_naive()
+        recent = db.query(EmailVerification).filter(
+            EmailVerification.user_id == user.id,
+            EmailVerification.purpose == "change_email",
+            EmailVerification.created_at >= now - timedelta(minutes=CHANGE_EMAIL_INTERVAL_MINUTES),
+        ).order_by(EmailVerification.created_at.desc()).first()
+        if recent:
+            wait_seconds = int(
+                (recent.created_at + timedelta(minutes=CHANGE_EMAIL_INTERVAL_MINUTES) - now).total_seconds()
+            )
+            return {"success": False, "message": "accountEmailTooFrequent", "retry_after": max(wait_seconds, 1)}
+
+        sent_today = db.query(EmailVerification).filter(
+            EmailVerification.user_id == user.id,
+            EmailVerification.purpose == "change_email",
+            EmailVerification.created_at >= now - timedelta(hours=24),
+        ).count()
+        if sent_today >= CHANGE_EMAIL_MAX_PER_DAY:
+            return {"success": False, "message": "accountEmailDailyLimit"}
+
+        blocked = email_blocked_by_other(db, new_email, exclude_user_id=user.id)
+        if blocked == "cooldown":
+            return {"success": False, "message": "accountEmailCooldown"}
+        if blocked == "taken":
+            return {"success": False, "message": "accountEmailTaken"}
+
+        # 之前发出的更换邮箱链接作废，只有最新一封有效
+        db.query(EmailVerification).filter(
+            EmailVerification.user_id == user.id,
+            EmailVerification.purpose == "change_email",
+            EmailVerification.used == 0,
+        ).update({"used": 1}, synchronize_session=False)
+
+        user.pending_email = new_email
+        token = secrets.token_urlsafe(64)
+        db.add(EmailVerification(
+            user_id=user.id,
+            token=token,
+            purpose="change_email",
+            expires_at=now + timedelta(minutes=ACCOUNT_EMAIL_TOKEN_TTL_MINUTES),
+            used=0,
+        ))
+        db.commit()
+
+        dispatch(background_tasks, send_change_email_confirm, new_email, token, user.username)
+        return {"success": True, "message": "accountEmailSent", "pending_email": new_email}
+
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "message": safe_error(e)}
+    finally:
+        db.close()
+
+
+def cancel_email_change_service(user_id: int) -> dict:
+    """取消还没确认的更换：确认链接作废，继续用原邮箱。"""
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == user_id).with_for_update().first()
+        if user is None or user.is_active == 0:
+            return {"success": False, "message": "userNotFound"}
+        if user.email_verified:
+            user.pending_email = None
+        db.query(EmailVerification).filter(
+            EmailVerification.user_id == user.id,
+            EmailVerification.purpose == "change_email",
+            EmailVerification.used == 0,
+        ).update({"used": 1}, synchronize_session=False)
+        db.commit()
+        return {"success": True, "message": "accountEmailCancelled"}
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()

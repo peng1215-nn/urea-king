@@ -254,3 +254,122 @@ body {
         background-repeat: no-repeat !important;
     }
 }
+
+/* ── 公告卡片可点击：打开全部公告 ── */
+.announcement-overview-card.is-clickable {
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+.announcement-overview-card.is-clickable:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(251,191,36,0.3);
+}
+.announcement-overview-card.is-clickable:focus-visible {
+    outline: 2px solid rgba(251,191,36,0.7);
+    outline-offset: 2px;
+}
+.announcement-view-all {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: rgba(251,191,36,0.85);
+    white-space: nowrap;
+}
+.announcement-view-all i { font-size: 10px; }
+
+/* ── 全部公告弹窗 ── */
+body.modal-open { overflow: hidden; }
+
+.announcements-modal {
+    padding: 16px;
+    box-sizing: border-box;
+}
+.custom-modal-content.announcements-modal-content {
+    width: 560px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+.announcements-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 20px 14px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+}
+.custom-modal-content .announcements-modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.announcements-modal-header h3 i { color: #fbbf24; font-size: 16px; }
+.announcements-close-btn {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.8);
+    font-size: 16px;
+    cursor: pointer;
+}
+.announcements-close-btn:hover { background: rgba(255,255,255,0.15); }
+.announcements-modal-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 8px 24px 20px;
+}
+.announcements-modal-item {
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.announcements-modal-item:last-child { border-bottom: none; }
+.announcements-modal-item-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    overflow-wrap: anywhere;
+}
+.announcements-modal-item-date {
+    margin-top: 4px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+}
+.announcements-modal-item-content {
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.8);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.announcements-modal-empty {
+    padding: 28px 0;
+    text-align: center;
+    font-size: 14px;
+    color: rgba(255,255,255,0.45);
+}
+
+@media (max-width: 768px) {
+    .custom-modal-content.announcements-modal-content {
+        width: 100%;
+        padding: 0;
+    }
+    .announcements-modal-header { padding: 16px 14px 12px 18px; }
+    .announcements-modal-list { padding: 4px 18px 16px; }
+}

@@ -8,7 +8,7 @@
     let messageKey = null;
 
     const MONEY_EVENTS = ["buyin_requested", "buyin_approved", "organizer_buyin", "proxy_buyin"];
-    const REJECT_EVENTS = ["buyin_rejected", "buyin_auto_rejected"];
+    const REJECT_EVENTS = ["buyin_rejected", "buyin_auto_rejected", "buyin_withdrawn"];
     const PEOPLE_EVENTS = ["player_added", "player_rejoined", "player_removed", "player_exited"];
 
     /** 一次性替换 {name} 占位符：替换进去的内容（如昵称）里即使有 {xxx} 也不会再被替换。 */
@@ -64,6 +64,8 @@
                 });
             case "buyin_auto_rejected":
                 return t("detailAutoRejected");
+            case "buyin_withdrawn":
+                return t("detailWithdrawn");
             case "proxy_buyin":
                 return t("detailProxy");
             case "game_finished": {

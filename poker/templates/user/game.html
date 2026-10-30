@@ -57,6 +57,19 @@
     </div>
 </div>
 
+<!-- 撤回买入申请 Modal -->
+<div id="withdraw-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content">
+        <h3 data-i18n="withdrawRequestTitle">撤回买入申请</h3>
+        <p id="withdraw-desc" class="modal-desc"></p>
+        <div id="withdraw-message" class="operation-message withdraw-message"></div>
+        <div class="custom-modal-actions">
+            <button type="button" id="withdraw-confirm-button" class="modal-confirm-button modal-danger-button" data-on-click="confirmWithdrawRequest" data-i18n="confirmWithdraw">确认撤回</button>
+            <button type="button" id="withdraw-cancel-button" class="modal-cancel-button" data-on-click="closeWithdrawModal" data-i18n="cancel">取消</button>
+        </div>
+    </div>
+</div>
+
 <!-- 牌局设置 Modal -->
 <div id="game-settings-modal" class="custom-modal" style="display:none;">
     <div class="custom-modal-content settings-modal-content">

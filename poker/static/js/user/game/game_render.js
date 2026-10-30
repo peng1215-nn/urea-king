@@ -120,7 +120,9 @@ function notifyResolvedRequests(games) {
             if (!p.is_me) return;
             (p.requests || []).forEach(r => {
                 current[r.id] = r.status;
-                if (lastRequestStatus && lastRequestStatus[r.id] === "pending" && r.status !== "pending") {
+                // 自己撤回的申请不再提示（撤回时已经有提示了，在另一台设备上撤回的也不必再提醒）
+                if (lastRequestStatus && lastRequestStatus[r.id] === "pending"
+                        && r.status !== "pending" && r.status !== "withdrawn") {
                     changed.push(r);
                 }
             });
@@ -236,6 +238,9 @@ function requestStatusLabel(r) {
             text: r.rejected_by === "auto" ? t("requestAutoRejected") : t("requestRejected"),
         };
     }
+    if (r.status === "withdrawn") {
+        return { cls: "req-withdrawn", text: t("requestWithdrawn") };
+    }
     return { cls: "req-pending", text: t("requestPending") };
 }
 
@@ -252,11 +257,17 @@ function renderPlayerRow(p, gameId, canBuyIn) {
         : `<div class="player-avatar-placeholder"><i class="fa-solid fa-user"></i></div>`;
 
     // 申请买入按钮只对自己、且仍在桌上时显示；已有待审批的申请时显示为不可点的状态
-    const hasPending = p.is_me && (p.requests || []).some(r => r.status === "pending");
+    const pendingRequest = p.is_me ? (p.requests || []).find(r => r.status === "pending") : null;
     let buyinBtn = "";
     if (p.is_me && canBuyIn) {
-        buyinBtn = hasPending
-            ? `<span class="buyin-pending-state"><i class="fa-regular fa-hourglass-half"></i> ${t("buyinPendingState")}</span>`
+        buyinBtn = pendingRequest
+            ? `<div class="buyin-pending-wrap">
+                   <span class="buyin-pending-state"><i class="fa-regular fa-hourglass-half"></i> ${t("buyinPendingState")}</span>
+                   <button type="button" class="btn-withdraw-buyin" data-on-click="openWithdrawModal"
+                       data-args="${escapeHtml(JSON.stringify([Number(pendingRequest.id), Number(pendingRequest.amount)]))}">
+                       <i class="fa-solid fa-rotate-left"></i> ${t("withdrawRequest")}
+                   </button>
+               </div>`
             : `<button type="button" class="btn-submit-buyin" data-on-click="openBuyinModal" data-args="[${gameId}]">
                    <i class="fa-solid fa-plus"></i> ${t("submitBuyinRequest")}
                </button>`;
@@ -356,6 +367,68 @@ async function confirmBuyin() {
         closeBuyinModal();
         loadUserGames(true);
     }, 1200);
+}
+
+// ── 撤回待审批的申请 ──
+// 用弹窗确认而不是在卡片里确认：卡片每 5 秒会随轮询重新渲染，弹窗不受影响
+
+let withdrawRequestId = null;
+let withdrawSubmitting = false;
+
+function setWithdrawSubmitting(submitting) {
+    withdrawSubmitting = submitting;
+    const confirmBtn = document.getElementById("withdraw-confirm-button");
+    const cancelBtn = document.getElementById("withdraw-cancel-button");
+    if (confirmBtn) {
+        confirmBtn.disabled = submitting;
+        confirmBtn.innerText = submitting ? t("withdrawing") : t("confirmWithdraw");
+    }
+    if (cancelBtn) cancelBtn.disabled = submitting;
+}
+
+function openWithdrawModal(requestId, amount) {
+    withdrawRequestId = requestId;
+    setWithdrawSubmitting(false);
+    document.getElementById("withdraw-desc").innerText = t("withdrawRequestDesc").replace("{amount}", amount);
+    document.getElementById("withdraw-message").innerText = "";
+    document.getElementById("withdraw-modal").style.display = "flex";
+}
+
+function closeWithdrawModal() {
+    if (withdrawSubmitting) return;
+    document.getElementById("withdraw-modal").style.display = "none";
+    withdrawRequestId = null;
+}
+
+async function confirmWithdrawRequest() {
+    if (withdrawSubmitting || withdrawRequestId === null) return;
+    const messageBox = document.getElementById("withdraw-message");
+    messageBox.innerText = "";
+
+    setWithdrawSubmitting(true);
+    let data;
+    try {
+        data = await apiWithdrawBuyinRequest(withdrawRequestId);
+    } catch (error) {
+        data = { success: false, message: "connectionLostFirst" };
+    }
+
+    if (!data.success && data.message === "connectionLostFirst") {
+        // 网络问题：留在弹窗里，可以再试一次
+        setWithdrawSubmitting(false);
+        messageBox.innerText = t(data.message);
+        return;
+    }
+
+    setWithdrawSubmitting(false);
+    closeWithdrawModal();
+    if (data.success) {
+        showGameToast(t("withdrawRequestSuccess"), true);
+    } else {
+        // 例如局头刚好同时批准/拒绝了：以服务器的状态为准，刷新后就能看到结果
+        showGameToast(t(data.message || "operationFailed"), false);
+    }
+    loadUserGames(true);
 }
 
 // 切换语言后，用最新的数据重新渲染（不用等下一次轮询）

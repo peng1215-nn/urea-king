@@ -36,10 +36,17 @@
 
     <div id="onboarding-slot" data-role="user" hidden></div>
 
-    <div class="announcement-overview-card">
+    <div id="announcement-overview-card" class="announcement-overview-card is-clickable" role="button" tabindex="0"
+         aria-haspopup="dialog" aria-controls="announcements-modal"
+         data-i18n-aria-label="viewAllAnnouncements" aria-label="查看全部公告"
+         data-on-click="openAnnouncementsModal">
         <div class="announcement-overview-header">
             <div class="announcement-icon"><i class="fa-solid fa-bullhorn"></i></div>
             <h2 data-i18n="announcements">公告</h2>
+            <span class="announcement-view-all">
+                <span data-i18n="viewAll">查看全部</span>
+                <i class="fa-solid fa-chevron-right"></i>
+            </span>
         </div>
         <div id="announcement-preview-list" class="announcement-preview-list">
             <div id="announcement-empty-msg" class="announcement-loading" data-i18n="loading">加载中...</div>
@@ -98,6 +105,21 @@
             <button class="modal-confirm-button" data-on-click="confirmJoinGroup" data-i18n="confirm">确认</button>
             <button class="modal-cancel-button" data-on-click="closeJoinGroupModal" data-i18n="cancel">取消</button>
         </div>
+    </div>
+</div>
+
+<!-- 全部公告 -->
+<div id="announcements-modal" class="custom-modal announcements-modal" style="display:none;"
+     data-on-click="onAnnouncementsOverlayClick" data-args="[&quot;$event&quot;]">
+    <div class="custom-modal-content announcements-modal-content" role="dialog" aria-modal="true" aria-labelledby="announcements-modal-title">
+        <div class="announcements-modal-header">
+            <h3 id="announcements-modal-title"><i class="fa-solid fa-bullhorn"></i> <span data-i18n="allAnnouncements">全部公告</span></h3>
+            <button type="button" id="announcements-close-button" class="announcements-close-btn"
+                    data-on-click="closeAnnouncementsModal" data-i18n-aria-label="close" aria-label="关闭">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div id="announcements-modal-list" class="announcements-modal-list"></div>
     </div>
 </div>
 

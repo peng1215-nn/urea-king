@@ -211,7 +211,7 @@ class EmailVerification(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("platform_users.id"), nullable=False, index=True)
     token = Column(String(128), unique=True, nullable=False, index=True)
-    # 'verify_email' | 'reset_password'
+    # 'verify_email' | 'reset_password' | 'change_email'（已验证账号更换邮箱）
     purpose = Column(String(30), nullable=False)
     expires_at = Column(DateTime, nullable=False)
     used = Column(Integer, nullable=False, default=0)

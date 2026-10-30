@@ -292,3 +292,44 @@ def test_report_flags_settlement_changed_after_finish(table):
     assert report["all_match"] is False
     row = next(r for r in report["summary"] if r["user_id"] == t["members"][0])
     assert row["matches"] is False
+
+
+def test_withdrawn_request_is_in_report_and_totals_still_match(table):
+    from poker.services.user.game import submit_buyin_request_service, withdraw_buyin_request_service
+
+    t = table
+    svc = _svc()
+    alice, bob, _carol = t["members"]
+    game_id = svc.start_game_service(
+        group_id=t["group"], organizer_id=t["org"], name="撤回",
+        preselected_user_ids=[t["org"], alice, bob],
+    )["game_id"]
+
+    assert submit_buyin_request_service(game_id=game_id, group_id=t["group"], user_id=alice, amount=300)["success"]
+    assert withdraw_buyin_request_service(_request_id(game_id, alice), t["group"], alice)["success"]
+    assert submit_buyin_request_service(game_id=game_id, group_id=t["group"], user_id=alice, amount=100)["success"]
+    assert svc.approve_chip_request_service(_request_id(game_id, alice), game_id, t["group"], t["org"])["success"]
+    assert svc.organizer_buyin_service(game_id=game_id, group_id=t["group"], user_id=t["org"], amount=100)["success"]
+
+    result = svc.finish_game_service(
+        game_id=game_id, group_id=t["group"], organizer_id=t["org"],
+        player_cash_outs=[
+            {"user_id": t["org"], "cash_out": 50},
+            {"user_id": alice, "cash_out": 150},
+            {"user_id": bob, "cash_out": 0},
+        ],
+    )
+    assert result["success"] is True, result
+
+    report = _report(game_id, t["group"])
+    withdrawn = [e for e in report["events"] if e["type"] == "buyin_withdrawn"]
+    assert len(withdrawn) == 1
+    assert withdrawn[0]["actor_name"] == "alice001"
+    assert withdrawn[0]["target_name"] == "alice001"
+    assert withdrawn[0]["amount"] == 300
+
+    assert report["all_match"] is True
+    alice_row = next(row for row in report["summary"] if row["user_id"] == alice)
+    assert alice_row["total_buy_in"] == 100
+    assert alice_row["buy_in_from_events"] == 100
+    assert report["game"]["total_buy_in"] == 200
