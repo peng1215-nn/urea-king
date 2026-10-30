@@ -15,7 +15,7 @@ def create_group_page(request: Request):
 
 
 @router.post("/create-group")
-def create_group(request: Request, group_name: str = Form(...)):
+def create_group(request: Request, group_name: str = Form(..., max_length=200)):
     user_id = request.session.get("user_id")
     if not user_id:
         return {"success": False, "error_code": "loginRequired"}

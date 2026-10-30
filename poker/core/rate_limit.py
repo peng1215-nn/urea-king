@@ -22,6 +22,10 @@ login_failures_by_ip = SlidingWindowLimiter(30, WINDOW)
 # 这一条是防分布式猜密码的唯一屏障，多留一些键的空间
 login_failures_by_username = SlidingWindowLimiter(20, WINDOW, max_keys=100000)
 
+# 所有需要校验密码的请求（登录、邀请码加组、注销、更换验证邮箱），不论成败：同一 IP 15 分钟内最多 60 次。
+# 只限制失败的话，用一个真实账号循环"正确密码登录"就能不停消耗 CPU（密码哈希）和数据库连接
+password_checks_by_ip = SlidingWindowLimiter(60, WINDOW)
+
 # 注册：同一 IP 15 分钟内最多 10 次注册请求（成功的也计数，防止借注册给任意邮箱发信）
 register_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
 
@@ -165,6 +169,11 @@ def reserve_login_attempt(ip, username):
     需要校验账号密码的请求（登录、注销、改邮箱、邀请码加组）在校验之前调用。
     先按"失败"占用名额；密码正确时调用 release() 退回。
     """
+    # 先按"所有请求"计数：这一项不随 release() 退回，密码正确也算一次
+    wait, _ = password_checks_by_ip.try_hit(ip or "unknown")
+    if wait:
+        return Reservation(wait=wait)
+
     account_key, ip_key = login_keys(ip, username)
     reservation = reserve([
         (login_failures_by_account, account_key, True),

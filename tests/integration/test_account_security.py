@@ -11,9 +11,9 @@ def no_real_email(monkeypatch):
     sent = []
     from poker.services.auth import change_email, resend_verify, reset_password
 
-    monkeypatch.setattr(change_email, "send_verify_email", lambda to, token: sent.append((to, token)) or True)
-    monkeypatch.setattr(resend_verify, "send_verify_email", lambda to, token: sent.append((to, token)) or True)
-    monkeypatch.setattr(reset_password, "send_reset_password", lambda to, token: sent.append((to, token)) or True)
+    monkeypatch.setattr(change_email, "send_verify_email", lambda to, token, *rest: sent.append((to, token)) or True)
+    monkeypatch.setattr(resend_verify, "send_verify_email", lambda to, token, *rest: sent.append((to, token)) or True)
+    monkeypatch.setattr(reset_password, "send_reset_password", lambda to, token, *rest: sent.append((to, token)) or True)
     return sent
 
 
@@ -253,7 +253,7 @@ def test_group_join_requires_verified_email(client, factory):
 def test_successful_registrations_are_rate_limited(client, monkeypatch):
     from poker.services.auth import register
 
-    monkeypatch.setattr(register, "send_verify_email", lambda to, token: True)
+    monkeypatch.setattr(register, "send_verify_email", lambda to, token, *rest: True)
 
     for i in range(10):
         response = client.post("/register", data={
@@ -365,7 +365,7 @@ def test_squatted_email_cannot_block_the_real_owner(client, monkeypatch):
     from poker.services.auth import register
     from poker.services.auth.register import verify_email_service
 
-    monkeypatch.setattr(register, "send_verify_email", lambda to, token: True)
+    monkeypatch.setattr(register, "send_verify_email", lambda to, token, *rest: True)
     form = {"email": "victim@example.com", "password": "GoodPass123", "confirm_password": "GoodPass123"}
 
     assert client.post("/register", data={**form, "username": "squatter1", "nickname": "squat"}).json()["success"] is True
@@ -404,7 +404,7 @@ def test_verify_page_shows_which_account(client, monkeypatch):
     from poker.models import EmailVerification, User
     from poker.services.auth import register
 
-    monkeypatch.setattr(register, "send_verify_email", lambda to, token: True)
+    monkeypatch.setattr(register, "send_verify_email", lambda to, token, *rest: True)
     client.post("/register", data={
         "username": "pageuser1", "nickname": "pageuser", "email": "page@example.com",
         "password": "GoodPass123", "confirm_password": "GoodPass123",
@@ -424,7 +424,7 @@ def test_verify_page_shows_which_account(client, monkeypatch):
 def test_nickname_must_be_unique_at_registration(client, factory, monkeypatch):
     from poker.services.auth import register
 
-    monkeypatch.setattr(register, "send_verify_email", lambda to, token: True)
+    monkeypatch.setattr(register, "send_verify_email", lambda to, token, *rest: True)
     factory.user("orgnick01", nickname="王局头")
     result = client.post("/register", data={
         "username": "copycat1", "nickname": "王局头", "email": "copy@example.com",
@@ -446,3 +446,71 @@ def test_only_one_pending_buyin_request_per_player(factory):
 
     assert submit_buyin_request_service(game_id, group_id, alice, 100)["success"] is True
     assert submit_buyin_request_service(game_id, group_id, alice, 100)["message"] == "buyinRequestPending"
+
+
+# ───────────────────────── 第八轮 ─────────────────────────
+
+def test_overlong_username_is_rejected_before_any_work(client):
+    response = client.post("/login", data={"username": "a" * 5000, "password": "whatever123"})
+    assert response.status_code == 422
+    assert response.json() == {"success": False, "message": "invalidRequest"}
+
+
+def test_successful_logins_are_also_rate_limited_per_ip(client, factory):
+    factory.user("loop0001")
+    statuses = [
+        client.post("/login", data={"username": "loop0001", "password": DEFAULT_PASSWORD}).status_code
+        for _ in range(61)
+    ]
+    assert statuses[:60] == [200] * 60
+    assert statuses[60] == 429
+
+
+def test_resend_sends_a_link_for_every_pending_account(client, factory, no_real_email):
+    first = factory.user("pend0001")
+    second = factory.user("pend0002")
+    _set_user(first, email=None, pending_email="shared@example.com", email_verified=0)
+    _set_user(second, email=None, pending_email="shared@example.com", email_verified=0)
+
+    result = client.post("/resend-verify-email", data={"email": "shared@example.com"}).json()
+    assert result == {"success": True, "error_code": "resendSent"}
+    assert len(no_real_email) == 2
+
+
+def test_legacy_invite_codes_must_match_case_exactly(factory):
+    from database import SessionLocal
+    from poker.services.common.invite_codes import normalize_invite_code
+
+    factory.group("G51")
+    factory.group("G52")
+    factory.invite("Abc", "G51")
+    factory.invite("ABC", "G52")
+    db = SessionLocal()
+    try:
+        assert normalize_invite_code(db, "abc") == "abc"   # 不会匹配到别的组的 "ABC"
+        assert normalize_invite_code(db, "Abc") == "Abc"
+    finally:
+        db.close()
+
+
+def test_reset_link_does_not_work_for_disabled_account(client, factory):
+    from datetime import timedelta
+
+    from core.time import now_columbus_naive
+    from database import SessionLocal
+    from poker.models import EmailVerification
+
+    user_id = factory.user("dis00001")
+    db = SessionLocal()
+    try:
+        db.add(EmailVerification(
+            user_id=user_id, token="reset-disabled", purpose="reset_password",
+            expires_at=now_columbus_naive() + timedelta(minutes=15), used=0,
+        ))
+        db.commit()
+    finally:
+        db.close()
+    _set_user(user_id, is_active=0)
+
+    form = {"token": "reset-disabled", "new_password": "newpass123", "confirm_password": "newpass123"}
+    assert client.post("/reset-password", data=form).json()["error_code"] == "resetTokenInvalid"

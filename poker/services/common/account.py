@@ -3,6 +3,8 @@
 """
 
 
+from sqlalchemy.exc import IntegrityError
+
 from database import SessionLocal
 from poker.models import EmailVerification, User
 from core.validators import check_name, check_password
@@ -76,6 +78,11 @@ def update_nickname_service(user_id, nickname):
             "message": "nicknameUpdateSuccess",
             "nickname": nickname,
         }
+
+    except IntegrityError:
+        # 同一瞬间有人改成了同一个昵称：由数据库的唯一约束兜底
+        db.rollback()
+        return {"success": False, "message": "nicknameExists"}
 
     except Exception as e:
         db.rollback()

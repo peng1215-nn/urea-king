@@ -10,6 +10,7 @@
 
 import logging
 import os
+from html import escape as html_escape
 
 import resend
 
@@ -69,15 +70,22 @@ def _send(to: str, subject: str, html: str) -> bool:
         return False
 
 
-def send_verify_email(to: str, token: str) -> bool:
-    """发送邮箱验证邮件（中英双语）。"""
+def send_verify_email(to: str, token: str, username: str = "") -> bool:
+    """发送邮箱验证邮件（中英双语）。写明是哪个账号，同一个邮箱有多个账号在等验证时不会混淆。"""
     link = f"{_POKER_URL}/verify-email?token={token}"
+    account_line = (
+        f'<p>账号 / Account：<strong>{html_escape(username)}</strong><br>'
+        '<span style="color:#888;font-size:13px;">如果这不是你注册的账号，请不要点击。'
+        " If this isn't the account you registered, don't click.</span></p>"
+        if username else ""
+    )
     html = f"""
     <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;">
       <h2 style="letter-spacing:2px;">UREAKING POKER</h2>
       <p>感谢注册！请点击下方链接验证您的邮箱：<br>
          <span style="color:#888;font-size:13px;">Thank you for registering! Please click the link below to verify your email:</span>
       </p>
+      {account_line}
       <p style="margin:24px 0;">
         <a href="{link}"
            style="background:#111;color:#fff;padding:12px 28px;border-radius:8px;

@@ -1,3 +1,4 @@
+from sqlalchemy import BigInteger
 from sqlalchemy import CheckConstraint
 from sqlalchemy import Column
 from sqlalchemy import DateTime
@@ -62,6 +63,11 @@ class InvitationCode(Base):
 class AuditLog(Base):
 
     __tablename__ = "poker_audit_logs"
+    __table_args__ = (
+        # 系统日志页按时间倒序翻页、按操作类型筛选
+        Index("ix_audit_logs_created_at", "created_at"),
+        Index("ix_audit_logs_action_created_at", "action", "created_at"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     operator_id = Column(Integer, nullable=True)
@@ -106,8 +112,9 @@ class PokerGame(Base):
     name = Column(String(100), nullable=True)
     started_at = Column(DateTime, nullable=False, default=now_columbus_naive)
     ended_at = Column(DateTime, nullable=True)
-    total_buy_in = Column(Integer, nullable=True)
-    total_cash_out = Column(Integer, nullable=True)
+    # 整局累计金额可能超过 32 位整数上限（约 21 亿），用 64 位
+    total_buy_in = Column(BigInteger, nullable=True)
+    total_cash_out = Column(BigInteger, nullable=True)
     is_balanced = Column(Integer, nullable=True)
     player_count = Column(Integer, nullable=True)
     note = Column(Text, nullable=True)
@@ -129,11 +136,11 @@ class PokerGamePlayer(Base):
     game_id = Column(Integer, ForeignKey("poker_games.id"), nullable=False, index=True)
     user_id = Column(Integer, ForeignKey("platform_users.id"), nullable=False)
     nickname = Column(String(50), nullable=True)
-    total_buy_in = Column(Integer, nullable=False, default=0)
-    cash_out = Column(Integer, nullable=True)
-    net = Column(Integer, nullable=True)
+    total_buy_in = Column(BigInteger, nullable=False, default=0)
+    cash_out = Column(BigInteger, nullable=True)
+    net = Column(BigInteger, nullable=True)
     # 中途结算离场时累计拿走的筹码；结束牌局时 总卖出 = 这部分 + 结束时剩余的筹码
-    left_cash_out = Column(Integer, nullable=False, default=0, server_default="0")
+    left_cash_out = Column(BigInteger, nullable=False, default=0, server_default="0")
     is_active = Column(Integer, nullable=False, default=1)
     joined_at = Column(DateTime, nullable=False, default=now_columbus_naive)
 
@@ -220,6 +227,9 @@ class SiteCounter(Base):
     """
 
     __tablename__ = "poker_site_counters"
+    __table_args__ = (
+        UniqueConstraint("key", "date", name="uq_site_counter_key_date"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     key = Column(String(50), nullable=False, index=True)   # 统计项名称

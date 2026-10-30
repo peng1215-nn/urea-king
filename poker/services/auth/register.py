@@ -1,12 +1,14 @@
 import re
 import secrets
+
+from sqlalchemy.exc import IntegrityError
 from datetime import timedelta
 
 from core.time import now_columbus_naive
 
-DELETE_COOLDOWN_HOURS = 24
 from core.validators import check_name, check_password
 from poker.services.common.nicknames import nickname_taken
+from poker.services.auth.email_owner import email_blocked_by_other
 from core.errors import safe_error
 from core.security import pwd_context
 from database import SessionLocal
@@ -76,20 +78,12 @@ def register_user_service(
         if nickname_taken(db, nickname):
             return {"success": False, "error_code": "registerNicknameExists"}
 
-        existing = db.query(User).filter(User.email == email).first()
-        if existing:
-            # 邮箱存在：区分"注销冷却中"和"真正被占用"
-            if existing.is_active == 0 and existing.deleted_at is not None:
-                cooldown_cutoff = now_columbus_naive() - timedelta(hours=DELETE_COOLDOWN_HOURS)
-                if existing.deleted_at > cooldown_cutoff:
-                    # 注销不足 24 小时，禁止重新注册
-                    return {"success": False, "error_code": "registerEmailCooldown"}
-                # 超过 24 小时：允许重新注册，清空旧记录的邮箱让本次注册通过唯一约束
-                existing.email = f"deleted#{existing.id}@deleted"
-                db.flush()
-            else:
-                # 只有已验证的账号才占用邮箱；未验证账号的邮箱在 pending_email 里，不会挡住这里
-                return {"success": False, "error_code": "registerEmailExists"}
+        # 只有已验证的账号才占用邮箱；未验证账号的邮箱在 pending_email 里，不会挡住这里
+        blocked = email_blocked_by_other(db, email)
+        if blocked == "cooldown":
+            return {"success": False, "error_code": "registerEmailCooldown"}
+        if blocked == "taken":
+            return {"success": False, "error_code": "registerEmailExists"}
 
         # 邮箱先放在"待验证"里，不占用：别人用你的邮箱抢注也占不住，谁先完成验证归谁
         new_user = User(
@@ -117,7 +111,7 @@ def register_user_service(
         db.commit()
 
         # 发验证邮件（发送失败不回滚，账号已创建，用户可以重新请求）
-        send_verify_email(email, token)
+        send_verify_email(email, token, username)
 
         write_audit_log(
             request=request,
@@ -128,9 +122,17 @@ def register_user_service(
             new_value=f"email={email}",
             operator_id=new_user.id,
             operator_username=new_user.username,
+            db=db,
         )
 
         return {"success": True, "error_code": "registerSuccess", "nickname": nickname}
+
+    except IntegrityError as e:
+        # 两个人同一瞬间注册同一个用户名或昵称：由数据库的唯一约束兜底
+        db.rollback()
+        if "nickname" in str(getattr(e, "orig", e)):
+            return {"success": False, "error_code": "registerNicknameExists"}
+        return {"success": False, "error_code": "registerUsernameExists"}
 
     except Exception as e:
         safe_error(e)
@@ -197,9 +199,14 @@ def verify_email_service(token: str):
             if not target:
                 return {"success": False, "error_code": "verifyTokenInvalid"}
 
-            # 这个邮箱已经被别的账号验证过了：谁先验证归谁
-            taken = db.query(User.id).filter(User.email == target, User.id != user.id).first()
-            if taken:
+            # 按编号顺序锁住所有和这个邮箱有关的账号：两个账号同时验证同一个邮箱时排队执行，
+            # 后执行的那个会看到邮箱已被验证，而不是互相等待或撞上唯一约束
+            db.query(User.id).filter(
+                (User.pending_email == target) | (User.email == target)
+            ).order_by(User.id).with_for_update().all()
+
+            # 这个邮箱已经被别的账号验证过了：谁先验证归谁（注销超过 24 小时的会被释放）
+            if email_blocked_by_other(db, target, exclude_user_id=user.id):
                 record.used = 1
                 db.commit()
                 return {"success": False, "error_code": "verifyEmailTaken"}
@@ -234,6 +241,11 @@ def verify_email_service(token: str):
 
         db.commit()
         return {"success": True}
+
+    except IntegrityError:
+        # 极少数情况下仍撞上邮箱唯一约束：说明邮箱刚被别的账号验证
+        db.rollback()
+        return {"success": False, "error_code": "verifyEmailTaken"}
 
     except Exception as e:
         safe_error(e)

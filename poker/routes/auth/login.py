@@ -38,8 +38,8 @@ def login_page(request: Request):
 @router.post("/login")
 def login_user(
     request: Request,
-    username: str = Form(...),
-    password: str = Form(...),
+    username: str = Form(..., max_length=50),
+    password: str = Form(..., max_length=256),
 ):
     ip = get_client_ip(request) or "unknown"
 

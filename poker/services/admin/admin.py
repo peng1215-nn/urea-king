@@ -63,6 +63,20 @@ def _increment_counter(key: str):
     today = now_columbus_naive().strftime("%Y-%m-%d")
     db = SessionLocal()
     try:
+        if db.bind.dialect.name == "postgresql":
+            # 在数据库里原子地"没有就插入、有就 +1"，并发访问时不会丢计数
+            from sqlalchemy.dialects.postgresql import insert
+
+            stmt = insert(SiteCounter).values(key=key, date=today, count=1)
+            stmt = stmt.on_conflict_do_update(
+                index_elements=["key", "date"],
+                set_={"count": SiteCounter.count + 1},
+            )
+            db.execute(stmt)
+            db.commit()
+            return
+
+        # 本地开发用的 SQLite：保持原来的做法
         row = db.query(SiteCounter).filter(
             SiteCounter.key == key,
             SiteCounter.date == today,

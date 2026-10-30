@@ -138,16 +138,20 @@ def _csv_safe(value):
     return text
 
 
+EXPORT_MAX_ROWS = 50000
+
+
 def export_audit_logs_csv_service(action=None, username=None):
     """按当前筛选条件导出全部匹配日志，返回带 BOM 的 CSV 文本。"""
     db = SessionLocal()
 
     try:
+        # 最多导出最新的 EXPORT_MAX_ROWS 条，避免一次把整张表读进内存
         rows = _build_filtered_query(
             db, action, username
         ).order_by(
             AuditLog.created_at.desc()
-        ).all()
+        ).limit(EXPORT_MAX_ROWS).all()
 
         buffer = io.StringIO()
         writer = csv.writer(buffer)

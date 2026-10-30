@@ -86,6 +86,7 @@ def create_group_service(request, user_id: int, group_name: str):
             new_value=f"group_code={group_code}, group_name={group_name}",
             operator_id=user_id,
             operator_username=user.username,
+            db=db,
         )
 
         return {

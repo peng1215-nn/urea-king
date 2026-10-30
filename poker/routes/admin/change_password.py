@@ -59,7 +59,7 @@ def get_current_account(request: Request):
 @router.post("/change-password/update-nickname")
 def update_nickname(
     request: Request,
-    nickname: str = Form(...),
+    nickname: str = Form(..., max_length=200),
 ):
     if not require_admin(request):
         return {
@@ -83,9 +83,9 @@ def update_nickname(
 @router.post("/change-password/update-password")
 def update_password(
     request: Request,
-    current_password: str = Form(...),
-    new_password: str = Form(...),
-    confirm_password: str = Form(...),
+    current_password: str = Form(..., max_length=256),
+    new_password: str = Form(..., max_length=256),
+    confirm_password: str = Form(..., max_length=256),
 ):
     if not require_admin(request):
         return {

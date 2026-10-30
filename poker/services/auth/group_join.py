@@ -100,6 +100,7 @@ def group_join_logged_in_service(request, user_id, invite_code):
             new_value=f"group_code={invitation.group_code}, role={invitation.role}",
             operator_id=user.id,
             operator_username=user.username,
+            db=db,
         )
 
         return {
@@ -238,6 +239,7 @@ def group_join_service(
             new_value=f"group_code={invitation.group_code}, role={invitation.role}",
             operator_id=user.id,
             operator_username=user.username,
+            db=db,
         )
 
         return {

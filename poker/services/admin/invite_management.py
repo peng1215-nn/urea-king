@@ -238,6 +238,12 @@ def delete_group_service(group_id):
         deleted_group_code = group.group_code
         deleted_group_name = group.group_name
 
+        # 这个组用过的邀请码也一并删除：邀请码按组编号关联，留着的话，
+        # 以后新建的组碰巧用到同一个编号会"继承"这些记录，还会占用它的邀请码名额
+        db.query(InvitationCode).filter(
+            InvitationCode.group_code == deleted_group_code,
+        ).delete(synchronize_session=False)
+
         db.delete(group)
         db.commit()
 

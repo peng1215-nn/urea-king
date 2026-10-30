@@ -28,11 +28,11 @@ def register_page(request: Request):
 @router.post("/register")
 def register_user(
     request: Request,
-    username: str = Form(...),
-    nickname: str = Form(...),
-    email: str = Form(...),
-    password: str = Form(...),
-    confirm_password: str = Form(...),
+    username: str = Form(..., max_length=50),
+    nickname: str = Form(..., max_length=200),
+    email: str = Form(..., max_length=254),
+    password: str = Form(..., max_length=256),
+    confirm_password: str = Form(..., max_length=256),
 ):
     ip = get_client_ip(request) or "unknown"
     # 每次注册请求都计数（不只是失败的）：注册成功会往外发验证邮件，
@@ -57,7 +57,7 @@ def register_user(
 
 
 @router.post("/resend-verify-email")
-def resend_verify_email(request: Request, background_tasks: BackgroundTasks, email: str = Form(...)):
+def resend_verify_email(request: Request, background_tasks: BackgroundTasks, email: str = Form(..., max_length=254)):
     ip = get_client_ip(request) or "unknown"
     # 回复几乎总是"已发送"，所以按请求次数计数，而不是按失败计数
     wait, _ = resend_verify_failures_by_ip.try_hit(ip)
@@ -74,9 +74,9 @@ def resend_verify_email(request: Request, background_tasks: BackgroundTasks, ema
 def change_email(
     request: Request,
     background_tasks: BackgroundTasks,
-    username: str = Form(...),
-    password: str = Form(...),
-    new_email: str = Form(...),
+    username: str = Form(..., max_length=50),
+    password: str = Form(..., max_length=256),
+    new_email: str = Form(..., max_length=254),
 ):
     ip = get_client_ip(request) or "unknown"
 
@@ -120,7 +120,7 @@ def verify_email_page(request: Request, token: str = ""):
 
 
 @router.post("/verify-email", response_class=HTMLResponse)
-def verify_email_confirm(request: Request, token: str = Form("")):
+def verify_email_confirm(request: Request, token: str = Form("", max_length=256)):
     """用户点击确认按钮后才真正验证 token。"""
     result = verify_email_service(token)
     return templates.TemplateResponse(

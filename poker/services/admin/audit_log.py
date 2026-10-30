@@ -28,8 +28,15 @@ def write_audit_log(
     new_value=None,
     operator_id=None,
     operator_username=None,
+    db=None,
 ):
-    db = SessionLocal()
+    """
+    写一条审计日志。调用方已经开着数据库会话时传 db=，复用同一个连接：
+    否则同一个请求会同时占用两个连接，并发高时连接池被占满、互相等待。
+    """
+    own_session = db is None
+    if own_session:
+        db = SessionLocal()
 
     try:
         log = AuditLog(
@@ -52,4 +59,5 @@ def write_audit_log(
         logging.getLogger("poker.audit").error("failed to write audit log", exc_info=error)
 
     finally:
-        db.close()
+        if own_session:
+            db.close()

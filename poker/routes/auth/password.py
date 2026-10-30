@@ -19,7 +19,7 @@ def forgot_password_page(request: Request):
 
 
 @router.post("/forgot-password")
-def forgot_password(request: Request, background_tasks: BackgroundTasks, email: str = Form(...)):
+def forgot_password(request: Request, background_tasks: BackgroundTasks, email: str = Form(..., max_length=254)):
     ip = get_client_ip(request) or "unknown"
     # 回复总是"已发送"，所以按请求次数计数，而不是按失败计数
     wait, _ = forgot_password_failures_by_ip.try_hit(ip)
@@ -44,9 +44,9 @@ def reset_password_page(request: Request, token: str = ""):
 @router.post("/reset-password")
 def reset_password(
     request: Request,
-    token: str = Form(...),
-    new_password: str = Form(...),
-    confirm_password: str = Form(...),
+    token: str = Form(..., max_length=256),
+    new_password: str = Form(..., max_length=256),
+    confirm_password: str = Form(..., max_length=256),
 ):
     ip = get_client_ip(request) or "unknown"
     # 先按失败占用名额，链接有效时退回

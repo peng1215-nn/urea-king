@@ -19,6 +19,7 @@ from core.time import now_columbus_naive
 from database import SessionLocal
 from poker.core.email import dispatch, send_verify_email
 from poker.models import EmailVerification, User
+from poker.services.auth.email_owner import email_blocked_by_other
 
 CHANGE_EMAIL_INTERVAL_MINUTES = 5
 CHANGE_EMAIL_MAX_PER_DAY = 5
@@ -82,8 +83,11 @@ def change_email_service(username: str, password: str, new_email: str, backgroun
         if sent_today >= CHANGE_EMAIL_MAX_PER_DAY:
             return {"success": False, "error_code": "changeEmailDailyLimit"}
 
-        # 新邮箱不能已被别的账号验证过（未验证账号的邮箱不占用，不会挡住这里）
-        if db.query(User.id).filter(User.email == new_email, User.id != user.id).first():
+        # 新邮箱不能已被别的账号验证过（未验证账号的邮箱不占用；注销超过 24 小时的会被释放）
+        blocked = email_blocked_by_other(db, new_email, exclude_user_id=user.id)
+        if blocked == "cooldown":
+            return {"success": False, "error_code": "changeEmailCooldown"}
+        if blocked == "taken":
             return {"success": False, "error_code": "changeEmailEmailExists"}
 
         # 发往旧邮箱的验证链接全部作废，避免换邮箱后用旧链接把新邮箱标记为已验证
@@ -107,7 +111,7 @@ def change_email_service(username: str, password: str, new_email: str, backgroun
         db.add(verification)
         db.commit()
 
-        dispatch(background_tasks, send_verify_email, new_email, token)
+        dispatch(background_tasks, send_verify_email, new_email, token, user.username)
 
         return {"success": True, "error_code": "changeEmailSuccess"}
 

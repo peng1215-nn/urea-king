@@ -5,7 +5,7 @@ User 是平台统一账号，不属于任何单一模块。
 各模块（poker 等）的 user_id 外键指向这里的 platform_users 表。
 """
 
-from sqlalchemy import Column, DateTime, Integer, String, UniqueConstraint
+from sqlalchemy import Column, DateTime, Index, Integer, String, UniqueConstraint, func
 from database import Base
 from core.time import now_columbus_naive
 
@@ -27,6 +27,16 @@ class User(Base):
     is_active = Column(Integer, nullable=False, default=1)
     created_at = Column(DateTime, default=now_columbus_naive)
     deleted_at = Column(DateTime, nullable=True)
+
+
+# 昵称全站唯一（不区分大小写，已注销的账号不算），见 poker/services/common/nicknames.py
+Index(
+    "uq_platform_users_nickname_lower",
+    func.lower(User.nickname),
+    unique=True,
+    postgresql_where=User.deleted_at.is_(None),
+    sqlite_where=User.deleted_at.is_(None),
+)
 
 
 class UserModule(Base):

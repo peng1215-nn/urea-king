@@ -88,6 +88,7 @@ def login_user_service(request, username, password):
             new_value="login_verified",
             operator_id=user.id,
             operator_username=user.username,
+            db=db,
         )
 
         return {

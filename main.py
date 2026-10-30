@@ -1,3 +1,6 @@
+from contextlib import asynccontextmanager
+
+from starlette.concurrency import run_in_threadpool
 from core.time import now_columbus_naive
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
@@ -11,6 +14,7 @@ from core.errors import register_exception_handlers
 from core.middleware import install_middleware
 from poker.core import session as poker_session
 from poker.template_config import render_error_page
+from poker.services.auth.token_cleanup import delete_expired_tokens
 from poker.routes.common.health import router as health_router
 
 from root.routes.index import router as root_index_router
@@ -46,10 +50,17 @@ setup_logging(settings.LOG_LEVEL)
 setup_error_reporting()
 
 # 线上（含测试环境）不公开接口文档，避免把全部接口和参数暴露给未登录的访客
+@asynccontextmanager
+async def lifespan(app):
+    # 启动时清理一次早已过期的验证、重置链接记录
+    await run_in_threadpool(delete_expired_tokens)
+    yield
+
+
 if settings.IS_PRODUCTION:
-    app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+    app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 else:
-    app = FastAPI()
+    app = FastAPI(lifespan=lifespan)
 
 register_exception_handlers(app, error_page_renderer=render_error_page)
 

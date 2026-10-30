@@ -28,9 +28,9 @@ def delete_account_page(request: Request):
 @router.post("/account/delete")
 def delete_account(
     request: Request,
-    username: str = Form(""),
-    password: str = Form(""),
-    confirm_text: str = Form(""),
+    username: str = Form("", max_length=50),
+    password: str = Form("", max_length=256),
+    confirm_text: str = Form("", max_length=64),
 ):
     ip = get_client_ip(request) or "unknown"
 

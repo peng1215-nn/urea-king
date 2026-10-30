@@ -5,6 +5,7 @@
 按全站每 15 分钟最多 300 次猜码计算，猜中一个码需要几十亿年。
 """
 
+import re
 import secrets
 
 from poker.models import InvitationCode
@@ -12,6 +13,7 @@ from poker.models import InvitationCode
 
 ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
 CODE_LENGTH = 12
+_NEW_FORMAT = re.compile(f"[{ALPHABET}]{{{CODE_LENGTH}}}")
 
 
 def generate_invite_code(db):
@@ -33,8 +35,12 @@ def normalize_invite_code(db, code):
         return code
     if db.query(InvitationCode.id).filter(InvitationCode.code == code).first() is not None:
         return code
+    # 只对系统生成格式的码（12 位、字母表内）不区分大小写，
+    # 以前手填的旧码必须原样输入，避免 "abc" 匹配到别的组的旧码 "ABC"
     upper = code.upper()
-    if upper != code and db.query(InvitationCode.id).filter(InvitationCode.code == upper).first() is not None:
+    if upper != code and _NEW_FORMAT.fullmatch(upper) and (
+        db.query(InvitationCode.id).filter(InvitationCode.code == upper).first() is not None
+    ):
         return upper
     return code
 

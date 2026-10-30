@@ -35,13 +35,19 @@ def upgrade():
 
 
 def downgrade():
-    # 未验证账号的邮箱挪回 email；若与已验证账号冲突则保持为空
+    # 未验证账号的邮箱挪回 email。同一个邮箱可能有多个未验证账号在等，
+    # 只给其中编号最小的那个挪回（email 唯一）；已被已验证账号占用的邮箱不挪
     op.execute(
         """
         UPDATE platform_users AS u
         SET email = u.pending_email
-        WHERE u.email IS NULL
-          AND u.pending_email IS NOT NULL
+        FROM (
+            SELECT DISTINCT ON (pending_email) id
+            FROM platform_users
+            WHERE email IS NULL AND pending_email IS NOT NULL
+            ORDER BY pending_email, id
+        ) AS first_pending
+        WHERE u.id = first_pending.id
           AND NOT EXISTS (SELECT 1 FROM platform_users v WHERE v.email = u.pending_email)
         """
     )

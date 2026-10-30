@@ -26,8 +26,8 @@ def forgot_password_service(email: str, background_tasks=None):
     db = SessionLocal()
     try:
         user = db.query(User).filter(User.email == email).first()
-        if not user or not user.email_verified:
-            # 静默成功，不暴露账号是否存在
+        # 不存在、未验证、已停用、已注销的账号都不发邮件，静默返回成功，不暴露账号状态
+        if not user or not user.email_verified or user.is_active == 0 or user.deleted_at is not None:
             return {"success": True}
 
         now = now_columbus_naive()
@@ -123,7 +123,8 @@ def reset_password_service(token: str, new_password: str, confirm_password: str)
             return {"success": False, "error_code": "resetTokenExpired"}
 
         user = db.query(User).filter(User.id == record.user_id).first()
-        if not user:
+        # 停用或注销之前申请的重置链接，不能再改那个账号的密码
+        if not user or user.is_active == 0 or user.deleted_at is not None:
             return {"success": False, "error_code": "resetTokenInvalid"}
 
         user.password_hash = pwd_context.hash(new_password)

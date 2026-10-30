@@ -40,9 +40,9 @@ def group_join_page(request: Request):
 @router.post("/group-join")
 def group_join(
     request: Request,
-    invite_code: str = Form(...),
-    username: Optional[str] = Form(None),
-    password: Optional[str] = Form(None),
+    invite_code: str = Form(..., max_length=64),
+    username: Optional[str] = Form(None, max_length=50),
+    password: Optional[str] = Form(None, max_length=256),
 ):
     ip = get_client_ip(request) or "unknown"
     user_id = request.session.get("user_id")
@@ -70,7 +70,8 @@ def group_join(
         global_attempt = Reservation()
     blocked = ip_attempt.wait or (global_attempt.wait if global_attempt else 0)
     if blocked:
-        ip_attempt.release()
+        # 被全站上限挡下时，按 IP 的次数照样扣（不退回）：否则"挡下还是放行"就成了
+        # 可以无限试探邀请码是否有效的信号。被按 IP 上限挡下时本来就没有占用名额。
         if global_attempt:
             global_attempt.release()
         if login_attempt:
