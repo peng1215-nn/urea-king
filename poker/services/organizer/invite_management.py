@@ -55,19 +55,20 @@ def create_invite_code_service(group_id: int, code: str):
         if not group:
             return {"success": False, "message": "groupNotFound"}
 
-        existing = db.query(InvitationCode).filter(
-            InvitationCode.code == code
-        ).first()
-
-        if existing:
-            return {"success": False, "message": "inviteCodeExists"}
-
+        # 先检查本组数量上限，再检查是否重复：数量已满时不回答"这个码是否存在"
         total_count = db.query(InvitationCode).filter(
             InvitationCode.group_code == group.group_code,
         ).count()
 
         if total_count >= group.invite_code_limit:
             return {"success": False, "message": "inviteCodeLimitReached"}
+
+        existing = db.query(InvitationCode).filter(
+            InvitationCode.code == code
+        ).first()
+
+        if existing:
+            return {"success": False, "message": "inviteCodeExists"}
 
         invitation = InvitationCode(
             code=code,

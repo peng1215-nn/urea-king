@@ -1,5 +1,6 @@
 window.forgotPasswordTranslations = {
     zh: {
+        invalidRequest: "提交的内容格式不正确，请检查后重试。",
         pageTitle: "找回密码 - UREAKING POKER",
         resetPageTitle: "重置密码 - UREAKING POKER",
         newPassword: "新密码",
@@ -31,6 +32,7 @@ window.forgotPasswordTranslations = {
         forgotPasswordTooManyAttempts: "尝试次数过多，请 15 分钟后再试。",
     },
     en: {
+        invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
         pageTitle: "Forgot Password - UREAKING POKER",
         resetPageTitle: "Reset Password - UREAKING POKER",
         newPassword: "New Password",

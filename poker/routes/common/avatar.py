@@ -18,7 +18,8 @@ async def upload_avatar(
     if not user_id:
         return {"success": False, "message": "notLoggedIn"}
 
-    wait = avatar_uploads_by_user.retry_after(str(user_id))
+    # 先占名额，上传失败时退回
+    wait, stamp = avatar_uploads_by_user.try_hit(str(user_id))
     if wait:
         return JSONResponse(
             {"success": False, "message": "tooManyUploads", "retry_after": wait},
@@ -29,6 +30,6 @@ async def upload_avatar(
     data = await avatar.read(MAX_AVATAR_BYTES + 1)
 
     result = upload_avatar_service(user_id, data)
-    if result.get("success"):
-        avatar_uploads_by_user.hit(str(user_id))
+    if not result.get("success"):
+        avatar_uploads_by_user.undo(str(user_id), stamp)
     return result

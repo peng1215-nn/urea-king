@@ -1,12 +1,10 @@
 from fastapi import APIRouter
-from fastapi import Form
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
 
 from poker.services.common.game_log import get_game_logs_service
 from poker.services.common.game_log import get_stats_service
-from poker.services.common.game_log import delete_game_log_service
 from poker.services.common.game_log import get_member_stats_service
 from poker.services.common.game_log import get_member_trend_service
 from poker.services.common.common import add_no_cache_headers
@@ -61,16 +59,7 @@ def get_stats(request: Request):
     return get_stats_service(group_id=int(group_id))
 
 
-@router.post("/organizer/game-log/delete")
-def delete_game_log(request: Request, game_id: int = Form(...)):
-    if not require_organizer(request):
-        return {"success": False, "message": "permissionDenied"}
-
-    group_id = get_group_id(request)
-    if not group_id:
-        return {"success": False, "message": "noGroupSelected"}
-
-    return delete_game_log_service(game_id=game_id, group_id=int(group_id))
+# 删除牌局记录只开放给管理员（/admin/game-log/delete），局头不能删除
 
 @router.get("/organizer/game-log/member-stats")
 def get_member_stats(request: Request):

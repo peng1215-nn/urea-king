@@ -8,7 +8,7 @@ from poker.services.auth.login import login_user_service
 from poker.services.auth.login import select_group_service, get_user_groups_service
 from poker.template_config import templates
 from fastapi.responses import JSONResponse
-from poker.core.rate_limit import login_retry_after, record_login_failure, record_login_success
+from poker.core.rate_limit import record_login_success, reserve_login_attempt
 from poker.services.admin.audit_log import get_client_ip
 from poker.services.admin.admin import record_login_page_view_service, record_login_success_service
 
@@ -42,14 +42,15 @@ def login_user(
     password: str = Form(...),
 ):
     ip = get_client_ip(request) or "unknown"
-    wait = login_retry_after(ip, username)
 
-    if wait:
+    # 先按失败占用一次名额，再校验密码；并发的请求不能同时通过检查
+    attempt = reserve_login_attempt(ip, username)
+    if attempt.wait:
         return JSONResponse(
             {
                 "success": False,
                 "error_code": "loginTooManyAttempts",
-                "retry_after": wait,
+                "retry_after": attempt.wait,
             },
             status_code=429,
         )
@@ -60,11 +61,13 @@ def login_user(
         password=password,
     )
 
+    # 只有账号密码错误才算失败，其余情况退回名额
+    if result.get("error_code") != "loginInvalidCredentials":
+        attempt.release()
+
     if result.get("success"):
         record_login_success(ip, username)
         record_login_success_service()
-    elif result.get("error_code") == "loginInvalidCredentials":
-        record_login_failure(ip, username)
 
     return result
 

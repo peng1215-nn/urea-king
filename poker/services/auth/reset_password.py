@@ -8,7 +8,7 @@ from core.security import pwd_context
 from core.time import now_columbus_naive
 from core.validators import check_password
 from database import SessionLocal
-from poker.core.email import send_reset_password
+from poker.core.email import dispatch, send_reset_password
 from poker.models import EmailVerification, User
 
 TOKEN_TTL_MINUTES = 15
@@ -16,7 +16,7 @@ RESET_INTERVAL_MINUTES = 5
 RESET_MAX_PER_DAY = 5
 
 
-def forgot_password_service(email: str):
+def forgot_password_service(email: str, background_tasks=None):
     """
     接收邮箱，查用户，生成 reset token，发邮件。
     无论邮箱是否存在都返回相同提示，防止枚举账号。
@@ -73,7 +73,7 @@ def forgot_password_service(email: str):
         db.add(record)
         db.commit()
 
-        send_reset_password(email, token)
+        dispatch(background_tasks, send_reset_password, email, token)
         return {"success": True}
 
     except Exception as e:

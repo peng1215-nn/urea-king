@@ -1,5 +1,6 @@
 window.userTranslations = {
     zh: {
+        invalidRequest: "提交的内容格式不正确，请检查后重试。",
         noGroupSelected: "未选择组别，请重新登录。",
         notLoggedIn: "未登录。",
         groupNotFound: "组别不存在。",
@@ -177,6 +178,7 @@ window.userTranslations = {
     },
 
     en: {
+        invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
         noGroupSelected: "No group selected. Please sign in again.",
         notLoggedIn: "You are not signed in.",
         groupNotFound: "Group does not exist.",

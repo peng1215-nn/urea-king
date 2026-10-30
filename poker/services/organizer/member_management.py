@@ -8,6 +8,7 @@ from poker.models import UserGroupRole
 from core.validators import check_name
 from poker.core.validators import ALIAS_MAX
 from core.errors import safe_error
+from poker.services.common.common import user_in_ongoing_game
 
 
 def _get_aliases(db, group_id: int) -> dict:
@@ -131,6 +132,9 @@ def remove_member_service(group_id: int, target_user_id: int):
     db = SessionLocal()
 
     try:
+        # 先锁住组：和"加入牌局"互斥，避免一边移除、一边把他加进牌局
+        db.query(Group.id).filter(Group.id == group_id).with_for_update().first()
+
         record = db.query(UserGroupRole).filter(
             UserGroupRole.group_id == group_id,
             UserGroupRole.user_id == target_user_id,
@@ -148,6 +152,13 @@ def remove_member_service(group_id: int, target_user_id: int):
                 "message": "cannotRemoveOrganizer",
             }
 
+        # 和成员自己退出组一样：还在进行中的牌局里时不能移除
+        if user_in_ongoing_game(db, target_user_id, group_id):
+            return {
+                "success": False,
+                "message": "removeMemberOngoingGame",
+            }
+
         # 释放该成员使用的邀请码仓位
         user = db.query(User).filter(User.id == target_user_id).first()
         group = db.query(Group).filter(Group.id == group_id).first()
@@ -159,6 +170,12 @@ def remove_member_service(group_id: int, target_user_id: int):
             ).first()
             if used_invite:
                 db.delete(used_invite)
+
+        # 和成员自己退出组一样：删除局头给他设的备注名
+        db.query(GroupMemberAlias).filter(
+            GroupMemberAlias.group_id == group_id,
+            GroupMemberAlias.user_id == target_user_id,
+        ).delete(synchronize_session=False)
 
         db.delete(record)
         db.commit()

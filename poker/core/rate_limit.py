@@ -21,13 +21,15 @@ login_failures_by_account = SlidingWindowLimiter(5, WINDOW)
 login_failures_by_ip = SlidingWindowLimiter(30, WINDOW)
 login_failures_by_username = SlidingWindowLimiter(20, WINDOW)
 
-# 邀请码：同一 IP 15 分钟内最多 10 次邀请码相关失败；
-# “邀请码不存在”（猜码）全站合计最多 300 次
+# 注册：同一 IP 15 分钟内最多 10 次注册请求（成功的也计数，防止借注册给任意邮箱发信）
 register_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
+
+# 邀请码：同一 IP 15 分钟内最多 10 次邀请码相关失败；
+# “邀请码不存在”（猜码）全站合计最多 300 次；局头创建邀请码时撞到已存在的码也计入
 group_join_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
 invite_failures_global = SlidingWindowLimiter(300, WINDOW)
 
-# 重发验证邮件：同一 IP 15 分钟内最多 10 次失败
+# 重发验证邮件：同一 IP 15 分钟内最多 10 次请求
 resend_verify_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
 
 # 忘记密码：同一 IP 15 分钟内最多 10 次
@@ -109,6 +111,66 @@ def record_login_failure(ip, username):
     login_failures_by_account.hit(account_key)
     login_failures_by_ip.hit(ip_key)
     login_failures_by_username.hit(username_key(username))
+
+
+# ───── 先占名额、再校验：避免并发请求一起通过检查 ─────
+
+class Reservation:
+    """
+    reserve() 的结果。wait > 0 表示已达上限（此时没有占用任何名额）。
+    名额占用后：这次请求算作失败时什么也不用做；不算失败时调用 release() 退回名额。
+    """
+
+    def __init__(self, held=None, wait=0):
+        self._held = held or []
+        self.wait = wait
+
+    def release(self):
+        for limiter, key, stamp in self._held:
+            limiter.undo(key, stamp)
+        self._held = []
+
+    def stamp_of(self, limiter):
+        """取出某个限流器这次的计数时间戳，用于只退回其中一项。"""
+        for held_limiter, _key, stamp in self._held:
+            if held_limiter is limiter:
+                return stamp
+        return None
+
+
+def reserve(entries):
+    """
+    entries: [(limiter, key, enforce)]。enforce=False 表示只计数、不因它拦截。
+    任何一项已达上限时，退回已占的名额并返回 wait > 0。
+    """
+    held = []
+    for limiter, key, enforce in entries:
+        if enforce:
+            wait, stamp = limiter.try_hit(key)
+            if wait:
+                Reservation(held).release()
+                return Reservation(wait=wait)
+        else:
+            stamp = limiter.hit(key)
+        held.append((limiter, key, stamp))
+    return Reservation(held)
+
+
+def reserve_login_attempt(ip, username):
+    """
+    需要校验账号密码的请求（登录、注销、改邮箱、邀请码加组）在校验之前调用。
+    先按"失败"占用名额；密码正确时调用 release() 退回。
+    """
+    account_key, ip_key = login_keys(ip, username)
+    reservation = reserve([
+        (login_failures_by_account, account_key, True),
+        (login_failures_by_ip, ip_key, True),
+        # 曾在该 IP 成功登录过的不受"同一用户名"这条限制，但仍然计数
+        (login_failures_by_username, username_key(username), not is_trusted_login(ip, username)),
+    ])
+    if reservation.wait:
+        reservation.wait = max(reservation.wait, login_retry_after(ip, username))
+    return reservation
 
 
 def record_login_success(ip, username):

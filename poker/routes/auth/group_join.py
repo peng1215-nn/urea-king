@@ -9,7 +9,13 @@ from poker.services.auth.group_join import group_join_service
 from poker.services.auth.group_join import group_join_logged_in_service
 from poker.template_config import templates
 from fastapi.responses import JSONResponse
-from poker.core.rate_limit import GLOBAL_KEY, group_join_failures_by_ip, invite_failures_global, login_retry_after, record_login_failure
+from poker.core.rate_limit import (
+    GLOBAL_KEY,
+    group_join_failures_by_ip,
+    invite_failures_global,
+    reserve,
+    reserve_login_attempt,
+)
 from poker.services.admin.audit_log import get_client_ip
 
 
@@ -39,58 +45,57 @@ def group_join(
     ip = get_client_ip(request) or "unknown"
     user_id = request.session.get("user_id")
 
-    # 已登录用户：直接用 session 身份，只需邀请码
-    if user_id:
-        wait = max(
-            group_join_failures_by_ip.retry_after(ip),
-            invite_failures_global.retry_after(GLOBAL_KEY),
+    # 未登录用户：需要账号密码 + 邀请码
+    if not user_id:
+        if not username:
+            return {"success": False, "message": "groupJoinUsernameRequired"}
+        if not password:
+            return {"success": False, "message": "groupJoinPasswordRequired"}
+
+    # 先占名额再校验，并发的请求不能同时通过检查。
+    # 账号密码错误计入登录限流；邀请码不存在或已使用计入按 IP 限流；邀请码不存在还计入全站上限。
+    login_attempt = reserve_login_attempt(ip, username) if not user_id else None
+    if login_attempt and login_attempt.wait:
+        return JSONResponse(
+            {"success": False, "message": "groupJoinTooManyAttempts", "retry_after": login_attempt.wait},
+            status_code=429,
         )
-        if wait:
-            return JSONResponse(
-                {"success": False, "message": "groupJoinTooManyAttempts", "retry_after": wait},
-                status_code=429,
-            )
+
+    ip_attempt = reserve([(group_join_failures_by_ip, ip, True)])
+    global_attempt = reserve([(invite_failures_global, GLOBAL_KEY, True)]) if not ip_attempt.wait else None
+    blocked = ip_attempt.wait or (global_attempt.wait if global_attempt else 0)
+    if blocked:
+        ip_attempt.release()
+        if global_attempt:
+            global_attempt.release()
+        if login_attempt:
+            login_attempt.release()
+        return JSONResponse(
+            {"success": False, "message": "groupJoinTooManyAttempts", "retry_after": blocked},
+            status_code=429,
+        )
+
+    if user_id:
+        # 已登录用户：直接用 session 身份，只需邀请码
         result = group_join_logged_in_service(
             request=request,
             user_id=user_id,
             invite_code=invite_code,
         )
-        if result.get("message") in ("groupJoinInviteCodeNotFound", "groupJoinInviteCodeUsed"):
-            group_join_failures_by_ip.hit(ip)
-            if result.get("message") == "groupJoinInviteCodeNotFound":
-                invite_failures_global.hit(GLOBAL_KEY)
-        return result
-
-    # 未登录用户：需要账号密码 + 邀请码
-    if not username:
-        return {"success": False, "message": "groupJoinUsernameRequired"}
-    if not password:
-        return {"success": False, "message": "groupJoinPasswordRequired"}
-
-    wait = max(
-        login_retry_after(ip, username),
-        group_join_failures_by_ip.retry_after(ip),
-        invite_failures_global.retry_after(GLOBAL_KEY),
-    )
-    if wait:
-        return JSONResponse(
-            {"success": False, "message": "groupJoinTooManyAttempts", "retry_after": wait},
-            status_code=429,
+    else:
+        result = group_join_service(
+            request=request,
+            username=username,
+            password=password,
+            invite_code=invite_code,
         )
 
-    result = group_join_service(
-        request=request,
-        username=username,
-        password=password,
-        invite_code=invite_code,
-    )
-
     message = result.get("message")
-    if message == "groupJoinAccountInvalid":
-        record_login_failure(ip, username)
-    elif message in ("groupJoinInviteCodeNotFound", "groupJoinInviteCodeUsed"):
-        group_join_failures_by_ip.hit(ip)
-        if message == "groupJoinInviteCodeNotFound":
-            invite_failures_global.hit(GLOBAL_KEY)
+    if login_attempt and message != "groupJoinAccountInvalid":
+        login_attempt.release()
+    if message not in ("groupJoinInviteCodeNotFound", "groupJoinInviteCodeUsed"):
+        ip_attempt.release()
+    if message != "groupJoinInviteCodeNotFound":
+        global_attempt.release()
 
     return result

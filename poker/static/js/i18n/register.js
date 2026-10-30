@@ -1,5 +1,6 @@
 window.registerTranslations = {
     zh: {
+        invalidRequest: "提交的内容格式不正确，请检查后重试。",
         pageTitle: "UREAKING-POKER 注册",
         username: "用户名",
         nickname: "昵称",
@@ -67,6 +68,7 @@ window.registerTranslations = {
     },
 
     en: {
+        invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
         pageTitle: "UREAKING-POKER Register",
         username: "Username",
         nickname: "Nickname",

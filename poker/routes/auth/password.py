@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, BackgroundTasks, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from core.middleware import clear_session_cache
@@ -19,17 +19,17 @@ def forgot_password_page(request: Request):
 
 
 @router.post("/forgot-password")
-def forgot_password(request: Request, email: str = Form(...)):
+def forgot_password(request: Request, background_tasks: BackgroundTasks, email: str = Form(...)):
     ip = get_client_ip(request) or "unknown"
-    wait = forgot_password_failures_by_ip.retry_after(ip)
+    # 回复总是"已发送"，所以按请求次数计数，而不是按失败计数
+    wait, _ = forgot_password_failures_by_ip.try_hit(ip)
     if wait:
         return JSONResponse(
             {"success": False, "error_code": "forgotPasswordTooManyAttempts", "retry_after": wait},
             status_code=429,
         )
-    # 回复总是"已发送"，所以按请求次数计数，而不是按失败计数
-    forgot_password_failures_by_ip.hit(ip)
-    return forgot_password_service(email=email)
+    # 邮件在响应返回后再发，响应时间不会暴露邮箱是否注册
+    return forgot_password_service(email=email, background_tasks=background_tasks)
 
 
 @router.get("/reset-password", response_class=HTMLResponse)
@@ -49,7 +49,8 @@ def reset_password(
     confirm_password: str = Form(...),
 ):
     ip = get_client_ip(request) or "unknown"
-    wait = reset_password_failures_by_ip.retry_after(ip)
+    # 先按失败占用名额，链接有效时退回
+    wait, stamp = reset_password_failures_by_ip.try_hit(ip)
     if wait:
         return JSONResponse(
             {"success": False, "error_code": "forgotPasswordTooManyAttempts", "retry_after": wait},
@@ -60,9 +61,9 @@ def reset_password(
         new_password=new_password,
         confirm_password=confirm_password,
     )
+    if result.get("error_code") not in RESET_TOKEN_FAILURES:
+        reset_password_failures_by_ip.undo(ip, stamp)
     if result.get("success"):
         # 密码已改，其他设备上的旧登录立即失效
         clear_session_cache()
-    elif result.get("error_code") in RESET_TOKEN_FAILURES:
-        reset_password_failures_by_ip.hit(ip)
     return result

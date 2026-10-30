@@ -7,7 +7,7 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from core.middleware import clear_session_cache
-from poker.core.rate_limit import login_retry_after, record_login_failure
+from poker.core.rate_limit import reserve_login_attempt
 from poker.services.common.avatar import delete_avatar_for_user
 from poker.services.admin.audit_log import get_client_ip, write_audit_log
 from poker.services.auth.delete_account import delete_account_service
@@ -34,18 +34,18 @@ def delete_account(
 ):
     ip = get_client_ip(request) or "unknown"
 
-    # 这里要验证账号密码，所以和登录共用限流
-    wait = login_retry_after(ip, username)
-    if wait:
+    # 这里要验证账号密码，所以和登录共用限流；先占名额再校验
+    attempt = reserve_login_attempt(ip, username)
+    if attempt.wait:
         return JSONResponse(
-            {"success": False, "message": "loginTooManyAttempts", "retry_after": wait},
+            {"success": False, "message": "loginTooManyAttempts", "retry_after": attempt.wait},
             status_code=429,
         )
 
     result = delete_account_service(username, password, confirm_text)
 
-    if result.pop("credential_failed", False):
-        record_login_failure(ip, username)
+    if not result.pop("credential_failed", False):
+        attempt.release()
 
     if not result.get("success"):
         return result

@@ -4,30 +4,9 @@ function exportGameCard(gameId) {
     exportGameImage(_gameCache[gameId]);
 }
 
-let pendingDeleteGameId = null;
 let currentPage = 1;
 let currentView = "logs";
 let currentSearch = "";
-
-function openDeleteGameModal(gameId) {
-    pendingDeleteGameId = gameId;
-    document.getElementById("delete-game-modal").style.display = "flex";
-}
-
-function closeDeleteGameModal() {
-    document.getElementById("delete-game-modal").style.display = "none";
-    pendingDeleteGameId = null;
-}
-
-async function confirmDeleteGame() {
-    if (!pendingDeleteGameId) return;
-    const fd = new FormData();
-    fd.append("game_id", pendingDeleteGameId);
-    const res = await fetch("/organizer/game-log/delete", { method: "POST", body: fd });
-    const data = await res.json();
-    closeDeleteGameModal();
-    if (data.success) loadGameLogs(currentPage);
-}
 
 function switchView(view) {
     currentView = view;

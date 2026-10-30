@@ -1,10 +1,12 @@
 const organizerTranslations = {
     zh: {
+        invalidRequest: "提交的内容格式不正确，请检查后重试。",
         noGroupSelected: "未选择组别，请重新登录。",
         notLoggedIn: "未登录。",
         groupNotFound: "组别不存在。",
         memberNotInGroup: "该成员不在本组中。",
         cannotRemoveOrganizer: "不允许移除局头。",
+        removeMemberOngoingGame: "该成员还在进行中的牌局里，请等牌局结束后再移除。",
         invalidBuyType: "买入类型无效。",
         playerNotInGame: "该玩家不在本局中。",
         groupNameInvalid: "组名包含不允许的字符。",
@@ -329,11 +331,13 @@ const organizerTranslations = {
     },
 
     en: {
+        invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
         noGroupSelected: "No group selected. Please sign in again.",
         notLoggedIn: "You are not signed in.",
         groupNotFound: "Group does not exist.",
         memberNotInGroup: "This member is not in your group.",
         cannotRemoveOrganizer: "The organizer cannot be removed.",
+        removeMemberOngoingGame: "This member is still in an ongoing game. Please remove them after the game ends.",
         invalidBuyType: "Invalid buy-in type.",
         playerNotInGame: "This player is not in the game.",
         groupNameInvalid: "The group name contains characters that are not allowed.",

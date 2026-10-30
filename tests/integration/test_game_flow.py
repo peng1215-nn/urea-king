@@ -454,3 +454,91 @@ def test_database_rejects_duplicates_and_negative_amounts(table):
     finally:
         db.close()
     must_fail(GroupMemberAlias(group_id=t["group"], user_id=alice, alias="B"))
+
+
+# ───────────────────────── 玩家进出 ─────────────────────────
+
+def _request_status(req_id):
+    from database import SessionLocal
+    from poker.models import ChipRequest
+
+    db = SessionLocal()
+    try:
+        return db.query(ChipRequest.status).filter(ChipRequest.id == req_id).scalar()
+    finally:
+        db.close()
+
+
+def test_rejoining_player_still_respects_table_limit(factory, table):
+    t = table
+    game_id = _start(t)
+    # 补满到 10 人
+    for i in range(10 - 4):
+        uid = factory.user(f"extra{i:03d}")
+        factory.role(uid, t["group"], "user")
+        assert _svc().add_player_to_game_service(game_id, t["group"], uid, t["org"])["success"] is True
+
+    alice = t["members"][0]
+    assert _svc().remove_player_from_game_service(game_id, t["group"], alice)["success"] is True
+    newcomer = factory.user("newcomer1")
+    factory.role(newcomer, t["group"], "user")
+    assert _svc().add_player_to_game_service(game_id, t["group"], newcomer, t["org"])["success"] is True
+
+    result = _svc().add_player_to_game_service(game_id, t["group"], alice, t["org"])
+    assert result["message"] == "gameFull"
+
+
+def test_rejoining_player_cannot_be_in_two_games(table):
+    t = table
+    alice, bob, carol = t["members"]
+    first = _start(t, players=[t["org"], alice, bob])
+    assert _svc().remove_player_from_game_service(first, t["group"], alice)["success"] is True
+    second = _start(t, players=[t["org"], alice, carol], name="第二局")
+    assert _player(second, alice).is_active == 1
+
+    result = _svc().add_player_to_game_service(first, t["group"], alice, t["org"])
+    assert result["message"] == "playerAlreadyInAnotherGame"
+
+
+def test_removing_player_rejects_their_pending_requests(table):
+    t = table
+    alice = t["members"][0]
+    game_id = _start(t)
+    req = _request_buyin(game_id, t["group"], alice, 100)
+
+    assert _svc().remove_player_from_game_service(game_id, t["group"], alice)["success"] is True
+    assert _request_status(req) == "rejected"
+    assert _svc().approve_chip_request_service(req, game_id, t["group"], t["org"])["message"] == "requestNotFound"
+    assert _player(game_id, alice).total_buy_in == 0
+
+
+def test_finishing_game_rejects_pending_requests(table):
+    t = table
+    alice, bob, carol = t["members"]
+    game_id = _start(t)
+    req = _request_buyin(game_id, t["group"], alice, 100)
+
+    result = _finish(t, game_id, {t["org"]: 0, alice: 0, bob: 0, carol: 0})
+    assert result["success"] is True, result
+    assert _request_status(req) == "rejected"
+
+
+def test_member_in_ongoing_game_cannot_be_removed_from_group(table):
+    from poker.services.organizer.member_management import remove_member_service
+
+    t = table
+    alice = t["members"][0]
+    _start(t)
+    assert remove_member_service(t["group"], alice)["message"] == "removeMemberOngoingGame"
+
+
+def test_organizer_cannot_delete_game_log(client, table, login_as):
+    t = table
+    game_id = _start(t)
+    alice, bob, carol = t["members"]
+    assert _finish(t, game_id, {t["org"]: 0, alice: 0, bob: 0, carol: 0})["success"] is True
+
+    login_as("orgaaaa1", t["group"])
+    response = client.post("/organizer/game-log/delete", data={"game_id": game_id})
+    assert response.status_code in (404, 405)
+    assert _game(game_id) is not None

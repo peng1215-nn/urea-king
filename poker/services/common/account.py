@@ -4,7 +4,7 @@
 
 
 from database import SessionLocal
-from poker.models import User
+from poker.models import EmailVerification, User
 from core.validators import check_name, check_password
 from poker.core.rate_limit import current_password_failures_by_user
 from poker.core.validators import NICKNAME_MAX
@@ -103,15 +103,16 @@ def update_password_service(
         if not user:
             return {"success": False, "message": "userNotFound"}
 
-        # 限制输错当前密码的次数，防止拿到登录状态的人借此猜出密码
+        # 限制输错当前密码的次数，防止拿到登录状态的人借此猜出密码。
+        # 先按失败占用名额再校验，并发请求不能同时通过；密码正确时退回名额。
         limiter_key = str(user.id)
-        wait = current_password_failures_by_user.retry_after(limiter_key)
+        wait, stamp = current_password_failures_by_user.try_hit(limiter_key)
         if wait:
             return {"success": False, "message": "currentPasswordTooManyAttempts", "retry_after": wait}
 
         if not pwd_context.verify(current_password, user.password_hash):
-            current_password_failures_by_user.hit(limiter_key)
             return {"success": False, "message": "currentPasswordIncorrect"}
+        current_password_failures_by_user.undo(limiter_key, stamp)
 
         password_error = check_password(new_password)
 
@@ -132,6 +133,12 @@ def update_password_service(
             return {"success": False, "message": "newPasswordMismatch"}
 
         user.password_hash = pwd_context.hash(new_password)
+        # 之前申请但还没用的重置链接一并作废
+        db.query(EmailVerification).filter(
+            EmailVerification.user_id == user.id,
+            EmailVerification.purpose == "reset_password",
+            EmailVerification.used == 0,
+        ).update({"used": 1}, synchronize_session=False)
         db.commit()
 
         return {"success": True, "message": "passwordUpdateSuccessLogout"}

@@ -24,6 +24,18 @@ _POKER_URL = (
 ).rstrip("/")
 
 
+def dispatch(background_tasks, send_func, *args):
+    """
+    有 background_tasks 时放到响应返回之后再发，否则立即发送。
+    找回密码、重发验证用它：响应时间不再因"是否真的发了邮件"而不同，
+    别人无法从快慢判断邮箱是否注册。
+    """
+    if background_tasks is not None:
+        background_tasks.add_task(send_func, *args)
+    else:
+        send_func(*args)
+
+
 def _send(to: str, subject: str, html: str) -> bool:
     """底层发送，返回是否成功。"""
     if not resend.api_key:

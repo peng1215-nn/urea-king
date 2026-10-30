@@ -19,6 +19,9 @@ def leave_group_service(user_id, group_id):
     db = SessionLocal()
 
     try:
+        # 先锁住组：和"加入牌局"互斥，避免一边退出、一边被加进牌局
+        db.query(Group.id).filter(Group.id == group_id).with_for_update().first()
+
         membership = db.query(UserGroupRole).filter(
             UserGroupRole.user_id == user_id,
             UserGroupRole.group_id == group_id,

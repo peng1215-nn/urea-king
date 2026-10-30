@@ -1,5 +1,6 @@
 window.createGroupTranslations = {
     zh: {
+        invalidRequest: "提交的内容格式不正确，请检查后重试。",
         pageTitle: "创建组 - UREAKING POKER",
         createGroupDesc: "创建自己的组，成为局头。每个账号只能创建一个组。",
         createGroupDesc2: "成员加入需使用邀请码。",
@@ -19,6 +20,7 @@ window.createGroupTranslations = {
         requestFailed: "请求失败，请稍后重试。",
     },
     en: {
+        invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
         pageTitle: "Create Group - UREAKING POKER",
         createGroupDesc: "Create your own group and become the organizer. Each account can only create one group.",
         createGroupDesc2: "Members join using an invite code.",

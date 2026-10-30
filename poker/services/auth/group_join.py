@@ -138,6 +138,10 @@ def group_join_service(
         if int(user.is_active) != 1:
             return {"success": False, "message": "groupJoinAccountDisabled"}
 
+        # 和登录一样，邮箱未验证的账号不能用邀请码加入组
+        if not user.email_verified:
+            return {"success": False, "message": "groupJoinEmailNotVerified"}
+
         admin_role = db.query(UserGroupRole).filter(
             UserGroupRole.user_id == user.id,
             UserGroupRole.role == "admin",

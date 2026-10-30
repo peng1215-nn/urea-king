@@ -235,3 +235,75 @@ def test_weak_new_password_is_rejected(client, factory, login_as):
     result = client.post("/user/change-password/update-password", data=form).json()
     assert result["message"] == "newPasswordTooWeak"
 
+
+
+def test_group_join_requires_verified_email(client, factory):
+    user_id = factory.user("unv00001")
+    _set_user(user_id, email_verified=0)
+    factory.group("G9")
+    factory.invite("JOINCODE9", "G9")
+
+    result = client.post(
+        "/group-join",
+        data={"invite_code": "JOINCODE9", "username": "unv00001", "password": DEFAULT_PASSWORD},
+    ).json()
+    assert result["message"] == "groupJoinEmailNotVerified"
+
+
+def test_successful_registrations_are_rate_limited(client, monkeypatch):
+    from poker.services.auth import register
+
+    monkeypatch.setattr(register, "send_verify_email", lambda to, token: True)
+
+    for i in range(10):
+        response = client.post("/register", data={
+            "username": f"spam{i:04d}", "nickname": f"spam{i}", "email": f"spam{i}@example.com",
+            "password": "GoodPass123", "confirm_password": "GoodPass123",
+        })
+        assert response.status_code == 200, response.text
+
+    response = client.post("/register", data={
+        "username": "spam9999", "nickname": "spam9999", "email": "spam9999@example.com",
+        "password": "GoodPass123", "confirm_password": "GoodPass123",
+    })
+    assert response.status_code == 429
+
+
+def test_changing_password_invalidates_pending_reset_links(client, factory, login_as):
+    from datetime import timedelta
+
+    from core.time import now_columbus_naive
+    from database import SessionLocal
+    from poker.models import EmailVerification
+
+    user_id = factory.user("cp000004")
+    group_id = factory.group("G1")
+    factory.role(user_id, group_id, "user")
+    db = SessionLocal()
+    try:
+        db.add(EmailVerification(
+            user_id=user_id, token="pending-reset", purpose="reset_password",
+            expires_at=now_columbus_naive() + timedelta(minutes=15), used=0,
+        ))
+        db.commit()
+    finally:
+        db.close()
+
+    login_as("cp000004", group_id)
+    form = {"current_password": DEFAULT_PASSWORD, "new_password": "newpass123", "confirm_password": "newpass123"}
+    assert client.post("/user/change-password/update-password", data=form).json()["success"] is True
+
+    reset = {"token": "pending-reset", "new_password": "another123", "confirm_password": "another123"}
+    assert client.post("/reset-password", data=reset).json()["error_code"] == "resetTokenUsed"
+
+
+def test_validation_errors_do_not_echo_input(client, factory, login_as):
+    org = factory.user("org00009")
+    group_id = factory.group("G1")
+    factory.role(org, group_id, "organizer")
+    login_as("org00009", group_id)
+
+    response = client.post("/organizer/game/organizer-buyin", data={"game_id": "abc", "amount": "secret-value"})
+    assert response.status_code == 422
+    assert response.json() == {"success": False, "message": "invalidRequest"}
+    assert "secret-value" not in response.text

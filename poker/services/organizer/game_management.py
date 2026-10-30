@@ -31,6 +31,23 @@ def _lock_ongoing_game(db, game_id, group_id):
     ).with_for_update().first()
 
 
+def _reject_pending_requests(db, game_id, user_id=None):
+    """
+    把待审批的买入申请标记为已拒绝（玩家离开牌局、牌局结束时调用）。
+    resolved_by 留空，表示由系统自动处理。
+    """
+    query = db.query(ChipRequest).filter(
+        ChipRequest.game_id == game_id,
+        ChipRequest.status == "pending",
+    )
+    if user_id is not None:
+        query = query.filter(ChipRequest.user_id == user_id)
+    query.update(
+        {ChipRequest.status: "rejected", ChipRequest.resolved_at: now_columbus_naive()},
+        synchronize_session=False,
+    )
+
+
 def _add_to_buy_in(db, player_id, amount):
     """在数据库里直接累加，不经过“读出来、加好、写回去”。"""
     db.query(PokerGamePlayer).filter(PokerGamePlayer.id == player_id).update(
@@ -220,13 +237,10 @@ def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organi
             PokerGamePlayer.user_id == user_id,
         ).first()
 
-        if existing_player:
-            if existing_player.is_active == 1:
-                return {"success": False, "message": "playerAlreadyInGame"}
-            # 加回本局不检查其他局
-            existing_player.is_active = 1
-            db.commit()
-            return {"success": True, "rejoined": True}
+        if existing_player and existing_player.is_active == 1:
+            return {"success": False, "message": "playerAlreadyInGame"}
+
+        # 新加入和加回（之前被移出或中途退出）都要检查下面两条
 
         # 非局头用户不能同时在本组其他进行中牌局
         if user_id != organizer_id:
@@ -253,6 +267,11 @@ def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organi
 
         if active_count >= MAX_PLAYERS:
             return {"success": False, "message": "gameFull"}
+
+        if existing_player:
+            existing_player.is_active = 1
+            db.commit()
+            return {"success": True, "rejoined": True}
 
         user = db.query(User).filter(User.id == user_id).first()
         player = PokerGamePlayer(
@@ -289,6 +308,8 @@ def remove_player_from_game_service(game_id: int, group_id: int, user_id: int):
             return {"success": False, "message": "playerNotInGame"}
 
         player.is_active = 0
+        # 被移出后，他还没审批的买入申请一并拒绝
+        _reject_pending_requests(db, game_id, user_id)
         db.commit()
         return {"success": True}
     except Exception as e:
@@ -322,6 +343,8 @@ def exit_player_from_game_service(game_id: int, group_id: int, user_id: int, cas
         player.cash_out = cash_out
         player.net = cash_out - (player.total_buy_in or 0)
         player.is_active = 0
+        # 已经结算离场，还没审批的买入申请一并拒绝
+        _reject_pending_requests(db, game_id, user_id)
         db.commit()
         return {"success": True}
     except Exception as e:
@@ -348,9 +371,11 @@ def approve_chip_request_service(request_id: int, game_id: int, group_id: int, r
         if not req:
             return {"success": False, "message": "requestNotFound"}
 
+        # 只能批准仍在牌局中的玩家的申请
         player = db.query(PokerGamePlayer).filter(
             PokerGamePlayer.game_id == game_id,
             PokerGamePlayer.user_id == req.user_id,
+            PokerGamePlayer.is_active == 1,
         ).first()
 
         if not player:
@@ -419,6 +444,7 @@ def organizer_buyin_service(game_id: int, group_id: int, user_id: int, amount: i
         player = db.query(PokerGamePlayer).filter(
             PokerGamePlayer.game_id == game_id,
             PokerGamePlayer.user_id == user_id,
+            PokerGamePlayer.is_active == 1,
         ).first()
 
         if not player:
@@ -574,6 +600,9 @@ def finish_game_service(
                 "total_cash_out": total_cash_out,
                 "diff": total_cash_out - total_buy_in,
             }
+
+        # 牌局结束时，还没审批的买入申请全部拒绝，不再挂着"待审批"
+        _reject_pending_requests(db, game_id)
 
         game.status = "finished"
         game.ended_at = now_columbus_naive()

@@ -39,16 +39,49 @@ class SlidingWindowLimiter:
                 return 0
             return max(1, int(events[0] + self.window - now) + 1)
 
+    def _append(self, key, now):
+        events = self._prune(key, now)
+        if events is None:
+            if len(self._events) >= self.max_keys:
+                self._evict(now)
+            events = deque()
+            self._events[key] = events
+        events.append(now)
+
     def hit(self, key, now=None):
+        """计数一次，返回这次的时间戳（可用于 undo）。"""
+        now = time.monotonic() if now is None else now
+        with self._lock:
+            self._append(key, now)
+        return now
+
+    def try_hit(self, key, now=None):
+        """
+        检查与计数一步完成，避免并发请求同时通过检查。
+        未达上限：计数一次，返回 (0, 时间戳)；已达上限：不计数，返回 (等待秒数, None)。
+        """
         now = time.monotonic() if now is None else now
         with self._lock:
             events = self._prune(key, now)
-            if events is None:
-                if len(self._events) >= self.max_keys:
-                    self._evict(now)
-                events = deque()
-                self._events[key] = events
-            events.append(now)
+            if events is not None and len(events) >= self.max_events:
+                return max(1, int(events[0] + self.window - now) + 1), None
+            self._append(key, now)
+            return 0, now
+
+    def undo(self, key, stamp):
+        """撤销一次之前的计数（例如密码校验通过后，撤销预先占用的失败名额）。"""
+        if stamp is None:
+            return
+        with self._lock:
+            events = self._events.get(key)
+            if not events:
+                return
+            try:
+                events.remove(stamp)
+            except ValueError:
+                return
+            if not events:
+                del self._events[key]
 
     def reset(self, key):
         with self._lock:

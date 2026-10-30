@@ -1,5 +1,6 @@
 window.adminTranslations = {
     zh: {
+        invalidRequest: "提交的内容格式不正确，请检查后重试。",
         noGroupSelected: "未选择组别，请重新登录。",
         roleInvalid: "身份类型无效。",
         userNotInSelectedGroup: "该用户不属于所选组别。",
@@ -364,6 +365,7 @@ window.adminTranslations = {
     },
 
     en: {
+        invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
         noGroupSelected: "No group selected. Please sign in again.",
         roleInvalid: "Invalid role.",
         userNotInSelectedGroup: "This user does not belong to the selected group.",

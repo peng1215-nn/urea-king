@@ -7,6 +7,7 @@
 
 import logging
 
+from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import JSONResponse
 
@@ -72,7 +73,18 @@ async def unhandled_exception_handler(request, exc):
     )
 
 
+async def validation_exception_handler(request, exc):
+    # 参数缺失或格式不对（如金额填了字母）。默认的 422 会把参数名、类型和提交的原值带回去，
+    # 这里只返回通用提示；细节写进日志方便排查。
+    logger.info("request validation failed", extra={"path": request.url.path, "errors": exc.errors()})
+    return JSONResponse(
+        {"success": False, "message": "invalidRequest"},
+        status_code=422,
+    )
+
+
 def register_exception_handlers(app, error_page_renderer=None):
     app.state.error_page_renderer = error_page_renderer
+    app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(StarletteHTTPException, http_exception_handler)
     app.add_exception_handler(Exception, unhandled_exception_handler)

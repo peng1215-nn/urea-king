@@ -1,5 +1,6 @@
 window.loginTranslations = {
     zh: {
+        invalidRequest: "提交的内容格式不正确，请检查后重试。",
         pageTitle: "UREAKING-POKER 登录",
         username: "用户名",
         password: "密码",
@@ -26,6 +27,7 @@ window.loginTranslations = {
         groupJoinPasswordRequired: "请输入密码。",
         groupJoinInviteCodeRequired: "请输入邀请码。",
         groupJoinAccountInvalid: "用户名或密码不正确。",
+        groupJoinEmailNotVerified: "邮箱尚未验证，请先查收注册时发送的验证邮件，完成验证后再加入组。",
         groupJoinAccountDisabled: "该账号已被禁用。",
         groupJoinInviteCodeNotFound: "邀请码不存在。",
         groupJoinInviteCodeUsed: "邀请码已被使用。",
@@ -68,6 +70,7 @@ window.loginTranslations = {
     },
 
     en: {
+        invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
         pageTitle: "UREAKING-POKER Login",
         username: "Username",
         password: "Password",
@@ -93,6 +96,7 @@ window.loginTranslations = {
         groupJoinPasswordRequired: "Please enter your password.",
         groupJoinInviteCodeRequired: "Please enter an invitation code.",
         groupJoinAccountInvalid: "Username or password is incorrect.",
+        groupJoinEmailNotVerified: "Email not verified. Please verify your email using the link sent during registration, then join the group.",
         groupJoinAccountDisabled: "This account has been disabled.",
         groupJoinInviteCodeNotFound: "Invitation code does not exist.",
         groupJoinInviteCodeUsed: "Invitation code has already been used.",

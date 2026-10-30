@@ -80,3 +80,74 @@ def test_username_limit_does_not_block_trusted_device():
     rate_limit.clear_trusted_logins()
     for limiter in (rate_limit.login_failures_by_username, rate_limit.login_failures_by_account, rate_limit.login_failures_by_ip):
         limiter._events.clear()
+
+
+def test_try_hit_checks_and_counts_in_one_step():
+    limiter = SlidingWindowLimiter(max_events=2, window_seconds=60)
+    assert limiter.try_hit("k", now=0)[0] == 0
+    assert limiter.try_hit("k", now=1)[0] == 0
+    wait, stamp = limiter.try_hit("k", now=2)
+    assert wait > 0 and stamp is None
+    # 被拦下的那次不计数
+    assert len(limiter._events["k"]) == 2
+
+
+def test_concurrent_attempts_cannot_all_pass_the_check():
+    import threading
+
+    limiter = SlidingWindowLimiter(max_events=5, window_seconds=60)
+    passed = []
+    barrier = threading.Barrier(40)
+
+    def attempt():
+        barrier.wait()
+        if limiter.try_hit("k")[0] == 0:
+            passed.append(1)
+
+    threads = [threading.Thread(target=attempt) for _ in range(40)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    assert len(passed) == 5
+
+
+def test_undo_returns_one_slot():
+    limiter = SlidingWindowLimiter(max_events=1, window_seconds=60)
+    _, stamp = limiter.try_hit("k", now=0)
+    assert limiter.retry_after("k", now=1) > 0
+    limiter.undo("k", stamp)
+    assert limiter.retry_after("k", now=1) == 0
+
+
+def test_reserve_releases_everything_when_one_limiter_is_full():
+    from poker.core.rate_limit import reserve
+
+    a = SlidingWindowLimiter(max_events=5, window_seconds=60)
+    b = SlidingWindowLimiter(max_events=1, window_seconds=60)
+    b.hit("k")
+
+    reservation = reserve([(a, "k", True), (b, "k", True)])
+    assert reservation.wait > 0
+    assert "k" not in a._events  # a 占的名额已退回
+
+
+def test_login_reservation_counts_failure_and_release_undoes_it():
+    from poker.core import rate_limit
+
+    for limiter in (rate_limit.login_failures_by_username, rate_limit.login_failures_by_account, rate_limit.login_failures_by_ip):
+        limiter._events.clear()
+    rate_limit.clear_trusted_logins()
+
+    for _ in range(5):
+        assert rate_limit.reserve_login_attempt("3.3.3.3", "carol").wait == 0  # 5 次失败
+    assert rate_limit.reserve_login_attempt("3.3.3.3", "carol").wait > 0
+
+    for limiter in (rate_limit.login_failures_by_username, rate_limit.login_failures_by_account, rate_limit.login_failures_by_ip):
+        limiter._events.clear()
+
+    # 密码正确时退回名额：连续成功不会被限流
+    for _ in range(10):
+        attempt = rate_limit.reserve_login_attempt("3.3.3.3", "carol")
+        assert attempt.wait == 0
+        attempt.release()

@@ -1,10 +1,9 @@
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, BackgroundTasks, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from poker.core.rate_limit import (
-    login_retry_after,
-    record_login_failure,
     register_failures_by_ip,
+    reserve_login_attempt,
     resend_verify_failures_by_ip,
 )
 from poker.services.admin.audit_log import get_client_ip
@@ -35,7 +34,9 @@ def register_user(
     confirm_password: str = Form(...),
 ):
     ip = get_client_ip(request) or "unknown"
-    wait = register_failures_by_ip.retry_after(ip)
+    # 每次注册请求都计数（不只是失败的）：注册成功会往外发验证邮件，
+    # 不限制成功次数的话，脚本可以无限注册、借网站给任意邮箱发信
+    wait, _ = register_failures_by_ip.try_hit(ip)
     if wait:
         return JSONResponse(
             {"success": False, "error_code": "registerTooManyAttempts", "retry_after": wait},
@@ -51,24 +52,21 @@ def register_user(
         confirm_password=confirm_password,
     )
 
-    if not result.get("success"):
-        register_failures_by_ip.hit(ip)
-
     return result
 
 
 @router.post("/resend-verify-email")
-def resend_verify_email(request: Request, email: str = Form(...)):
+def resend_verify_email(request: Request, background_tasks: BackgroundTasks, email: str = Form(...)):
     ip = get_client_ip(request) or "unknown"
-    wait = resend_verify_failures_by_ip.retry_after(ip)
+    # 回复几乎总是"已发送"，所以按请求次数计数，而不是按失败计数
+    wait, _ = resend_verify_failures_by_ip.try_hit(ip)
     if wait:
         return JSONResponse(
             {"success": False, "error_code": "resendTooManyAttempts", "retry_after": wait},
             status_code=429,
         )
-    # 回复几乎总是"已发送"，所以按请求次数计数，而不是按失败计数
-    resend_verify_failures_by_ip.hit(ip)
-    return resend_verify_email_service(email)
+    # 邮件在响应返回后再发，响应时间不会暴露邮箱是否注册
+    return resend_verify_email_service(email, background_tasks=background_tasks)
 
 
 @router.post("/change-email")
@@ -80,17 +78,17 @@ def change_email(
 ):
     ip = get_client_ip(request) or "unknown"
 
-    # 这里要验证账号密码，所以和登录共用限流，防止借此反复猜密码
-    wait = login_retry_after(ip, username)
-    if wait:
+    # 这里要验证账号密码，所以和登录共用限流，防止借此反复猜密码；先占名额再校验
+    attempt = reserve_login_attempt(ip, username)
+    if attempt.wait:
         return JSONResponse(
-            {"success": False, "error_code": "changeEmailTooManyAttempts", "retry_after": wait},
+            {"success": False, "error_code": "changeEmailTooManyAttempts", "retry_after": attempt.wait},
             status_code=429,
         )
 
     result = change_email_service(username, password, new_email)
-    if result.get("error_code") == "changeEmailWrongCredentials":
-        record_login_failure(ip, username)
+    if result.get("error_code") != "changeEmailWrongCredentials":
+        attempt.release()
     return result
 
 

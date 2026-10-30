@@ -12,7 +12,7 @@ from datetime import timedelta
 from core.errors import safe_error
 from core.time import now_columbus_naive
 from database import SessionLocal
-from poker.core.email import send_verify_email
+from poker.core.email import dispatch, send_verify_email
 from poker.models import EmailVerification, User
 
 RESEND_INTERVAL_MINUTES = 5
@@ -20,7 +20,7 @@ RESEND_MAX_PER_DAY = 5
 TOKEN_TTL_MINUTES = 15
 
 
-def resend_verify_email_service(email: str) -> dict:
+def resend_verify_email_service(email: str, background_tasks=None) -> dict:
     email = (email or "").strip().lower()
     if not email:
         return {"success": False, "error_code": "resendEmailRequired"}
@@ -70,7 +70,7 @@ def resend_verify_email_service(email: str) -> dict:
         db.add(verification)
         db.commit()
 
-        send_verify_email(email, token)
+        dispatch(background_tasks, send_verify_email, email, token)
 
         return {"success": True, "error_code": "resendSent"}
 

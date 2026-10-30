@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.responses import JSONResponse
 from fastapi.responses import RedirectResponse
 
-from poker.core.rate_limit import invite_creates_by_user
+from poker.core.rate_limit import GLOBAL_KEY, invite_creates_by_user, invite_failures_global, reserve
 from poker.services.organizer.invite_management import create_invite_code_service
 from poker.services.organizer.invite_management import delete_invite_code_service
 from poker.services.organizer.invite_management import get_invite_codes_service
@@ -61,16 +61,23 @@ def create_invite_code(
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
 
+    # 每次创建都按用户计数；撞到已存在的邀请码相当于猜中别组的码，还计入全站猜码上限
     user_key = str(request.session.get("user_id"))
-    wait = invite_creates_by_user.retry_after(user_key)
-    if wait:
+    attempt = reserve([
+        (invite_creates_by_user, user_key, True),
+        (invite_failures_global, GLOBAL_KEY, True),
+    ])
+    if attempt.wait:
         return JSONResponse(
-            {"success": False, "message": "inviteCreateTooFrequent", "retry_after": wait},
+            {"success": False, "message": "inviteCreateTooFrequent", "retry_after": attempt.wait},
             status_code=429,
         )
-    invite_creates_by_user.hit(user_key)
 
-    return create_invite_code_service(group_id=int(group_id), code=code)
+    result = create_invite_code_service(group_id=int(group_id), code=code)
+    if result.get("message") != "inviteCodeExists":
+        # 只退回全站猜码名额；按用户的创建次数照常计入
+        invite_failures_global.undo(GLOBAL_KEY, attempt.stamp_of(invite_failures_global))
+    return result
 
 
 @router.post("/organizer/invite/delete")
