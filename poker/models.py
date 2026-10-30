@@ -182,11 +182,21 @@ class EmailVerification(Base):
     created_at = Column(DateTime, default=now_columbus_naive)
 
 
-class PageView(Base):
-    """登录页访问量统计，每天一行，按日累计。"""
+class SiteCounter(Base):
+    """通用计数器，按 key + date 存储每日统计量。
 
-    __tablename__ = "poker_page_views"
+    key 取值：
+      'login_page_view'  — 登录页 PV
+      'login_success'    — 登录成功次数
+    """
+
+    __tablename__ = "poker_site_counters"
 
     id = Column(Integer, primary_key=True, index=True)
-    date = Column(String(10), nullable=False, unique=True, index=True)  # 'YYYY-MM-DD'
+    key = Column(String(50), nullable=False, index=True)   # 统计项名称
+    date = Column(String(10), nullable=False, index=True)  # 'YYYY-MM-DD'
     count = Column(Integer, nullable=False, default=0)
+
+    __table_args__ = (
+        UniqueConstraint("key", "date", name="uq_site_counter_key_date"),
+    )

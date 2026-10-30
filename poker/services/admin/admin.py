@@ -5,7 +5,7 @@ from poker.app_state import SYSTEM_VERSION
 from database import SessionLocal
 from poker.models import Group
 from poker.models import InvitationCode
-from poker.models import PageView
+from poker.models import SiteCounter
 from poker.models import User
 from poker.models import UserGroupRole
 import secrets
@@ -59,16 +59,19 @@ def get_admin_stats_service():
         db.close()
 
 
-def record_login_page_view_service():
-    """登录页每次被访问时调用，今日计数 +1。"""
+def _increment_counter(key: str):
+    """通用计数器 +1，key+date 唯一，不存在则新建。"""
     today = now_columbus_naive().strftime("%Y-%m-%d")
     db = SessionLocal()
     try:
-        row = db.query(PageView).filter(PageView.date == today).first()
+        row = db.query(SiteCounter).filter(
+            SiteCounter.key == key,
+            SiteCounter.date == today,
+        ).first()
         if row:
             row.count += 1
         else:
-            db.add(PageView(date=today, count=1))
+            db.add(SiteCounter(key=key, date=today, count=1))
         db.commit()
     except Exception:
         db.rollback()
@@ -76,12 +79,12 @@ def record_login_page_view_service():
         db.close()
 
 
-def get_page_view_stats_service():
-    """返回今日点击量和历史总点击量。"""
+def _get_counter_stats(key: str):
+    """返回指定 key 的今日计数和历史总计。"""
     today = now_columbus_naive().strftime("%Y-%m-%d")
     db = SessionLocal()
     try:
-        rows = db.query(PageView).all()
+        rows = db.query(SiteCounter).filter(SiteCounter.key == key).all()
         total = sum(r.count for r in rows)
         today_count = next((r.count for r in rows if r.date == today), 0)
         return {"today": today_count, "total": total}
@@ -91,12 +94,23 @@ def get_page_view_stats_service():
         db.close()
 
 
+def record_login_page_view_service():
+    """登录页每次被访问时调用。"""
+    _increment_counter("login_page_view")
+
+
+def record_login_success_service():
+    """登录成功时调用。"""
+    _increment_counter("login_success")
+
+
 def get_system_monitor_service():
     total_runtime_seconds = int(
         (now_columbus_naive() - PROJECT_LAUNCH_TIME).total_seconds()
     )
 
-    page_views = get_page_view_stats_service()
+    pv = _get_counter_stats("login_page_view")
+    ls = _get_counter_stats("login_success")
 
     return {
         "success": True,
@@ -104,8 +118,10 @@ def get_system_monitor_service():
         "database_status": "normal",
         "deploy_environment": DEPLOY_ENVIRONMENT,
         "system_version": SYSTEM_VERSION,
-        "page_view_today": page_views["today"],
-        "page_view_total": page_views["total"],
+        "page_view_today": pv["today"],
+        "page_view_total": pv["total"],
+        "login_success_today": ls["today"],
+        "login_success_total": ls["total"],
     }
 
 

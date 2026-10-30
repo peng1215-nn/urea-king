@@ -25,6 +25,12 @@ async function loadSystemMonitor() {
         document.getElementById("page-view-total").innerText =
             data.page_view_total ?? "--";
 
+        document.getElementById("login-success-today").innerText =
+            data.login_success_today ?? "--";
+
+        document.getElementById("login-success-total").innerText =
+            data.login_success_total ?? "--";
+
     } catch (error) {
         console.error(t("systemMonitorLoadFailed"), error);
     }

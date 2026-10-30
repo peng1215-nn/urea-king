@@ -10,7 +10,7 @@ from poker.template_config import templates
 from fastapi.responses import JSONResponse
 from poker.core.rate_limit import login_retry_after, record_login_failure, record_login_success
 from poker.services.admin.audit_log import get_client_ip
-from poker.services.admin.admin import record_login_page_view_service
+from poker.services.admin.admin import record_login_page_view_service, record_login_success_service
 
 
 router = APIRouter()
@@ -62,6 +62,7 @@ def login_user(
 
     if result.get("success"):
         record_login_success(ip, username)
+        record_login_success_service()
     elif result.get("error_code") == "loginInvalidCredentials":
         record_login_failure(ip, username)
 
