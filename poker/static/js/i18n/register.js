@@ -45,6 +45,7 @@ window.registerTranslations = {
         resendTooFrequent: "发送过于频繁，请 {wait} 分钟后再试。",
         resendDailyLimit: "今日发送次数已达上限，请明天再试。",
         resendEmailRequired: "请输入邮箱地址。",
+        resendTooManyAttempts: "尝试次数过多，请 15 分钟后再试。",
         resendFailed: "发送失败，请稍后重试。",
 
         changeEmailTitle: "修改注册邮箱",
@@ -112,6 +113,7 @@ window.registerTranslations = {
         resendTooFrequent: "Too many requests. Please try again in {wait} minutes.",
         resendDailyLimit: "Daily limit reached. Please try again tomorrow.",
         resendEmailRequired: "Please enter your email address.",
+        resendTooManyAttempts: "Too many attempts. Please try again in 15 minutes.",
         resendFailed: "Failed to send. Please try again later.",
 
         changeEmailTitle: "Change Registration Email",
