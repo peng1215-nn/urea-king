@@ -212,3 +212,37 @@ def test_deleting_game_deletes_its_events(client, factory, table, login_as):
         assert db.query(GameEvent).filter(GameEvent.game_id == game_id).count() == 0
     finally:
         db.close()
+
+
+def test_rejoin_records_whether_player_stepped_away_or_cashed_out(table):
+    from database import SessionLocal
+    from poker.models import GameEvent
+
+    t = table
+    svc = _svc()
+    alice, bob, _ = t["members"]
+    game_id = svc.start_game_service(
+        group_id=t["group"], organizer_id=t["org"], name="进出",
+        preselected_user_ids=[t["org"], alice, bob],
+    )["game_id"]
+
+    assert svc.remove_player_from_game_service(game_id, t["group"], alice, actor_id=t["org"])["success"]
+    assert svc.add_player_to_game_service(game_id, t["group"], alice, t["org"])["rejoined"] is True
+
+    assert svc.exit_player_from_game_service(game_id, t["group"], bob, 80, actor_id=t["org"])["success"]
+    assert svc.add_player_to_game_service(game_id, t["group"], bob, t["org"])["rejoined"] is True
+
+    db = SessionLocal()
+    try:
+        rejoins = {
+            e.target_user_id: e.details
+            for e in db.query(GameEvent).filter(
+                GameEvent.game_id == game_id, GameEvent.event_type == "player_rejoined",
+            )
+        }
+    finally:
+        db.close()
+
+    import json
+    assert json.loads(rejoins[alice]) == {"after": "away"}
+    assert json.loads(rejoins[bob]) == {"after": "exit", "cash_out": 80}

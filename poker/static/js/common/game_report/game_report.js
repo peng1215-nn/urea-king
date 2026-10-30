@@ -50,6 +50,12 @@
                 return fmt("detailStartPlayers", {
                     players: (d.players || []).join(getCurrentLanguage() === "zh" ? "、" : ", "),
                 });
+            case "player_removed":
+                return t("detailAway");
+            case "player_rejoined":
+                if (d.after === "exit") return fmt("detailRejoinedAfterExit", { cash_out: d.cash_out ?? 0 });
+                if (d.after === "away") return t("detailRejoinedAfterAway");
+                return "";
             case "player_exited":
                 return fmt("detailExited", { cash_out: ev.amount ?? 0, buy_in: d.buy_in ?? 0, net: signed(d.net) });
             case "buyin_auto_rejected":

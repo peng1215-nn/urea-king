@@ -4,9 +4,10 @@
 事件类型（前端 i18n/game_report.js 里有对应的中英文说明，增加类型时一起加）：
   game_started         开局（details.players：开局时的玩家）
   player_added         加入牌局
-  player_rejoined      被移出或离场后重新加入
-  player_removed       被局头移出牌局
-  player_exited        中途结算离场（amount：卖出数额）
+  player_rejoined      暂离或结算离场后回到牌局（details.after："away" 暂离 | "exit" 结算离场，
+                       结算离场时附 details.cash_out：当时的卖出）
+  player_removed       暂离（界面上"移出 → 暂离"）：离开桌子，买入保留，之后可以回来
+  player_exited        退出、结算离场（界面上"移出 → 退出"；amount：卖出数额）
   buyin_requested      玩家申请买入（amount、buy_type）
   buyin_approved       局头批准申请
   buyin_rejected       局头拒绝申请

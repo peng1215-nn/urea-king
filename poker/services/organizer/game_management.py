@@ -1,6 +1,7 @@
 from core.time import now_columbus_naive
 from database import SessionLocal
 from poker.models import ChipRequest
+from poker.models import GameEvent
 from poker.models import Group
 from poker.models import PokerGame
 from poker.models import PokerGamePlayer
@@ -281,7 +282,20 @@ def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organi
 
         if existing_player:
             existing_player.is_active = 1
-            record_game_event(db, game_id, "player_rejoined", actor_user_id=organizer_id, target_user_id=user_id)
+            # 记下他这次回来之前是"暂离"还是"结算离场"，报告里区分显示
+            last_leave = db.query(GameEvent).filter(
+                GameEvent.game_id == game_id,
+                GameEvent.target_user_id == user_id,
+                GameEvent.event_type.in_(("player_removed", "player_exited")),
+            ).order_by(GameEvent.id.desc()).first()
+            if last_leave is not None and last_leave.event_type == "player_exited":
+                rejoin_details = {"after": "exit", "cash_out": last_leave.amount}
+            else:
+                rejoin_details = {"after": "away"}
+            record_game_event(
+                db, game_id, "player_rejoined",
+                actor_user_id=organizer_id, target_user_id=user_id, details=rejoin_details,
+            )
             db.commit()
             return {"success": True, "rejoined": True}
 
