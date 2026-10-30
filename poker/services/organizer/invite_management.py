@@ -51,7 +51,8 @@ def create_invite_code_service(group_id: int, code: str):
         if len(code) > 50:
             return {"success": False, "message": "inviteCodeTooLong"}
 
-        group = db.query(Group).filter(Group.id == group_id).first()
+        # 锁住组再计数，并发创建时不会一起通过数量检查
+        group = db.query(Group).filter(Group.id == group_id).with_for_update().first()
         if not group:
             return {"success": False, "message": "groupNotFound"}
 

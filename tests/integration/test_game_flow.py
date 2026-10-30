@@ -568,3 +568,14 @@ def test_cash_out_taken_at_exit_is_added_at_finish(table):
     assert player.left_cash_out == 80
     assert player.cash_out == 150  # 80 离场 + 70 结束时剩余
     assert player.net == 0
+
+
+def test_exit_cannot_be_recorded_twice(table):
+    t = table
+    alice = t["members"][0]
+    game_id = _start(t)
+    assert _svc().exit_player_from_game_service(game_id, t["group"], alice, 80)["success"] is True
+    # 重复提交（连点、两个标签页）
+    assert _svc().exit_player_from_game_service(game_id, t["group"], alice, 80)["message"] == "playerNotInGame"
+    assert _svc().remove_player_from_game_service(game_id, t["group"], alice)["message"] == "playerNotInGame"
+    assert _player(game_id, alice).left_cash_out == 80

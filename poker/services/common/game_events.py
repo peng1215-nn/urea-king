@@ -77,6 +77,16 @@ def record_game_event(
     ))
 
 
+def _matches_finish_record(record, player):
+    if record is None:
+        return True
+    return (
+        record.get("cash_out") == (player.cash_out or 0)
+        and record.get("net") == (player.net or 0)
+        and record.get("buy_in") == (player.total_buy_in or 0)
+    )
+
+
 def _format_time(value):
     return value.strftime("%Y-%m-%d %H:%M:%S") if value else ""
 
@@ -111,6 +121,14 @@ def build_game_report(db, game_id, group_id):
             key = event.buy_type if event.buy_type in by_type else "normal"
             by_type[key] += event.amount
 
+    # "牌局结束"那条记录里存了每人的最终结算，再和现在的数据核对一遍（较早的记录没有 user_id，跳过）
+    finished = next((e for e in reversed(events) if e.event_type == "game_finished"), None)
+    finished_by_user = {}
+    if finished is not None and finished.details:
+        for row in json.loads(finished.details).get("players", []):
+            if row.get("user_id") is not None:
+                finished_by_user[row["user_id"]] = row
+
     summary = []
     for player in sorted(players, key=lambda p: -(p.net or 0)):
         from_events = buy_in_from_events.get(player.user_id, 0)
@@ -127,11 +145,16 @@ def build_game_report(db, game_id, group_id):
             "left_from_events": left_events,
             "final_chips": (player.cash_out or 0) - left_cash_out,
             "net": player.net or 0,
-            # 买入、离场拿走的筹码，都要和操作记录累计的一致
-            "matches": from_events == (player.total_buy_in or 0) and left_events == left_cash_out,
+            # 买入、离场拿走的筹码要和操作记录累计的一致；最终卖出、盈亏要和"牌局结束"的记录一致
+            "matches": (
+                from_events == (player.total_buy_in or 0)
+                and left_events == left_cash_out
+                and _matches_finish_record(finished_by_user.get(player.user_id), player)
+            ),
         })
 
-    has_events = bool(events)
+    # 有"开局"记录才说明整局都在审计功能上线之后进行，记录是完整的
+    has_events = any(e.event_type == "game_started" for e in events)
     return {
         "success": True,
         "game": {

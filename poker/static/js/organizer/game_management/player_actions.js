@@ -25,7 +25,20 @@ function selectRemoveType(type) {
     });
 }
 
+let removePlayerInFlight = false;
+
 async function confirmRemovePlayer() {
+    // 请求处理中不再接受点击，避免连点把同一次离场记两次
+    if (removePlayerInFlight) return;
+    removePlayerInFlight = true;
+    try {
+        await submitRemovePlayer();
+    } finally {
+        removePlayerInFlight = false;
+    }
+}
+
+async function submitRemovePlayer() {
     const messageBox = document.getElementById("remove-player-message");
     messageBox.style.color = "#ff8a8a";
     messageBox.innerText = "";

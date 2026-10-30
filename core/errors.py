@@ -76,7 +76,12 @@ async def unhandled_exception_handler(request, exc):
 async def validation_exception_handler(request, exc):
     # 参数缺失或格式不对（如金额填了字母）。默认的 422 会把参数名、类型和提交的原值带回去，
     # 这里只返回通用提示；细节写进日志方便排查。
-    logger.info("request validation failed", extra={"path": request.url.path, "errors": exc.errors()})
+    # 只记录出错的字段和原因，不记录提交的值（可能是密码）
+    errors = [
+        {"loc": list(error.get("loc", ())), "type": error.get("type")}
+        for error in exc.errors()
+    ]
+    logger.info("request validation failed", extra={"path": request.url.path, "errors": errors})
     return JSONResponse(
         {"success": False, "message": "invalidRequest"},
         status_code=422,

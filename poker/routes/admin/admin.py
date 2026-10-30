@@ -124,6 +124,8 @@ def update_user_role(
     )
 
     if result.get("success"):
+        # 被操作的人（或整组成员）的旧登录状态立即失效，不等 15 秒缓存过期
+        clear_session_cache()
 
         write_audit_log(
             request=request,
@@ -189,6 +191,8 @@ def toggle_user_active(
     )
 
     if result.get("success"):
+        # 被操作的人（或整组成员）的旧登录状态立即失效，不等 15 秒缓存过期
+        clear_session_cache()
         is_active = result.get("is_active")
 
         action = (

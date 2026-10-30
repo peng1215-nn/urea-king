@@ -268,3 +268,27 @@ def test_report_checks_cash_out_taken_at_exit(table):
     assert report["all_match"] is True
     alice_row = next(r for r in report["summary"] if r["user_id"] == alice)
     assert alice_row["left_cash_out"] == 0 and alice_row["left_from_events"] == 0
+
+
+def test_report_flags_settlement_changed_after_finish(table):
+    from database import SessionLocal
+    from poker.models import PokerGamePlayer
+
+    t = table
+    game_id = _play_full_game(t)
+    assert _report(game_id, t["group"])["all_match"] is True
+
+    # 结束后有人直接改了数据库里的卖出
+    db = SessionLocal()
+    try:
+        db.query(PokerGamePlayer).filter(
+            PokerGamePlayer.game_id == game_id, PokerGamePlayer.user_id == t["members"][0],
+        ).update({"cash_out": 999, "net": 799})
+        db.commit()
+    finally:
+        db.close()
+
+    report = _report(game_id, t["group"])
+    assert report["all_match"] is False
+    row = next(r for r in report["summary"] if r["user_id"] == t["members"][0])
+    assert row["matches"] is False

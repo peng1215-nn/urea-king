@@ -120,6 +120,7 @@ class PokerGamePlayer(Base):
         UniqueConstraint("game_id", "user_id", name="uq_game_players_game_user"),
         CheckConstraint("total_buy_in >= 0", name="ck_game_players_buy_in_nonneg"),
         CheckConstraint("cash_out IS NULL OR cash_out >= 0", name="ck_game_players_cash_out_nonneg"),
+        CheckConstraint("left_cash_out >= 0", name="ck_game_players_left_cash_out_nonneg"),
         # 个人走势、是否在进行中的牌局里：按用户查
         Index("ix_game_players_user_id", "user_id"),
     )

@@ -92,6 +92,8 @@ class SlidingWindowLimiter:
         for key in list(self._events.keys()):
             self._prune(key, now)
         if len(self._events) >= self.max_keys:
-            oldest = sorted(self._events.items(), key=lambda kv: kv[1][-1])
-            for key, _ in oldest[: len(oldest) // 2]:
+            # 先丢弃次数最少、最早的一半。快到上限的键（正在被反复猜的账号）最后才会被丢，
+            # 攻击者不能靠大量刷别的键把它挤掉、让计数归零
+            ranked = sorted(self._events.items(), key=lambda kv: (len(kv[1]), kv[1][-1]))
+            for key, _ in ranked[: len(ranked) // 2]:
                 del self._events[key]

@@ -11,12 +11,11 @@
     const REJECT_EVENTS = ["buyin_rejected", "buyin_auto_rejected"];
     const PEOPLE_EVENTS = ["player_added", "player_rejoined", "player_removed", "player_exited"];
 
+    /** 一次性替换 {name} 占位符：替换进去的内容（如昵称）里即使有 {xxx} 也不会再被替换。 */
     function fmt(key, vars) {
-        let text = t(key);
-        Object.entries(vars || {}).forEach(([name, value]) => {
-            text = text.split(`{${name}}`).join(String(value));
-        });
-        return text;
+        const values = vars || {};
+        return t(key).replace(/\{(\w+)\}/g, (match, name) =>
+            Object.prototype.hasOwnProperty.call(values, name) ? String(values[name]) : match);
     }
 
     function signed(n) {

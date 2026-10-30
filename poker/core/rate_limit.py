@@ -19,7 +19,8 @@ WINDOW = 15 * 60
 #   避免别人靠故意输错密码把账号主人锁在外面。
 login_failures_by_account = SlidingWindowLimiter(5, WINDOW)
 login_failures_by_ip = SlidingWindowLimiter(30, WINDOW)
-login_failures_by_username = SlidingWindowLimiter(20, WINDOW)
+# 这一条是防分布式猜密码的唯一屏障，多留一些键的空间
+login_failures_by_username = SlidingWindowLimiter(20, WINDOW, max_keys=100000)
 
 # 注册：同一 IP 15 分钟内最多 10 次注册请求（成功的也计数，防止借注册给任意邮箱发信）
 register_failures_by_ip = SlidingWindowLimiter(10, WINDOW)

@@ -1,3 +1,4 @@
+from core.middleware import clear_session_cache
 from fastapi import APIRouter
 from fastapi import Form
 from fastapi import Request
@@ -111,6 +112,8 @@ def remove_member(
     )
 
     if result.get("success"):
+        # 被操作的人（或整组成员）的旧登录状态立即失效，不等 15 秒缓存过期
+        clear_session_cache()
         write_audit_log(
             request=request,
             action="REMOVE_GROUP_MEMBER",

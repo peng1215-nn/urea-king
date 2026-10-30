@@ -33,6 +33,14 @@ def group_join_logged_in_service(request, user_id, invite_code):
         if admin_role:
             return {"success": False, "message": "groupJoinAdminForbidden"}
 
+        # 加锁顺序和解散组、注销一致：先锁组，再锁邀请码，避免互相等待。
+        # 先不加锁查出邀请码属于哪个组，锁住那个组之后再锁邀请码本身。
+        target_group_code = db.query(InvitationCode.group_code).filter(
+            InvitationCode.code == invite_code
+        ).scalar()
+        if target_group_code is not None:
+            db.query(Group.id).filter(Group.group_code == target_group_code).with_for_update().first()
+
         # 锁住这条邀请码，并发的两次使用只有一次能通过"未使用"检查
         invitation = db.query(InvitationCode).filter(
             InvitationCode.code == invite_code
@@ -152,6 +160,14 @@ def group_join_service(
                 "success": False,
                 "message": "groupJoinAdminForbidden",
             }
+
+        # 加锁顺序和解散组、注销一致：先锁组，再锁邀请码，避免互相等待。
+        # 先不加锁查出邀请码属于哪个组，锁住那个组之后再锁邀请码本身。
+        target_group_code = db.query(InvitationCode.group_code).filter(
+            InvitationCode.code == invite_code
+        ).scalar()
+        if target_group_code is not None:
+            db.query(Group.id).filter(Group.group_code == target_group_code).with_for_update().first()
 
         # 锁住这条邀请码，并发的两次使用只有一次能通过"未使用"检查
         invitation = db.query(InvitationCode).filter(

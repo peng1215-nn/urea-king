@@ -326,9 +326,11 @@ def remove_player_from_game_service(game_id: int, group_id: int, user_id: int, a
         if not game:
             return {"success": False, "message": "gameNotFound"}
 
+        # 只能对仍在桌上的玩家执行；已经暂离或离场的再点一次（如重复提交）直接拒绝
         player = db.query(PokerGamePlayer).filter(
             PokerGamePlayer.game_id == game_id,
             PokerGamePlayer.user_id == user_id,
+            PokerGamePlayer.is_active == 1,
         ).first()
 
         if not player:
@@ -356,9 +358,11 @@ def exit_player_from_game_service(game_id: int, group_id: int, user_id: int, cas
         if not game:
             return {"success": False, "message": "gameNotFound"}
 
+        # 只能对仍在桌上的玩家执行；已经暂离或离场的再点一次（如重复提交）直接拒绝
         player = db.query(PokerGamePlayer).filter(
             PokerGamePlayer.game_id == game_id,
             PokerGamePlayer.user_id == user_id,
+            PokerGamePlayer.is_active == 1,
         ).first()
 
         if not player:
@@ -679,6 +683,7 @@ def finish_game_service(
                 "forced": bool(force and not is_balanced),
                 "players": [
                     {
+                        "user_id": p.user_id,
                         "name": p.nickname,
                         "buy_in": p.total_buy_in,
                         "left_cash_out": p.left_cash_out or 0,

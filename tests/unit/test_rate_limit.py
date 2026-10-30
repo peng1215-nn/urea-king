@@ -151,3 +151,13 @@ def test_login_reservation_counts_failure_and_release_undoes_it():
         attempt = rate_limit.reserve_login_attempt("3.3.3.3", "carol")
         assert attempt.wait == 0
         attempt.release()
+
+
+def test_eviction_keeps_keys_close_to_their_limit():
+    limiter = SlidingWindowLimiter(max_events=20, window_seconds=900, max_keys=100)
+    for i in range(19):
+        limiter.hit("victim", now=i)
+    # 攻击者刷大量别的键，触发淘汰
+    for i in range(200):
+        limiter.hit(f"spray-{i}", now=100 + i)
+    assert len(limiter._events["victim"]) == 19
