@@ -1,13 +1,5 @@
 let selectedPreselect = [];
 
-// 默认牌局名：“MM-DD 牌局”，局头可以改，也可以清空（清空后按序号显示）
-function defaultGameName() {
-    const now = new Date();
-    const mm = String(now.getMonth() + 1).padStart(2, "0");
-    const dd = String(now.getDate()).padStart(2, "0");
-    return t("defaultGameName").replace("{date}", `${mm}-${dd}`);
-}
-
 function renderStartMemberList(members) {
     const list = document.getElementById("member-select-list");
     list.innerHTML = "";
@@ -62,7 +54,7 @@ async function openStartGameModal() {
 
     document.getElementById("start-game-message").innerText = "";
     document.getElementById("selected-count").innerText = "0";
-    document.getElementById("start-game-name").value = defaultGameName();
+    document.getElementById("start-game-name").value = "";
 
     const data = await fetchGroupMembers();
 
@@ -113,7 +105,7 @@ async function submitStartGame() {
     messageBox.innerText = "";
     messageBox.style.color = "#ff8a8a";
 
-    // 牌局名称可以为空（后端允许），默认已填好“MM-DD 牌局”
+    // 牌局名称可以不填（后端允许，列表里按序号显示）
     const name = document.getElementById("start-game-name").value.trim();
 
     const data = await apiStartGame(selectedPreselect, name);
