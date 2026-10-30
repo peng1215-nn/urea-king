@@ -301,30 +301,6 @@ def test_reset_password_with_invalid_tokens_is_rate_limited(client):
     assert response.json()["error_code"] == "forgotPasswordTooManyAttempts"
 
 
-def test_home_shows_login_page_when_logged_out(client):
-    response = client.get("/", follow_redirects=False)
-    assert response.status_code == 200
-    assert 'id="login-form"' in response.text
-
-
-def test_home_redirects_logged_in_users(client, factory, login_as):
-    user_id = factory.user("homeuser1")
-    group_id = factory.group("G1")
-    factory.role(user_id, group_id, "user")
-
-    # 登录了但还没选组：去选组
-    assert client.post("/login", data={"username": "homeuser1", "password": DEFAULT_PASSWORD}).json()["success"]
-    response = client.get("/", follow_redirects=False)
-    assert response.status_code == 302
-    assert response.headers["location"] == "/group-select"
-
-    # 选过组：直接回到该身份的首页
-    login_as("homeuser1", group_id)
-    response = client.get("/", follow_redirects=False)
-    assert response.status_code == 302
-    assert response.headers["location"] == "/user-dashboard"
-
-
 def test_reset_password_page_checks_token_without_using_it(client, factory):
     from datetime import timedelta
 

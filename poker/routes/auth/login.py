@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.responses import RedirectResponse
 
 from poker.services.auth.login import login_user_service
-from poker.services.auth.login import ROLE_HOME, select_group_service, get_user_groups_service
+from poker.services.auth.login import select_group_service, get_user_groups_service
 from poker.template_config import templates
 from fastapi.responses import JSONResponse
 from poker.core.rate_limit import record_login_success, reserve_login_attempt
@@ -26,12 +26,6 @@ def render_login_page(request: Request):
 # HEAD：在线监控、搜索引擎常用它检查页面是否存在
 @router.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 def home(request: Request):
-    # 已登录时直接回到工作台：选过组的进入该身份的首页，没选组的去选组
-    if request.session.get("user_id"):
-        role = request.session.get("current_role")
-        if request.session.get("current_group_id") and role in ROLE_HOME:
-            return RedirectResponse(url=ROLE_HOME[role], status_code=302)
-        return RedirectResponse(url="/group-select", status_code=302)
     return render_login_page(request)
 
 
