@@ -65,7 +65,7 @@ function _checkNewRequests(games) {
 // 标签页标题显示待审批数，如 "(3) UREAKING-POKER 牌局管理"
 function _updatePendingTitle(games) {
     const count = games.reduce(
-        (sum, game) => sum + (game.requests || []).filter(r => r.status === "pending").length,
+        (sum, game) => sum + (game.requests || []).filter(r => r.status === "pending" && !isRequestHandled(r.id)).length,
         0
     );
     const base = t("titleGameManagement");
@@ -111,7 +111,7 @@ function renderGameTabs() {
     tabContainer.innerHTML = "";
 
     currentGames.forEach((game, index) => {
-        const hasPending = (game.requests || []).some(r => r.status === "pending");
+        const hasPending = (game.requests || []).some(r => r.status === "pending" && !isRequestHandled(r.id));
         const tab = document.createElement("button");
         tab.className = "game-tab" + (index === currentGameIndex ? " active" : "");
         tab.innerHTML = `${game.name ? escapeHtml(game.name) : `#${index + 1}`}${hasPending ? ' <span class="tab-pending-dot">●</span>' : ""}`;
@@ -245,7 +245,7 @@ function renderRequestList() {
     const container = document.getElementById("request-list");
     container.innerHTML = "";
 
-    const pending = currentRequests.filter(r => r.status === "pending");
+    const pending = currentRequests.filter(r => r.status === "pending" && !isRequestHandled(r.id));
 
     // 手机上把有待审批申请的面板排到玩家列表前面，并在标题旁显示数量
     const panel = document.getElementById("request-panel");

@@ -25,6 +25,20 @@ function showGameMessage(text, type) {
 // 正在处理中的操作（按 key 区分），同一个操作在返回前不会被再次提交
 const _busyActions = new Set();
 
+// 已经处理完的申请：服务器下次返回的列表里可能还带着它（轮询请求在审批前就发出了），
+// 这里记住，不再显示、也不再提交，避免快速连点时出现“申请不存在或已处理”
+const _handledRequestIds = new Set();
+
+function markRequestHandled(requestId, button) {
+    _handledRequestIds.add(requestId);
+    const card = button && button.closest ? button.closest(".request-card") : null;
+    if (card) card.remove();
+}
+
+function isRequestHandled(requestId) {
+    return _handledRequestIds.has(requestId);
+}
+
 function isActionBusy(key) {
     return _busyActions.has(key);
 }

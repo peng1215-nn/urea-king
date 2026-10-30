@@ -303,7 +303,7 @@ function _requestCardButtons(button) {
 }
 
 async function approveRequest(requestId, button) {
-    if (!currentGame) return;
+    if (!currentGame || isRequestHandled(requestId)) return;
     const gameId = currentGame.id;
 
     // 批准、拒绝两个按钮一起锁住，同一申请处理完之前不能再点
@@ -312,7 +312,11 @@ async function approveRequest(requestId, button) {
     if (!data) return; // 这条申请正在处理中
 
     if (data.success) {
+        markRequestHandled(requestId, button);
         showGameMessage(t("requestApproved"), "success");
+    } else if (data.message === "requestNotFound") {
+        // 已经被处理过（例如另一台设备上点过），直接从列表里去掉，不当作错误
+        markRequestHandled(requestId, button);
     } else {
         reportGameFailure(data, null);
     }
@@ -320,7 +324,7 @@ async function approveRequest(requestId, button) {
 }
 
 async function rejectRequest(requestId, button) {
-    if (!currentGame) return;
+    if (!currentGame || isRequestHandled(requestId)) return;
     const gameId = currentGame.id;
 
     const data = await runBusy(`request-${requestId}`, _requestCardButtons(button),
@@ -328,7 +332,11 @@ async function rejectRequest(requestId, button) {
     if (!data) return; // 这条申请正在处理中
 
     if (data.success) {
+        markRequestHandled(requestId, button);
         showGameMessage(t("requestRejected"), "success");
+    } else if (data.message === "requestNotFound") {
+        // 已经被处理过（例如另一台设备上点过），直接从列表里去掉，不当作错误
+        markRequestHandled(requestId, button);
     } else {
         reportGameFailure(data, null);
     }
