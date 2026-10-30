@@ -716,6 +716,19 @@ body {
     .game-settings-label {
         font-size: 12px;
     }
+    /* 标题旁多了“筹码操作授权”按钮：放不下时按钮这一组换到下一行，标题不被挤成竖排 */
+    .top-bar {
+        flex-wrap: wrap;
+    }
+    .main > .top-bar .title-area {
+        min-width: max-content;
+    }
+    .title-area h1 {
+        white-space: nowrap;
+    }
+    .top-bar .topbar-actions {
+        margin-left: auto;
+    }
 }
 
 /* ── 撤回待审批的申请 ── */
