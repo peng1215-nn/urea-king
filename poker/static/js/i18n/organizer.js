@@ -1,5 +1,14 @@
 const organizerTranslations = {
     zh: {
+        buyinHistory: "买入明细",
+        reverseBuyinDesc: "记错的买入可以撤销：撤销后从总买入里减掉，原记录保留并标为“已撤销”，审计报告里也会记录。撤销不能恢复，撤错了重新买入即可。",
+        reverseBuyin: "撤销",
+        reverseBuyinConfirm: "撤销这笔 {amount}？请先确认筹码已收回。",
+        confirmReverse: "确认撤销",
+        buyinReversed: "已撤销",
+        reverseBuyinSuccess: "已撤销 {amount} 的买入",
+        noBuyins: "还没有买入记录",
+        buyinNotFound: "这笔买入不存在或已经撤销，请刷新查看。",
         avatarUploading: "上传中…",
         avatarUploadSuccess: "头像已更新",
         retryAfterSeconds: "请 {s} 秒后再试。",
@@ -368,6 +377,15 @@ const organizerTranslations = {
     },
 
     en: {
+        buyinHistory: "Buy-ins",
+        reverseBuyinDesc: "A buy-in entered by mistake can be undone: it's subtracted from the total buy-in, the record is kept and marked \"Undone\", and the audit report notes it. An undo can't be reverted — if you undo the wrong one, just buy in again.",
+        reverseBuyin: "Undo",
+        reverseBuyinConfirm: "Undo this {amount} buy-in? Make sure the chips have been taken back first.",
+        confirmReverse: "Confirm undo",
+        buyinReversed: "Undone",
+        reverseBuyinSuccess: "Undid the {amount} buy-in",
+        noBuyins: "No buy-ins yet",
+        buyinNotFound: "This buy-in doesn't exist or was already undone. Please refresh.",
         avatarUploading: "Uploading…",
         avatarUploadSuccess: "Avatar updated",
         retryAfterSeconds: "Please try again in {s} seconds.",

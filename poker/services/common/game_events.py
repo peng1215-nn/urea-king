@@ -15,6 +15,7 @@
   buyin_withdrawn      玩家撤回自己未审批的申请（不影响买入）
   organizer_buyin      局头给自己买入
   proxy_buyin          局头代玩家买入（玩家已开启授权）
+  buyin_reversed       局头撤销一笔已记入的买入（amount：撤销的数额，从总买入里减掉；details.request_id）
   game_finished        牌局结束（details：每位玩家的买入、卖出、盈亏，是否平衡、是否强制结束）
 """
 
@@ -37,6 +38,7 @@ EVENT_TYPES = (
     "buyin_withdrawn",
     "organizer_buyin",
     "proxy_buyin",
+    "buyin_reversed",
     "game_finished",
 )
 
@@ -122,6 +124,12 @@ def build_game_report(db, game_id, group_id):
             by_type = buy_in_by_type.setdefault(uid, {"normal": 0, "insurance": 0, "anti": 0})
             key = event.buy_type if event.buy_type in by_type else "normal"
             by_type[key] += event.amount
+        if event.event_type == "buyin_reversed" and event.amount:
+            uid = event.target_user_id
+            buy_in_from_events[uid] = buy_in_from_events.get(uid, 0) - event.amount
+            by_type = buy_in_by_type.setdefault(uid, {"normal": 0, "insurance": 0, "anti": 0})
+            key = event.buy_type if event.buy_type in by_type else "normal"
+            by_type[key] -= event.amount
 
     # "牌局结束"那条记录里存了每人的最终结算，再和现在的数据核对一遍（较早的记录没有 user_id，跳过）
     finished = next((e for e in reversed(events) if e.event_type == "game_finished"), None)

@@ -8,7 +8,7 @@
     let messageKey = null;
 
     const MONEY_EVENTS = ["buyin_requested", "buyin_approved", "organizer_buyin", "proxy_buyin"];
-    const REJECT_EVENTS = ["buyin_rejected", "buyin_auto_rejected", "buyin_withdrawn"];
+    const REJECT_EVENTS = ["buyin_rejected", "buyin_auto_rejected", "buyin_withdrawn", "buyin_reversed"];
     const PEOPLE_EVENTS = ["player_added", "player_rejoined", "player_removed", "player_exited"];
 
     /** 一次性替换 {name} 占位符：替换进去的内容（如昵称）里即使有 {xxx} 也不会再被替换。 */
@@ -32,6 +32,13 @@
         if (type === "anti") return t("buyInAnti");
         if (type === "normal") return t("buyInNormal");
         return "";
+    }
+
+    /** 数额列：撤销买入显示为负数，表示从总买入里减掉。 */
+    function eventAmount(ev) {
+        if (ev.amount == null) return "";
+        // 返回数字：CSV 里不会被当成以“-”开头的文字加上防公式的引号
+        return ev.type === "buyin_reversed" ? -ev.amount : ev.amount;
     }
 
     function eventTagClass(type) {
@@ -66,6 +73,8 @@
                 return t("detailAutoRejected");
             case "buyin_withdrawn":
                 return t("detailWithdrawn");
+            case "buyin_reversed":
+                return fmt("detailReversed", { amount: ev.amount ?? 0 });
             case "proxy_buyin":
                 return t("detailProxy");
             case "game_finished": {
@@ -182,7 +191,7 @@
                 <td><span class="event-tag ${eventTagClass(ev.type)}">${escapeHtml(t("ev_" + ev.type))}</span></td>
                 <td>${escapeHtml(ev.actor_name || t("system"))}</td>
                 <td>${escapeHtml(ev.target_name)}</td>
-                <td class="num">${ev.amount == null ? "" : ev.amount}</td>
+                <td class="num">${escapeHtml(eventAmount(ev))}</td>
                 <td>${escapeHtml(buyTypeLabel(ev.buy_type))}</td>
                 <td class="wrap">${escapeHtml(eventDetail(ev))}</td>
             </tr>`).join("");
@@ -266,7 +275,7 @@
         report.events.forEach(ev => {
             lines.push(csvLine([
                 asText(ev.time), t("ev_" + ev.type), ev.actor_name || t("system"), ev.target_name,
-                ev.amount, buyTypeLabel(ev.buy_type), eventDetail(ev),
+                eventAmount(ev), buyTypeLabel(ev.buy_type), eventDetail(ev),
             ]));
         });
         lines.push("");

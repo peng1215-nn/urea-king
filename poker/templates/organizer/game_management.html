@@ -315,6 +315,19 @@
     </div>
 </div>
 
+<!-- 买入明细：每一笔买入，局头可以撤销记错的 -->
+<div id="buyin-history-modal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content">
+        <h3 data-i18n="buyinHistory">买入明细</h3>
+        <p class="modal-target-name" id="buyin-history-player"></p>
+        <p class="modal-desc" data-i18n="reverseBuyinDesc">记错的买入可以撤销：撤销后从总买入里减掉，原记录保留并标为“已撤销”，审计报告里也会记录。撤销不能恢复，撤错了重新买入即可。</p>
+        <div id="buyin-history-list" class="buyin-history-list"></div>
+        <div class="custom-modal-actions">
+            <button class="modal-cancel-button" data-on-click="closeBuyinHistoryModal" data-i18n="close">关闭</button>
+        </div>
+    </div>
+</div>
+
 <div id="settlement-modal" class="custom-modal" style="display:none;">
     <div class="custom-modal-content modal-wide">
 
@@ -365,6 +378,7 @@
 <script src="/static/js/organizer/game_management/game_render.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/game_management/start_game.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/game_management/player_actions.js?v={{ static_version }}"></script>
+<script src="/static/js/organizer/game_management/buyin_history.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/game_management/finish_game.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/game_management/init.js?v={{ static_version }}"></script>
 

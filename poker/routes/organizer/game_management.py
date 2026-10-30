@@ -11,6 +11,8 @@ from poker.services.common.common import add_no_cache_headers
 from poker.services.organizer.game_management import add_player_to_game_service
 from poker.services.organizer.game_management import approve_chip_request_service
 from poker.services.organizer.game_management import finish_game_service
+from poker.services.organizer.game_management import list_player_buyins_service
+from poker.services.organizer.game_management import reverse_buyin_service
 from poker.services.organizer.game_management import get_group_members_for_game_service
 from poker.services.organizer.game_management import get_ongoing_games_service
 from poker.services.organizer.game_management import organizer_buyin_service
@@ -222,6 +224,40 @@ def reject_request(
         game_id=game_id,
         group_id=int(group_id),
         resolver_id=int(user_id),
+    )
+
+
+@router.get("/organizer/game/player-buyins")
+def get_player_buyins(request: Request, game_id: int, user_id: int):
+    if not require_organizer(request):
+        return {"success": False, "message": "permissionDenied"}
+
+    group_id = get_group_id(request)
+    if not group_id:
+        return {"success": False, "message": "noGroupSelected"}
+
+    return list_player_buyins_service(game_id=game_id, group_id=int(group_id), user_id=user_id)
+
+
+@router.post("/organizer/game/reverse-buyin")
+def reverse_buyin(
+    request: Request,
+    request_id: int = Form(...),
+    game_id: int = Form(...),
+):
+    if not require_organizer(request):
+        return {"success": False, "message": "permissionDenied"}
+
+    group_id = get_group_id(request)
+    organizer_id = get_user_id(request)
+    if not group_id or not organizer_id:
+        return {"success": False, "message": "noGroupSelected"}
+
+    return reverse_buyin_service(
+        request_id=request_id,
+        game_id=game_id,
+        group_id=int(group_id),
+        organizer_id=int(organizer_id),
     )
 
 

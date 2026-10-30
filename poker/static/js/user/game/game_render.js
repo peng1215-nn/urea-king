@@ -125,6 +125,10 @@ function notifyResolvedRequests(games) {
                         && r.status !== "pending" && r.status !== "withdrawn") {
                     changed.push(r);
                 }
+                // 局头撤销了一笔已记入的买入，也提醒一下
+                if (lastRequestStatus && lastRequestStatus[r.id] === "approved" && r.status === "reversed") {
+                    changed.push(r);
+                }
             });
         });
     });
@@ -133,6 +137,7 @@ function notifyResolvedRequests(games) {
     if (changed.length === 0) return;
     const messages = changed.map(r => {
         const key = r.status === "approved" ? "toastRequestApproved"
+            : r.status === "reversed" ? "toastBuyinReversed"
             : r.rejected_by === "auto" ? "toastRequestAutoRejected" : "toastRequestRejected";
         return t(key).replace("{amount}", r.amount);
     });
@@ -240,6 +245,9 @@ function requestStatusLabel(r) {
     }
     if (r.status === "withdrawn") {
         return { cls: "req-withdrawn", text: t("requestWithdrawn") };
+    }
+    if (r.status === "reversed") {
+        return { cls: "req-withdrawn", text: t("requestReversed") };
     }
     return { cls: "req-pending", text: t("requestPending") };
 }

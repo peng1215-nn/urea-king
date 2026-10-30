@@ -225,6 +225,15 @@ function renderPlayerList() {
             `;
         }
 
+        // 有买入记录就能打开明细，局头可以在里面撤销记错的买入（暂离、离场的玩家也可以）
+        if ((player.total_buy_in || 0) > 0) {
+            actionsHtml = `
+                <div class="player-action-row">
+                    <button class="btn-small btn-history" data-on-click="openBuyinHistoryModal" data-args="[${player.user_id}]">${t("buyinHistory")}</button>
+                </div>
+            ` + actionsHtml;
+        }
+
         card.innerHTML = `
             <img class="player-avatar" src="${escapeHtml(avatarUrl)}" alt="头像">
             <div class="player-info">

@@ -686,3 +686,120 @@ def test_forced_finish_reports_unbalanced(table):
     assert result["game"]["total_buy_in"] == 100
     assert result["game"]["total_cash_out"] == 80
     assert all("alias" in p for p in result["players"])
+
+
+# ───────────────────────── 局头撤销买入 ─────────────────────────
+
+def _approved_ids(game_id, user_id):
+    listed = _svc().list_player_buyins_service(game_id=game_id, group_id=_game(game_id).group_id, user_id=user_id)
+    assert listed["success"] is True, listed
+    return [b["id"] for b in listed["buyins"] if b["status"] == "approved"]
+
+
+def _reverse(t, game_id, request_id):
+    return _svc().reverse_buyin_service(
+        request_id=request_id, game_id=game_id, group_id=t["group"], organizer_id=t["org"],
+    )
+
+
+def test_reverse_buyin_subtracts_and_report_balances(table):
+    from database import SessionLocal
+    from poker.services.common.game_events import build_game_report
+
+    t = table
+    alice, bob = t["members"][0], t["members"][1]
+    game_id = _start(t, players=[t["org"], alice, bob])
+
+    req = _request_buyin(game_id, t["group"], alice, 2000)
+    assert _svc().approve_chip_request_service(
+        request_id=req, game_id=game_id, group_id=t["group"], resolver_id=t["org"],
+    )["success"] is True
+    req2 = _request_buyin(game_id, t["group"], alice, 200)
+    _svc().approve_chip_request_service(request_id=req2, game_id=game_id, group_id=t["group"], resolver_id=t["org"])
+    assert _buyin(t, game_id, t["org"], 300)["success"] is True
+    assert _player(game_id, alice).total_buy_in == 2200
+
+    # 撤销记错的 2000
+    assert _reverse(t, game_id, req)["success"] is True
+    assert _player(game_id, alice).total_buy_in == 200
+    listed = _svc().list_player_buyins_service(game_id=game_id, group_id=t["group"], user_id=alice)["buyins"]
+    assert {b["id"]: b["status"] for b in listed} == {req: "reversed", req2: "approved"}
+
+    # 同一笔不能撤销两次
+    assert _reverse(t, game_id, req)["message"] == "buyinNotFound"
+    assert _player(game_id, alice).total_buy_in == 200
+
+    # 局头自己的买入也能撤销；明细里普通 / 保险 / anti 的拆分随之更新
+    org_buyin = _approved_ids(game_id, t["org"])[0]
+    assert _reverse(t, game_id, org_buyin)["success"] is True
+    assert _player(game_id, t["org"]).total_buy_in == 0
+
+    result = _finish(t, game_id, {t["org"]: 0, alice: 200, bob: 0})
+    assert result["success"] is True, result
+
+    db = SessionLocal()
+    try:
+        report = build_game_report(db, game_id, t["group"])
+    finally:
+        db.close()
+    assert report["all_match"] is True
+    alice_row = next(r for r in report["summary"] if r["user_id"] == alice)
+    assert alice_row["buy_in_from_events"] == 200
+    assert sum(1 for e in report["events"] if e["type"] == "buyin_reversed") == 2
+
+
+def test_reverse_buyin_only_in_ongoing_game_and_own_group(factory, table):
+    t = table
+    alice = t["members"][0]
+    game_id = _start(t, players=[t["org"], alice])
+    req = _request_buyin(game_id, t["group"], alice, 100)
+    _svc().approve_chip_request_service(request_id=req, game_id=game_id, group_id=t["group"], resolver_id=t["org"])
+
+    # 别的组不能撤销
+    other_group = factory.group("G2")
+    assert _svc().reverse_buyin_service(
+        request_id=req, game_id=game_id, group_id=other_group, organizer_id=t["org"],
+    )["message"] == "gameNotFound"
+
+    # 待审批、被拒绝的申请不能撤销
+    pending = _request_buyin(game_id, t["group"], alice, 50)
+    assert _reverse(t, game_id, pending)["message"] == "buyinNotFound"
+
+    _svc().reject_chip_request_service(request_id=pending, game_id=game_id, group_id=t["group"], resolver_id=t["org"])
+    assert _finish(t, game_id, {t["org"]: 0, alice: 100})["success"] is True
+
+    # 牌局结束后不能再改
+    assert _reverse(t, game_id, req)["message"] == "gameNotFound"
+    assert _player(game_id, alice).total_buy_in == 100
+
+
+def test_concurrent_reverse_subtracts_once(table):
+    t = table
+    alice = t["members"][0]
+    game_id = _start(t, players=[t["org"], alice])
+    req = _request_buyin(game_id, t["group"], alice, 500)
+    _svc().approve_chip_request_service(request_id=req, game_id=game_id, group_id=t["group"], resolver_id=t["org"])
+
+    results = _run_concurrently(lambda i: _reverse(t, game_id, req), 4)
+    assert sum(1 for r in results if r["success"]) == 1
+    assert _player(game_id, alice).total_buy_in == 0
+
+
+def test_reverse_buyin_over_http_requires_organizer(client, table, login_as):
+    t = table
+    alice = t["members"][0]
+    game_id = _start(t, players=[t["org"], alice])
+    req = _request_buyin(game_id, t["group"], alice, 100)
+    _svc().approve_chip_request_service(request_id=req, game_id=game_id, group_id=t["group"], resolver_id=t["org"])
+
+    login_as("alice001", t["group"])
+    response = client.post("/organizer/game/reverse-buyin", data={"request_id": req, "game_id": game_id})
+    assert response.json()["message"] == "permissionDenied"
+    assert _player(game_id, alice).total_buy_in == 100
+
+    login_as("orgaaaa1", t["group"])
+    listed = client.get(f"/organizer/game/player-buyins?game_id={game_id}&user_id={alice}").json()
+    assert [b["amount"] for b in listed["buyins"]] == [100]
+    response = client.post("/organizer/game/reverse-buyin", data={"request_id": req, "game_id": game_id})
+    assert response.json()["success"] is True
+    assert _player(game_id, alice).total_buy_in == 0

@@ -54,7 +54,7 @@ def _my_requests(db, game_id, user_id):
     ]
 
     def is_proxy(r):
-        if r.status != "approved" or r.resolved_by is None or r.resolved_by == user_id:
+        if r.status not in ("approved", "reversed") or r.resolved_by is None or r.resolved_by == user_id:
             return False
         for index, (created_at, amount) in enumerate(proxy_times):
             if amount == r.amount and created_at and r.requested_at \

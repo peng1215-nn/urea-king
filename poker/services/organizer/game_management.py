@@ -675,6 +675,87 @@ def organizer_proxy_buyin_service(game_id: int, group_id: int, organizer_id: int
         db.close()
 
 
+def list_player_buyins_service(game_id: int, group_id: int, user_id: int):
+    """进行中牌局里某位玩家的每一笔买入（已批准的和已撤销的），给局头核对、撤销用。"""
+    db = SessionLocal()
+    try:
+        game = db.query(PokerGame).filter(
+            PokerGame.id == game_id,
+            PokerGame.group_id == group_id,
+            PokerGame.status == "ongoing",
+        ).first()
+        if not game:
+            return {"success": False, "message": "gameNotFound"}
+
+        rows = db.query(ChipRequest).filter(
+            ChipRequest.game_id == game_id,
+            ChipRequest.user_id == user_id,
+            ChipRequest.status.in_(("approved", "reversed")),
+        ).order_by(ChipRequest.resolved_at.asc(), ChipRequest.id.asc()).all()
+
+        return {
+            "success": True,
+            "buyins": [
+                {
+                    "id": r.id,
+                    "amount": r.amount,
+                    "type": r.type or "normal",
+                    "status": r.status,
+                    "time": r.resolved_at.strftime("%H:%M:%S") if r.resolved_at else "",
+                }
+                for r in rows
+            ],
+        }
+    except Exception as e:
+        return {"success": False, "message": safe_error(e)}
+    finally:
+        db.close()
+
+
+def reverse_buyin_service(request_id: int, game_id: int, group_id: int, organizer_id: int):
+    """
+    局头撤销一笔已记入的买入（批准的申请、局头买入、代买都可以）：
+    从玩家总买入里减掉，原记录标为 reversed（不删除），并记一条 buyin_reversed 审计事件。
+    只能在牌局进行中撤销；撤销不能再恢复，撤错了重新买入即可。
+    """
+    db = SessionLocal()
+    try:
+        game = _lock_ongoing_game(db, game_id, group_id)
+        if not game:
+            return {"success": False, "message": "gameNotFound"}
+
+        req = db.query(ChipRequest).filter(
+            ChipRequest.id == request_id,
+            ChipRequest.game_id == game_id,
+            ChipRequest.status == "approved",
+        ).with_for_update().first()
+        if not req:
+            return {"success": False, "message": "buyinNotFound"}
+
+        player = db.query(PokerGamePlayer).filter(
+            PokerGamePlayer.game_id == game_id,
+            PokerGamePlayer.user_id == req.user_id,
+        ).with_for_update().first()
+        if not player or (player.total_buy_in or 0) < req.amount:
+            # 正常情况下不会发生：总买入就是这些买入加起来的
+            return {"success": False, "message": "buyinNotFound"}
+
+        req.status = "reversed"
+        _add_to_buy_in(db, player.id, -req.amount)
+        record_game_event(
+            db, game_id, "buyin_reversed",
+            actor_user_id=organizer_id, target_user_id=req.user_id, amount=req.amount, buy_type=req.type,
+            details={"request_id": req.id},
+        )
+        db.commit()
+        return {"success": True}
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "message": safe_error(e)}
+    finally:
+        db.close()
+
+
 def finish_game_service(
     game_id: int,
     group_id: int,

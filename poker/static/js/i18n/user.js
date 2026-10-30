@@ -93,6 +93,8 @@ window.userTranslations = {
         requestRejected: "已拒绝",
         // 撤回买入申请
         requestWithdrawn: "已撤回",
+        requestReversed: "已撤销（局头）",
+        toastBuyinReversed: "局头撤销了你的 {amount} 买入",
         withdrawRequest: "撤回",
         withdrawRequestTitle: "撤回买入申请",
         withdrawRequestDesc: "确认撤回这笔 {amount} 的买入申请？撤回后局头不会再看到它，买入不受影响。",
@@ -314,6 +316,8 @@ window.userTranslations = {
         requestRejected: "Rejected",
         // Withdraw buy-in request
         requestWithdrawn: "Withdrawn",
+        requestReversed: "Undone (by organizer)",
+        toastBuyinReversed: "The organizer undid your {amount} buy-in",
         withdrawRequest: "Withdraw",
         withdrawRequestTitle: "Withdraw buy-in request",
         withdrawRequestDesc: "Withdraw your buy-in request of {amount}? The organizer will no longer see it, and your buy-in stays the same.",
