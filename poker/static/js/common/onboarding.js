@@ -15,6 +15,7 @@
             { key: "onboardingOrganizer1", href: "/organizer-invite-management" },
             { key: "onboardingOrganizer2", href: "/organizer-members" },
             { key: "onboardingOrganizer3", href: "/organizer-games" },
+            { key: "onboardingOrganizerLeaveRule", href: "/organizer-games" },
             { key: "onboardingOrganizer4", href: "/organizer-game-logs" },
         ],
         user: [

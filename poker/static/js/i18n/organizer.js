@@ -155,6 +155,8 @@ const organizerTranslations = {
 
                 onboardingOrganizer3: "第三步：在牌局管理里开局、审批筹码申请，结束时结算",
 
+                onboardingOrganizerLeaveRule: "提示：玩家要离开时，点他的「移出」，选「暂离」或「退出」（结算离场）。结算离场的人回来必须重新买入，原来的筹码不能再用；打算回来接着用原来的筹码，就选「暂离」。结束牌局时只填每人剩余的筹码，结算离场拿走的部分会自动计入。",
+
                 onboardingOrganizer4: "之后：在牌局日志里查看历史战绩和统计",
 
                 avatarUploadFailed: "头像上传失败。",
@@ -263,6 +265,7 @@ const organizerTranslations = {
         reject: "拒绝",
         playerRemoved: "玩家已移出。",
         playerAway: "玩家已暂离。",
+        playerAwayOption: "暂离",
         playerExited: "玩家已退出。",
         playerExit: "退出",
         removePlayerDesc: "请选择操作类型：",
@@ -489,6 +492,8 @@ const organizerTranslations = {
 
                 onboardingOrganizer3: "Step 3: Start a game, approve chip requests and settle it in Game Management",
 
+                onboardingOrganizerLeaveRule: "Tip: when a player leaves, tap their \"Remove\" and choose \"Away\" or \"Exit\" (cash out and leave). A player who cashed out must buy in again if they come back; their old chips can't be reused. If they'll come back and keep playing with the same chips, choose \"Away\". When the game ends, enter only the chips each player has left; chips taken by players who cashed out early are added automatically.",
+
                 onboardingOrganizer4: "Then: Review history and statistics in Game Logs",
 
                 avatarUploadFailed: "Avatar upload failed.",
@@ -597,6 +602,7 @@ const organizerTranslations = {
         reject: "Reject",
         playerRemoved: "Player removed.",
         playerAway: "Player is away.",
+        playerAwayOption: "Away",
         playerExited: "Player has exited.",
         playerExit: "Exit",
         removePlayerDesc: "Please select an action:",
