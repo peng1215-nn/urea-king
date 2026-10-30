@@ -277,5 +277,6 @@ def install_middleware(app, domain_router=None, public_paths=(), session_key=Non
         max_age=settings.SESSION_MAX_AGE,
         same_site="lax",
         https_only=settings.SESSION_HTTPS_ONLY,
+        httponly=True,
     )
     app.add_middleware(BaseHTTPMiddleware, dispatch=security_headers)
