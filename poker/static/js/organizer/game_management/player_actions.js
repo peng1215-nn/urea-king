@@ -307,7 +307,6 @@ async function confirmOrganizerBuyin() {
 
     const fd = new FormData();
     fd.append("game_id", currentGame.id);
-    fd.append("user_id", organizerBuyinUserId);
     fd.append("amount", amount);
     fd.append("buy_type", buyType);
 

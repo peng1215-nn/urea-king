@@ -1,6 +1,6 @@
 from poker.core.validators import NICKNAME_MAX
 from core.validators import (
-    PASSWORD_MAX,
+    PASSWORD_MAX_BYTES,
     PASSWORD_MIN,
     check_name,
     check_password,
@@ -50,6 +50,9 @@ def test_text_rejects_control_characters_and_overlong_text():
 def test_password_length_rules():
     assert check_password("a" * (PASSWORD_MIN - 1)) == "too_short"
     assert check_password("a" * PASSWORD_MIN) is None
-    assert check_password("a" * PASSWORD_MAX) is None
-    assert check_password("a" * (PASSWORD_MAX + 1)) == "too_long"
+    assert check_password("a" * PASSWORD_MAX_BYTES) is None
+    assert check_password("a" * (PASSWORD_MAX_BYTES + 1)) == "too_long"
+    # 按 UTF-8 字节计算：24 个汉字正好 72 字节，25 个超出
+    assert check_password("密" * 24) is None
+    assert check_password("密" * 25) == "too_long"
     assert check_password(None) == "too_short"

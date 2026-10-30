@@ -227,10 +227,10 @@ def reject_request(
 def organizer_buyin(
     request: Request,
     game_id: int = Form(...),
-    user_id: int = Form(...),
     amount: int = Form(...),
     buy_type: str = Form("normal"),
 ):
+    """局头给自己买入。给其他玩家买入走 proxy-buyin，需要玩家授权。"""
     if not require_organizer(request):
         return {"success": False, "message": "permissionDenied"}
 
@@ -238,10 +238,11 @@ def organizer_buyin(
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
 
+    # 买入对象固定为局头本人，不接受表单传入的 user_id
     return organizer_buyin_service(
         game_id=game_id,
         group_id=int(group_id),
-        user_id=user_id,
+        user_id=int(request.session.get("user_id")),
         amount=amount,
         buy_type=buy_type,
     )

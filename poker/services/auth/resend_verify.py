@@ -33,8 +33,10 @@ def resend_verify_email_service(email: str) -> dict:
         if not user or user.is_active == 0:
             return {"success": True, "error_code": "resendSent"}  # 假装发送成功
 
+        # 已验证、发送太频繁、超出每日上限时都静默返回"已发送"，
+        # 和邮箱不存在时的回复完全一样，防止借此判断邮箱是否注册
         if user.email_verified:
-            return {"success": False, "error_code": "resendAlreadyVerified"}
+            return {"success": True, "error_code": "resendSent"}
 
         now = now_columbus_naive()
         cutoff_24h = now - timedelta(hours=24)
@@ -52,18 +54,10 @@ def resend_verify_email_service(email: str) -> dict:
         )
 
         if len(recent_tokens) >= RESEND_MAX_PER_DAY:
-            return {"success": False, "error_code": "resendDailyLimit"}
+            return {"success": True, "error_code": "resendSent"}
 
         if recent_tokens and recent_tokens[0].created_at >= cutoff_5min:
-            wait_seconds = int(
-                (recent_tokens[0].created_at + timedelta(minutes=RESEND_INTERVAL_MINUTES) - now)
-                .total_seconds()
-            )
-            return {
-                "success": False,
-                "error_code": "resendTooFrequent",
-                "wait_seconds": wait_seconds,
-            }
+            return {"success": True, "error_code": "resendSent"}
 
         token = secrets.token_urlsafe(64)
         verification = EmailVerification(

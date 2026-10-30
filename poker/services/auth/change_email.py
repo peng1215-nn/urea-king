@@ -80,6 +80,13 @@ def change_email_service(username: str, password: str, new_email: str) -> dict:
         if conflict:
             return {"success": False, "error_code": "changeEmailEmailExists"}
 
+        # 发往旧邮箱的验证链接全部作废，避免换邮箱后用旧链接把新邮箱标记为已验证
+        db.query(EmailVerification).filter(
+            EmailVerification.user_id == user.id,
+            EmailVerification.purpose == "verify_email",
+            EmailVerification.used == 0,
+        ).update({"used": 1}, synchronize_session=False)
+
         # 更新邮箱
         user.email = new_email
 

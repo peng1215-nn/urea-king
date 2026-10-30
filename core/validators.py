@@ -20,7 +20,9 @@ _ANGLE_RE = re.compile("[<>]")
 
 # 各字段长度上限（不超过数据库列宽）
 PASSWORD_MIN = 8
-PASSWORD_MAX = 128
+# bcrypt 只接受最多 72 字节的密码（bcrypt 5.0 起超长直接报错），按 UTF-8 字节数计算。
+# 英文、数字、符号每个 1 字节；汉字每个 3 字节，最多 24 个。
+PASSWORD_MAX_BYTES = 72
 
 
 def check_name(value, max_len):
@@ -63,7 +65,7 @@ def check_password(password):
     if len(password) < PASSWORD_MIN:
         return "too_short"
 
-    if len(password) > PASSWORD_MAX:
+    if len(password.encode("utf-8")) > PASSWORD_MAX_BYTES:
         return "too_long"
 
     return None

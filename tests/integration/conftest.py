@@ -51,6 +51,8 @@ def clean_state(migrated_db):
         rate_limit.forgot_password_failures_by_ip,
         rate_limit.reset_password_failures_by_ip,
         rate_limit.avatar_uploads_by_user,
+        rate_limit.invite_creates_by_user,
+        rate_limit.current_password_failures_by_user,
     ):
         limiter._events.clear()
 

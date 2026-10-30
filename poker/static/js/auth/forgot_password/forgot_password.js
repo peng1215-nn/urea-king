@@ -27,18 +27,6 @@ async function sendForgotPassword() {
                 msgBox.style.color = "#e55";
                 btn.disabled = false;
                 btn.textContent = t.sendBtn || "发送重置邮件";
-            } else if (data.error_code === "resetTooFrequent") {
-                const wait = Math.ceil((data.wait_seconds || 300) / 60);
-                const msg = (t.resetTooFrequent || "请 {wait} 分钟后再试。").replace("{wait}", wait);
-                msgBox.textContent = msg;
-                msgBox.style.color = "#e55";
-                btn.disabled = false;
-                btn.textContent = t.sendBtn || "发送重置邮件";
-            } else if (data.error_code === "resetDailyLimit") {
-                msgBox.textContent = t.resetDailyLimit || "今日发送次数已达上限，请明天再试。";
-                msgBox.style.color = "#e55";
-                btn.disabled = false;
-                btn.textContent = t.sendBtn || "发送重置邮件";
             } else {
                 // 其他错误显示通用提示（防枚举）
                 msgBox.textContent = t.resetSuccess || "如果该邮箱已注册，重置链接已发送，请查收邮件。";

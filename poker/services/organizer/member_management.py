@@ -91,6 +91,13 @@ def save_member_alias_service(group_id: int, target_user_id: int, alias: str):
                 "success": False,
                 "message": "textTooLong" if alias_error == "too_long" else "textInvalidChars",
             }
+        # 只能给本组成员设置备注名
+        is_member = db.query(UserGroupRole).filter(
+            UserGroupRole.group_id == group_id,
+            UserGroupRole.user_id == target_user_id,
+        ).first()
+        if not is_member:
+            return {"success": False, "message": "memberNotInGroup"}
         existing = db.query(GroupMemberAlias).filter(
             GroupMemberAlias.group_id == group_id,
             GroupMemberAlias.user_id == target_user_id,

@@ -144,6 +144,7 @@ def verify_email_service(token: str):
                 EmailVerification.token == token,
                 EmailVerification.purpose == "verify_email",
             )
+            .with_for_update()
             .first()
         )
 

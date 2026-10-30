@@ -401,6 +401,7 @@ def reject_chip_request_service(request_id: int, game_id: int, group_id: int, re
 
 
 def organizer_buyin_service(game_id: int, group_id: int, user_id: int, amount: int, buy_type: str = "normal"):
+    """局头给自己买入，直接记为已批准。user_id 必须是局头本人（由路由从会话取得）。"""
     db = SessionLocal()
     try:
         game = _lock_ongoing_game(db, game_id, group_id)

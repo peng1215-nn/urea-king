@@ -1,7 +1,12 @@
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from poker.core.rate_limit import register_failures_by_ip, resend_verify_failures_by_ip
+from poker.core.rate_limit import (
+    login_retry_after,
+    record_login_failure,
+    register_failures_by_ip,
+    resend_verify_failures_by_ip,
+)
 from poker.services.admin.audit_log import get_client_ip
 from poker.services.auth.register import register_user_service, verify_email_service
 from poker.services.auth.resend_verify import resend_verify_email_service
@@ -61,10 +66,9 @@ def resend_verify_email(request: Request, email: str = Form(...)):
             {"success": False, "error_code": "resendTooManyAttempts", "retry_after": wait},
             status_code=429,
         )
-    result = resend_verify_email_service(email)
-    if not result.get("success"):
-        resend_verify_failures_by_ip.hit(ip)
-    return result
+    # 回复几乎总是"已发送"，所以按请求次数计数，而不是按失败计数
+    resend_verify_failures_by_ip.hit(ip)
+    return resend_verify_email_service(email)
 
 
 @router.post("/change-email")
@@ -74,7 +78,20 @@ def change_email(
     password: str = Form(...),
     new_email: str = Form(...),
 ):
-    return change_email_service(username, password, new_email)
+    ip = get_client_ip(request) or "unknown"
+
+    # 这里要验证账号密码，所以和登录共用限流，防止借此反复猜密码
+    wait = login_retry_after(ip, username)
+    if wait:
+        return JSONResponse(
+            {"success": False, "error_code": "changeEmailTooManyAttempts", "retry_after": wait},
+            status_code=429,
+        )
+
+    result = change_email_service(username, password, new_email)
+    if result.get("error_code") == "changeEmailWrongCredentials":
+        record_login_failure(ip, username)
+    return result
 
 
 @router.get("/verify-email", response_class=HTMLResponse)

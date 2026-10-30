@@ -59,10 +59,15 @@ def login_user_service(request, username, password):
             db.add(UserModule(user_id=user.id, module="poker"))
             db.commit()
 
-        # 旧 pbkdf2_sha256 哈希在首次登录成功时静默升级为 bcrypt
+        # 旧 pbkdf2_sha256 哈希在首次登录成功时静默升级为 bcrypt。
+        # 升级失败（例如旧密码超过 bcrypt 的 72 字节上限）不影响本次登录，下次再试。
         if user.password_hash.startswith("$pbkdf2-sha256$"):
-            user.password_hash = pwd_context.hash(password)
-            db.commit()
+            try:
+                user.password_hash = pwd_context.hash(password)
+                db.commit()
+            except Exception as e:
+                db.rollback()
+                safe_error(e)
 
         request.session["user_id"] = user.id
         request.session["username"] = user.username

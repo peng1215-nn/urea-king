@@ -43,16 +43,10 @@ def forgot_password_service(email: str):
             )
             .first()
         )
+        # 发送太频繁、超出每日上限时静默返回成功，
+        # 和邮箱不存在时的回复一样，防止借此判断邮箱是否注册
         if recent:
-            wait_seconds = int(
-                (recent.created_at + timedelta(minutes=RESET_INTERVAL_MINUTES) - now)
-                .total_seconds()
-            )
-            return {
-                "success": False,
-                "error_code": "resetTooFrequent",
-                "wait_seconds": max(wait_seconds, 1),
-            }
+            return {"success": True}
 
         # 24 小时内次数限制
         cutoff_24h = now - timedelta(hours=24)
@@ -66,7 +60,7 @@ def forgot_password_service(email: str):
             .count()
         )
         if count_today >= RESET_MAX_PER_DAY:
-            return {"success": False, "error_code": "resetDailyLimit"}
+            return {"success": True}
 
         token = secrets.token_urlsafe(64)
         record = EmailVerification(
@@ -115,6 +109,7 @@ def reset_password_service(token: str, new_password: str, confirm_password: str)
                 EmailVerification.token == token,
                 EmailVerification.purpose == "reset_password",
             )
+            .with_for_update()
             .first()
         )
 
@@ -132,6 +127,12 @@ def reset_password_service(token: str, new_password: str, confirm_password: str)
             return {"success": False, "error_code": "resetTokenInvalid"}
 
         user.password_hash = pwd_context.hash(new_password)
+        # 本链接和这个账号其他未使用的重置链接一起作废
+        db.query(EmailVerification).filter(
+            EmailVerification.user_id == user.id,
+            EmailVerification.purpose == "reset_password",
+            EmailVerification.used == 0,
+        ).update({"used": 1}, synchronize_session=False)
         record.used = 1
         db.commit()
         return {"success": True}

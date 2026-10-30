@@ -2,8 +2,10 @@ from fastapi import APIRouter
 from fastapi import Form
 from fastapi import Request
 from fastapi.responses import HTMLResponse
+from fastapi.responses import JSONResponse
 from fastapi.responses import RedirectResponse
 
+from poker.core.rate_limit import invite_creates_by_user
 from poker.services.organizer.invite_management import create_invite_code_service
 from poker.services.organizer.invite_management import delete_invite_code_service
 from poker.services.organizer.invite_management import get_invite_codes_service
@@ -58,6 +60,15 @@ def create_invite_code(
     group_id = get_group_id(request)
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
+
+    user_key = str(request.session.get("user_id"))
+    wait = invite_creates_by_user.retry_after(user_key)
+    if wait:
+        return JSONResponse(
+            {"success": False, "message": "inviteCreateTooFrequent", "retry_after": wait},
+            status_code=429,
+        )
+    invite_creates_by_user.hit(user_key)
 
     return create_invite_code_service(group_id=int(group_id), code=code)
 

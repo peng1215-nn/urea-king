@@ -317,6 +317,22 @@ def test_organizer_cannot_touch_other_groups_game(client, factory, table, login_
     assert _player(game_id, t["members"][0]).total_buy_in == 0
 
 
+def test_organizer_buyin_only_buys_for_the_organizer(client, table, login_as):
+    t = table
+    game_id = _start(t)
+    alice = t["members"][0]
+    login_as("orgaaaa1", t["group"])
+
+    # 表单里填别人的 user_id 也只会记在局头本人名下
+    response = client.post(
+        "/organizer/game/organizer-buyin",
+        data={"game_id": game_id, "user_id": alice, "amount": 100},
+    )
+    assert response.json()["success"] is True
+    assert _player(game_id, alice).total_buy_in == 0
+    assert _player(game_id, t["org"]).total_buy_in == 100
+
+
 def test_buy_in_request_over_http(client, table, login_as):
     t = table
     game_id = _start(t)

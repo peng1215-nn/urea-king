@@ -113,12 +113,7 @@
                     submitBtn.disabled = false;
                 } else {
                     msgBox.style.color = "#e05050";
-                    if (data.error_code === "resendTooFrequent") {
-                        const wait = Math.ceil((data.wait_seconds || 300) / 60);
-                        msgBox.textContent = t("resendTooFrequent", { wait });
-                    } else {
-                        msgBox.textContent = t(data.error_code || "resendFailed");
-                    }
+                    msgBox.textContent = t(data.error_code || "resendFailed");
                     submitBtn.disabled = false;
                 }
             } catch {

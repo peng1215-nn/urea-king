@@ -6,6 +6,7 @@
 from database import SessionLocal
 from poker.models import User
 from core.validators import check_name, check_password
+from poker.core.rate_limit import current_password_failures_by_user
 from poker.core.validators import NICKNAME_MAX
 from core.errors import safe_error
 from core.security import pwd_context
@@ -102,7 +103,14 @@ def update_password_service(
         if not user:
             return {"success": False, "message": "userNotFound"}
 
+        # 限制输错当前密码的次数，防止拿到登录状态的人借此猜出密码
+        limiter_key = str(user.id)
+        wait = current_password_failures_by_user.retry_after(limiter_key)
+        if wait:
+            return {"success": False, "message": "currentPasswordTooManyAttempts", "retry_after": wait}
+
         if not pwd_context.verify(current_password, user.password_hash):
+            current_password_failures_by_user.hit(limiter_key)
             return {"success": False, "message": "currentPasswordIncorrect"}
 
         password_error = check_password(new_password)

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
+from core.middleware import clear_session_cache
 from poker.core.rate_limit import forgot_password_failures_by_ip, reset_password_failures_by_ip
 from poker.services.admin.audit_log import get_client_ip
 from poker.services.auth.reset_password import forgot_password_service, reset_password_service
@@ -26,10 +27,9 @@ def forgot_password(request: Request, email: str = Form(...)):
             {"success": False, "error_code": "forgotPasswordTooManyAttempts", "retry_after": wait},
             status_code=429,
         )
-    result = forgot_password_service(email=email)
-    if not result.get("success"):
-        forgot_password_failures_by_ip.hit(ip)
-    return result
+    # 回复总是"已发送"，所以按请求次数计数，而不是按失败计数
+    forgot_password_failures_by_ip.hit(ip)
+    return forgot_password_service(email=email)
 
 
 @router.get("/reset-password", response_class=HTMLResponse)
@@ -60,6 +60,9 @@ def reset_password(
         new_password=new_password,
         confirm_password=confirm_password,
     )
-    if result.get("error_code") in RESET_TOKEN_FAILURES:
+    if result.get("success"):
+        # 密码已改，其他设备上的旧登录立即失效
+        clear_session_cache()
+    elif result.get("error_code") in RESET_TOKEN_FAILURES:
         reset_password_failures_by_ip.hit(ip)
     return result

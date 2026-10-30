@@ -33,9 +33,10 @@ def group_join_logged_in_service(request, user_id, invite_code):
         if admin_role:
             return {"success": False, "message": "groupJoinAdminForbidden"}
 
+        # 锁住这条邀请码，并发的两次使用只有一次能通过"未使用"检查
         invitation = db.query(InvitationCode).filter(
             InvitationCode.code == invite_code
-        ).first()
+        ).with_for_update().first()
         if not invitation:
             return {"success": False, "message": "groupJoinInviteCodeNotFound"}
         if int(invitation.is_used) == 1:
@@ -43,9 +44,10 @@ def group_join_logged_in_service(request, user_id, invite_code):
         if invitation.group_code == ADMIN_GROUP_CODE:
             return {"success": False, "message": "groupJoinAdminGroupForbidden"}
 
+        # 锁住目标组，避免两个局头邀请码同时使用时产生两个局头
         group = db.query(Group).filter(
             Group.group_code == invitation.group_code
-        ).first()
+        ).with_for_update().first()
         if not group:
             return {"success": False, "message": "groupJoinTargetGroupNotFound"}
 
@@ -147,9 +149,10 @@ def group_join_service(
                 "message": "groupJoinAdminForbidden",
             }
 
+        # 锁住这条邀请码，并发的两次使用只有一次能通过"未使用"检查
         invitation = db.query(InvitationCode).filter(
             InvitationCode.code == invite_code
-        ).first()
+        ).with_for_update().first()
 
         if not invitation:
             return {"success": False, "message": "groupJoinInviteCodeNotFound"}
@@ -160,9 +163,10 @@ def group_join_service(
         if invitation.group_code == ADMIN_GROUP_CODE:
             return {"success": False, "message": "groupJoinAdminGroupForbidden"}
 
+        # 锁住目标组，避免两个局头邀请码同时使用时产生两个局头
         group = db.query(Group).filter(
             Group.group_code == invitation.group_code
-        ).first()
+        ).with_for_update().first()
 
         if not group:
             return {"success": False, "message": "groupJoinTargetGroupNotFound"}

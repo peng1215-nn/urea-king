@@ -36,6 +36,12 @@ forgot_password_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
 # 重置密码提交：同一 IP 15 分钟内最多 10 次无效链接
 reset_password_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
 
+# 修改密码时输错当前密码：同一用户 15 分钟内最多 5 次
+current_password_failures_by_user = SlidingWindowLimiter(5, WINDOW)
+
+# 局头创建邀请码：同一用户 15 分钟内最多 20 次（防止借"邀请码已存在"试探其他组的邀请码）
+invite_creates_by_user = SlidingWindowLimiter(20, WINDOW)
+
 # 头像上传：同一用户 60 秒内最多 5 次
 avatar_uploads_by_user = SlidingWindowLimiter(5, 60)
 
