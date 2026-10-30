@@ -1217,10 +1217,18 @@ body {
 }
 
 /* ── 买入明细（可撤销记错的买入） ── */
-.btn-history {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
+.btn-history-link {
+    padding: 6px 0;
+    min-height: 32px;
+    border: none;
+    background: none;
+    color: #8fb4ff;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-history-link:hover {
+    text-decoration: underline;
 }
 
 .buyin-history-list {

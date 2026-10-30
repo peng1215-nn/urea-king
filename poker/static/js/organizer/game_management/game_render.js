@@ -225,13 +225,10 @@ function renderPlayerList() {
             `;
         }
 
-        // 有买入记录就能打开明细，局头可以在里面撤销记错的买入（暂离、离场的玩家也可以）
+        // 有买入记录就能打开明细，局头可以在里面撤销记错的买入（暂离、离场的玩家也可以）。
+        // 放在买入数字下面的小链接里，不占右侧按钮列的高度
         if ((player.total_buy_in || 0) > 0) {
-            actionsHtml = `
-                <div class="player-action-row">
-                    <button class="btn-small btn-history" data-on-click="openBuyinHistoryModal" data-args="[${player.user_id}]">${t("buyinHistory")}</button>
-                </div>
-            ` + actionsHtml;
+            statsHtml += `<div class="player-stat-row"><button type="button" class="btn-history-link" data-on-click="openBuyinHistoryModal" data-args="[${player.user_id}]">${t("buyinHistory")} ›</button></div>`;
         }
 
         card.innerHTML = `
