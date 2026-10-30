@@ -5,7 +5,7 @@ from poker.models import UserGroupRole
 from core.models import UserModule
 from poker.services.admin.audit_log import write_audit_log
 from core.errors import safe_error
-from core.security import password_fingerprint, verify_user_password
+from core.security import password_fingerprint, pwd_context, verify_user_password
 
 
 
@@ -57,6 +57,11 @@ def login_user_service(request, username, password):
         ).first()
         if not already:
             db.add(UserModule(user_id=user.id, module="poker"))
+            db.commit()
+
+        # 旧 pbkdf2_sha256 哈希在首次登录成功时静默升级为 bcrypt
+        if user.password_hash.startswith("$pbkdf2-sha256$"):
+            user.password_hash = pwd_context.hash(password)
             db.commit()
 
         request.session["user_id"] = user.id

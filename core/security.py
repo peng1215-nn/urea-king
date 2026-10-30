@@ -10,8 +10,35 @@ import bcrypt
 from core import settings
 
 
+def _verify_pbkdf2_sha256(password: str, hashed: str) -> bool:
+    """兼容迁移前 passlib pbkdf2_sha256 哈希的校验。
+    格式：$pbkdf2-sha256$rounds$salt$hash（base64url，无填充）
+    """
+    try:
+        import hashlib as _hl
+        import base64
+        parts = hashed.split("$")
+        # $pbkdf2-sha256$rounds$salt$digest — 分割后 ['', 'pbkdf2-sha256', rounds, salt, digest]
+        if len(parts) != 5 or parts[1] != "pbkdf2-sha256":
+            return False
+        rounds = int(parts[2])
+        # passlib 用 base64url（ab64）：把 "." 换回 "+"，再补 "=" 填充
+        def ab64_decode(s):
+            s = s.replace(".", "+")
+            pad = (4 - len(s) % 4) % 4
+            return base64.b64decode(s + "=" * pad)
+        salt = ab64_decode(parts[3])
+        expected = ab64_decode(parts[4])
+        dk = _hl.pbkdf2_hmac("sha256", password.encode(), salt, rounds)
+        return hmac.compare_digest(dk, expected)
+    except Exception:
+        return False
+
+
 class _BcryptContext:
-    """bcrypt 的薄封装，提供与 passlib CryptContext 相同的 .hash() / .verify() 接口。"""
+    """bcrypt 封装，提供与 passlib CryptContext 相同的 .hash() / .verify() 接口。
+    验证时兼容迁移前的 pbkdf2_sha256 哈希，新哈希全部用 bcrypt。
+    """
 
     ROUNDS = 12
 
@@ -20,6 +47,8 @@ class _BcryptContext:
 
     def verify(self, password: str, hashed: str) -> bool:
         try:
+            if (hashed or "").startswith("$pbkdf2-sha256$"):
+                return _verify_pbkdf2_sha256(password, hashed)
             return bcrypt.checkpw(password.encode(), hashed.encode())
         except Exception:
             return False
