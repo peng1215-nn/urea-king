@@ -5,6 +5,7 @@ from poker.models import UserGroupRole
 from core.models import UserModule
 from poker.services.admin.audit_log import write_audit_log
 from core.errors import safe_error
+from core.middleware import LOGIN_AT_KEY, now_timestamp
 from core.security import password_fingerprint, pwd_context, verify_user_password
 
 
@@ -72,6 +73,8 @@ def login_user_service(request, username, password):
         request.session["user_id"] = user.id
         request.session["username"] = user.username
         request.session["pw_fp"] = password_fingerprint(user.password_hash)
+        # 登录状态最长保持 SESSION_ABSOLUTE_MAX_AGE，从此刻开始计算（见 core/middleware.py）
+        request.session[LOGIN_AT_KEY] = now_timestamp()
         request.session.pop("current_group_id", None)
         request.session.pop("current_group_code", None)
         request.session.pop("current_role", None)

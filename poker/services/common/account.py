@@ -118,7 +118,11 @@ def update_password_service(
         if password_error:
             return {
                 "success": False,
-                "message": "newPasswordTooShort" if password_error == "too_short" else "newPasswordTooLong",
+                "message": {
+                    "too_short": "newPasswordTooShort",
+                    "too_long": "newPasswordTooLong",
+                    "too_weak": "newPasswordTooWeak",
+                }[password_error],
             }
 
         if current_password == new_password:

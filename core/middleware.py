@@ -174,6 +174,26 @@ def _wants_html(request):
     return request.method == "GET" and "text/html" in (request.headers.get("accept") or "")
 
 
+# 登录时写入会话的时间戳键名（秒）。测试里可以替换 now_timestamp 模拟时间流逝。
+LOGIN_AT_KEY = "login_at"
+
+
+def now_timestamp():
+    return int(time.time())
+
+
+def _login_too_old(session):
+    """
+    登录超过 SESSION_ABSOLUTE_MAX_AGE 返回 True。
+    上线前就已登录的会话没有登录时间：从这次请求开始计时，不把大家一次性踢下线。
+    """
+    login_at = session.get(LOGIN_AT_KEY)
+    if not isinstance(login_at, int):
+        session[LOGIN_AT_KEY] = now_timestamp()
+        return False
+    return now_timestamp() - login_at > settings.SESSION_ABSOLUTE_MAX_AGE
+
+
 async def session_guard(request, call_next):
     path = request.url.path
 
@@ -185,12 +205,15 @@ async def session_guard(request, call_next):
     key = config["session_key"](request.session)
 
     if key is not None:
-        try:
-            valid = await run_in_threadpool(_cached_session_is_valid, key, config["session_validator"])
-        except Exception:
-            # 数据库暂时不可用时不在这里拦截，后续处理自己会报错
-            logger.exception("session check failed", extra={"path": path})
-            valid = True
+        if _login_too_old(request.session):
+            valid = False
+        else:
+            try:
+                valid = await run_in_threadpool(_cached_session_is_valid, key, config["session_validator"])
+            except Exception:
+                # 数据库暂时不可用时不在这里拦截，后续处理自己会报错
+                logger.exception("session check failed", extra={"path": path})
+                valid = True
 
         if not valid:
             request.session.clear()

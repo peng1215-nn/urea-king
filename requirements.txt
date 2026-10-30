@@ -28,5 +28,5 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 urllib3==2.8.0
 uvicorn==0.47.0
-pytz
+pytz==2026.5
 resend==2.10.0

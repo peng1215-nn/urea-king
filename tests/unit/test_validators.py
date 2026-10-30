@@ -47,12 +47,32 @@ def test_text_rejects_control_characters_and_overlong_text():
     assert check_text("a" * 101, 100)[1] == "too_long"
 
 
+def _varied(length):
+    """不重复、不连续的字符串，只用来测长度。"""
+    pool = "k7Tq2mXw9Rb4Lz8Fv3Np6Hd5Js1Gc0Ya"
+    return (pool * (length // len(pool) + 1))[:length]
+
+
 def test_password_length_rules():
-    assert check_password("a" * (PASSWORD_MIN - 1)) == "too_short"
-    assert check_password("a" * PASSWORD_MIN) is None
-    assert check_password("a" * PASSWORD_MAX_BYTES) is None
-    assert check_password("a" * (PASSWORD_MAX_BYTES + 1)) == "too_long"
+    assert check_password(_varied(PASSWORD_MIN - 1)) == "too_short"
+    assert check_password(_varied(PASSWORD_MIN)) is None
+    assert check_password(_varied(PASSWORD_MAX_BYTES)) is None
+    assert check_password(_varied(PASSWORD_MAX_BYTES + 1)) == "too_long"
     # 按 UTF-8 字节计算：24 个汉字正好 72 字节，25 个超出
-    assert check_password("密" * 24) is None
-    assert check_password("密" * 25) == "too_long"
+    assert check_password("我的扑克密码" * 4) is None
+    assert check_password("我的扑克密码" * 4 + "长") == "too_long"
     assert check_password(None) == "too_short"
+
+
+def test_weak_passwords_are_rejected():
+    for weak in (
+        "11111111", "00000000", "12121212", "abcabcab", "12341234",
+        "12345678", "87654321", "1234567890", "abcdefgh", "qwertyui", "ASDFGHJKL",
+        "password", "PassW0rd", "1qaz2wsx", "iloveyou", "密码密码密码密码",
+    ):
+        assert check_password(weak) == "too_weak", weak
+
+
+def test_ordinary_passwords_are_accepted():
+    for ok in ("newpass123", "Passw0rd123", "GoodPass123", "aB3dE5gH", "我的扑克密码很长"):
+        assert check_password(ok) is None, ok

@@ -26,13 +26,14 @@ def bootstrap_admin(username, password):
     """返回 'created' | 'skipped_exists' | 'invalid_username' | 'invalid_password' | 'username_taken'。"""
     if not USERNAME_PATTERN.match(username or ""):
         return "invalid_username"
-    if check_password(password):
-        return "invalid_password"
-
     db = SessionLocal()
     try:
+        # 已有管理员时直接跳过，不因为环境变量里的旧密码不符合新规则而报错
         if db.query(UserGroupRole.id).filter(UserGroupRole.role == "admin").first():
             return "skipped_exists"
+
+        if check_password(password):
+            return "invalid_password"
 
         if db.query(User.id).filter(User.username == username).first():
             return "username_taken"

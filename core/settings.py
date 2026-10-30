@@ -91,6 +91,9 @@ if not SESSION_SECRET_KEY:
 # Cookie 只通过 HTTPS 发送；生产环境默认开启，本地 http 开发默认关闭
 SESSION_HTTPS_ONLY = _env_bool("SESSION_HTTPS_ONLY", IS_PRODUCTION)
 
+# 会话 cookie 有效期：24 小时内没有访问就要重新登录（每次访问会重新计时）
 SESSION_MAX_AGE = 60 * 60 * 24
+# 登录状态的绝对上限：从登录那一刻算起，无论是否一直在用，7 天后都要重新登录
+SESSION_ABSOLUTE_MAX_AGE = 60 * 60 * 24 * 7
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()

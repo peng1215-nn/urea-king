@@ -223,3 +223,15 @@ def test_alias_only_for_group_members(client, factory, login_as):
 
     rejected = client.post("/organizer/save-member-alias", data={"target_user_id": outsider, "alias": "路人"}).json()
     assert rejected["message"] == "memberNotInGroup"
+
+
+def test_weak_new_password_is_rejected(client, factory, login_as):
+    user_id = factory.user("cp000003")
+    group_id = factory.group("G1")
+    factory.role(user_id, group_id, "user")
+    login_as("cp000003", group_id)
+
+    form = {"current_password": DEFAULT_PASSWORD, "new_password": "12345678", "confirm_password": "12345678"}
+    result = client.post("/user/change-password/update-password", data=form).json()
+    assert result["message"] == "newPasswordTooWeak"
+

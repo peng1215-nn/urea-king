@@ -170,3 +170,22 @@ def test_unhandled_error_renders_html_page_for_browsers(client):
     assert response.status_code == 500
     assert "text/html" in response.headers["content-type"]
     assert "secret" not in response.text
+
+
+def test_login_expires_after_absolute_limit(client, monkeypatch):
+    from core import settings
+
+    clock = {"now": 1_000_000}
+    monkeypatch.setattr(middleware, "now_timestamp", lambda: clock["now"])
+
+    client.post("/sign-in", headers=SAME_ORIGIN)
+    # 第一次请求记下登录时间
+    assert client.post("/api", headers=SAME_ORIGIN).status_code == 200
+
+    clock["now"] += settings.SESSION_ABSOLUTE_MAX_AGE - 60
+    assert client.post("/api", headers=SAME_ORIGIN).status_code == 200
+
+    clock["now"] += 120
+    response = client.post("/api", headers=SAME_ORIGIN)
+    assert response.status_code == 401
+    assert response.json()["message"] == "sessionExpired"

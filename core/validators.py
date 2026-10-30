@@ -58,8 +58,61 @@ def check_text(value, max_len):
     return value, None
 
 
+# 弱密码规则（前端提示文案里写明了这三条，改规则时一起改 i18n 里的 *PasswordTooWeak）：
+#   1. 由 1–4 个字符反复重复组成，如 11111111、12121212、abcabcab、12341234
+#   2. 整个密码是一段连续的数字、字母或键盘排列，如 12345678、87654321、abcdefgh、qwertyui
+#   3. 常见密码，如 password、iloveyou、1qaz2wsx（不区分大小写）
+_SEQUENCES = (
+    "0123456789",
+    "1234567890",
+    "abcdefghijklmnopqrstuvwxyz",
+    "qwertyuiop",
+    "asdfghjkl",
+    "zxcvbnm",
+    "qwertyuiopasdfghjklzxcvbnm",
+)
+
+COMMON_PASSWORDS = frozenset({
+    "password", "password1", "password12", "password123", "passw0rd", "p@ssw0rd", "p@ssword",
+    "iloveyou", "iloveyou1", "sunshine", "princess", "football", "baseball", "superman",
+    "welcome1", "welcome123", "letmein1", "trustno1", "computer", "internet", "starwars",
+    "admin123", "admin1234", "administrator", "root1234", "test1234", "testtest",
+    "abc12345", "abc123456", "a1234567", "a12345678", "a123456789", "aa123456", "aa12345678",
+    "qq123456", "qwe12345", "qwer1234", "qwert123", "qwerty12", "qwerty123", "qwerty1234",
+    "1qaz2wsx", "1qaz2wsx3edc", "1q2w3e4r", "1q2w3e4r5t", "1q2w3e4r5t6y", "q1w2e3r4", "q1w2e3r4t5",
+    "123qweasd", "qweasdzxc", "123qwe123", "zxcvbnm1", "asdf1234", "1234qwer", "1234abcd",
+    "123456abc", "123456aa", "12345678a", "123456789a", "11223344", "12344321", "1234554321",
+    "5201314520", "52013145", "woaini1314", "woaini520", "iloveyou520",
+    "ureaking", "ureaking123", "urea-king", "poker123", "pokerpoker", "pokerking",
+})
+
+
+def _is_repeated_pattern(value):
+    for size in range(1, 5):
+        unit = value[:size]
+        if len(value) > size and (unit * (len(value) // size + 1))[: len(value)] == value:
+            return True
+    return False
+
+
+def _is_sequence(value):
+    for sequence in _SEQUENCES:
+        if value in sequence or value in sequence[::-1]:
+            return True
+    return False
+
+
+def is_weak_password(password):
+    value = (password or "").lower()
+    return (
+        _is_repeated_pattern(value)
+        or _is_sequence(value)
+        or value in COMMON_PASSWORDS
+    )
+
+
 def check_password(password):
-    """返回错误原因：None | 'too_short' | 'too_long'"""
+    """返回错误原因：None | 'too_short' | 'too_long' | 'too_weak'"""
     password = password or ""
 
     if len(password) < PASSWORD_MIN:
@@ -67,5 +120,8 @@ def check_password(password):
 
     if len(password.encode("utf-8")) > PASSWORD_MAX_BYTES:
         return "too_long"
+
+    if is_weak_password(password):
+        return "too_weak"
 
     return None

@@ -57,11 +57,11 @@ def register_user_service(
     if password_error:
         return {
             "success": False,
-            "error_code": (
-                "registerPasswordTooShort"
-                if password_error == "too_short"
-                else "registerPasswordTooLong"
-            ),
+            "error_code": {
+                "too_short": "registerPasswordTooShort",
+                "too_long": "registerPasswordTooLong",
+                "too_weak": "registerPasswordTooWeak",
+            }[password_error],
         }
 
     if password != confirm_password:

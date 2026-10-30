@@ -94,11 +94,11 @@ def reset_password_service(token: str, new_password: str, confirm_password: str)
     if password_error:
         return {
             "success": False,
-            "error_code": (
-                "resetPasswordTooShort"
-                if password_error == "too_short"
-                else "resetPasswordTooLong"
-            ),
+            "error_code": {
+                "too_short": "resetPasswordTooShort",
+                "too_long": "resetPasswordTooLong",
+                "too_weak": "resetPasswordTooWeak",
+            }[password_error],
         }
 
     db = SessionLocal()
