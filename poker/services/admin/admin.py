@@ -8,7 +8,6 @@ from poker.models import InvitationCode
 from poker.models import SiteCounter
 from poker.models import User
 from poker.models import UserGroupRole
-import secrets
 from core.errors import safe_error
 from core.security import pwd_context
 
@@ -245,14 +244,7 @@ def update_user_role_service(
         db.close()
 
 
-_TEMP_PASSWORD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789"
-
-
-def generate_temporary_password(length=10):
-    """随机临时密码，去掉了 0/O、1/l/I 等容易看错的字符。"""
-    return "".join(
-        secrets.choice(_TEMP_PASSWORD_ALPHABET) for _ in range(length)
-    )
+RESET_PASSWORD = "00000000"
 
 
 def reset_user_password_service(target_user_id):
@@ -280,16 +272,12 @@ def reset_user_password_service(target_user_id):
                 "message": "adminPasswordResetForbidden",
             }
 
-        temporary_password = generate_temporary_password()
-
-        user.password_hash = pwd_context.hash(temporary_password)
+        user.password_hash = pwd_context.hash(RESET_PASSWORD)
 
         db.commit()
 
-        # 临时密码只在本次响应里返回给管理员，不写入日志
         return {
             "success": True,
-            "temporary_password": temporary_password,
         }
 
     except Exception as e:

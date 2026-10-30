@@ -30,6 +30,9 @@ invite_failures_global = SlidingWindowLimiter(300, WINDOW)
 # 重发验证邮件：同一 IP 15 分钟内最多 10 次失败
 resend_verify_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
 
+# 忘记密码：同一 IP 15 分钟内最多 10 次
+forgot_password_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
+
 GLOBAL_KEY = "global"
 
 

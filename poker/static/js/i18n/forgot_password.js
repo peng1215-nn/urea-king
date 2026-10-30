@@ -29,6 +29,7 @@ window.forgotPasswordTranslations = {
         resetTokenUsed: "该重置链接已使用，请重新申请。",
         resetTokenExpired: "重置链接已过期，请重新申请。",
         resetFailed: "重置失败，请稍后重试。",
+        forgotPasswordTooManyAttempts: "尝试次数过多，请 15 分钟后再试。",
     },
     en: {
         pageTitle: "Forgot Password - UREAKING POKER",
@@ -60,5 +61,6 @@ window.forgotPasswordTranslations = {
         resetTokenUsed: "This reset link has already been used. Please request a new one.",
         resetTokenExpired: "The reset link has expired. Please request a new one.",
         resetFailed: "Reset failed. Please try again later.",
+        forgotPasswordTooManyAttempts: "Too many attempts. Please try again in 15 minutes.",
     }
 };

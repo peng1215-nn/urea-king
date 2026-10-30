@@ -104,12 +104,11 @@ async function confirmResetPassword() {
 
         resetSelectedUserState();
 
-        // 临时密码只显示这一次（用 innerText，不会被当作 HTML 解析）
         messageBox.style.color =
             "#5CFFB2";
 
         messageBox.innerText =
-            `${t("passwordResetSuccess")}${data.temporary_password}\n${t("passwordResetTempHint")}`;
+            `${t("passwordResetSuccess")}\n${t("passwordResetTempHint")}`;
 
     } catch (error) {
         console.error(error);

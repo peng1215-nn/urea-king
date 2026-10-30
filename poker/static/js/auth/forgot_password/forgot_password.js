@@ -22,7 +22,12 @@ async function sendForgotPassword() {
         const data = await res.json();
 
         if (!data.success) {
-            if (data.error_code === "resetTooFrequent") {
+            if (data.error_code === "forgotPasswordTooManyAttempts") {
+                msgBox.textContent = t.forgotPasswordTooManyAttempts || "尝试次数过多，请 15 分钟后再试。";
+                msgBox.style.color = "#e55";
+                btn.disabled = false;
+                btn.textContent = t.sendBtn || "发送重置邮件";
+            } else if (data.error_code === "resetTooFrequent") {
                 const wait = Math.ceil((data.wait_seconds || 300) / 60);
                 const msg = (t.resetTooFrequent || "请 {wait} 分钟后再试。").replace("{wait}", wait);
                 msgBox.textContent = msg;

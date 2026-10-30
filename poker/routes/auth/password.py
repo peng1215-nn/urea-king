@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
+from poker.core.rate_limit import forgot_password_failures_by_ip
+from poker.services.admin.audit_log import get_client_ip
 from poker.services.auth.reset_password import forgot_password_service, reset_password_service
 from poker.template_config import templates
 
@@ -14,7 +16,16 @@ def forgot_password_page(request: Request):
 
 @router.post("/forgot-password")
 def forgot_password(request: Request, email: str = Form(...)):
+    ip = get_client_ip(request) or "unknown"
+    wait = forgot_password_failures_by_ip.retry_after(ip)
+    if wait:
+        return JSONResponse(
+            {"success": False, "error_code": "forgotPasswordTooManyAttempts", "retry_after": wait},
+            status_code=429,
+        )
     result = forgot_password_service(email=email)
+    if not result.get("success"):
+        forgot_password_failures_by_ip.hit(ip)
     return result
 
 

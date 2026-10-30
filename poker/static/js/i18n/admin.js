@@ -71,7 +71,7 @@ window.adminTranslations = {
         editUserInfoDesc: "仅支持修改所选用户在指定所属组下的身份。组别不可修改，身份相同则无需保存。",
         saveChanges: "保存修改",
         resetPassword: "重置密码",
-        resetPasswordDesc: "点击确认后，系统会为所选用户生成一个随机临时密码，并只在本页面显示一次。",
+        resetPasswordDesc: "点击确认后，该用户的密码将被重置为初始密码 00000000，请提醒用户登录后立即修改。",
         confirmResetPassword: "确认重置密码",
         toggleAccountStatus: "禁用 / 启用账号",
         toggleAccountStatusDesc: "通过账号状态控制该用户是否允许登录。",
@@ -130,8 +130,8 @@ window.adminTranslations = {
         loadUsersFailed: "加载用户列表失败：",
 
         passwordResetConfirmText: "确认重置 {username} 的密码？",
-        passwordResetSuccess: "密码已重置，临时密码：",
-        passwordResetTempHint: "请把临时密码告知该用户，并提醒其登录后立即修改。此密码只显示这一次。",
+        passwordResetSuccess: "密码已重置为初始密码 00000000。",
+        passwordResetTempHint: "请提醒该用户登录后立即修改密码。",
         passwordResetFailed: "密码重置失败。",
 
         accountDisabled: "已禁用",
@@ -432,7 +432,7 @@ window.adminTranslations = {
         editUserInfoDesc: "Only the selected user's role in the specified group can be modified. Group cannot be changed. No save is needed if the role is unchanged.",
         saveChanges: "Save Changes",
         resetPassword: "Reset Password",
-        resetPasswordDesc: "After confirmation, a random temporary password will be generated for the selected user and shown on this page only once.",
+        resetPasswordDesc: "After confirmation, the user's password will be reset to the default password 00000000. Please remind the user to change it immediately after logging in.",
         confirmResetPassword: "Confirm Password Reset",
         toggleAccountStatus: "Disable / Enable Account",
         toggleAccountStatusDesc: "Control whether this user is allowed to log in through account status.",
@@ -491,8 +491,8 @@ window.adminTranslations = {
         loadUsersFailed: "Failed to load user list:",
 
         passwordResetConfirmText: "Confirm resetting {username}'s password?",
-        passwordResetSuccess: "Password reset. Temporary password: ",
-        passwordResetTempHint: "Share this temporary password with the user and ask them to change it right after signing in. It is shown only once.",
+        passwordResetSuccess: "Password has been reset to the default password 00000000.",
+        passwordResetTempHint: "Please remind the user to change their password immediately after logging in.",
         passwordResetFailed: "Password reset failed.",
 
         accountDisabled: "Disabled",
