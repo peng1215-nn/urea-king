@@ -42,7 +42,8 @@ def create_group_service(request, user_id: int, group_name: str):
 
     db = SessionLocal()
     try:
-        user = db.query(User).filter(User.id == user_id).first()
+        # 锁住这个用户：同时发出的几次建组请求排队执行，不能一起通过"还没建过组"的检查
+        user = db.query(User).filter(User.id == user_id).with_for_update().first()
         if not user or not user.email_verified:
             return {"success": False, "error_code": "createGroupNotVerified"}
 

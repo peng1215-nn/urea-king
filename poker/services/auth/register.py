@@ -6,6 +6,8 @@ from core.time import now_columbus_naive
 
 DELETE_COOLDOWN_HOURS = 24
 from core.validators import check_name, check_password
+from poker.services.auth.email_claims import release_stale_unverified_email
+from poker.services.common.nicknames import nickname_taken
 from core.errors import safe_error
 from core.security import pwd_context
 from database import SessionLocal
@@ -72,6 +74,9 @@ def register_user_service(
         if db.query(User).filter(User.username == username).first():
             return {"success": False, "error_code": "registerUsernameExists"}
 
+        if nickname_taken(db, nickname):
+            return {"success": False, "error_code": "registerNicknameExists"}
+
         existing = db.query(User).filter(User.email == email).first()
         if existing:
             # 邮箱存在：区分"注销冷却中"和"真正被占用"
@@ -83,7 +88,8 @@ def register_user_service(
                 # 超过 24 小时：允许重新注册，清空旧记录的邮箱让本次注册通过唯一约束
                 existing.email = f"deleted#{existing.id}@deleted"
                 db.flush()
-            else:
+            elif not release_stale_unverified_email(db, email):
+                # 被已验证的账号占用，或者被 24 小时内注册、尚未验证的账号临时占用
                 return {"success": False, "error_code": "registerEmailExists"}
 
         new_user = User(

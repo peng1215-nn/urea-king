@@ -17,9 +17,9 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
 
@@ -28,7 +28,7 @@ jobs:
           pip install ruff==0.16.8
           ruff check .
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22"
 
@@ -61,9 +61,9 @@ jobs:
       APP_ENV: test
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
           cache: pip
@@ -105,23 +105,29 @@ jobs:
     name: Dependency audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
 
-      # 只报告已知漏洞、不让检查变红：Render 设成“CI 通过后再部署”时，
-      # 任何一项检查失败都会挡住部署。漏洞清单写进本次运行的 Summary 页面。
+      # 依赖有已知漏洞时让检查失败（Render 设成"CI 通过后再部署"，所以有漏洞时不会上线）。
+      # 如果某个漏洞暂时没有修复版本、又必须上线，把它的编号写进 .github/pip-audit-ignore.txt
+      # （每行一个，如 GHSA-xxxx-xxxx-xxxx），并在旁边注明原因。
       - name: pip-audit
-        continue-on-error: true
         run: |
-          pip install pip-audit
+          pip install pip-audit==2.9.0
+          ignore_args=""
+          if [ -f .github/pip-audit-ignore.txt ]; then
+            for id in $(grep -vE '^\s*(#|$)' .github/pip-audit-ignore.txt | awk '{print $1}'); do
+              ignore_args="$ignore_args --ignore-vuln $id"
+            done
+          fi
           set -o pipefail
           {
             echo "## Dependency audit"
             echo
             echo '```'
-            pip-audit -r requirements.txt 2>&1 || true
+            pip-audit -r requirements.txt $ignore_args 2>&1
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"

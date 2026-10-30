@@ -2,6 +2,7 @@ from fastapi import APIRouter, BackgroundTasks, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from poker.core.rate_limit import (
+    change_email_by_ip,
     register_failures_by_ip,
     reserve_login_attempt,
     resend_verify_failures_by_ip,
@@ -72,11 +73,20 @@ def resend_verify_email(request: Request, background_tasks: BackgroundTasks, ema
 @router.post("/change-email")
 def change_email(
     request: Request,
+    background_tasks: BackgroundTasks,
     username: str = Form(...),
     password: str = Form(...),
     new_email: str = Form(...),
 ):
     ip = get_client_ip(request) or "unknown"
+
+    # 每次请求都按 IP 计数：成功的请求会发验证邮件，不能被拿来给任意邮箱批量发信
+    wait, _ = change_email_by_ip.try_hit(ip)
+    if wait:
+        return JSONResponse(
+            {"success": False, "error_code": "changeEmailTooManyAttempts", "retry_after": wait},
+            status_code=429,
+        )
 
     # 这里要验证账号密码，所以和登录共用限流，防止借此反复猜密码；先占名额再校验
     attempt = reserve_login_attempt(ip, username)
@@ -86,7 +96,7 @@ def change_email(
             status_code=429,
         )
 
-    result = change_email_service(username, password, new_email)
+    result = change_email_service(username, password, new_email, background_tasks=background_tasks)
     if result.get("error_code") != "changeEmailWrongCredentials":
         attempt.release()
     return result

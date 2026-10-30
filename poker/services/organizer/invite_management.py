@@ -4,6 +4,7 @@ from database import SessionLocal
 from poker.models import Group
 from poker.models import InvitationCode
 from core.errors import safe_error
+from poker.services.common.invite_codes import generate_invite_code
 
 
 def get_invite_codes_service(group_id: int):
@@ -40,23 +41,16 @@ def get_invite_codes_service(group_id: int):
         db.close()
 
 
-def create_invite_code_service(group_id: int, code: str):
+def create_invite_code_service(group_id: int):
+    """生成一个本组的邀请码（随机码，由系统生成）。"""
     db = SessionLocal()
     try:
-        code = code.strip()
-
-        if not code:
-            return {"success": False, "message": "inviteCodeRequired"}
-
-        if len(code) > 50:
-            return {"success": False, "message": "inviteCodeTooLong"}
-
         # 锁住组再计数，并发创建时不会一起通过数量检查
         group = db.query(Group).filter(Group.id == group_id).with_for_update().first()
         if not group:
             return {"success": False, "message": "groupNotFound"}
 
-        # 先检查本组数量上限，再检查是否重复：数量已满时不回答"这个码是否存在"
+        # 检查本组邀请码数量上限
         total_count = db.query(InvitationCode).filter(
             InvitationCode.group_code == group.group_code,
         ).count()
@@ -64,12 +58,7 @@ def create_invite_code_service(group_id: int, code: str):
         if total_count >= group.invite_code_limit:
             return {"success": False, "message": "inviteCodeLimitReached"}
 
-        existing = db.query(InvitationCode).filter(
-            InvitationCode.code == code
-        ).first()
-
-        if existing:
-            return {"success": False, "message": "inviteCodeExists"}
+        code = generate_invite_code(db)
 
         invitation = InvitationCode(
             code=code,

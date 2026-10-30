@@ -1,6 +1,7 @@
 window.createGroupTranslations = {
     zh: {
         invalidRequest: "提交的内容格式不正确，请检查后重试。",
+        requestTooLarge: "提交的内容太大（普通请求上限 1 MB，头像上限 10 MB），请缩小后再试。",
         pageTitle: "创建组 - UREAKING POKER",
         createGroupDesc: "创建自己的组，成为局头。每个账号只能创建一个组。",
         createGroupDesc2: "成员加入需使用邀请码。",
@@ -21,6 +22,7 @@ window.createGroupTranslations = {
     },
     en: {
         invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
+        requestTooLarge: "The submitted data is too large (1 MB for normal requests, 10 MB for avatars). Please make it smaller and try again.",
         pageTitle: "Create Group - UREAKING POKER",
         createGroupDesc: "Create your own group and become the organizer. Each account can only create one group.",
         createGroupDesc2: "Members join using an invite code.",

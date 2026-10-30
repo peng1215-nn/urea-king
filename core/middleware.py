@@ -10,6 +10,7 @@ import time
 import uuid
 from urllib.parse import urlsplit
 
+from fastapi import HTTPException as FastAPIHTTPException
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -229,6 +230,61 @@ async def session_guard(request, call_next):
     return await call_next(request)
 
 
+# ───────────────────────── 请求体大小限制 ─────────────────────────
+
+# 普通请求最多 1 MB；头像上传最多 12 MB（前端会先压缩，服务端另有 10 MB 的图片上限）。
+# 不限制的话，任何人（不用登录）都能发几个 GB 的请求，占满磁盘或拖垮服务。
+DEFAULT_BODY_LIMIT = 1 * 1024 * 1024
+BODY_LIMITS = {
+    "/upload-avatar": 12 * 1024 * 1024,
+}
+
+_TOO_LARGE = {"success": False, "message": "requestTooLarge"}
+
+
+class BodySizeLimitMiddleware:
+    """
+    先看 Content-Length，超过上限直接返回 413；
+    没有声明长度（分块传输）的，边接收边计数，超过上限时中止。
+    """
+
+    def __init__(self, app, default_limit=DEFAULT_BODY_LIMIT, path_limits=None):
+        self.app = app
+        self.default_limit = default_limit
+        self.path_limits = path_limits if path_limits is not None else BODY_LIMITS
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http" or scope.get("method") in SAFE_METHODS:
+            await self.app(scope, receive, send)
+            return
+
+        limit = self.path_limits.get(scope.get("path", ""), self.default_limit)
+
+        for name, value in scope.get("headers", []):
+            if name == b"content-length":
+                try:
+                    declared = int(value)
+                except ValueError:
+                    declared = 0
+                if declared > limit:
+                    await JSONResponse(_TOO_LARGE, status_code=413)(scope, receive, send)
+                    return
+
+        received = 0
+
+        async def limited_receive():
+            nonlocal received
+            message = await receive()
+            if message["type"] == "http.request":
+                received += len(message.get("body", b""))
+                if received > limit:
+                    # FastAPI 解析请求体时会原样抛出 HTTPException，由全局处理器返回 JSON 413
+                    raise FastAPIHTTPException(status_code=413, detail="requestTooLarge")
+            return message
+
+        await self.app(scope, limited_receive, send)
+
+
 # ───────────────────────── 请求日志 ─────────────────────────
 
 async def request_logging(request, call_next):
@@ -277,7 +333,7 @@ async def request_logging(request, call_next):
 def install_middleware(app, domain_router=None, public_paths=(), session_key=None, session_validator=None):
     """
     Starlette 中后注册的在外层。请求进入时的执行顺序（外 → 内）：
-      security_headers → SessionMiddleware → request_logging → domain_router
+      security_headers → BodySizeLimitMiddleware → SessionMiddleware → request_logging → domain_router
       → origin_check → session_guard → 路由
 
     session_key / session_validator / public_paths 由模块提供，见 poker/core/session.py。
@@ -301,4 +357,5 @@ def install_middleware(app, domain_router=None, public_paths=(), session_key=Non
         same_site="lax",
         https_only=settings.SESSION_HTTPS_ONLY,
     )
+    app.add_middleware(BodySizeLimitMiddleware)
     app.add_middleware(BaseHTTPMiddleware, dispatch=security_headers)

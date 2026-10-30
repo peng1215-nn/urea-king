@@ -7,6 +7,7 @@ from poker.models import UserGroupRole
 from core.validators import check_name
 from poker.core.validators import GROUP_NAME_MAX
 from core.errors import safe_error
+from poker.services.common.invite_codes import generate_invite_code
 from poker.services.common.group_purge import purge_group
 
 
@@ -260,21 +261,13 @@ def delete_group_service(group_id):
 
 
 def create_invitation_code_service(
-    code,
     group_id,
     role,
 ):
+    """为指定组生成一个邀请码（随机码，由系统生成）。"""
     db = SessionLocal()
 
     try:
-        code = code.strip()
-
-        if not code:
-            return {
-                "success": False,
-                "message": "inviteCodeRequired",
-            }
-
         if role not in ["organizer", "user"]:
             return {
                 "success": False,
@@ -321,15 +314,7 @@ def create_invitation_code_service(
                     "message": "organizerInvitePending",
                 }
 
-        existing_code = db.query(InvitationCode).filter(
-            InvitationCode.code == code
-        ).first()
-
-        if existing_code:
-            return {
-                "success": False,
-                "message": "inviteCodeExists",
-            }
+        code = generate_invite_code(db)
 
         total_count = db.query(InvitationCode).filter(
             InvitationCode.group_code == group.group_code,

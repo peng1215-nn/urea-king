@@ -307,3 +307,110 @@ def test_validation_errors_do_not_echo_input(client, factory, login_as):
     assert response.status_code == 422
     assert response.json() == {"success": False, "message": "invalidRequest"}
     assert "secret-value" not in response.text
+
+
+# ───────────────────────── 第七轮：邀请码、邮箱、昵称、申请 ─────────────────────────
+
+def test_invite_codes_are_generated_and_case_insensitive(client, factory, login_as):
+    from poker.services.common.invite_codes import ALPHABET, CODE_LENGTH
+
+    _organizer(factory, login_as, username="org00021", code="G21")
+    created = client.post("/organizer/invite/create", data={"code": "abc"}).json()
+    assert created["success"] is True
+    code = created["code"]["code"]
+    assert code != "abc"
+    assert len(code) == CODE_LENGTH and all(ch in ALPHABET for ch in code)
+
+    client.get("/logout")
+    joiner = factory.user("join0021")
+    assert joiner
+    result = client.post(
+        "/group-join",
+        data={"invite_code": code.lower(), "username": "join0021", "password": DEFAULT_PASSWORD},
+    ).json()
+    assert result["success"] is True, result
+
+
+def test_change_email_has_daily_limit(client, factory):
+    from datetime import timedelta
+
+    from core.time import now_columbus_naive
+    from database import SessionLocal
+    from poker.models import EmailVerification
+
+    user_id = _unverified_user(factory, "eve00031", "own31@example.com")
+    db = SessionLocal()
+    try:
+        now = now_columbus_naive()
+        for i in range(5):
+            db.add(EmailVerification(
+                user_id=user_id, token=f"old-{i}", purpose="verify_email",
+                expires_at=now, used=1, created_at=now - timedelta(hours=2 + i),
+            ))
+        db.commit()
+    finally:
+        db.close()
+
+    result = client.post(
+        "/change-email",
+        data={"username": "eve00031", "password": DEFAULT_PASSWORD, "new_email": "x31@example.com"},
+    ).json()
+    assert result["error_code"] == "changeEmailDailyLimit"
+
+
+def test_unverified_account_holds_email_for_24_hours_only(client, monkeypatch):
+    from datetime import timedelta
+
+    from core.time import now_columbus_naive
+    from database import SessionLocal
+    from poker.models import EmailVerification, User
+    from poker.services.auth import register
+
+    monkeypatch.setattr(register, "send_verify_email", lambda to, token: True)
+    form = {"nickname": "squat", "email": "victim@example.com", "password": "GoodPass123", "confirm_password": "GoodPass123"}
+
+    assert client.post("/register", data={**form, "username": "squatter1"}).json()["success"] is True
+    # 24 小时内：邮箱仍被未验证的账号占着
+    second = client.post("/register", data={**form, "username": "realowner", "nickname": "owner"}).json()
+    assert second["error_code"] == "registerEmailExists"
+
+    # 超过 24 小时仍未验证：真正的主人可以注册
+    db = SessionLocal()
+    try:
+        squatter = db.query(User).filter(User.username == "squatter1").first()
+        old = now_columbus_naive() - timedelta(hours=25)
+        squatter.created_at = old
+        db.query(EmailVerification).filter(EmailVerification.user_id == squatter.id).update({"created_at": old})
+        db.commit()
+    finally:
+        db.close()
+
+    third = client.post("/register", data={**form, "username": "realowner", "nickname": "owner"}).json()
+    assert third["success"] is True, third
+
+
+def test_nickname_must_be_unique_at_registration(client, factory, monkeypatch):
+    from poker.services.auth import register
+
+    monkeypatch.setattr(register, "send_verify_email", lambda to, token: True)
+    factory.user("orgnick01", nickname="王局头")
+    result = client.post("/register", data={
+        "username": "copycat1", "nickname": "王局头", "email": "copy@example.com",
+        "password": "GoodPass123", "confirm_password": "GoodPass123",
+    }).json()
+    assert result["error_code"] == "registerNicknameExists"
+
+
+def test_only_one_pending_buyin_request_per_player(factory):
+    from poker.services.organizer import game_management as gm
+    from poker.services.user.game import submit_buyin_request_service
+
+    group_id = factory.group("G41")
+    org = factory.user("org00041")
+    factory.role(org, group_id, "organizer")
+    alice = factory.user("ali00041")
+    factory.role(alice, group_id, "user")
+    game_id = gm.start_game_service(group_id, org, "局", [org, alice])["game_id"]
+
+    assert submit_buyin_request_service(game_id, group_id, alice, 100)["success"] is True
+    assert submit_buyin_request_service(game_id, group_id, alice, 100)["message"] == "buyinRequestPending"

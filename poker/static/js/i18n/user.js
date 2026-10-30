@@ -1,6 +1,7 @@
 window.userTranslations = {
     zh: {
         invalidRequest: "提交的内容格式不正确，请检查后重试。",
+        requestTooLarge: "提交的内容太大（普通请求上限 1 MB，头像上限 10 MB），请缩小后再试。",
         noGroupSelected: "未选择组别，请重新登录。",
         notLoggedIn: "未登录。",
         groupNotFound: "组别不存在。",
@@ -58,6 +59,7 @@ window.userTranslations = {
         buyinRequestAmount: "申请数额",
         buyinRequestDesc: "填写买入数额，由局头审批后生效。",
         buyinRequestSuccess: "买入申请已提交，等待局头审批。",
+        buyinRequestPending: "你还有一条买入申请在等局头审批，处理后再提交新的申请。",
         requestPending: "待审批",
         requestApproved: "已批准",
         requestRejected: "已拒绝",
@@ -180,6 +182,7 @@ window.userTranslations = {
 
     en: {
         invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
+        requestTooLarge: "The submitted data is too large (1 MB for normal requests, 10 MB for avatars). Please make it smaller and try again.",
         noGroupSelected: "No group selected. Please sign in again.",
         notLoggedIn: "You are not signed in.",
         groupNotFound: "Group does not exist.",
@@ -237,6 +240,7 @@ window.userTranslations = {
         buyinRequestAmount: "Amount",
         buyinRequestDesc: "Enter the amount. The organizer will approve your request.",
         buyinRequestSuccess: "Buy-in request submitted. Waiting for organizer approval.",
+        buyinRequestPending: "You already have a buy-in request waiting for the organizer. You can submit a new one after it's handled.",
         requestPending: "Pending",
         requestApproved: "Approved",
         requestRejected: "Rejected",

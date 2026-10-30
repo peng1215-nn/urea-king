@@ -175,6 +175,15 @@ def submit_buyin_request_service(game_id: int, group_id: int, user_id: int, amou
         if amount_error:
             return {"success": False, "message": amount_error}
 
+        # 每人同时只能有一条待审批的申请，防止刷出大量申请
+        pending = db.query(ChipRequest.id).filter(
+            ChipRequest.game_id == game_id,
+            ChipRequest.user_id == user_id,
+            ChipRequest.status == "pending",
+        ).first()
+        if pending:
+            return {"success": False, "message": "buyinRequestPending"}
+
         user = db.query(User).filter(User.id == user_id).first()
 
         req = ChipRequest(

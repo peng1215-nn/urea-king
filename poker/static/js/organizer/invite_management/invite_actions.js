@@ -56,15 +56,8 @@ async function createInviteCode() {
     messageBox.style.color = "#ff8a8a";
     messageBox.innerText = "";
 
-    const input = document.getElementById("invite-code-input");
-    const code = input.value.trim();
-
-    if (!code) {
-        messageBox.innerText = t("inviteCodeRequired");
-        return;
-    }
-
-    const data = await apiCreateInviteCode(code);
+    // 邀请码由系统随机生成，不需要填写
+    const data = await apiCreateInviteCode();
 
     if (!data.success) {
         messageBox.innerText = t(data.message || "operationFailed");
@@ -73,7 +66,6 @@ async function createInviteCode() {
 
     messageBox.style.color = "#5CFFB2";
     messageBox.innerText = t("inviteCreateSuccess");
-    input.value = "";
 
     await loadInviteCodes();
 }

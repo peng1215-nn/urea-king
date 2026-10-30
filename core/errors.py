@@ -28,6 +28,7 @@ def _wants_html(request):
 _STATUS_MESSAGES = {
     404: "notFound",
     405: "methodNotAllowed",
+    413: "requestTooLarge",
 }
 
 

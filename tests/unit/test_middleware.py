@@ -189,3 +189,13 @@ def test_login_expires_after_absolute_limit(client, monkeypatch):
     response = client.post("/api", headers=SAME_ORIGIN)
     assert response.status_code == 401
     assert response.json()["message"] == "sessionExpired"
+
+
+def test_oversized_body_is_rejected(client):
+    response = client.post("/api", headers=SAME_ORIGIN, content=b"x" * (middleware.DEFAULT_BODY_LIMIT + 1))
+    assert response.status_code == 413
+    assert response.json() == {"success": False, "message": "requestTooLarge"}
+
+
+def test_normal_body_is_accepted(client):
+    assert client.post("/api", headers=SAME_ORIGIN, content=b"x" * 1000).status_code == 200

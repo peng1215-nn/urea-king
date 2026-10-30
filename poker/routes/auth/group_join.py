@@ -13,10 +13,12 @@ from poker.core.rate_limit import (
     GLOBAL_KEY,
     group_join_failures_by_ip,
     invite_failures_global,
+    Reservation,
     reserve,
     reserve_login_attempt,
 )
 from poker.services.admin.audit_log import get_client_ip
+from poker.services.common.invite_codes import invite_code_is_available
 
 
 router = APIRouter()
@@ -63,6 +65,9 @@ def group_join(
 
     ip_attempt = reserve([(group_join_failures_by_ip, ip, True)])
     global_attempt = reserve([(invite_failures_global, GLOBAL_KEY, True)]) if not ip_attempt.wait else None
+    if global_attempt is not None and global_attempt.wait and invite_code_is_available(invite_code):
+        # 全站猜码上限被别人刷满时，真实有效的邀请码照样放行，不让一个人锁住全站的加组
+        global_attempt = Reservation()
     blocked = ip_attempt.wait or (global_attempt.wait if global_attempt else 0)
     if blocked:
         ip_attempt.release()

@@ -3,10 +3,8 @@ async function fetchInviteCodes() {
     return await res.json();
 }
 
-async function apiCreateInviteCode(code) {
-    const fd = new FormData();
-    fd.append("code", code);
-    const res = await fetch("/organizer/invite/create", { method: "POST", body: fd });
+async function apiCreateInviteCode() {
+    const res = await fetch("/organizer/invite/create", { method: "POST" });
     return await res.json();
 }
 

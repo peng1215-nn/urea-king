@@ -53,6 +53,7 @@ def clean_state(migrated_db):
         rate_limit.avatar_uploads_by_user,
         rate_limit.invite_creates_by_user,
         rate_limit.current_password_failures_by_user,
+        rate_limit.change_email_by_ip,
     ):
         limiter._events.clear()
 

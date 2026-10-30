@@ -5,6 +5,7 @@ from poker.models import Group
 from poker.models import InvitationCode
 from poker.models import User
 from poker.models import UserGroupRole
+from poker.services.common.invite_codes import normalize_invite_code
 from poker.services.admin.audit_log import write_audit_log
 from core.errors import safe_error
 from core.security import verify_user_password
@@ -18,7 +19,7 @@ def group_join_logged_in_service(request, user_id, invite_code):
     """已登录用户用邀请码加入组，不需要重新验证密码。"""
     db = SessionLocal()
     try:
-        invite_code = invite_code.strip() if invite_code else ""
+        invite_code = normalize_invite_code(db, invite_code)
         if not invite_code:
             return {"success": False, "message": "groupJoinInviteCodeRequired"}
 
@@ -125,7 +126,7 @@ def group_join_service(
 
     try:
         username = username.strip()
-        invite_code = invite_code.strip()
+        invite_code = normalize_invite_code(db, invite_code)
 
         if not username:
             return {"success": False, "message": "groupJoinUsernameRequired"}

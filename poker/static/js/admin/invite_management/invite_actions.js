@@ -44,11 +44,6 @@ async function createInvitationCode() {
             "create-invite-message"
         );
 
-    const code =
-        document.getElementById(
-            "create-invite-code"
-        ).value.trim();
-
     const groupId =
         document.getElementById(
             "create-invite-group-id"
@@ -61,13 +56,6 @@ async function createInvitationCode() {
 
     messageBox.innerText = "";
     messageBox.style.color = "#ff8a8a";
-
-    if (!code) {
-        messageBox.innerText =
-            t("inviteCodeRequired");
-
-        return;
-    }
 
     if (!groupId) {
         messageBox.innerText =
@@ -84,11 +72,6 @@ async function createInvitationCode() {
     }
 
     const formData = new FormData();
-
-    formData.append(
-        "code",
-        code
-    );
 
     formData.append(
         "group_id",
@@ -122,12 +105,9 @@ async function createInvitationCode() {
         messageBox.style.color =
             "#5CFFB2";
 
+        // 显示系统生成的邀请码，方便直接复制发给对方
         messageBox.innerText =
-            t("inviteCreateSuccess");
-
-        document.getElementById(
-            "create-invite-code"
-        ).value = "";
+            `${t("inviteCreateSuccess")} ${data.code || ""}`;
 
         document.getElementById(
             "create-invite-role"

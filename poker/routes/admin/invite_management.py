@@ -172,7 +172,6 @@ def force_delete_group(request: Request, group_id: int = Form(...), group_code: 
 @router.post("/admin/invitation-codes/create")
 def create_invitation_code(
     request: Request,
-    code: str = Form(...),
     group_id: int = Form(...),
     role: str = Form(...),
 ):
@@ -183,7 +182,6 @@ def create_invitation_code(
         }
 
     result = create_invitation_code_service(
-        code=code,
         group_id=group_id,
         role=role,
     )

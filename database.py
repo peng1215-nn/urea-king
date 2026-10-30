@@ -33,6 +33,8 @@ if DATABASE_URL.startswith("sqlite"):
 engine = create_engine(
     DATABASE_URL,
     connect_args=connect_args,
+    # 报错信息里不带 SQL 参数的值（邮箱、令牌、密码哈希），避免写进日志和 Sentry
+    hide_parameters=True,
 )
 
 SessionLocal = sessionmaker(

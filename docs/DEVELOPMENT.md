@@ -124,6 +124,8 @@ main.py      把 core 和各模块组装成一个网站
 | `SESSION_SECRET_KEY` | 新生成的随机值（不能与线上相同） |
 | `AVATAR_FOLDER` | 例如 `urea_king_avatars_staging`，避免覆盖线上用户的头像 |
 | `POKER_URL` | 测试网站自己的地址 |
+| `SITE_URL` | 邮件里的链接用的地址（不填时用 `POKER_URL`）。测试环境两个都没填会拒绝启动，避免邮件链接指向线上 |
+| `RESEND_API_KEY` / `EMAIL_FROM` | 发送验证、重置邮件；不填则不发邮件（只记日志） |
 | `BOOTSTRAP_ADMIN_USERNAME` / `BOOTSTRAP_ADMIN_PASSWORD` | 空库第一次启动时创建管理员；库里已有管理员时不起作用 |
 
 测试服务的启动命令（免费实例没有 Pre-Deploy Command，所以写在一起）：

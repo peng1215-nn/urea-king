@@ -89,6 +89,7 @@ window.gameReportTranslations = {
         gameNotFound: "找不到这局牌局，可能已被删除，或不属于你当前所在的组。",
         operationFailed: "操作失败，请稍后重试。",
         invalidRequest: "提交的内容格式不正确，请检查后重试。",
+        requestTooLarge: "提交的内容太大（普通请求上限 1 MB，头像上限 10 MB），请缩小后再试。",
         sessionExpired: "登录状态已失效，请重新登录。",
     },
 
@@ -178,6 +179,7 @@ window.gameReportTranslations = {
         gameNotFound: "This game could not be found. It may have been deleted, or it isn't in your current group.",
         operationFailed: "Operation failed. Please try again.",
         invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
+        requestTooLarge: "The submitted data is too large (1 MB for normal requests, 10 MB for avatars). Please make it smaller and try again.",
         sessionExpired: "Your session has expired. Please sign in again.",
     },
 };

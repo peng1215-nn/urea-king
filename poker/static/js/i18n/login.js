@@ -1,6 +1,7 @@
 window.loginTranslations = {
     zh: {
         invalidRequest: "提交的内容格式不正确，请检查后重试。",
+        requestTooLarge: "提交的内容太大（普通请求上限 1 MB，头像上限 10 MB），请缩小后再试。",
         pageTitle: "UREAKING-POKER 登录",
         username: "用户名",
         password: "密码",
@@ -71,6 +72,7 @@ window.loginTranslations = {
 
     en: {
         invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
+        requestTooLarge: "The submitted data is too large (1 MB for normal requests, 10 MB for avatars). Please make it smaller and try again.",
         pageTitle: "UREAKING-POKER Login",
         username: "Username",
         password: "Password",

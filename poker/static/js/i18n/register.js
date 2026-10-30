@@ -1,6 +1,7 @@
 window.registerTranslations = {
     zh: {
         invalidRequest: "提交的内容格式不正确，请检查后重试。",
+        requestTooLarge: "提交的内容太大（普通请求上限 1 MB，头像上限 10 MB），请缩小后再试。",
         pageTitle: "UREAKING-POKER 注册",
         username: "用户名",
         nickname: "昵称",
@@ -26,6 +27,7 @@ window.registerTranslations = {
         registerNicknameRequired: "昵称不能为空。",
         registerEmailInvalid: "请输入有效的邮箱地址。",
         registerEmailExists: "该邮箱已被注册。",
+        registerNicknameExists: "这个昵称已经有人用了，请换一个。",
         registerEmailCooldown: "该邮箱在注销后 24 小时内不能重新注册，请稍后再试。",
         registerPasswordTooShort: "密码长度至少为 8 位。",
         registerPasswordMismatch: "两次输入的密码不一致。",
@@ -62,6 +64,7 @@ window.registerTranslations = {
         changeEmailPasswordRequired: "请输入密码。",
         changeEmailFailed: "修改失败，请稍后重试。",
         changeEmailTooFrequent: "操作过于频繁，请 {wait} 分钟后再试。",
+        changeEmailDailyLimit: "今天更换验证邮箱的次数已达上限（5 次），请明天再试。",
         platformAccountHint: "已有平台账号？无需重新注册，直接",
         platformAccountLogin: "登录",
         platformAccountSuffix: "即可。",
@@ -69,6 +72,7 @@ window.registerTranslations = {
 
     en: {
         invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
+        requestTooLarge: "The submitted data is too large (1 MB for normal requests, 10 MB for avatars). Please make it smaller and try again.",
         pageTitle: "UREAKING-POKER Register",
         username: "Username",
         nickname: "Nickname",
@@ -94,6 +98,7 @@ window.registerTranslations = {
         registerNicknameRequired: "Nickname cannot be empty.",
         registerEmailInvalid: "Please enter a valid email address.",
         registerEmailExists: "This email is already registered.",
+        registerNicknameExists: "This nickname is already taken. Please choose another one.",
         registerEmailCooldown: "This email cannot be re-registered within 24 hours of account deletion. Please try again later.",
         registerPasswordTooShort: "Password must be at least 8 characters.",
         registerPasswordMismatch: "Passwords do not match.",
@@ -130,6 +135,7 @@ window.registerTranslations = {
         changeEmailPasswordRequired: "Please enter your password.",
         changeEmailFailed: "Update failed. Please try again later.",
         changeEmailTooFrequent: "Too many requests. Please try again in {wait} minutes.",
+        changeEmailDailyLimit: "You've reached today's limit for changing the verification email (5 times). Please try again tomorrow.",
         platformAccountHint: "Already have a platform account? No need to register again, just",
         platformAccountLogin: "sign in",
         platformAccountSuffix: ".",

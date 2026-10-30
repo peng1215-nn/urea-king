@@ -9,11 +9,27 @@ Sentry 再按设置给你发邮件。
 
 import logging
 import os
+import re
 
 from core import settings
 
 
 logger = logging.getLogger("core.error_reporting")
+
+
+_SQL_PARAMETERS = re.compile(r"\[parameters: .*?\]", re.S)
+
+
+def _scrub_event(event, hint):
+    """发往 Sentry 前再清理一遍：去掉数据库报错里的参数值（邮箱、令牌、密码哈希等）。"""
+    for exception in (event.get("exception") or {}).get("values", []) or []:
+        if isinstance(exception.get("value"), str):
+            exception["value"] = _SQL_PARAMETERS.sub("[parameters: hidden]", exception["value"])
+    logentry = event.get("logentry") or {}
+    if isinstance(logentry.get("message"), str):
+        logentry["message"] = _SQL_PARAMETERS.sub("[parameters: hidden]", logentry["message"])
+    event.pop("request", None)
+    return event
 
 
 def setup_error_reporting():
@@ -26,6 +42,9 @@ def setup_error_reporting():
 
     sentry_sdk.init(
         dsn=dsn,
+        # 不附带出错时函数里的局部变量（可能有 new_password 之类，默认过滤名单覆盖不到）
+        include_local_variables=False,
+        before_send=_scrub_event,
         environment=settings.DEPLOY_ENVIRONMENT.lower(),
         # 不发送用户 IP、Cookie、请求内容等个人信息
         send_default_pii=False,

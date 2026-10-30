@@ -9,6 +9,7 @@ from core.validators import check_name, check_password
 from poker.core.rate_limit import current_password_failures_by_user
 from poker.core.validators import NICKNAME_MAX
 from core.errors import safe_error
+from poker.services.common.nicknames import nickname_taken
 from core.security import pwd_context
 
 
@@ -64,12 +65,7 @@ def update_nickname_service(user_id, nickname):
         if user.nickname == nickname:
             return {"success": False, "message": "nicknameNoChange"}
 
-        existing = db.query(User).filter(
-            User.nickname == nickname,
-            User.id != user_id,
-        ).first()
-
-        if existing:
+        if nickname_taken(db, nickname, exclude_user_id=user_id):
             return {"success": False, "message": "nicknameExists"}
 
         user.nickname = nickname

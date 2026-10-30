@@ -13,6 +13,8 @@ import os
 
 import resend
 
+from core import settings
+
 logger = logging.getLogger(__name__)
 
 resend.api_key = os.environ.get("RESEND_API_KEY", "")
@@ -22,6 +24,11 @@ _POKER_URL = (
     os.environ.get("SITE_URL")
     or os.environ.get("POKER_URL", "https://poker.urea-king.com")
 ).rstrip("/")
+
+# 测试环境必须配置自己的地址：否则验证、重置链接会默认指向线上网站，
+# 测试库里生成的令牌被发往线上（线上找不到，链接失效），也容易把人引到错误的网站
+if settings.IS_STAGING and not (os.environ.get("SITE_URL") or os.environ.get("POKER_URL")):
+    raise RuntimeError("Staging requires SITE_URL (or POKER_URL) so email links point to the staging site.")
 
 
 def dispatch(background_tasks, send_func, *args):
@@ -36,10 +43,18 @@ def dispatch(background_tasks, send_func, *args):
         send_func(*args)
 
 
+def mask_email(address: str) -> str:
+    """日志里只记录打码后的邮箱，如 pe***@osu.edu。"""
+    local, _, domain = (address or "").partition("@")
+    if not domain:
+        return "***"
+    return f"{local[:2]}***@{domain}"
+
+
 def _send(to: str, subject: str, html: str) -> bool:
     """底层发送，返回是否成功。"""
     if not resend.api_key:
-        logger.warning("RESEND_API_KEY 未配置，跳过邮件发送（to=%s）", to)
+        logger.warning("RESEND_API_KEY 未配置，跳过邮件发送（to=%s）", mask_email(to))
         return False
     try:
         resend.Emails.send({
@@ -50,7 +65,7 @@ def _send(to: str, subject: str, html: str) -> bool:
         })
         return True
     except Exception as e:
-        logger.error("邮件发送失败 to=%s: %s", to, e)
+        logger.error("邮件发送失败 to=%s: %s", mask_email(to), e)
         return False
 
 

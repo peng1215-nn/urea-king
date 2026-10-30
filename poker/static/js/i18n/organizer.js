@@ -1,6 +1,7 @@
 const organizerTranslations = {
     zh: {
         invalidRequest: "提交的内容格式不正确，请检查后重试。",
+        requestTooLarge: "提交的内容太大（普通请求上限 1 MB，头像上限 10 MB），请缩小后再试。",
         noGroupSelected: "未选择组别，请重新登录。",
         notLoggedIn: "未登录。",
         groupNotFound: "组别不存在。",
@@ -42,7 +43,7 @@ const organizerTranslations = {
 
         inviteManagement: "邀请码管理",
         inviteManagementDesc: "生成本组用户邀请码，查看使用状态，并撤销未使用的邀请码。",
-        createInviteCode: "创建",
+        createInviteCode: "生成邀请码",
         inviteCodePlaceholder: "请输入邀请码",
         inviteCodeRequired: "邀请码不能为空。",
         inviteCodeTooLong: "邀请码不能超过50个字符。",
@@ -55,11 +56,11 @@ const organizerTranslations = {
         usedAt: "使用时间",
         createdAt: "创建时间",
         noInviteCodes: "暂无邀请码。",
-        inviteCreateSuccess: "邀请码生成成功。",
+        inviteCreateSuccess: "已生成新的邀请码，见下方列表。",
         inviteDeleteSuccess: "邀请码已删除。",
         delete: "删除",
         usedInviteDeleteForbidden: "已使用的邀请码无法删除。",
-        inviteManagementDesc: "生成本组邀请码，查看使用状态，并撤销未使用的邀请码。",
+        inviteManagementDesc: "生成本组邀请码（由系统随机生成 12 位，不区分大小写），查看使用状态，并撤销未使用的邀请码。",
 
         chipRequests: "筹码请求",
         chipRequestsDesc: "批准或拒绝组内成员的买入与回收筹码请求。",
@@ -338,6 +339,7 @@ const organizerTranslations = {
 
     en: {
         invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
+        requestTooLarge: "The submitted data is too large (1 MB for normal requests, 10 MB for avatars). Please make it smaller and try again.",
         noGroupSelected: "No group selected. Please sign in again.",
         notLoggedIn: "You are not signed in.",
         groupNotFound: "Group does not exist.",
@@ -379,7 +381,7 @@ const organizerTranslations = {
 
         inviteManagement: "Invite Management",
         inviteManagementDesc: "Generate user invite codes for your group, view usage status, and revoke unused codes.",
-        createInviteCode: "Create",
+        createInviteCode: "Generate Invite Code",
         inviteCodePlaceholder: "Enter invite code",
         inviteCodeRequired: "Invite code cannot be empty.",
         inviteCodeTooLong: "Invite code cannot exceed 50 characters.",
@@ -392,11 +394,11 @@ const organizerTranslations = {
         usedAt: "Used At",
         createdAt: "Created At",
         noInviteCodes: "No invite codes yet.",
-        inviteCreateSuccess: "Invite code created successfully.",
+        inviteCreateSuccess: "A new invite code has been generated. See the list below.",
         inviteDeleteSuccess: "Invite code deleted.",
         delete: "Delete",
         usedInviteDeleteForbidden: "Cannot delete a used invite code.",
-        inviteManagementDesc: "Generate invite codes for your group, check usage status, and revoke unused codes.",
+        inviteManagementDesc: "Generate invite codes for your group (12 random characters, not case-sensitive), check usage status, and revoke unused codes.",
 
         chipRequests: "Chip Requests",
         chipRequestsDesc: "Approve or reject buy-in and chip recovery requests from group members.",

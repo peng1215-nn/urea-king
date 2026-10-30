@@ -1,6 +1,7 @@
 window.adminTranslations = {
     zh: {
         invalidRequest: "提交的内容格式不正确，请检查后重试。",
+        requestTooLarge: "提交的内容太大（普通请求上限 1 MB，头像上限 10 MB），请缩小后再试。",
         noGroupSelected: "未选择组别，请重新登录。",
         roleInvalid: "身份类型无效。",
         userNotInSelectedGroup: "该用户不属于所选组别。",
@@ -217,8 +218,8 @@ window.adminTranslations = {
         groupCodePlaceholder: "请输入组编号",
         groupNamePlaceholder: "请输入组名",
 
-        createInviteCode: "创建邀请码",
-        createInviteCodeDesc: "为指定组别创建 organizer 或 user 身份的邀请码。管理员邀请码不通过此处创建。",
+        createInviteCode: "生成邀请码",
+        createInviteCodeDesc: "为指定组别生成 organizer 或 user 身份的邀请码。邀请码由系统随机生成（12 位），不能自定义。管理员邀请码不通过此处创建。",
         updateInviteLimit: "修改邀请码上限",
         updateInviteLimitDesc: "修改指定组的邀请码总数上限。默认为 27，范围 1–200。",
         inviteLimit: "上限数量",
@@ -248,7 +249,7 @@ window.adminTranslations = {
         inviteCodeLimitReached: "该组邀请码总数已达上限。",
         inviteCodeNotFound: "邀请码不存在。",
         usedInviteDeleteForbidden: "已使用的邀请码不可删除。",
-        inviteCreateSuccess: "邀请码创建成功。",
+        inviteCreateSuccess: "已生成邀请码：",
         inviteDeleteSuccess: "邀请码删除成功。",
         permissionDenied: "无权限访问。",
         deleteGroupConfirmText: "确认删除该组：",
@@ -367,6 +368,7 @@ window.adminTranslations = {
 
     en: {
         invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
+        requestTooLarge: "The submitted data is too large (1 MB for normal requests, 10 MB for avatars). Please make it smaller and try again.",
         noGroupSelected: "No group selected. Please sign in again.",
         roleInvalid: "Invalid role.",
         userNotInSelectedGroup: "This user does not belong to the selected group.",
@@ -582,8 +584,8 @@ window.adminTranslations = {
         groupCodePlaceholder: "Please enter group code",
         groupNamePlaceholder: "Please enter group name",
 
-        createInviteCode: "Create Invitation Code",
-        createInviteCodeDesc: "Create an organizer or user invitation code for the selected group. Admin invitation codes are not created here.",
+        createInviteCode: "Generate Invitation Code",
+        createInviteCodeDesc: "Generate an organizer or user invitation code for the selected group. Codes are generated randomly by the system (12 characters) and can't be customized. Admin invitation codes are not created here.",
         updateInviteLimit: "Update Invite Limit",
         updateInviteLimitDesc: "Update the total invite code limit for the selected group. Default is 27, range 1–200.",
         inviteLimit: "Limit",
@@ -613,7 +615,7 @@ window.adminTranslations = {
         inviteCodeLimitReached: "Invite code limit reached for this group.",
         inviteCodeNotFound: "Invitation code not found.",
         usedInviteDeleteForbidden: "Used invitation codes cannot be deleted.",
-        inviteCreateSuccess: "Invitation code created successfully.",
+        inviteCreateSuccess: "Invitation code generated:",
         inviteDeleteSuccess: "Invitation code deleted successfully.",
         permissionDenied: "Permission denied.",
         deleteGroupConfirmText: "Confirm deleting this group:",

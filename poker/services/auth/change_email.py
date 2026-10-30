@@ -14,17 +14,19 @@ import secrets
 from datetime import timedelta
 
 from core.errors import safe_error
+from poker.services.auth.email_claims import release_stale_unverified_email
 from core.security import verify_user_password
 from core.time import now_columbus_naive
 from database import SessionLocal
-from poker.core.email import send_verify_email
+from poker.core.email import dispatch, send_verify_email
 from poker.models import EmailVerification, User
 
 CHANGE_EMAIL_INTERVAL_MINUTES = 5
+CHANGE_EMAIL_MAX_PER_DAY = 5
 TOKEN_TTL_MINUTES = 15
 
 
-def change_email_service(username: str, password: str, new_email: str) -> dict:
+def change_email_service(username: str, password: str, new_email: str, background_tasks=None) -> dict:
     username = (username or "").strip()
     new_email = (new_email or "").strip().lower()
 
@@ -71,13 +73,18 @@ def change_email_service(username: str, password: str, new_email: str) -> dict:
                 "wait_seconds": wait_seconds,
             }
 
-        # 新邮箱不能被其他活跃账号占用
-        conflict = (
-            db.query(User)
-            .filter(User.email == new_email, User.id != user.id, User.is_active == 1)
-            .first()
-        )
-        if conflict:
+        # 每天最多发 5 封验证邮件（和"重发验证邮件"一致），防止被用来给任意邮箱发信
+        cutoff_24h = now - timedelta(hours=24)
+        sent_today = db.query(EmailVerification).filter(
+            EmailVerification.user_id == user.id,
+            EmailVerification.purpose == "verify_email",
+            EmailVerification.created_at >= cutoff_24h,
+        ).count()
+        if sent_today >= CHANGE_EMAIL_MAX_PER_DAY:
+            return {"success": False, "error_code": "changeEmailDailyLimit"}
+
+        # 新邮箱不能被其他账号占用（超过 24 小时未验证的账号占用的邮箱会被收回）
+        if not release_stale_unverified_email(db, new_email, exclude_user_id=user.id):
             return {"success": False, "error_code": "changeEmailEmailExists"}
 
         # 发往旧邮箱的验证链接全部作废，避免换邮箱后用旧链接把新邮箱标记为已验证
@@ -101,7 +108,7 @@ def change_email_service(username: str, password: str, new_email: str) -> dict:
         db.add(verification)
         db.commit()
 
-        send_verify_email(new_email, token)
+        dispatch(background_tasks, send_verify_email, new_email, token)
 
         return {"success": True, "error_code": "changeEmailSuccess"}
 
