@@ -184,8 +184,20 @@
 
     // ───── CSV 导出 ─────
 
+    /**
+     * 时间按文本写入：写成 ="2026-10-30 04:22:57"，Excel、WPS 会原样显示，
+     * 不会自动识别成日期、按默认格式丢掉秒。
+     */
+    function asText(value) {
+        return { asText: String(value == null ? "" : value) };
+    }
+
     function csvCell(value) {
         if (value === null || value === undefined) return "";
+        if (typeof value === "object" && "asText" in value) {
+            const formula = '="' + value.asText.replace(/"/g, '""') + '"';
+            return '"' + formula.replace(/"/g, '""') + '"';
+        }
         let text = String(value);
         // 防止表格软件把以 = + - @ 开头的文字当成公式执行（数字本身不处理）
         if (typeof value === "string" && /^[=+\-@\t\r]/.test(text)) {
@@ -209,8 +221,8 @@
         lines.push(csvLine([t("csvSectionOverview")]));
         lines.push(csvLine([t("gameName"), game.name || t("unnamedGame")]));
         lines.push(csvLine([t("gameId"), game.id]));
-        lines.push(csvLine([t("startedAt"), game.started_at]));
-        lines.push(csvLine([t("endedAt"), game.ended_at]));
+        lines.push(csvLine([t("startedAt"), asText(game.started_at)]));
+        lines.push(csvLine([t("endedAt"), asText(game.ended_at)]));
         lines.push(csvLine([t("totalBuyIn"), game.total_buy_in]));
         lines.push(csvLine([t("totalCashOut"), game.total_cash_out]));
         lines.push(csvLine([t("balanceStatus"), game.is_balanced ? t("balanced") : t("unbalanced")]));
@@ -234,7 +246,7 @@
         lines.push(csvLine([t("colTime"), t("colEvent"), t("colOperator"), t("colPlayer"), t("colAmount"), t("colBuyType"), t("colDetail")]));
         report.events.forEach(ev => {
             lines.push(csvLine([
-                ev.time, t("ev_" + ev.type), ev.actor_name || t("system"), ev.target_name,
+                asText(ev.time), t("ev_" + ev.type), ev.actor_name || t("system"), ev.target_name,
                 ev.amount, buyTypeLabel(ev.buy_type), eventDetail(ev),
             ]));
         });
@@ -242,8 +254,9 @@
 
         const now = new Date();
         const pad = n => String(n).padStart(2, "0");
-        lines.push(csvLine([t("csvExportedAt"),
-            `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`]));
+        lines.push(csvLine([t("csvExportedAt"), asText(
+            `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
+        )]));
 
         // 开头的 BOM 让 Excel 按 UTF-8 打开，中文不乱码
         return "﻿" + lines.join("\r\n");
@@ -292,6 +305,25 @@
         }
     }
 
+    // 从本站牌局日志跳转过来时，"返回"用浏览器后退，回到原来的页码、搜索和选中的组；
+    // 直接打开链接等其他情况，按链接回到对应角色的牌局日志
+    function setupBackLink() {
+        const back = document.querySelector(".report-back");
+        if (!back) return;
+        back.addEventListener("click", event => {
+            let fromSameSite = false;
+            try {
+                fromSameSite = !!document.referrer && new URL(document.referrer).origin === window.location.origin;
+            } catch (e) {
+                fromSameSite = false;
+            }
+            if (fromSameSite && window.history.length > 1) {
+                event.preventDefault();
+                window.history.back();
+            }
+        });
+    }
+
     window.onLanguageApplied = function () {
         if (report) {
             render();
@@ -300,10 +332,15 @@
         }
     };
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", load);
-    } else {
+    function init() {
+        setupBackLink();
         load();
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
     }
 })();
 
