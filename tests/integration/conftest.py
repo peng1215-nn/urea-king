@@ -70,9 +70,9 @@ class Factory:
     """直接往测试库里造数据，绕过页面流程，让测试只关注被测的那一件事。"""
 
     def __init__(self):
-        from passlib.context import CryptContext
+        from core.security import pwd_context
 
-        self._pwd = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+        self._pwd = pwd_context
 
     def _session(self):
         from database import SessionLocal

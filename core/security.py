@@ -5,13 +5,28 @@
 import hashlib
 import hmac
 
-from passlib.context import CryptContext
+import bcrypt
 
 from core import settings
 
 
+class _BcryptContext:
+    """bcrypt 的薄封装，提供与 passlib CryptContext 相同的 .hash() / .verify() 接口。"""
+
+    ROUNDS = 12
+
+    def hash(self, password: str) -> str:
+        return bcrypt.hashpw(password.encode(), bcrypt.gensalt(self.ROUNDS)).decode()
+
+    def verify(self, password: str, hashed: str) -> bool:
+        try:
+            return bcrypt.checkpw(password.encode(), hashed.encode())
+        except Exception:
+            return False
+
+
 # 全站唯一的密码哈希配置；其他地方都从这里导入，不要另建
-pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+pwd_context = _BcryptContext()
 
 # 用户名不存在时也做一次同样耗时的校验，避免通过响应时间判断用户名是否存在
 _DUMMY_HASH = pwd_context.hash("dummy-password-for-timing")
