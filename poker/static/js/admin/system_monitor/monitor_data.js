@@ -19,6 +19,12 @@ async function loadSystemMonitor() {
         document.getElementById("system-version").innerText =
             data.system_version || t("unknown");
 
+        document.getElementById("page-view-today").innerText =
+            data.page_view_today ?? "--";
+
+        document.getElementById("page-view-total").innerText =
+            data.page_view_total ?? "--";
+
     } catch (error) {
         console.error(t("systemMonitorLoadFailed"), error);
     }

@@ -180,3 +180,13 @@ class EmailVerification(Base):
     expires_at = Column(DateTime, nullable=False)
     used = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime, default=now_columbus_naive)
+
+
+class PageView(Base):
+    """登录页访问量统计，每天一行，按日累计。"""
+
+    __tablename__ = "poker_page_views"
+
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(String(10), nullable=False, unique=True, index=True)  # 'YYYY-MM-DD'
+    count = Column(Integer, nullable=False, default=0)

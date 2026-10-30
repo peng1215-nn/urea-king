@@ -5,6 +5,7 @@ from poker.app_state import SYSTEM_VERSION
 from database import SessionLocal
 from poker.models import Group
 from poker.models import InvitationCode
+from poker.models import PageView
 from poker.models import User
 from poker.models import UserGroupRole
 import secrets
@@ -58,10 +59,44 @@ def get_admin_stats_service():
         db.close()
 
 
+def record_login_page_view_service():
+    """登录页每次被访问时调用，今日计数 +1。"""
+    today = now_columbus_naive().strftime("%Y-%m-%d")
+    db = SessionLocal()
+    try:
+        row = db.query(PageView).filter(PageView.date == today).first()
+        if row:
+            row.count += 1
+        else:
+            db.add(PageView(date=today, count=1))
+        db.commit()
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
+
+
+def get_page_view_stats_service():
+    """返回今日点击量和历史总点击量。"""
+    today = now_columbus_naive().strftime("%Y-%m-%d")
+    db = SessionLocal()
+    try:
+        rows = db.query(PageView).all()
+        total = sum(r.count for r in rows)
+        today_count = next((r.count for r in rows if r.date == today), 0)
+        return {"today": today_count, "total": total}
+    except Exception:
+        return {"today": 0, "total": 0}
+    finally:
+        db.close()
+
+
 def get_system_monitor_service():
     total_runtime_seconds = int(
         (now_columbus_naive() - PROJECT_LAUNCH_TIME).total_seconds()
     )
+
+    page_views = get_page_view_stats_service()
 
     return {
         "success": True,
@@ -69,6 +104,8 @@ def get_system_monitor_service():
         "database_status": "normal",
         "deploy_environment": DEPLOY_ENVIRONMENT,
         "system_version": SYSTEM_VERSION,
+        "page_view_today": page_views["today"],
+        "page_view_total": page_views["total"],
     }
 
 

@@ -10,6 +10,7 @@ from poker.template_config import templates
 from fastapi.responses import JSONResponse
 from poker.core.rate_limit import login_retry_after, record_login_failure, record_login_success
 from poker.services.admin.audit_log import get_client_ip
+from poker.services.admin.admin import record_login_page_view_service
 
 
 router = APIRouter()
@@ -30,6 +31,7 @@ def home(request: Request):
 
 @router.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
+    record_login_page_view_service()
     return render_login_page(request)
 
 
