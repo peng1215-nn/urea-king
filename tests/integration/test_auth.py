@@ -285,3 +285,15 @@ def test_session_without_password_fingerprint_is_rejected(client, factory, login
 
     middleware.clear_session_cache()
     assert session_is_valid((user_id, group_id, "user", None)) is False
+
+
+def test_reset_password_with_invalid_tokens_is_rate_limited(client):
+    form = {"token": "not-a-real-token", "new_password": "newpass123", "confirm_password": "newpass123"}
+
+    for _ in range(10):
+        result = client.post("/reset-password", data=form).json()
+        assert result["error_code"] == "resetTokenInvalid"
+
+    response = client.post("/reset-password", data=form)
+    assert response.status_code == 429
+    assert response.json()["error_code"] == "forgotPasswordTooManyAttempts"

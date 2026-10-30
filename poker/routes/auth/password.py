@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from poker.core.rate_limit import forgot_password_failures_by_ip
+from poker.core.rate_limit import forgot_password_failures_by_ip, reset_password_failures_by_ip
 from poker.services.admin.audit_log import get_client_ip
 from poker.services.auth.reset_password import forgot_password_service, reset_password_service
 from poker.template_config import templates
 
 router = APIRouter()
+
+# 这些结果说明提交的重置链接无效，计入同一 IP 的失败次数
+RESET_TOKEN_FAILURES = {"resetTokenInvalid", "resetTokenUsed", "resetTokenExpired"}
 
 
 @router.get("/forgot-password", response_class=HTMLResponse)
@@ -45,9 +48,18 @@ def reset_password(
     new_password: str = Form(...),
     confirm_password: str = Form(...),
 ):
+    ip = get_client_ip(request) or "unknown"
+    wait = reset_password_failures_by_ip.retry_after(ip)
+    if wait:
+        return JSONResponse(
+            {"success": False, "error_code": "forgotPasswordTooManyAttempts", "retry_after": wait},
+            status_code=429,
+        )
     result = reset_password_service(
         token=token,
         new_password=new_password,
         confirm_password=confirm_password,
     )
+    if result.get("error_code") in RESET_TOKEN_FAILURES:
+        reset_password_failures_by_ip.hit(ip)
     return result

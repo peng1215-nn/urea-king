@@ -165,7 +165,7 @@ def reset_user_password(
             target_type="user",
             target_id=target_user_id,
             old_value=None,
-            new_value="password_reset_to_temporary",
+            new_value="password_reset_to_default",
             operator_id=request.session.get("user_id"),
             operator_username=request.session.get("username"),
         )

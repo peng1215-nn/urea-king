@@ -47,6 +47,10 @@ def clean_state(migrated_db):
         rate_limit.group_join_failures_by_ip,
         rate_limit.login_failures_by_username,
         rate_limit.invite_failures_global,
+        rate_limit.resend_verify_failures_by_ip,
+        rate_limit.forgot_password_failures_by_ip,
+        rate_limit.reset_password_failures_by_ip,
+        rate_limit.avatar_uploads_by_user,
     ):
         limiter._events.clear()
 

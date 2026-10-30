@@ -33,6 +33,9 @@ resend_verify_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
 # 忘记密码：同一 IP 15 分钟内最多 10 次
 forgot_password_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
 
+# 重置密码提交：同一 IP 15 分钟内最多 10 次无效链接
+reset_password_failures_by_ip = SlidingWindowLimiter(10, WINDOW)
+
 # 头像上传：同一用户 60 秒内最多 5 次
 avatar_uploads_by_user = SlidingWindowLimiter(5, 60)
 
