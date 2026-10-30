@@ -155,6 +155,7 @@ const organizerTranslations = {
                 onboardingOrganizer4: "之后：在牌局日志里查看历史战绩和统计",
 
                 avatarUploadFailed: "头像上传失败。",
+                tooManyUploads: "上传过于频繁，请稍后再试。",
 
                 avatarTooLarge: "图片太大（超过 10 MB），请换一张。",
 
@@ -480,6 +481,7 @@ const organizerTranslations = {
                 onboardingOrganizer4: "Then: Review history and statistics in Game Logs",
 
                 avatarUploadFailed: "Avatar upload failed.",
+                tooManyUploads: "Too many uploads. Please try again later.",
 
                 avatarTooLarge: "The image is too large (over 10 MB). Please choose another one.",
 

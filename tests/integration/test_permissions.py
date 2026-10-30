@@ -80,7 +80,7 @@ def test_removed_organizer_loses_access(client, factory, login_as):
     assert client.get("/organizer/game-log/list").status_code == 401
 
 
-def test_admin_password_reset_uses_random_temporary_password(client, factory, login_as):
+def test_admin_password_reset_uses_fixed_default_password(client, factory, login_as):
     admin_group = factory.group("ADMIN")
     _member(factory, "admin002", admin_group, "admin")
     player_group = factory.group("G1")
@@ -89,15 +89,14 @@ def test_admin_password_reset_uses_random_temporary_password(client, factory, lo
     login_as("admin002", admin_group)
     result = client.post("/admin/reset-user-password", data={"target_user_id": target_id}).json()
 
+    # 重置密码固定为 00000000，不在响应里明文返回
     assert result["success"] is True
-    temporary = result["temporary_password"]
-    assert len(temporary) == 10
-    assert temporary != "000000"
+    assert "temporary_password" not in result
 
-    # 临时密码不能出现在审计日志里
+    # 默认密码不能出现在审计日志里
     logs = client.get("/admin/audit-logs", params={"page_size": 20}).json()["logs"]
-    assert all(temporary not in str(log) for log in logs)
+    assert all("00000000" not in str(log) for log in logs)
 
     client.get("/logout")
-    response = client.post("/login", data={"username": "target01", "password": temporary})
+    response = client.post("/login", data={"username": "target01", "password": "00000000"})
     assert response.json()["success"] is True

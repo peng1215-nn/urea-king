@@ -171,6 +171,7 @@ window.adminTranslations = {
         onboardingAdmin4: "之后：在牌局日志和系统日志里查看各组的使用情况",
 
         avatarUploadFailed: "头像上传失败。",
+        tooManyUploads: "上传过于频繁，请稍后再试。",
 
         avatarTooLarge: "图片太大（超过 10 MB），请换一张。",
 
@@ -532,6 +533,7 @@ window.adminTranslations = {
         onboardingAdmin4: "Then: Check activity in Game Logs and System Logs",
 
         avatarUploadFailed: "Avatar upload failed.",
+        tooManyUploads: "Too many uploads. Please try again later.",
 
         avatarTooLarge: "The image is too large (over 10 MB). Please choose another one.",
 
