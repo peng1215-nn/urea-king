@@ -1014,3 +1014,10 @@ body {
         background-repeat: no-repeat !important;
     }
 }
+
+/* 结束牌局：中途结算离场已卖出的部分（自动计入总卖出） */
+.finish-player-left {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #5cffb2;
+}

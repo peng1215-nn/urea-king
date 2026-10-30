@@ -138,9 +138,12 @@ def test_full_game_flow_balances(table):
     assert _svc().exit_player_from_game_service(game_id, t["group"], carol, 150)["success"] is True
     assert _player(game_id, carol).net == 50
 
-    result = _finish(t, game_id, {t["org"]: 0, alice: 300, bob: 50, carol: 150})
+    # 结束时只填剩余筹码：carol 已经结算离场，手上是 0，离场拿走的 150 自动计入
+    result = _finish(t, game_id, {t["org"]: 0, alice: 300, bob: 50, carol: 0})
     assert result["success"] is True, result
     assert result["is_balanced"] == 1
+    assert _player(game_id, carol).cash_out == 150
+    assert _player(game_id, carol).net == 50
 
     game = _game(game_id)
     assert game.status == "finished"
@@ -542,3 +545,26 @@ def test_organizer_cannot_delete_game_log(client, table, login_as):
     response = client.post("/organizer/game-log/delete", data={"game_id": game_id})
     assert response.status_code in (404, 405)
     assert _game(game_id) is not None
+
+
+def test_cash_out_taken_at_exit_is_added_at_finish(table):
+    t = table
+    alice, bob, carol = t["members"]
+    game_id = _start(t)
+    assert _buyin(t, game_id, t["org"], 100)["success"] is True
+    req = _request_buyin(game_id, t["group"], alice, 100)
+    assert _svc().approve_chip_request_service(req, game_id, t["group"], t["org"])["success"] is True
+
+    # alice 结算离场拿走 80，回来后又买入 50，最后剩 70
+    assert _svc().exit_player_from_game_service(game_id, t["group"], alice, 80)["success"] is True
+    assert _svc().add_player_to_game_service(game_id, t["group"], alice, t["org"])["success"] is True
+    req = _request_buyin(game_id, t["group"], alice, 50)
+    assert _svc().approve_chip_request_service(req, game_id, t["group"], t["org"])["success"] is True
+
+    result = _finish(t, game_id, {t["org"]: 100, alice: 70, bob: 0, carol: 0})
+    assert result["success"] is True, result
+    player = _player(game_id, alice)
+    assert player.total_buy_in == 150
+    assert player.left_cash_out == 80
+    assert player.cash_out == 150  # 80 离场 + 70 结束时剩余
+    assert player.net == 0

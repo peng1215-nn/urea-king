@@ -246,3 +246,25 @@ def test_rejoin_records_whether_player_stepped_away_or_cashed_out(table):
     import json
     assert json.loads(rejoins[alice]) == {"after": "away"}
     assert json.loads(rejoins[bob]) == {"after": "exit", "cash_out": 80}
+
+
+def test_report_checks_cash_out_taken_at_exit(table):
+    t = table
+    svc = _svc()
+    alice, bob, _ = t["members"]
+    game_id = svc.start_game_service(
+        group_id=t["group"], organizer_id=t["org"], name="离场",
+        preselected_user_ids=[t["org"], alice, bob],
+    )["game_id"]
+    assert svc.organizer_buyin_service(game_id=game_id, group_id=t["group"], user_id=t["org"], amount=100)["success"]
+    assert svc.exit_player_from_game_service(game_id, t["group"], alice, 0, actor_id=t["org"])["success"]
+    assert svc.organizer_proxy_buyin_service(game_id, t["group"], t["org"], bob, 100)["success"] is False  # bob 未授权
+    assert svc.finish_game_service(
+        game_id=game_id, group_id=t["group"], organizer_id=t["org"],
+        player_cash_outs=[{"user_id": t["org"], "cash_out": 60}, {"user_id": alice, "cash_out": 0}, {"user_id": bob, "cash_out": 40}],
+    )["success"]
+
+    report = _report(game_id, t["group"])
+    assert report["all_match"] is True
+    alice_row = next(r for r in report["summary"] if r["user_id"] == alice)
+    assert alice_row["left_cash_out"] == 0 and alice_row["left_from_events"] == 0

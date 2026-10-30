@@ -131,6 +131,8 @@ class PokerGamePlayer(Base):
     total_buy_in = Column(Integer, nullable=False, default=0)
     cash_out = Column(Integer, nullable=True)
     net = Column(Integer, nullable=True)
+    # 中途结算离场时累计拿走的筹码；结束牌局时 总卖出 = 这部分 + 结束时剩余的筹码
+    left_cash_out = Column(Integer, nullable=False, default=0, server_default="0")
     is_active = Column(Integer, nullable=False, default=1)
     joined_at = Column(DateTime, nullable=False, default=now_columbus_naive)
 

@@ -9,6 +9,12 @@ function openFinishGameModal() {
     currentPlayers.forEach(player => {
         const name = player.nickname || player.username;
         const isOrganizer = player.user_id === organizerId;
+        const leftCashOut = player.left_cash_out || 0;
+        // 已经结算离场、没再回来的玩家，手上已经没有筹码，默认填 0
+        const prefill = player.is_active !== 1 && leftCashOut > 0 ? "0" : "";
+        const leftHint = leftCashOut > 0
+            ? `<div class="finish-player-left">${escapeHtml(t("leftCashOutAuto").replace("{amount}", leftCashOut))}</div>`
+            : "";
 
         const row = document.createElement("div");
         row.className = "finish-player-row";
@@ -17,7 +23,7 @@ function openFinishGameModal() {
             <div class="finish-player-name">
                 ${escapeHtml(name)}${isOrganizer ? ` <span class="organizer-tag">${t("organizer")}</span>` : ""}
             </div>
-            <div class="finish-player-buyin">${t("buyIn")}：${player.total_buy_in}</div>
+            <div class="finish-player-buyin">${t("buyIn")}：${player.total_buy_in}${leftHint}</div>
             <input
                 type="number"
                 class="finish-cashout-input"
@@ -25,7 +31,7 @@ function openFinishGameModal() {
                 min="0"
                 data-i18n-placeholder="cashOutPlaceholder"
                 placeholder="${t("cashOutPlaceholder")}"
-                value="${player.cash_out !== null && player.cash_out !== undefined ? escapeHtml(player.cash_out) : ''}"
+                value="${prefill}"
             >
         `;
 

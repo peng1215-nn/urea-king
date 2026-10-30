@@ -150,6 +150,9 @@ function renderPlayerList() {
         } else {
             statsHtml = `<div class="player-stat-row"><span class="player-stat-item">${t("buyIn")}：${player.total_buy_in}</span></div>`;
         }
+        if (player.left_cash_out > 0) {
+            statsHtml += `<div class="player-stat-row"><span class="player-stat-item">${t("leftCashOut")}：${player.left_cash_out}</span></div>`;
+        }
 
         let actionsHtml = "";
         if (isActive) {

@@ -57,7 +57,12 @@
                 if (d.after === "away") return t("detailRejoinedAfterAway");
                 return "";
             case "player_exited":
-                return fmt("detailExited", { cash_out: ev.amount ?? 0, buy_in: d.buy_in ?? 0, net: signed(d.net) });
+                return fmt("detailExited", {
+                    cash_out: ev.amount ?? 0,
+                    left_total: d.left_total ?? ev.amount ?? 0,
+                    buy_in: d.buy_in ?? 0,
+                    net: signed(d.net),
+                });
             case "buyin_auto_rejected":
                 return t("detailAutoRejected");
             case "proxy_buyin":
@@ -66,9 +71,11 @@
                 const parts = [fmt("detailFinished", { buy_in: d.total_buy_in ?? 0, cash_out: d.total_cash_out ?? 0 })];
                 if (d.forced) parts.push(t("detailFinishedForced"));
                 (d.players || []).forEach(p => {
-                    parts.push(fmt("detailFinishedPlayer", {
+                    const vars = {
                         name: p.name || "", buy_in: p.buy_in ?? 0, cash_out: p.cash_out ?? 0, net: signed(p.net),
-                    }));
+                        left: p.left_cash_out ?? 0, final: p.final_chips ?? 0,
+                    };
+                    parts.push(fmt(p.left_cash_out ? "detailFinishedPlayerWithLeft" : "detailFinishedPlayer", vars));
                 });
                 return parts.join(getCurrentLanguage() === "zh" ? "；" : "; ");
             }
@@ -129,6 +136,8 @@
                 <th class="num">${escapeHtml(t("buyInNormal"))}</th>
                 <th class="num">${escapeHtml(t("buyInInsurance"))}</th>
                 <th class="num">${escapeHtml(t("buyInAnti"))}</th>
+                <th class="num">${escapeHtml(t("leftCashOut"))}</th>
+                <th class="num">${escapeHtml(t("finalChips"))}</th>
                 <th class="num">${escapeHtml(t("cashOut"))}</th>
                 <th class="num">${escapeHtml(t("net"))}</th>
                 ${showCheck ? `<th class="num">${escapeHtml(t("buyInFromEvents"))}</th><th>${escapeHtml(t("checkColumn"))}</th>` : ""}
@@ -140,6 +149,8 @@
                 <td class="num">${p.buy_in_by_type.normal}</td>
                 <td class="num">${p.buy_in_by_type.insurance}</td>
                 <td class="num">${p.buy_in_by_type.anti}</td>
+                <td class="num">${p.left_cash_out ?? 0}</td>
+                <td class="num">${p.final_chips ?? p.cash_out}</td>
                 <td class="num">${p.cash_out}</td>
                 <td class="num ${netClass(p.net)}">${escapeHtml(signed(p.net))}</td>
                 ${showCheck ? `<td class="num">${p.buy_in_from_events}</td>
@@ -236,12 +247,13 @@
         lines.push("");
 
         lines.push(csvLine([t("csvSectionSummary")]));
-        const summaryHead = [t("player"), t("buyIn"), t("buyInNormal"), t("buyInInsurance"), t("buyInAnti"), t("cashOut"), t("net")];
+        const summaryHead = [t("player"), t("buyIn"), t("buyInNormal"), t("buyInInsurance"), t("buyInAnti"),
+            t("leftCashOut"), t("finalChips"), t("cashOut"), t("net")];
         if (report.has_events) summaryHead.push(t("buyInFromEvents"), t("checkColumn"));
         lines.push(csvLine(summaryHead));
         report.summary.forEach(p => {
             const row = [p.nickname, p.total_buy_in, p.buy_in_by_type.normal, p.buy_in_by_type.insurance,
-                p.buy_in_by_type.anti, p.cash_out, p.net];
+                p.buy_in_by_type.anti, p.left_cash_out ?? 0, p.final_chips ?? p.cash_out, p.cash_out, p.net];
             if (report.has_events) row.push(p.buy_in_from_events, p.matches ? t("match") : t("mismatch"));
             lines.push(csvLine(row));
         });

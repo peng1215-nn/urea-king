@@ -368,13 +368,19 @@ def exit_player_from_game_service(game_id: int, group_id: int, user_id: int, cas
         if amount_error:
             return {"success": False, "message": amount_error}
 
-        player.cash_out = cash_out
-        player.net = cash_out - (player.total_buy_in or 0)
+        # 离场拿走的筹码累计起来（可能结算离场、回来、再离场），结束牌局时自动计入总卖出
+        player.left_cash_out = (player.left_cash_out or 0) + cash_out
+        player.cash_out = player.left_cash_out
+        player.net = player.cash_out - (player.total_buy_in or 0)
         player.is_active = 0
         record_game_event(
             db, game_id, "player_exited",
             actor_user_id=actor_id, target_user_id=user_id, amount=cash_out,
-            details={"buy_in": player.total_buy_in or 0, "net": player.net},
+            details={
+                "buy_in": player.total_buy_in or 0,
+                "left_total": player.left_cash_out,
+                "net": player.net,
+            },
         )
         # 已经结算离场，还没审批的买入申请一并拒绝
         _reject_pending_requests(db, game_id, user_id)
@@ -630,10 +636,11 @@ def finish_game_service(
         if set(cash_out_map) != {p.user_id for p in players}:
             return {"success": False, "message": "settlementPlayersMismatch"}
 
+        # 局头填的是每人结束时剩余的筹码；中途结算离场拿走的部分由系统加上
+        final_chips = dict(cash_out_map)
         for player in players:
-            co = cash_out_map[player.user_id]
-            player.cash_out = co
-            player.net = co - player.total_buy_in
+            player.cash_out = (player.left_cash_out or 0) + final_chips[player.user_id]
+            player.net = player.cash_out - player.total_buy_in
 
         total_buy_in = sum(p.total_buy_in for p in players)
         total_cash_out = sum((p.cash_out or 0) for p in players)
@@ -674,6 +681,8 @@ def finish_game_service(
                     {
                         "name": p.nickname,
                         "buy_in": p.total_buy_in,
+                        "left_cash_out": p.left_cash_out or 0,
+                        "final_chips": final_chips[p.user_id],
                         "cash_out": p.cash_out,
                         "net": p.net,
                     }
@@ -752,6 +761,7 @@ def _format_player(player, user):
         "avatar_url": user.avatar_url,
         "total_buy_in": player.total_buy_in,
         "cash_out": player.cash_out,
+        "left_cash_out": player.left_cash_out or 0,
         "net": player.net,
         "is_active": player.is_active,
         "joined_at": player.joined_at.strftime("%Y-%m-%d %H:%M") if player.joined_at else "",

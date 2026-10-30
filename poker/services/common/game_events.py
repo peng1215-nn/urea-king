@@ -97,10 +97,13 @@ def build_game_report(db, game_id, group_id):
     events = db.query(GameEvent).filter(GameEvent.game_id == game_id).order_by(GameEvent.id).all()
     players = db.query(PokerGamePlayer).filter(PokerGamePlayer.game_id == game_id).all()
 
-    # 按事件累加每位玩家的买入，用来和结算结果核对
+    # 按事件累加每位玩家的买入、中途离场拿走的筹码，用来和结算结果核对
     buy_in_from_events = {}
     buy_in_by_type = {}
+    left_from_events = {}
     for event in events:
+        if event.event_type == "player_exited" and event.amount is not None:
+            left_from_events[event.target_user_id] = left_from_events.get(event.target_user_id, 0) + event.amount
         if event.event_type in ("buyin_approved", "organizer_buyin", "proxy_buyin") and event.amount:
             uid = event.target_user_id
             buy_in_from_events[uid] = buy_in_from_events.get(uid, 0) + event.amount
@@ -111,6 +114,8 @@ def build_game_report(db, game_id, group_id):
     summary = []
     for player in sorted(players, key=lambda p: -(p.net or 0)):
         from_events = buy_in_from_events.get(player.user_id, 0)
+        left_cash_out = player.left_cash_out or 0
+        left_events = left_from_events.get(player.user_id, 0)
         summary.append({
             "user_id": player.user_id,
             "nickname": player.nickname,
@@ -118,8 +123,12 @@ def build_game_report(db, game_id, group_id):
             "buy_in_by_type": buy_in_by_type.get(player.user_id, {"normal": 0, "insurance": 0, "anti": 0}),
             "buy_in_from_events": from_events,
             "cash_out": player.cash_out or 0,
+            "left_cash_out": left_cash_out,
+            "left_from_events": left_events,
+            "final_chips": (player.cash_out or 0) - left_cash_out,
             "net": player.net or 0,
-            "matches": from_events == (player.total_buy_in or 0),
+            # 买入、离场拿走的筹码，都要和操作记录累计的一致
+            "matches": from_events == (player.total_buy_in or 0) and left_events == left_cash_out,
         })
 
     has_events = bool(events)
