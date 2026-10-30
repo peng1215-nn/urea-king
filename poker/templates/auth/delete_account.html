@@ -4,11 +4,13 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="pageTitle">UREAKING-POKER</title>
+    <title data-i18n="accountDeletePageTitle">UREAKING-POKER</title>
 
     <link rel="stylesheet" href="/static/css/auth/common.css?v={{ static_version }}">
     <link rel="stylesheet" href="/static/css/auth/group_join.css?v={{ static_version }}">
     <link rel="stylesheet" href="/static/css/auth/delete_account.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/common/language_base.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/auth/language.css?v={{ static_version }}">
 
 </head>
 
@@ -29,6 +31,8 @@
             <p class="login-poker-sub">POKER</p>
         </div>
 
+        {% include "common/language_switcher.html" %}
+
         <div class="delete-account-notice">
             <strong data-i18n="accountDeleteTitle">注销账号</strong>
             <ul>
@@ -38,15 +42,18 @@
             </ul>
         </div>
 
+        <form id="delete-account-form" class="auth-form" novalidate>
+
         <div class="form-group">
             <label for="username" data-i18n="username">用户名</label>
-            <input type="text" id="username" autocomplete="username"
+            <input type="text" id="username" name="username" autocomplete="username"
+                   autocapitalize="off" autocorrect="off" spellcheck="false"
                    placeholder="请输入用户名" data-i18n-placeholder="enterUsername">
         </div>
 
         <div class="form-group">
             <label for="password" data-i18n="password">密码</label>
-            <input type="password" id="password" autocomplete="current-password"
+            <input type="password" id="password" name="password" autocomplete="current-password"
                    placeholder="请输入密码" data-i18n-placeholder="enterPassword">
         </div>
 
@@ -58,10 +65,12 @@
 
         <div id="message-box" role="alert" aria-live="polite"></div>
 
-        <button id="delete-account-button" class="group-join-button delete-account-button"
-                data-on-click="deleteAccount" data-i18n="accountDeleteSubmit">
+        <button type="submit" id="delete-account-button" class="group-join-button delete-account-button"
+                data-i18n="accountDeleteSubmit">
             永久注销账号
         </button>
+
+        </form>
 
         <div class="bottom-links">
             <a href="/login" data-i18n="backToLogin">返回登录</a>
@@ -75,6 +84,7 @@
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/login.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/common/auth_form.js?v={{ static_version }}"></script>
 <script src="/static/js/auth/delete_account/delete_account.js?v={{ static_version }}"></script>
 
 </body>

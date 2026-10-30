@@ -102,6 +102,26 @@ def test_members_only_see_their_own_buy_in_details(played):
     assert _player(latest, t["bob"])["buyin_details"] == []
 
 
+def test_game_log_marks_the_viewer(played):
+    t = played
+    latest = _logs(t, viewer=t["alice"])["games"][0]
+    assert latest["my_net"] == 120
+    assert _player(latest, t["alice"])["is_me"] is True
+    assert _player(latest, t["bob"])["is_me"] is False
+
+    # 局头、管理员的日志接口不传查看者：没有人被标记为自己
+    unmarked = _logs(t)["games"][0]
+    assert unmarked["my_net"] is None
+    assert not any(p["is_me"] for p in unmarked["players"])
+
+
+def test_game_log_viewer_not_in_game(factory, played):
+    outsider = factory.user("dave0001")
+    factory.role(outsider, played["group"], "user")
+    latest = _logs(played, viewer=outsider)["games"][0]
+    assert latest["my_net"] is None
+
+
 def test_stats(played):
     from poker.services.common.game_log import get_stats_service
 

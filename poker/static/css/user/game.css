@@ -536,3 +536,184 @@ body {
         background-repeat: no-repeat !important;
     }
 }
+
+/* ── 筹码操作授权入口：图标 + 文字 ── */
+.game-settings-btn {
+    width: auto;
+    padding: 0 14px;
+    gap: 8px;
+    border-radius: 999px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+.game-settings-label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* ── 连接状态 ── */
+.game-conn-status {
+    margin-bottom: 12px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(255, 100, 100, 0.12);
+    color: #ff8a8a;
+    font-size: 13px;
+}
+.game-conn-status[hidden] { display: none; }
+
+.btn-retry {
+    margin-left: 10px;
+    padding: 4px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: transparent;
+    color: #ffffff;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* ── 空状态 ── */
+.game-empty-state {
+    padding: 36px 20px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px dashed rgba(255,255,255,0.12);
+    text-align: center;
+}
+.game-empty-icon {
+    font-size: 28px;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 12px;
+}
+.game-empty-title {
+    font-size: 15px;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 6px;
+}
+.game-empty-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+}
+
+/* ── 牌局结束提示 ── */
+.game-ended-notice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 20px;
+    border-radius: 16px;
+    background: rgba(92,255,178,0.08);
+    border: 1px solid rgba(92,255,178,0.25);
+}
+.game-ended-text {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    color: #5cffb2;
+    font-weight: 600;
+}
+.game-ended-name {
+    color: rgba(255,255,255,0.75);
+    font-weight: 400;
+}
+.game-ended-links {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.game-ended-link {
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.08);
+    color: #ffffff;
+    font-size: 13px;
+    text-decoration: none;
+}
+.game-ended-link.primary {
+    background: rgba(92,255,178,0.18);
+    color: #5cffb2;
+    font-weight: 600;
+}
+
+/* ── 自己已离开牌局时的状态条 ── */
+.my-status-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+.my-status-banner.status-exited {
+    background: rgba(92,141,255,0.12);
+    color: #a9c1ff;
+}
+.my-status-banner.status-away {
+    background: rgba(251,191,36,0.12);
+    color: #fbbf24;
+}
+.my-status-banner .net-positive { color: #34d399; }
+.my-status-banner .net-negative { color: #f87171; }
+
+/* ── 有待审批申请时，替代“提交买入申请”按钮 ── */
+.buyin-pending-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    border-radius: 12px;
+    background: rgba(251,191,36,0.12);
+    color: #fbbf24;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: default;
+}
+
+.modal-confirm-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.settings-message {
+    padding: 0 24px;
+    color: #ff8a8a;
+    font-size: 13px;
+}
+.settings-message:empty { display: none; }
+
+/* ── 申请状态变化的提示 ── */
+.game-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    z-index: 1100;
+    max-width: calc(100vw - 32px);
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: rgba(20,24,40,0.96);
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    color: #ffffff;
+    font-size: 14px;
+    white-space: pre-line;
+}
+.game-toast[hidden] { display: none; }
+.game-toast.toast-success { border-color: rgba(92,255,178,0.5); color: #5cffb2; }
+.game-toast.toast-warning { border-color: rgba(255,138,138,0.5); color: #ff8a8a; }
+
+@media (max-width: 768px) {
+    .game-settings-btn {
+        padding: 0 10px;
+        height: 34px;
+    }
+    .game-settings-label {
+        font-size: 12px;
+    }
+}

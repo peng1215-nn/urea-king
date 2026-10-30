@@ -87,6 +87,12 @@ body {
     color: #5c8dff;
 }
 
+/* 侧边栏里的语言切换（每个页面都能切换语言） */
+.sidebar-language-toggle {
+    margin-top: 10px;
+    border: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
 
 .main {
     flex: 1;
@@ -181,6 +187,12 @@ body {
 
 .upload-avatar-button:hover {
     background: rgba(255, 255, 255, 0.16);
+}
+
+.upload-avatar-button.is-busy {
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: progress;
 }
 
 
@@ -303,6 +315,11 @@ body {
         min-width: 0;
     }
 
+    /* 悬浮的汉堡按钮在左上角（16px, 40×40），.main 左边只有 16px：标题让出按钮的位置，避免被盖住 */
+    .main > .top-bar .title-area {
+        padding-left: 48px;
+    }
+
     .title-area h1 {
         font-size: 24px;
     }
@@ -375,6 +392,12 @@ body {
     }
 
 }
+
+
+/* ───── 紧凑分页（common/pagination.js） ───── */
+.pagination { flex-wrap: wrap; align-items: center; }
+.pagination .page-btn:disabled { opacity: 0.3; cursor: default; }
+.pagination .page-ellipsis { min-width: 20px; text-align: center; color: rgba(255, 255, 255, 0.4); }
 
 
 /* ───── Overflow Tooltip ───── */

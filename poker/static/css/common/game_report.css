@@ -157,6 +157,18 @@ body {
     white-space: nowrap;
 }
 
+/* 手机上表格横向滚动时，第一列（玩家 / 时间）固定在左边，始终知道这一行是谁 */
+#report-summary th:first-child,
+#report-summary td:first-child,
+#report-timeline th:first-child,
+#report-timeline td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: #1b2031;
+    box-shadow: 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
 .report-table td.wrap {
     white-space: normal;
     min-width: 200px;

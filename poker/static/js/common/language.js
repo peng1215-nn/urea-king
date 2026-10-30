@@ -140,6 +140,17 @@ function applyLanguage(language = getCurrentLanguage()) {
             }
         });
 
+    document
+        .querySelectorAll("[data-i18n-aria-label]")
+        .forEach(element => {
+            const key =
+                element.getAttribute("data-i18n-aria-label");
+
+            if (key && translations[key]) {
+                element.setAttribute("aria-label", translations[key]);
+            }
+        });
+
     const toggleButton =
         document.getElementById("language-toggle");
 
@@ -162,6 +173,11 @@ function applyLanguage(language = getCurrentLanguage()) {
     if (typeof window.onLanguageApplied === "function") {
         window.onLanguageApplied(language);
     }
+
+    // 由脚本动态生成的面板（如注册页的重发验证邮件）监听这个事件来更新文字
+    document.dispatchEvent(
+        new CustomEvent("languageChanged", { detail: { lang: language } })
+    );
 }
 
 

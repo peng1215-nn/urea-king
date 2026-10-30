@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="titleJoinGame">UREAKING-POKER</title>
+    <title data-i18n="titleCurrentGame">UREAKING-POKER</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
     <link rel="stylesheet" href="/static/css/user/game.css?v={{ static_version }}">
@@ -16,12 +16,13 @@
 
     <div class="top-bar">
         <div class="title-area">
-            <h1 data-i18n="joinGame">加入牌局</h1>
+            <h1 data-i18n="currentGame">当前牌局</h1>
             <p id="current-group-text"></p>
         </div>
         <div class="topbar-actions">
-            <button class="game-settings-btn" data-on-click="openGameSettings" data-i18n-title="gameSettings" title="牌局设置">
+            <button type="button" class="game-settings-btn" data-on-click="openGameSettings" data-i18n-title="gameSettings" title="牌局设置">
                 <i class="fa-solid fa-sliders"></i>
+                <span class="game-settings-label" data-i18n="chipAuthTitle">筹码操作授权</span>
             </button>
             <img id="avatar-preview" class="avatar" src="/static/images/default_avatar.jpg" alt="avatar">
             <div class="role-tag">
@@ -30,6 +31,8 @@
             </div>
         </div>
     </div>
+
+    <div id="game-conn-status" class="game-conn-status" role="status" hidden></div>
 
     <div id="game-list" class="game-list">
         <div class="game-loading" data-i18n="loading">加载中...</div>
@@ -44,11 +47,11 @@
         <p class="modal-desc" data-i18n="buyinRequestDesc">填写买入数额，由局头审批后生效。</p>
         <div class="form-group">
             <label data-i18n="buyinRequestAmount">申请数额</label>
-            <input type="number" id="buyin-amount" class="modal-input" min="1" placeholder="请输入数额">
+            <input type="number" id="buyin-amount" class="modal-input" min="1" data-i18n-placeholder="buyinAmountPlaceholder" placeholder="请输入数额">
         </div>
         <div id="buyin-message" class="operation-message"></div>
         <div class="custom-modal-actions">
-            <button class="modal-confirm-button" data-on-click="confirmBuyin" data-i18n="confirm">确认</button>
+            <button id="buyin-confirm-button" class="modal-confirm-button" data-on-click="confirmBuyin" data-i18n="confirm">确认</button>
             <button class="modal-cancel-button" data-on-click="closeBuyinModal" data-i18n="cancel">取消</button>
         </div>
     </div>
@@ -64,13 +67,15 @@
 
         <div class="settings-section">
             <div class="settings-section-title" data-i18n="chipAuthTitle">筹码操作授权</div>
-            <p class="settings-section-desc" data-i18n="chipAuthDesc">开启后，局头可代替您进行筹码买入与结算操作。</p>
+            <p class="settings-section-desc" data-i18n="chipAuthDesc">开启后，局头可以替你买入筹码（直接计入你的买入，不用你提交申请）。</p>
             <div id="chip-auth-list" class="chip-auth-list">
-                <div class="settings-loading">加载中...</div>
+                <div class="settings-loading" data-i18n="loading">加载中...</div>
             </div>
         </div>
 
         <!-- 未来可在此添加更多设置区块 -->
+
+        <div id="settings-message" class="operation-message settings-message"></div>
 
         <div class="settings-modal-footer">
             <button class="settings-apply-btn" data-on-click="applyGameSettings" data-i18n="apply">应用</button>
@@ -78,6 +83,8 @@
 
     </div>
 </div>
+
+<div id="game-toast" class="game-toast" role="status" aria-live="polite" hidden></div>
 
 <div id="join-group-modal" class="custom-modal" style="display:none;">
     <div class="custom-modal-content">
@@ -92,6 +99,7 @@
 
 <script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
+<script src="/static/js/common/text_format.js?v={{ static_version }}"></script>
 <script src="/static/js/user/game/game_settings.js?v={{ static_version }}"></script>
 <script src="/static/js/user/dashboard/group_join.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/user.js?v={{ static_version }}"></script>

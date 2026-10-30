@@ -1,12 +1,14 @@
 /**
  * 重发验证邮件面板逻辑
- * - 点击"重发验证邮件"链接展开面板
+ * - 点击"重发验证邮件"链接展开面板；从其他页面带 #resend 进入时自动展开
  * - 填邮箱提交，显示结果，处理频率限制
  */
 
 (function () {
     const t = (key, vars) => {
-        const lang = localStorage.getItem("language") || "zh";
+        const lang = typeof getCurrentLanguage === "function"
+            ? getCurrentLanguage()
+            : (localStorage.getItem("lang") || "zh");
         const map = window.registerTranslations?.[lang] || {};
         let str = map[key] || key;
         if (vars) {
@@ -17,39 +19,30 @@
         return str;
     };
 
+    function retryMinutes(data) {
+        const seconds = Number(data && data.retry_after);
+        return seconds > 0 ? Math.max(1, Math.ceil(seconds / 60)) : 15;
+    }
+
     function buildPanel() {
         // 已存在则跳过
-        if (document.getElementById("resend-panel")) return;
+        if (document.getElementById("resend-panel")) return null;
 
-        const panel = document.createElement("div");
+        const panel = document.createElement("form");
         panel.id = "resend-panel";
-        panel.style.cssText = [
-            "display:none",
-            "margin-top:16px",
-            "padding:16px",
-            "border:1px solid #333",
-            "border-radius:8px",
-            "background:#111",
-        ].join(";");
+        panel.className = "register-panel";
+        panel.noValidate = true;
+        panel.hidden = true;
 
         panel.innerHTML = `
-            <p style="color:#aaa;font-size:13px;margin:0 0 10px;"
-               id="resend-title"></p>
-            <input type="email" id="resend-email"
-                style="width:100%;box-sizing:border-box;padding:10px 14px;
-                       border-radius:6px;border:1px solid #444;background:#1a1a1a;
-                       color:#fff;font-size:14px;margin-bottom:10px;"
-            >
-            <div style="display:flex;gap:8px;">
-                <button id="resend-submit"
-                    style="flex:1;padding:10px;border:none;border-radius:6px;
-                           background:#fff;color:#111;font-weight:bold;
-                           cursor:pointer;font-size:14px;"></button>
-                <button id="resend-cancel"
-                    style="flex:1;padding:10px;border:1px solid #444;border-radius:6px;
-                           background:transparent;color:#aaa;cursor:pointer;font-size:14px;"></button>
+            <p class="register-panel-title" id="resend-title"></p>
+            <input type="email" id="resend-email" name="email"
+                   autocomplete="email" autocapitalize="off" spellcheck="false">
+            <div class="register-panel-actions">
+                <button type="submit" id="resend-submit" class="register-panel-submit"></button>
+                <button type="button" id="resend-cancel" class="register-panel-cancel"></button>
             </div>
-            <div id="resend-msg" style="margin-top:10px;font-size:13px;min-height:18px;"></div>
+            <div id="resend-msg" class="register-panel-msg" role="alert" aria-live="polite"></div>
         `;
 
         return panel;
@@ -60,6 +53,7 @@
         if (!trigger) return;
 
         const panel = buildPanel();
+        if (!panel) return;
         trigger.parentNode.insertAdjacentElement("afterend", panel);
 
         const emailInput = document.getElementById("resend-email");
@@ -67,37 +61,60 @@
         const cancelBtn = document.getElementById("resend-cancel");
         const msgBox = document.getElementById("resend-msg");
         const titleEl = document.getElementById("resend-title");
+        let sending = false;
 
         function applyI18n() {
             titleEl.textContent = t("resendVerifyTitle");
             emailInput.placeholder = t("resendEmailPlaceholder");
-            submitBtn.textContent = t("resendSubmit");
+            emailInput.setAttribute("aria-label", t("resendEmailPlaceholder"));
+            submitBtn.textContent = sending ? t("processing") : t("resendSubmit");
             cancelBtn.textContent = t("resendCancel");
         }
         applyI18n();
         document.addEventListener("languageChanged", applyI18n);
 
-        trigger.addEventListener("click", (e) => {
-            e.preventDefault();
-            panel.style.display = panel.style.display === "none" ? "block" : "none";
+        function openPanel() {
+            // 关闭修改邮箱面板（互斥）
+            const other = document.getElementById("change-email-panel");
+            if (other) other.hidden = true;
+
+            panel.hidden = false;
             msgBox.textContent = "";
             emailInput.value = "";
+            // 面板在页面底部，打开后滚到可见位置并聚焦输入框
+            panel.scrollIntoView({ behavior: "smooth", block: "center" });
+            emailInput.focus({ preventScroll: true });
+        }
+
+        trigger.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (panel.hidden) {
+                openPanel();
+            } else {
+                panel.hidden = true;
+            }
         });
 
         cancelBtn.addEventListener("click", () => {
-            panel.style.display = "none";
+            panel.hidden = true;
             msgBox.textContent = "";
         });
 
-        submitBtn.addEventListener("click", async () => {
+        panel.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (sending) return;
+
             const email = emailInput.value.trim();
             if (!email) {
                 msgBox.style.color = "#e05050";
                 msgBox.textContent = t("resendEmailRequired");
+                emailInput.focus();
                 return;
             }
 
+            sending = true;
             submitBtn.disabled = true;
+            submitBtn.textContent = t("processing");
             msgBox.style.color = "#aaa";
             msgBox.textContent = "…";
 
@@ -110,18 +127,24 @@
                 if (data.success) {
                     msgBox.style.color = "#4caf50";
                     msgBox.textContent = t("resendSent");
-                    submitBtn.disabled = false;
                 } else {
                     msgBox.style.color = "#e05050";
-                    msgBox.textContent = t(data.error_code || "resendFailed");
-                    submitBtn.disabled = false;
+                    msgBox.textContent = t(data.error_code || "resendFailed", { minutes: retryMinutes(data) });
                 }
             } catch {
                 msgBox.style.color = "#e05050";
                 msgBox.textContent = t("resendFailed");
+            } finally {
+                sending = false;
                 submitBtn.disabled = false;
+                submitBtn.textContent = t("resendSubmit");
             }
         });
+
+        // 从验证页、登录页的“重发验证邮件”链接进入时直接展开
+        if (window.location.hash === "#resend") {
+            openPanel();
+        }
     }
 
     if (document.readyState === "loading") {

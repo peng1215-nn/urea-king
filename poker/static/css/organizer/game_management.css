@@ -169,7 +169,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    height: 34px;
+    height: 40px;
     padding: 0 14px;
     border: none;
     border-radius: 10px;
@@ -268,21 +268,26 @@
 .player-actions {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
     align-items: flex-end;
 }
 
 .player-action-row {
     display: flex;
-    gap: 6px;
+    gap: 8px;
+}
+
+/* “移出”和买入按钮拉开距离，避免误触 */
+.player-action-row + .player-action-row.player-action-remove {
+    margin-top: 6px;
 }
 
 .btn-small {
-    height: 28px;
-    padding: 0 10px;
+    min-height: 40px;
+    padding: 0 14px;
     border: none;
-    border-radius: 8px;
-    font-size: 12px;
+    border-radius: 10px;
+    font-size: 13px;
     cursor: pointer;
     transition: 0.2s;
     white-space: nowrap;
@@ -397,7 +402,7 @@
 
 .btn-approve {
     flex: 1;
-    height: 34px;
+    height: 42px;
     border: none;
     border-radius: 10px;
     background: rgba(92, 255, 178, 0.16);
@@ -414,7 +419,7 @@
 
 .btn-reject {
     flex: 1;
-    height: 34px;
+    height: 42px;
     border: none;
     border-radius: 10px;
     background: rgba(255, 100, 130, 0.14);
@@ -452,12 +457,97 @@
     font-size: 14px;
 }
 
+/* 操作结果提示：固定在屏幕底部的浮动提示，几秒后自动消失（层级高于弹窗） */
 .game-message {
-    min-height: 22px;
-    margin-top: 16px;
+    position: fixed;
+    left: 50%;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    transform: translate(-50%, 16px);
+    max-width: calc(100vw - 32px);
+    width: max-content;
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: rgba(22, 27, 50, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
     font-size: 14px;
+    line-height: 1.5;
     color: #ff8a8a;
     text-align: center;
+    z-index: 10001;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.game-message.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.game-message.success {
+    color: #5CFFB2;
+    border-color: rgba(92, 255, 178, 0.3);
+}
+
+.game-message.error {
+    color: #ff8a8a;
+    border-color: rgba(255, 100, 130, 0.35);
+}
+
+.request-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: rgba(255, 100, 130, 0.85);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.modal-target-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: -8px 0 12px;
+}
+
+.modal-target-name:empty {
+    display: none;
+}
+
+.exit-buyin-info {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.75);
+    margin-bottom: 10px;
+}
+
+.exit-preview {
+    min-height: 20px;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.modal-confirm-button:disabled,
+.modal-cancel-button:disabled,
+.btn-small:disabled,
+.btn-approve:disabled,
+.btn-reject:disabled,
+.remove-type-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.modal-confirm-button.warning {
+    background: rgba(255, 160, 80, 0.85);
+}
+
+.modal-confirm-button.warning:hover {
+    background: rgba(255, 160, 80, 1);
 }
 
 .modal-wide {
@@ -573,13 +663,14 @@
 
 .modal-input {
     width: 100%;
-    height: 42px;
+    height: 44px;
     border: none;
     border-radius: 10px;
     padding: 0 12px;
     background: rgba(255, 255, 255, 0.92);
     color: #111;
-    font-size: 14px;
+    /* 不小于 16px，iOS 聚焦时才不会自动放大页面 */
+    font-size: 16px;
     outline: none;
 }
 
@@ -598,14 +689,12 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-height: 320px;
-    overflow-y: auto;
     margin-bottom: 16px;
 }
 
 .finish-player-row {
     display: grid;
-    grid-template-columns: 1fr 120px 120px;
+    grid-template-columns: 1fr 90px 120px;
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
@@ -626,13 +715,13 @@
 }
 
 .finish-cashout-input {
-    height: 36px;
+    height: 40px;
     border: none;
     border-radius: 8px;
     padding: 0 10px;
     background: rgba(255, 255, 255, 0.92);
     color: #111;
-    font-size: 14px;
+    font-size: 16px;
     outline: none;
     width: 100%;
     text-align: center;
@@ -749,6 +838,16 @@ body {
 .settlement-success-icon {
     font-size: 28px;
     color: #5CFFB2;
+}
+
+.settlement-warning-icon {
+    font-size: 28px;
+    color: #ffa050;
+}
+
+.settlement-summary.unbalanced {
+    background: rgba(255, 160, 80, 0.08);
+    border-color: rgba(255, 160, 80, 0.3);
 }
 
 .settlement-header h3 {
@@ -914,6 +1013,7 @@ body {
 
 .remove-type-btn {
     flex: 1;
+    min-height: 44px;
     padding: 10px;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.12);
@@ -983,9 +1083,17 @@ body {
         gap: 12px;
     }
     .finish-player-row {
-        grid-template-columns: 1fr 80px 90px;
+        grid-template-columns: 1fr 72px 100px;
         gap: 8px;
         padding: 10px 12px;
+    }
+    /* 有待审批申请时排到玩家列表前面，局头一眼就能看到 */
+    .game-panel.requests-panel.has-pending {
+        order: -1;
+    }
+    .player-list,
+    .request-list {
+        max-height: none;
     }
     .modal-wide {
         width: 92vw;
@@ -1020,4 +1128,90 @@ body {
     margin-top: 4px;
     font-size: 12px;
     color: #5cffb2;
+}
+
+/* 结束牌局：暂离玩家的提示、每行实时盈亏 */
+.finish-player-away {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #fbbf24;
+}
+
+.finish-player-input {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.finish-player-net {
+    min-height: 16px;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* 本页弹窗内容较长时，底部按钮固定在弹窗底部，滚动时始终可以点到。
+   第二层实色阴影盖住弹窗底部内边距，避免滚动内容从按钮下方透出。 */
+.custom-modal-content > .custom-modal-actions,
+.finish-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    padding-top: 12px;
+    background: rgb(24, 29, 53);
+    box-shadow: 0 -12px 16px -12px rgba(0, 0, 0, 0.6), 0 32px 0 rgb(24, 29, 53);
+}
+
+/* 结束牌局：底部固定的汇总和按钮 */
+.finish-footer {
+    margin-top: 12px;
+}
+
+.finish-footer .custom-modal-actions {
+    position: static;
+    margin-top: 0;
+    padding-top: 0;
+    background: none;
+    box-shadow: none;
+}
+
+.finish-footer .operation-message {
+    margin-top: 6px;
+    margin-bottom: 8px;
+    min-height: 0;
+}
+
+.finish-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.finish-summary strong {
+    color: #ffffff;
+}
+
+.finish-summary-sep {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.finish-summary-pending {
+    color: #fbbf24;
+}
+
+.player-status-badge.inactive.away {
+    background: rgba(251, 191, 36, 0.14);
+    color: #fbbf24;
+}
+
+/* 加入玩家：部分失败时逐行列出每个人的结果 */
+#add-player-message,
+#start-game-message {
+    white-space: pre-line;
 }

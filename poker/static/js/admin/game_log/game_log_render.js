@@ -13,6 +13,8 @@ let pendingDeleteGameId = null;
 let currentPage = 1;
 let currentView = "logs";
 let currentSearch = "";
+let searchTimer = null;
+let logRequestSeq = 0;   // 只显示最后一次请求的结果，先发后到的旧结果直接丢掉
 
 function openDeleteGameModal(gameId) {
     pendingDeleteGameId = gameId;
@@ -44,16 +46,30 @@ function switchView(view) {
     else loadMemberStats();
 }
 
+// 输入时等 300ms 没有新输入再搜索，不要每敲一个字就发一次请求
 function onSearch() {
-    currentSearch = document.getElementById("log-search-input")?.value?.trim() || "";
-    loadGameLogs(1);
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+        searchTimer = null;
+        const value = document.getElementById("log-search-input")?.value?.trim() || "";
+        if (value === currentSearch) return;
+        currentSearch = value;
+        loadGameLogs(1);
+    }, 300);
 }
 
 async function loadGameLogs(page) {
     currentPage = page;
     const list = document.getElementById("game-log-list");
     list.innerHTML = `<div class="log-loading">${t("loading")}</div>`;
-    const data = await fetchGameLogs(page, currentSearch);
+    const seq = ++logRequestSeq;
+    let data;
+    try {
+        data = await fetchGameLogs(page, currentSearch);
+    } catch (error) {
+        data = { success: false };
+    }
+    if (seq !== logRequestSeq) return;
     if (!data.success) { list.innerHTML = `<div class="log-loading">${t("operationFailed")}</div>`; return; }
     if (!data.games || data.games.length === 0) { list.innerHTML = `<div class="log-loading">${t("noGameLogs")}</div>`; renderPagination(1,1); return; }
     list.innerHTML = "";
@@ -79,7 +95,7 @@ function renderGameCard(game, container) {
                 <span class="log-duration"><i class="fa-regular fa-clock"></i> ${escapeHtml(game.duration)}</span>
             </div>
             <div class="log-card-right">
-                <span class="log-chips">${t("totalBuyIn")}：${game.total_buy_in}</span>
+                <span class="log-chips">${withColon(t("totalBuyIn"))}${game.total_buy_in}</span>
                 ${balanced}
                 <button class="btn-export-log" data-on-click="openGameReport" data-args="[${game.id}]" data-stop>${t("auditReport")}</button>
                 <button class="btn-export-log" data-on-click="exportGameCard" data-args="[${game.id}]" data-stop>${t("export")}</button>
@@ -103,9 +119,9 @@ function renderPlayers(game) {
         let buyinDetail = "";
         if (p.is_organizer) {
             buyinDetail = `<div class="log-player-buyin-detail">
-                <span>${t("buyInNormal")}：${p.buy_in_normal||0}</span>
-                <span>${t("buyInInsurance")}：${p.buy_in_insurance||0}</span>
-                <span>${t("buyInAnti")}：${p.buy_in_anti||0}</span>
+                <span>${withColon(t("buyInNormal"))}${p.buy_in_normal||0}</span>
+                <span>${withColon(t("buyInInsurance"))}${p.buy_in_insurance||0}</span>
+                <span>${withColon(t("buyInAnti"))}${p.buy_in_anti||0}</span>
             </div>`;
         }
         let detailsHtml = "";
@@ -125,9 +141,9 @@ function renderPlayers(game) {
         html += `<div class="log-player-row ${isWinner?"winner":""}">
             <div class="log-player-name">${escapeHtml(p.nickname)} ${organizerBadge} ${winnerBadge}</div>
             <div class="log-player-stats">
-                <span>${t("buyIn")}：${p.total_buy_in}</span>
-                <span>${t("cashOut")}：${p.cash_out}</span>
-                <span class="${netClass}">${t("net")}：${p.net>0?"+":""}${p.net}</span>
+                <span>${withColon(t("buyIn"))}${p.total_buy_in}</span>
+                <span>${withColon(t("cashOut"))}${p.cash_out}</span>
+                <span class="${netClass}">${withColon(t("net"))}${p.net>0?"+":""}${p.net}</span>
             </div>
             ${buyinDetail}
             ${detailsHtml}
@@ -146,26 +162,7 @@ function toggleDetail(header) {
 }
 
 function renderPagination(page, totalPages) {
-    const container = document.getElementById("pagination");
-    container.innerHTML = "";
-    if (totalPages <= 1) return;
-    const prev = document.createElement("button");
-    prev.className = "page-btn" + (page <= 1 ? " disabled" : "");
-    prev.innerText = "←";
-    prev.onclick = () => { if (page > 1) loadGameLogs(page - 1); };
-    container.appendChild(prev);
-    for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement("button");
-        btn.className = "page-btn" + (i === page ? " active" : "");
-        btn.innerText = i;
-        btn.onclick = () => loadGameLogs(i);
-        container.appendChild(btn);
-    }
-    const next = document.createElement("button");
-    next.className = "page-btn" + (page >= totalPages ? " disabled" : "");
-    next.innerText = "→";
-    next.onclick = () => { if (page < totalPages) loadGameLogs(page + 1); };
-    container.appendChild(next);
+    renderCompactPagination(document.getElementById("pagination"), page, totalPages, loadGameLogs);
 }
 
 async function loadStats() {
@@ -175,11 +172,11 @@ async function loadStats() {
     if (!data.success || !data.stats) { panel.innerHTML = `<div class="log-loading">${t("noGameLogs")}</div>`; return; }
     const s = data.stats;
     const rows = [
-        { color: "green",  icon: "fa-arrow-trend-up",   label: t("statMostWins"),   value: s.most_wins.names.length ? s.most_wins.names.join("、") : "-",   sub: s.most_wins.names.length ? s.most_wins.count + " " + t("times") : "" },
-        { color: "red",    icon: "fa-arrow-trend-down",  label: t("statMostLoses"),  value: s.most_loses.names.length ? s.most_loses.names.join("、") : "-",  sub: s.most_loses.names.length ? s.most_loses.count + " " + t("times") : "" },
-        { color: "yellow", icon: "fa-trophy",            label: t("statMostProfit"), value: s.most_profit.names.length ? s.most_profit.names.join("、") : "-", sub: s.most_profit.names.length ? "+" + s.most_profit.amount : "" },
-        { color: "purple", icon: "fa-face-sad-tear",     label: t("statMostLoss"),   value: s.most_loss.names.length ? s.most_loss.names.join("、") : "-",   sub: s.most_loss.names.length ? (s.most_loss.amount < 0 ? "" : "-") + Math.abs(s.most_loss.amount) : "" },
-        { color: "blue",   icon: "fa-users",             label: t("statMostGames"),  value: s.most_games.names.join("、"),  sub: s.most_games.count + " " + t("times") },
+        { color: "green",  icon: "fa-arrow-trend-up",   label: t("statMostWins"),   value: s.most_wins.names.length ? joinNames(s.most_wins.names) : "-",   sub: s.most_wins.names.length ? countTimes(s.most_wins.count) : "" },
+        { color: "red",    icon: "fa-arrow-trend-down",  label: t("statMostLoses"),  value: s.most_loses.names.length ? joinNames(s.most_loses.names) : "-",  sub: s.most_loses.names.length ? countTimes(s.most_loses.count) : "" },
+        { color: "yellow", icon: "fa-trophy",            label: t("statMostProfit"), value: s.most_profit.names.length ? joinNames(s.most_profit.names) : "-", sub: s.most_profit.names.length ? "+" + s.most_profit.amount : "" },
+        { color: "purple", icon: "fa-face-sad-tear",     label: t("statMostLoss"),   value: s.most_loss.names.length ? joinNames(s.most_loss.names) : "-",   sub: s.most_loss.names.length ? (s.most_loss.amount < 0 ? "" : "-") + Math.abs(s.most_loss.amount) : "" },
+        { color: "blue",   icon: "fa-users",             label: t("statMostGames"),  value: joinNames(s.most_games.names),  sub: countTimes(s.most_games.count) },
         { color: "cyan",   icon: "fa-clock",             label: t("statLongestGame"),value: s.longest_game.duration,        sub: s.longest_game.name },
         { color: "orange", icon: "fa-coins",             label: t("statMaxChips"),   value: s.max_chips.amount,             sub: s.max_chips.name },
         { color: "green",  icon: "fa-star",              label: t("statBestSingle"),  value: s.best_single.nickname || "-",   sub: s.best_single.nickname ? "+" + s.best_single.amount + (s.best_single.game ? " · " + s.best_single.game : "") : "" },
@@ -244,8 +241,8 @@ function renderMemberStatsTable(members, container) {
             <td class="rank-cell">${i + 1}</td>
             <td class="name-cell">${escapeHtml(m.nickname)}</td>
             <td>${m.game_count}</td>
-            <td style="color:#4caf7d">${m.win_rate}%（${m.win_count}${t("times")}）</td>
-            <td style="color:#e05c5c">${m.lose_rate !== undefined ? m.lose_rate + "%（" + m.lose_count + t("times") + "）" : "-"}</td>
+            <td style="color:#4caf7d">${withParen(m.win_rate + "%", countTimes(m.win_count))}</td>
+            <td style="color:#e05c5c">${m.lose_rate !== undefined ? withParen(m.lose_rate + "%", countTimes(m.lose_count)) : "-"}</td>
             <td class="${netClass} net-cell">${netStr}</td>
         </tr>`;
     });
@@ -298,7 +295,7 @@ function renderTrendChart(points, canvas) {
             interaction: { mode: "index", intersect: false },
             plugins: {
                 legend: { labels: { color: "rgba(255,255,255,0.7)", font: { size: 12 } } },
-                tooltip: { backgroundColor: "rgba(20,20,35,0.95)", titleColor: "#fff", bodyColor: "rgba(255,255,255,0.8)", callbacks: { afterBody: (items) => { const p = points[items[0].dataIndex]; return [`${t("buyIn")}：${p.buy_in}  ${t("cashOut")}：${p.cash_out}`, p.date]; } } },
+                tooltip: { backgroundColor: "rgba(20,20,35,0.95)", titleColor: "#fff", bodyColor: "rgba(255,255,255,0.8)", callbacks: { afterBody: (items) => { const p = points[items[0].dataIndex]; return [`${withColon(t("buyIn"))}${p.buy_in}  ${withColon(t("cashOut"))}${p.cash_out}`, p.date]; } } },
             },
             scales: {
                 x: { ticks: { color: "rgba(255,255,255,0.55)", maxRotation: 40 }, grid: { color: "rgba(255,255,255,0.05)" } },
@@ -312,9 +309,9 @@ function renderTrendChart(points, canvas) {
     const netClass = last.cumulative >= 0 ? "net-positive" : "net-negative";
     const netStr = last.cumulative > 0 ? "+" + last.cumulative : String(last.cumulative);
     document.getElementById("trend-summary").innerHTML = `
-        <span>${t("memberGames")}：${points.length}</span>
-        <span>${t("memberWinRate")}：${winRate}%</span>
-        <span class="${netClass}">${t("memberTotalNet")}：${netStr}</span>
+        <span>${withColon(t("memberGames"))}${points.length}</span>
+        <span>${withColon(t("memberWinRate"))}${winRate}%</span>
+        <span class="${netClass}">${withColon(t("memberTotalNet"))}${netStr}</span>
     `;
 }
 

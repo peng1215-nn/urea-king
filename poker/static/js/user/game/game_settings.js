@@ -1,15 +1,22 @@
 // 本地暂存开关状态，点应用后才提交
 let pendingChipAuth = {};
 
+function setSettingsMessage(text) {
+    const box = document.getElementById('settings-message');
+    if (box) box.innerText = text || '';
+}
+
 function openGameSettings() {
     document.getElementById('game-settings-modal').style.display = 'flex';
     pendingChipAuth = {};
+    setSettingsMessage('');
     loadChipAuthSettings();
 }
 
 function closeGameSettings() {
     document.getElementById('game-settings-modal').style.display = 'none';
     pendingChipAuth = {};
+    setSettingsMessage('');
     const btn = document.querySelector('.settings-apply-btn');
     if (btn) {
         btn.disabled = false;
@@ -72,6 +79,7 @@ function applyGameSettings() {
 
     btn.disabled = true;
     btn.textContent = t('settingsSaving');
+    setSettingsMessage('');
 
     const requests = keys.map(groupId =>
         fetch('/user/game/chip-auth-update', {
@@ -87,13 +95,20 @@ function applyGameSettings() {
             if (allOk) {
                 closeGameSettings();
             } else {
+                // 有的组没保存成功：重新加载开关（显示服务器上真实的状态），并告诉用户
+                const failed = results.find(r => !r.success);
                 btn.textContent = t('apply');
                 btn.disabled = false;
+                pendingChipAuth = {};
                 loadChipAuthSettings();
+                setSettingsMessage(t('settingsSaveError') + (failed && failed.message && failed.message !== 'operationFailed' ? ' ' + t(failed.message) : ''));
             }
         })
         .catch(() => {
             btn.textContent = t('apply');
             btn.disabled = false;
+            pendingChipAuth = {};
+            loadChipAuthSettings();
+            setSettingsMessage(t('settingsSaveError'));
         });
 }

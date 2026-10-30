@@ -83,6 +83,8 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
                     "total_buy_in": p.total_buy_in,
                     "cash_out": p.cash_out or 0,
                     "net": net,
+                    # 是不是正在查看的人自己（只有普通成员的日志接口会传 viewer_user_id）
+                    "is_me": viewer_user_id is not None and p.user_id == viewer_user_id,
                 }
 
                 # 每笔买入明细
@@ -118,10 +120,14 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
                 m = rem // 60
                 duration = f"{h}h {m}m"
 
+            my_row = next((pd for pd in players_data if pd["is_me"]), None)
+
             result.append({
                 "id": game.id,
                 "name": game.name or "",
                 "note": game.note or "",
+                # 查看者自己这局的盈亏；没参加这局时为 None
+                "my_net": my_row["net"] if my_row else None,
                 "started_at": game.started_at.strftime("%Y-%m-%d %H:%M") if game.started_at else "",
                 "ended_at": game.ended_at.strftime("%Y-%m-%d %H:%M") if game.ended_at else "",
                 "duration": duration,

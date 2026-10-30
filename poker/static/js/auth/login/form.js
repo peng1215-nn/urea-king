@@ -9,11 +9,13 @@ function getLoginFormData() {
 function validateLoginForm(username, password) {
     if (username.length === 0) {
         showMessage(t("loginUsernameRequired"), false);
+        authFocus("username");
         return false;
     }
 
     if (password.length === 0) {
         showMessage(t("loginPasswordRequired"), false);
+        authFocus("password");
         return false;
     }
 

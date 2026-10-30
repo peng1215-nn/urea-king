@@ -17,6 +17,27 @@
 }
 
 
+/* 组卡片是 <button>：去掉按钮默认样式，保持卡片外观 */
+button.group-card {
+    width: 100%;
+    border: none;
+    text-align: left;
+    font: inherit;
+}
+
+
+button.group-card:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+
+.group-card.is-loading {
+    opacity: 1;
+    background: rgba(92, 141, 255, 0.24);
+}
+
+
 .group-card:hover {
     background: rgba(92, 141, 255, 0.24);
 }
@@ -58,4 +79,25 @@
 
 .group-action-btn.secondary:hover {
     background: rgba(255, 255, 255, 0.14);
+}
+
+
+.group-select-footer {
+    display: flex;
+    justify-content: center;
+}
+
+.group-select-footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.group-select-footer a:hover {
+    color: white;
+    text-decoration: underline;
 }

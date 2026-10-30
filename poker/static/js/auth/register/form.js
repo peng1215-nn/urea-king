@@ -39,6 +39,7 @@ function validateRegisterForm(form) {
         showMessage(
             t("usernameRule"),
         );
+        authFocus("username");
 
         return false;
     }
@@ -47,6 +48,7 @@ function validateRegisterForm(form) {
         showMessage(
             t("nicknameRequired"),
         );
+        authFocus("nickname");
 
         return false;
     }
@@ -56,6 +58,7 @@ function validateRegisterForm(form) {
         showMessage(
             t("emailInvalid"),
         );
+        authFocus("email");
 
         return false;
     }
@@ -64,6 +67,7 @@ function validateRegisterForm(form) {
         showMessage(
             t("passwordTooShort"),
         );
+        authFocus("password");
 
         return false;
     }
@@ -76,6 +80,7 @@ function validateRegisterForm(form) {
         showMessage(
             t("passwordMismatch"),
         );
+        authFocus("confirm-password");
 
         return false;
     }

@@ -12,6 +12,8 @@ from poker.services.common.game_log import get_member_trend_service
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
 
+from poker.routes.user.guard import user_api_denied
+
 
 router = APIRouter()
 
@@ -43,8 +45,9 @@ def game_logs_page(request: Request):
 
 @router.get("/user/game-log/list")
 def get_game_logs(request: Request, page: int = 1, q: str = ""):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
     group_id = get_group_id(request)
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
@@ -54,8 +57,9 @@ def get_game_logs(request: Request, page: int = 1, q: str = ""):
 
 @router.get("/user/game-log/stats")
 def get_stats(request: Request):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
     group_id = get_group_id(request)
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
@@ -63,8 +67,9 @@ def get_stats(request: Request):
 
 @router.get("/user/game-log/member-stats")
 def get_member_stats(request: Request):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
     group_id = get_group_id(request)
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
@@ -73,8 +78,9 @@ def get_member_stats(request: Request):
 
 @router.get("/user/game-log/member-trend")
 def get_member_trend(request: Request, user_id: int):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
     group_id = get_group_id(request)
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}

@@ -137,6 +137,33 @@ body {
     background: rgba(255,100,100,0.22);
 }
 
+.btn-copy-invite {
+    min-height: 36px;
+    padding: 6px 14px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(92,141,255,0.16);
+    color: #7ea2ff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-copy-invite:hover {
+    background: rgba(92,141,255,0.28);
+}
+
+.btn-copy-invite.copied {
+    background: rgba(92,255,178,0.16);
+    color: #5cffb2;
+}
+
+.invite-code {
+    user-select: all;
+}
+
 .custom-modal {
     position: fixed;
     top: 0; left: 0;
@@ -216,6 +243,10 @@ body {
     }
     .btn-create-invite {
         white-space: nowrap;
+    }
+    .invite-card {
+        flex-wrap: wrap;
+        gap: 10px 12px;
     }
 }
 

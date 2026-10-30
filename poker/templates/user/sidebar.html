@@ -19,7 +19,7 @@
         <div class="menu-item {% if current_page == 'game' %}active{% endif %}"
              data-href="/user-game">
             <i class="fa-solid fa-chess-board"></i>
-            <span data-i18n="joinGame">加入牌局</span>
+            <span data-i18n="currentGame">当前牌局</span>
         </div>
 
         <div class="menu-item {% if current_page == 'game_logs' %}active{% endif %}"
@@ -37,6 +37,11 @@
              data-href="/user-change-password">
             <i class="fa-solid fa-lock"></i>
             <span data-i18n="changePassword">修改密码</span>
+        </div>
+
+        <div class="menu-item sidebar-language-toggle" data-on-click="toggleLanguage" role="button">
+            <i class="fa-solid fa-language"></i>
+            <span class="sidebar-language-label">English</span>
         </div>
 
         <div class="menu-item" data-on-click="logout">

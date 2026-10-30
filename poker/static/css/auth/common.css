@@ -13,7 +13,9 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     color: white;
-    overflow: hidden;
+    /* 内容比屏幕高时（横屏、小屏、键盘弹出）可以上下滚动 */
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 
@@ -58,7 +60,8 @@ select {
     outline: none;
     background: rgba(255, 255, 255, 0.92);
     color: #111;
-    font-size: 14px;
+    /* 不小于 16px，否则 iOS 聚焦输入框时会自动放大页面 */
+    font-size: 16px;
 }
 
 
@@ -122,12 +125,36 @@ select {
 }
 
 @media (max-width: 768px) {
-    body {
-        overflow: auto;
-    }
     .sidebar {
         display: none;
     }
+}
+
+
+/* 包住输入框的表单，沿用卡片的纵向排列和间距 */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: inherit;
+}
+
+
+/* 输入框下方常驻的规则说明 */
+.field-hint {
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+
+/* 提示框里附带的操作链接（如“重发验证邮件”） */
+.message-action-link {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 6px 0;
+    color: #9cc3ff;
+    text-decoration: underline;
+    font-weight: bold;
 }
 
 

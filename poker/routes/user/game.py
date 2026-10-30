@@ -11,6 +11,8 @@ from poker.services.user.game import update_chip_auth_service
 from poker.services.common.common import add_no_cache_headers
 from poker.template_config import templates
 
+from poker.routes.user.guard import user_api_denied
+
 
 router = APIRouter()
 
@@ -42,8 +44,9 @@ def user_game_page(request: Request):
 
 @router.get("/user/game/ongoing")
 def get_user_ongoing_games(request: Request):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
 
     group_id = get_group_id(request)
     user_id = get_user_id(request)
@@ -59,8 +62,9 @@ def get_user_ongoing_games(request: Request):
 
 @router.get("/user/game/chip-auth-settings")
 def get_chip_auth_settings(request: Request):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
     user_id = get_user_id(request)
     if not user_id:
         return {"success": False, "message": "notLoggedIn"}
@@ -73,8 +77,9 @@ def update_chip_auth(
     group_id: int = Form(...),
     allow: int = Form(...),
 ):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
     user_id = get_user_id(request)
     if not user_id:
         return {"success": False, "message": "notLoggedIn"}
@@ -91,8 +96,9 @@ def submit_buyin_request(
     game_id: int = Form(...),
     amount: int = Form(...),
 ):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
 
     group_id = get_group_id(request)
     user_id = get_user_id(request)

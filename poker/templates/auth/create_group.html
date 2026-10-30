@@ -28,19 +28,25 @@
         <span data-i18n="createGroupDesc2">成员加入需使用邀请码。</span>
     </p>
 
+    <form id="cg-form" class="auth-form" novalidate>
     <div class="form-group">
         <label for="group-name" data-i18n="groupNameLabel">组名</label>
-        <input type="text" id="group-name"
+        <input type="text" id="group-name" name="group-name"
+               autocomplete="off"
                placeholder="请输入组名（最多 50 字符）"
                data-i18n-placeholder="groupNamePlaceholder"
                maxlength="50">
     </div>
 
-    <div id="message-box"></div>
+    <div id="message-box" role="alert" aria-live="polite"></div>
 
-    <button class="register-button" id="cg-btn" data-i18n="createGroupBtn">
+    <button type="submit" class="register-button" id="cg-btn" data-i18n="createGroupBtn">
         创建组
     </button>
+    </form>
+
+    <a class="register-button register-link-button" id="cg-continue" href="/group-select"
+       data-i18n="continueBtn" hidden>进入</a>
 
     <div class="bottom-links" id="bottom-links">
         <a href="/group-select" data-i18n="backToGroupSelect">返回选组</a>
@@ -54,6 +60,7 @@
 <script src="/static/js/i18n/create_group.js?v={{ static_version }}"></script>
 <script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/common/auth_form.js?v={{ static_version }}"></script>
 <script src="/static/js/auth/create_group/create_group.js?v={{ static_version }}"></script>
 
 </body>

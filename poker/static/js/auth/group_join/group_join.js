@@ -1,4 +1,10 @@
+let groupJoinSubmitting = false;
+
 async function groupJoin() {
+    if (groupJoinSubmitting) {
+        return;
+    }
+
     const usernameEl = document.getElementById("username");
     const passwordEl = document.getElementById("password");
     const isLoggedIn = !usernameEl; // 已登录时账号密码字段不存在
@@ -11,6 +17,9 @@ async function groupJoin() {
     const messageBox =
         document.getElementById("message-box");
 
+    const button =
+        document.getElementById("group-join-button");
+
     messageBox.innerText = "";
     messageBox.style.color = "#ff7b7b";
 
@@ -20,10 +29,12 @@ async function groupJoin() {
 
         if (!username) {
             messageBox.innerText = t("groupJoinUsernameRequired");
+            authFocus("username");
             return;
         }
         if (!password) {
             messageBox.innerText = t("groupJoinPasswordRequired");
+            authFocus("password");
             return;
         }
     }
@@ -31,6 +42,7 @@ async function groupJoin() {
     if (!inviteCode) {
         messageBox.innerText =
             t("groupJoinInviteCodeRequired");
+        authFocus("invite-code");
 
         return;
     }
@@ -42,6 +54,11 @@ async function groupJoin() {
         formData.append("password", passwordEl.value);
     }
     formData.append("invite_code", inviteCode);
+
+    let redirecting = false;
+
+    groupJoinSubmitting = true;
+    authSetBusy(button, true);
 
     try {
         const response = await fetch(
@@ -56,18 +73,41 @@ async function groupJoin() {
             await response.json();
 
         if (!data.success) {
-            console.log(data);
+            // /group-join 登录失效时也能打开：服务端会清掉过期的登录，再按未登录处理，
+            // 所以这里收到“请输入用户名”也说明登录已过期
+            if (
+                isLoggedIn
+                && (authIsSessionExpired(data) || data.message === "groupJoinUsernameRequired")
+            ) {
+                redirecting = true;
+                authRedirectExpired();
+                return;
+            }
 
-            messageBox.innerText =
-                t(data.message || "groupJoinFailed");
+            const code = data.message || data.error_code || "groupJoinFailed";
+
+            messageBox.innerText = authMessage(code, data);
+
+            if (code === "groupJoinEmailNotVerified") {
+                const link = document.createElement("a");
+                link.className = "message-action-link";
+                link.href = "/register#resend";
+                link.textContent = t("resendVerifyLink");
+                messageBox.appendChild(document.createElement("br"));
+                messageBox.appendChild(link);
+            }
 
             return;
         }
 
         messageBox.style.color = "#5cffb2";
 
-        messageBox.innerText =
-            t("groupJoinSuccess");
+        messageBox.innerText = authFormat(
+            t(isLoggedIn ? "groupJoinSuccessLoggedIn" : "groupJoinSuccess"),
+            { group: data.group_name || "" }
+        );
+
+        redirecting = true;
 
         setTimeout(
             function () {
@@ -81,13 +121,14 @@ async function groupJoin() {
 
         messageBox.innerText =
             t("groupJoinFailed");
+
+    } finally {
+        if (!redirecting) {
+            groupJoinSubmitting = false;
+            authSetBusy(button, false);
+        }
     }
 }
 
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
-        applyLanguage();
-    }
-);
+authBindSubmit("group-join-form", groupJoin);

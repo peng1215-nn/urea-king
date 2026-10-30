@@ -1,4 +1,13 @@
+// 这些错误说明链接本身已失效，需要重新申请
+const RESET_LINK_ERRORS = ["resetTokenInvalid", "resetTokenUsed", "resetTokenExpired", "resetInvalidLink"];
+
+let resetSubmitting = false;
+
 async function resetPassword() {
+    if (resetSubmitting) {
+        return;
+    }
+
     const msgBox = document.getElementById("message-box");
     const btn = document.getElementById("rp-btn");
     const newPwd = document.getElementById("new-password").value;
@@ -9,11 +18,26 @@ async function resetPassword() {
     if (!RESET_TOKEN) {
         msgBox.textContent = t("resetInvalidLink");
         msgBox.style.color = "#e55";
+        showRequestNewLink();
         return;
     }
 
-    btn.disabled = true;
-    btn.textContent = t("resetting");
+    if (newPwd.length < 8) {
+        msgBox.textContent = t("resetPasswordTooShort");
+        msgBox.style.color = "#e55";
+        authFocus("new-password");
+        return;
+    }
+
+    if (newPwd !== confirmPwd) {
+        msgBox.textContent = t("resetPasswordMismatch");
+        msgBox.style.color = "#e55";
+        authFocus("confirm-password");
+        return;
+    }
+
+    resetSubmitting = true;
+    authSetBusy(btn, true, "resetting");
 
     try {
         const fd = new FormData();
@@ -29,17 +53,28 @@ async function resetPassword() {
             msgBox.style.color = "#5c5";
             document.getElementById("reset-form").style.display = "none";
         } else {
-            msgBox.textContent = t(data.error_code) || t("resetFailed");
+            msgBox.textContent = authMessage(data.error_code || "resetFailed", data);
             msgBox.style.color = "#e55";
-            btn.disabled = false;
-            btn.textContent = t("resetPasswordBtn");
+            if (RESET_LINK_ERRORS.includes(data.error_code)) {
+                showRequestNewLink();
+            }
         }
     } catch (e) {
         msgBox.textContent = t("requestFailed");
         msgBox.style.color = "#e55";
-        btn.disabled = false;
-        btn.textContent = t("resetPasswordBtn");
+    } finally {
+        resetSubmitting = false;
+        authSetBusy(btn, false);
     }
 }
 
-document.getElementById("rp-btn").addEventListener("click", resetPassword);
+
+function showRequestNewLink() {
+    const link = document.getElementById("request-new-link");
+    if (link) {
+        link.hidden = false;
+    }
+}
+
+
+authBindSubmit("reset-form", resetPassword);

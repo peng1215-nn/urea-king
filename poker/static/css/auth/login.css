@@ -1,5 +1,11 @@
+.page {
+    padding: 24px 16px;
+}
+
+
 .login-card {
     width: 380px;
+    max-width: 100%;
     padding: 36px;
     border-radius: 18px;
     background: rgba(10, 10, 18, 0.75);
@@ -107,4 +113,18 @@
     font-size: 12px;
     color: rgba(255, 255, 255, 0.45);
     text-align: center;
+}
+
+
+/* 登录过期等提示 */
+.notice-message {
+    background: rgba(255, 196, 92, 0.15);
+    color: #ffd27a;
+}
+
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: 28px 20px;
+    }
 }

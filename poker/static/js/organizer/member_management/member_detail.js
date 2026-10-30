@@ -11,7 +11,7 @@ function selectMember(member, rowElement) {
 
     setDetailText("detail-username",   member.username   || "--");
     setDetailText("detail-nickname",   member.nickname   || "--");
-    setDetailText("detail-role",       member.role       || "--");
+    setDetailText("detail-role",       memberRoleLabel(member.role));
     setDetailText("detail-group",      member.group_name || "--");
     setDetailText("detail-created-at", member.created_at || "--");
     setDetailText(
@@ -55,6 +55,7 @@ function refreshSelectedMemberLanguage() {
         "detail-status",
         isActive ? t("accountEnabled") : t("accountDisabled")
     );
+    setDetailText("detail-role", memberRoleLabel(selectedMember.role));
 
     updateRemoveMemberPanel(selectedMember);
 }

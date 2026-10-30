@@ -34,7 +34,11 @@
 
         <div id="group-list" class="group-list" data-server-groups="{{ server_groups | e }}"></div>
 
-        <div id="message-box" class="message-box"></div>
+        <div id="message-box" class="message-box" role="alert" aria-live="polite"></div>
+
+        <div class="group-select-footer">
+            <a href="/logout" data-i18n="logout">退出登录</a>
+        </div>
 
     </div>
 
@@ -46,6 +50,7 @@
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/group_select.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/common/auth_form.js?v={{ static_version }}"></script>
 <script src="/static/js/auth/group_select/group_select.js?v={{ static_version }}"></script>
 
 </body>

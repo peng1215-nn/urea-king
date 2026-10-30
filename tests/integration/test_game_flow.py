@@ -579,3 +579,110 @@ def test_exit_cannot_be_recorded_twice(table):
     assert _svc().exit_player_from_game_service(game_id, t["group"], alice, 80)["message"] == "playerNotInGame"
     assert _svc().remove_player_from_game_service(game_id, t["group"], alice)["message"] == "playerNotInGame"
     assert _player(game_id, alice).left_cash_out == 80
+
+
+# ───────────────────────── 牌局管理页需要的展示字段 ─────────────────────────
+
+def _set_alias(group_id, user_id, alias):
+    from database import SessionLocal
+    from poker.models import GroupMemberAlias
+
+    db = SessionLocal()
+    try:
+        db.add(GroupMemberAlias(group_id=group_id, user_id=user_id, alias=alias))
+        db.commit()
+    finally:
+        db.close()
+
+
+def test_start_game_lists_every_player_already_in_another_game(table):
+    t = table
+    alice, bob, carol = t["members"]
+    _set_alias(t["group"], bob, "老王")
+    _start(t, players=[t["org"], alice, bob])
+
+    result = _svc().start_game_service(t["group"], t["org"], "二号桌", [t["org"], alice, bob, carol])
+    assert result["success"] is False
+    assert result["message"] == "playerAlreadyInAnotherGame"
+    assert result["player_ids"] == [alice, bob]
+    assert result["player_names"] == ["alice001", "bobby001（老王）"]
+
+
+def test_add_player_names_the_player_already_in_another_game(table):
+    t = table
+    alice, bob, _ = t["members"]
+    _start(t, players=[t["org"], alice])
+    second = _start(t, players=[t["org"], bob], name="二号桌")
+
+    result = _svc().add_player_to_game_service(second, t["group"], alice, t["org"])
+    assert result["message"] == "playerAlreadyInAnotherGame"
+    assert result["player_names"] == ["alice001"]
+
+
+def test_members_for_game_include_alias_and_ongoing_games(table):
+    t = table
+    alice, bob, _ = t["members"]
+    _set_alias(t["group"], alice, "小A")
+    game_id = _start(t, players=[t["org"], alice, bob])
+    assert _svc().remove_player_from_game_service(game_id, t["group"], bob)["success"] is True
+
+    members = {m["user_id"]: m for m in _svc().get_group_members_for_game_service(t["group"])["members"]}
+    assert members[alice]["alias"] == "小A"
+    assert members[alice]["ongoing_game_ids"] == [game_id]
+    assert members[t["org"]]["ongoing_game_ids"] == [game_id]
+    # 暂离的人不算"在牌局中"，可以去别的局
+    assert members[bob]["ongoing_game_ids"] == []
+
+
+def test_ongoing_games_show_alias_and_how_each_player_left(table):
+    t = table
+    alice, bob, carol = t["members"]
+    _set_alias(t["group"], alice, "小A")
+    game_id = _start(t)
+    req = _request_buyin(game_id, t["group"], alice, 100)
+    assert _svc().remove_player_from_game_service(game_id, t["group"], bob)["success"] is True
+    assert _svc().exit_player_from_game_service(game_id, t["group"], carol, 0)["success"] is True
+    # carol 结算离场后回来又暂离：以最近一次为准
+    assert _svc().add_player_to_game_service(game_id, t["group"], carol, t["org"])["success"] is True
+    assert _svc().remove_player_from_game_service(game_id, t["group"], carol)["success"] is True
+
+    game = _svc().get_ongoing_games_service(t["group"])["games"][0]
+    players = {p["user_id"]: p for p in game["players"]}
+    assert players[alice]["alias"] == "小A"
+    assert players[alice]["leave_type"] is None
+    assert players[bob]["leave_type"] == "away"
+    assert players[carol]["leave_type"] == "away"
+    assert [(r["id"], r["alias"]) for r in game["requests"]] == [(req, "小A")]
+
+
+def test_exited_player_is_marked_as_cashed_out(table):
+    t = table
+    alice = t["members"][0]
+    game_id = _start(t)
+    assert _svc().exit_player_from_game_service(game_id, t["group"], alice, 30)["success"] is True
+
+    game = _svc().get_ongoing_games_service(t["group"])["games"][0]
+    player = next(p for p in game["players"] if p["user_id"] == alice)
+    assert player["leave_type"] == "exit"
+    assert player["left_cash_out"] == 30
+
+
+def test_forced_finish_reports_unbalanced(table):
+    t = table
+    alice = t["members"][0]
+    game_id = _start(t)
+    req = _request_buyin(game_id, t["group"], alice, 100)
+    assert _svc().approve_chip_request_service(req, game_id, t["group"], t["org"])["success"] is True
+
+    cash_outs = {uid: 0 for uid in [t["org"], *t["members"]]}
+    cash_outs[alice] = 80
+    failed = _finish(t, game_id, cash_outs)
+    assert failed["message"] == "balanceCheckFailed"
+    assert failed["diff"] == -20
+
+    result = _finish(t, game_id, cash_outs, force=True)
+    assert result["success"] is True
+    assert result["is_balanced"] == 0
+    assert result["game"]["total_buy_in"] == 100
+    assert result["game"]["total_cash_out"] == 80
+    assert all("alias" in p for p in result["players"])

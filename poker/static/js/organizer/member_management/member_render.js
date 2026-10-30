@@ -1,6 +1,13 @@
 // 渲染时把成员对象存在这里，行上只放下标，避免把 JSON 拼进 onclick 属性导致注入
 let renderedMembers = [];
 
+// 身份显示为当前语言的文字（organizer → 局头 / Organizer，user → 用户 / User）
+function memberRoleLabel(role) {
+    if (role === "organizer") return t("organizer");
+    if (role === "user") return t("roleUser");
+    return role || "--";
+}
+
 function renderMembers(members) {
     const tableBody = document.getElementById("user-table-body");
 
@@ -14,7 +21,7 @@ function renderMembers(members) {
 
         const username = member.username || "--";
         const nickname = member.nickname || "--";
-        const role     = member.role     || "--";
+        const role     = memberRoleLabel(member.role);
 
         const roleClass =
             member.role === "organizer" ? "organizer" : "";
@@ -88,4 +95,23 @@ function getMemberMatchedClass(member, fieldName) {
 // 点击成员表格的一行（由 actions.js 调用）
 function selectMemberRow(row) {
     selectMember(renderedMembers[Number(row.dataset.memberIndex)], row);
+
+    // 手机上详情和操作区在表格下方，选中后自动滚过去
+    if (window.matchMedia && window.matchMedia("(max-width: 768px)").matches) {
+        const detail = document.querySelector(".detail-panel");
+        if (detail) detail.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
 }
+
+
+// 切换语言后重新渲染表格（身份等文字），并保留当前选中行
+document.addEventListener("languageChanged", function () {
+    if (!Array.isArray(renderedMembers) || renderedMembers.length === 0) return;
+    renderMembers(renderedMembers);
+    if (typeof selectedMember !== "undefined" && selectedMember) {
+        const index = renderedMembers.findIndex(m => m.id === selectedMember.id);
+        const row = document.querySelector(`#user-table-body tr[data-member-index="${index}"]`);
+        if (row) row.classList.add("active");
+        refreshSelectedMemberLanguage();
+    }
+});

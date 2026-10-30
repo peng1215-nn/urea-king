@@ -8,6 +8,8 @@
 
     <link rel="stylesheet" href="/static/css/auth/common.css?v={{ static_version }}">
     <link rel="stylesheet" href="/static/css/auth/register.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/common/language_base.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/auth/language.css?v={{ static_version }}">
 
 </head>
 
@@ -26,15 +28,27 @@
             <p class="login-poker-sub">POKER</p>
         </div>
 
+        {% include "common/language_switcher.html" %}
+
+        <form id="register-form" class="auth-form" novalidate>
+
         <div class="form-group">
             <label for="username" data-i18n="username">用户名</label>
 
             <input
                 type="text"
                 id="username"
+                name="username"
+                maxlength="50"
+                autocomplete="username"
+                autocapitalize="off"
+                autocorrect="off"
+                spellcheck="false"
+                aria-describedby="username-hint"
                 placeholder="请输入用户名"
                 data-i18n-placeholder="enterUsername"
             >
+            <p id="username-hint" class="field-hint" data-i18n="usernameRule">用户名以英文字母开头，5–50 位，只能包含英文字母、数字和下划线（区分大小写）。</p>
         </div>
 
         <div class="form-group">
@@ -43,6 +57,8 @@
             <input
                 type="text"
                 id="nickname"
+                name="nickname"
+                autocomplete="nickname"
                 placeholder="请输入昵称"
                 data-i18n-placeholder="enterNickname"
             >
@@ -54,9 +70,13 @@
             <input
                 type="password"
                 id="password"
+                name="password"
+                autocomplete="new-password"
+                aria-describedby="password-hint"
                 placeholder="请输入密码"
                 data-i18n-placeholder="enterPassword"
             >
+            <p id="password-hint" class="field-hint" data-i18n="passwordHint">密码至少 8 位（最多 72 个英文字符或 24 个汉字），不能是重复、连续的字符或常见密码。</p>
         </div>
 
         <div class="form-group">
@@ -70,6 +90,8 @@
             <input
                 type="password"
                 id="confirm-password"
+                name="confirm-password"
+                autocomplete="new-password"
                 placeholder="请再次输入密码"
                 data-i18n-placeholder="reEnterPassword"
             >
@@ -81,20 +103,27 @@
             <input
                 type="email"
                 id="email"
+                name="email"
+                autocomplete="email"
+                autocapitalize="off"
+                spellcheck="false"
                 placeholder="请输入邮箱地址"
                 data-i18n-placeholder="enterEmail"
             >
         </div>
 
-        <div id="message-box"></div>
+        <div id="message-box" role="alert" aria-live="polite"></div>
 
         <button
+            type="submit"
+            id="register-button"
             class="register-button"
-            data-on-click="register"
             data-i18n="registerAccount"
         >
             注册账号
         </button>
+
+        </form>
 
         <div class="bottom-links">
             <a href="/login" data-i18n="backToLogin">返回登录</a>
@@ -110,6 +139,7 @@
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/register.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/common/auth_form.js?v={{ static_version }}"></script>
 <script src="/static/js/auth/register/message.js?v={{ static_version }}"></script>
 <script src="/static/js/auth/register/form.js?v={{ static_version }}"></script>
 <script src="/static/js/auth/register/redirect.js?v={{ static_version }}"></script>

@@ -3,6 +3,7 @@ from database import SessionLocal
 from poker.models import ChipRequest
 from poker.models import GameEvent
 from poker.models import Group
+from poker.models import GroupMemberAlias
 from poker.models import PokerGame
 from poker.models import PokerGamePlayer
 from poker.models import User
@@ -53,6 +54,32 @@ def _reject_pending_requests(db, game_id, user_id=None):
         )
 
 
+def _get_aliases(db, group_id):
+    """本组成员的备注名 {user_id: alias}（成员管理里设置）。"""
+    rows = db.query(GroupMemberAlias).filter(GroupMemberAlias.group_id == group_id).all()
+    return {r.user_id: r.alias for r in rows}
+
+
+def _display_name(nickname, alias):
+    """和牌局日志一致的显示名："昵称（备注）"。"""
+    return f"{nickname}（{alias}）" if alias else nickname
+
+
+def _last_leave_types(db, game_id):
+    """
+    每个玩家最近一次离开是"暂离"还是"结算离场"：{user_id: "away" | "exit"}。
+    以操作记录为准（同一玩家可能结算离场、回来、再暂离）。
+    """
+    events = db.query(GameEvent.target_user_id, GameEvent.event_type).filter(
+        GameEvent.game_id == game_id,
+        GameEvent.event_type.in_(("player_removed", "player_exited")),
+    ).order_by(GameEvent.id.asc()).all()
+    result = {}
+    for user_id, event_type in events:
+        result[user_id] = "exit" if event_type == "player_exited" else "away"
+    return result
+
+
 def _add_to_buy_in(db, player_id, amount):
     """在数据库里直接累加，不经过“读出来、加好、写回去”。"""
     db.query(PokerGamePlayer).filter(PokerGamePlayer.id == player_id).update(
@@ -72,8 +99,11 @@ def get_ongoing_games_service(group_id: int):
         if not games:
             return {"success": True, "games": []}
 
+        aliases = _get_aliases(db, group_id)
+
         result = []
         for game in games:
+            leave_types = _last_leave_types(db, game.id)
             players = db.query(PokerGamePlayer, User).join(
                 User, PokerGamePlayer.user_id == User.id
             ).filter(PokerGamePlayer.game_id == game.id).all()
@@ -101,12 +131,26 @@ def get_ongoing_games_service(group_id: int):
                     pd["buy_in_insurance"] = breakdown["insurance"]
                     pd["buy_in_anti"] = breakdown["anti"]
                 pd["allow_organizer_chip_op"] = auth_map.get(u.id, 0)
+                pd["alias"] = aliases.get(u.id, "")
+                # 不在桌上的玩家：区分"暂离"（筹码还在手上）和"已结算离场"
+                if p.is_active != 1:
+                    pd["leave_type"] = leave_types.get(
+                        u.id, "exit" if (p.left_cash_out or 0) > 0 else "away"
+                    )
+                else:
+                    pd["leave_type"] = None
                 players_data.append(pd)
+
+            requests_data = []
+            for r, u in requests:
+                rd = _format_request(r, u)
+                rd["alias"] = aliases.get(r.user_id, "")
+                requests_data.append(rd)
 
             result.append({
                 **_format_game(game),
                 "players": players_data,
-                "requests": [_format_request(r, u) for r, u in requests],
+                "requests": requests_data,
             })
 
         return {"success": True, "games": result}
@@ -123,13 +167,30 @@ def get_group_members_for_game_service(group_id: int):
             User, UserGroupRole.user_id == User.id
         ).filter(UserGroupRole.group_id == group_id).all()
 
+        aliases = _get_aliases(db, group_id)
+
+        # 每个成员当前在本组哪些进行中的牌局里（仍在桌上），前端据此把
+        # "在其他牌局中"的成员置灰，不用等提交后才报错
+        active_rows = db.query(PokerGamePlayer.user_id, PokerGamePlayer.game_id).join(
+            PokerGame, PokerGamePlayer.game_id == PokerGame.id
+        ).filter(
+            PokerGame.group_id == group_id,
+            PokerGame.status == "ongoing",
+            PokerGamePlayer.is_active == 1,
+        ).all()
+        ongoing_by_user = {}
+        for uid, gid in active_rows:
+            ongoing_by_user.setdefault(uid, []).append(gid)
+
         members = [
             {
                 "user_id": user.id,
                 "username": user.username,
                 "nickname": user.nickname,
+                "alias": aliases.get(user.id, ""),
                 "role": ugr.role,
                 "avatar_url": user.avatar_url,
+                "ongoing_game_ids": ongoing_by_user.get(user.id, []),
             }
             for ugr, user in rows
         ]
@@ -166,10 +227,11 @@ def start_game_service(group_id: int, organizer_id: int, name: str, preselected_
         if len(preselected_user_ids) > MAX_PLAYERS:
             return {"success": False, "message": "tooManyPlayers"}
 
-        # 非局头用户不能同时在两个局里
+        # 非局头用户不能同时在两个局里；把冲突的人一次全列出来
         ongoing_game_ids = [g.id for g in ongoing_games]
+        conflict_ids = []
         for uid in preselected_user_ids:
-            if uid == organizer_id:
+            if uid == organizer_id or uid in conflict_ids:
                 continue
             already_in = db.query(PokerGamePlayer).filter(
                 PokerGamePlayer.game_id.in_(ongoing_game_ids),
@@ -177,9 +239,20 @@ def start_game_service(group_id: int, organizer_id: int, name: str, preselected_
                 PokerGamePlayer.is_active == 1,
             ).first()
             if already_in:
+                conflict_ids.append(uid)
+        if conflict_ids:
+            aliases = _get_aliases(db, group_id)
+            names = []
+            for uid in conflict_ids:
                 user = db.query(User).filter(User.id == uid).first()
-                name_str = user.nickname or user.username if user else str(uid)
-                return {"success": False, "message": f"playerAlreadyInGame:{name_str}"}
+                nickname = (user.nickname or user.username) if user else str(uid)
+                names.append(_display_name(nickname, aliases.get(uid, "")))
+            return {
+                "success": False,
+                "message": "playerAlreadyInAnotherGame",
+                "player_ids": conflict_ids,
+                "player_names": names,
+            }
 
         game = PokerGame(
             group_id=group_id,
@@ -270,7 +343,15 @@ def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organi
                     PokerGamePlayer.is_active == 1,
                 ).first()
                 if already_in:
-                    return {"success": False, "message": "playerAlreadyInAnotherGame"}
+                    user = db.query(User).filter(User.id == user_id).first()
+                    nickname = (user.nickname or user.username) if user else str(user_id)
+                    alias = _get_aliases(db, group_id).get(user_id, "")
+                    return {
+                        "success": False,
+                        "message": "playerAlreadyInAnotherGame",
+                        "player_ids": [user_id],
+                        "player_names": [_display_name(nickname, alias)],
+                    }
 
         active_count = db.query(PokerGamePlayer).filter(
             PokerGamePlayer.game_id == game_id,
@@ -701,9 +782,11 @@ def finish_game_service(
             User, PokerGamePlayer.user_id == User.id
         ).filter(PokerGamePlayer.game_id == game_id).all()
 
+        aliases = _get_aliases(db, group_id)
         players_data = []
         for p, u in players_refreshed:
             pd = _format_player(p, u)
+            pd["alias"] = aliases.get(u.id, "")
             if u.id == organizer_id:
                 breakdown = _get_buyin_breakdown(db, game_id, u.id)
                 pd["buy_in_normal"] = breakdown["normal"]

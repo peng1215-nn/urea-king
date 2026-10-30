@@ -81,9 +81,42 @@
         return wrap;
     }
 
+    // 导出需要几秒（尤其在手机上）：期间按钮显示“导出中…”并禁用，防止连点导出多张
+    let exporting = false;
+
+    function exportingText() {
+        const text = t("exporting");
+        if (text && text !== "exporting") return text;
+        return (typeof getCurrentLanguage === "function" && getCurrentLanguage() === "en") ? "Exporting…" : "导出中…";
+    }
+
+    function exportButtons(gameId) {
+        return Array.from(document.querySelectorAll('[data-on-click="exportGameCard"]'))
+            .filter(btn => {
+                try { return JSON.parse(btn.getAttribute("data-args") || "[]")[0] == gameId; } catch (e) { return false; }
+            });
+    }
+
+    function setExporting(gameId, busy) {
+        exportButtons(gameId).forEach(btn => {
+            if (busy) {
+                btn.dataset.originalText = btn.innerText;
+                btn.innerText = exportingText();
+            } else if (btn.dataset.originalText !== undefined) {
+                btn.innerText = btn.dataset.originalText;
+                delete btn.dataset.originalText;
+            }
+            btn.disabled = busy;
+            btn.setAttribute("aria-busy", busy ? "true" : "false");
+        });
+    }
+
     window.exportGameImage = async function (game) {
+        if (exporting) return;
         if (!game) { alert(t("operationFailed")); return; }
         if (typeof html2canvas !== "function") { alert(t("operationFailed")); return; }
+        exporting = true;
+        setExporting(game.id, true);
         const wrap = buildCard(game);
         document.body.appendChild(wrap);
         try {
@@ -105,6 +138,8 @@
             alert(t("operationFailed"));
         } finally {
             document.body.removeChild(wrap);
+            exporting = false;
+            setExporting(game.id, false);
         }
     };
 })();

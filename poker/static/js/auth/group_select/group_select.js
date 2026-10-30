@@ -1,6 +1,30 @@
 window.addEventListener("pageshow", function () {
+    groupSelecting = false;
     renderGroups();
 });
+
+
+// 切换语言时重新渲染（身份等文字由脚本生成）
+document.addEventListener("languageChanged", function () {
+    if (!groupSelecting) {
+        renderGroups();
+    }
+});
+
+
+let groupSelecting = false;
+
+const ROLE_LABEL_KEYS = {
+    admin: "roleAdmin",
+    organizer: "roleOrganizer",
+    user: "roleUser",
+};
+
+
+function roleLabel(role) {
+    const key = ROLE_LABEL_KEYS[role];
+    return key ? t(key) : (role || "");
+}
 
 
 function renderGroups() {
@@ -51,21 +75,23 @@ function renderGroups() {
     groupList.innerHTML = "";
 
     groups.forEach(group => {
+        // 用 <button>：键盘可以 Tab 选中、回车 / 空格进入
         const card =
-            document.createElement("div");
+            document.createElement("button");
 
+        card.type = "button";
         card.className = "group-card";
 
-        card.onclick = function () {
-            selectGroup(group.group_id);
-        };
+        card.addEventListener("click", function () {
+            selectGroup(group.group_id, card);
+        });
 
         card.innerHTML = `
             <div class="group-name">
                 ${escapeHtml(group.group_code)} - ${escapeHtml(group.group_name || "")}
             </div>
 
-            <div class="group-role">${t("role")}：${escapeHtml(group.role)}
+            <div class="group-role">${escapeHtml(t("role"))}：${escapeHtml(roleLabel(group.role))}
             </div>
         `;
 
@@ -94,7 +120,36 @@ function renderGroups() {
 }
 
 
-async function selectGroup(groupId) {
+function setGroupSelecting(card, busy) {
+    groupSelecting = busy;
+
+    document
+        .querySelectorAll("#group-list button")
+        .forEach(button => {
+            button.disabled = busy;
+        });
+
+    if (!card) {
+        return;
+    }
+
+    card.classList.toggle("is-loading", busy);
+    card.setAttribute("aria-busy", busy ? "true" : "false");
+
+    const roleLine = card.querySelector(".group-role");
+    if (roleLine && busy) {
+        roleLine.textContent = t("groupSelecting");
+    }
+}
+
+
+async function selectGroup(groupId, card) {
+    if (groupSelecting) {
+        return;
+    }
+
+    setGroupSelecting(card, true);
+
     const formData =
         new FormData();
 
@@ -116,6 +171,14 @@ async function selectGroup(groupId) {
             await response.json();
 
         if (!data.success) {
+            if (authIsSessionExpired(data)) {
+                authRedirectExpired();
+                return;
+            }
+
+            renderGroups();
+            groupSelecting = false;
+
             showMessage(
                 t(
                     data.error_code ||
@@ -138,6 +201,9 @@ async function selectGroup(groupId) {
 
     } catch (error) {
         console.error(error);
+
+        renderGroups();
+        groupSelecting = false;
 
         showMessage(
             t("groupSelectFailed")

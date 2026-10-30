@@ -299,3 +299,64 @@ def test_reset_password_with_invalid_tokens_is_rate_limited(client):
     response = client.post("/reset-password", data=form)
     assert response.status_code == 429
     assert response.json()["error_code"] == "forgotPasswordTooManyAttempts"
+
+
+def test_home_shows_login_page_when_logged_out(client):
+    response = client.get("/", follow_redirects=False)
+    assert response.status_code == 200
+    assert 'id="login-form"' in response.text
+
+
+def test_home_redirects_logged_in_users(client, factory, login_as):
+    user_id = factory.user("homeuser1")
+    group_id = factory.group("G1")
+    factory.role(user_id, group_id, "user")
+
+    # 登录了但还没选组：去选组
+    assert client.post("/login", data={"username": "homeuser1", "password": DEFAULT_PASSWORD}).json()["success"]
+    response = client.get("/", follow_redirects=False)
+    assert response.status_code == 302
+    assert response.headers["location"] == "/group-select"
+
+    # 选过组：直接回到该身份的首页
+    login_as("homeuser1", group_id)
+    response = client.get("/", follow_redirects=False)
+    assert response.status_code == 302
+    assert response.headers["location"] == "/user-dashboard"
+
+
+def test_reset_password_page_checks_token_without_using_it(client, factory):
+    from datetime import timedelta
+
+    from core.time import now_columbus_naive
+    from database import SessionLocal
+    from poker.models import EmailVerification
+
+    user_id = factory.user("rpage0001")
+    db = SessionLocal()
+    try:
+        now = now_columbus_naive()
+        db.add(EmailVerification(
+            user_id=user_id, token="page-valid", purpose="reset_password",
+            expires_at=now + timedelta(minutes=15), used=0,
+        ))
+        db.add(EmailVerification(
+            user_id=user_id, token="page-expired", purpose="reset_password",
+            expires_at=now - timedelta(minutes=1), used=0,
+        ))
+        db.commit()
+    finally:
+        db.close()
+
+    expired = client.get("/reset-password", params={"token": "page-expired"}).text
+    assert 'data-i18n="resetTokenExpired"' in expired
+    assert 'href="/forgot-password"' in expired
+    assert 'id="reset-form"' not in expired
+
+    assert 'data-i18n="resetTokenInvalid"' in client.get("/reset-password", params={"token": "nope"}).text
+
+    # 打开页面只是检查，不会消耗链接
+    valid = client.get("/reset-password", params={"token": "page-valid"}).text
+    assert 'id="reset-form"' in valid
+    form = {"token": "page-valid", "new_password": "newpass123", "confirm_password": "newpass123"}
+    assert client.post("/reset-password", data=form).json()["success"] is True

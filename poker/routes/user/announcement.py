@@ -5,16 +5,15 @@ from fastapi import Request
 
 from poker.services.common.announcement import get_announcements_service
 
+from poker.routes.user.guard import user_api_denied
+
 
 router = APIRouter()
 
 
-def require_user(request: Request):
-    return request.session.get("current_role") == "user"
-
-
 @router.get("/user/announcements")
 def get_announcements(request: Request):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
     return get_announcements_service()

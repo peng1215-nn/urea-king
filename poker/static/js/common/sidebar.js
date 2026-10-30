@@ -120,14 +120,26 @@ function closeSidebar() {
     overlay.classList.remove("active");
 }
 
-// Close sidebar on navigation (menu item click)
+// Close sidebar on navigation (menu item click)；切换语言时不收起，方便看到切换结果
 document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".menu-item").forEach(function (item) {
+    document.querySelectorAll(".menu-item:not(.sidebar-language-toggle)").forEach(function (item) {
         item.addEventListener("click", function () {
             closeSidebar();
         });
     });
 });
+
+// 侧边栏语言切换按钮的文字：显示“要切换到的语言”（和登录页、控制台的按钮一致）
+function updateSidebarLanguageLabel() {
+    var lang = typeof getCurrentLanguage === "function" ? getCurrentLanguage() : "zh";
+    document.querySelectorAll(".sidebar-language-label").forEach(function (label) {
+        label.innerText = lang === "zh" ? "English" : "中文";
+        label.setAttribute("lang", lang === "zh" ? "en" : "zh");
+    });
+}
+
+document.addEventListener("languageChanged", updateSidebarLanguageLabel);
+document.addEventListener("DOMContentLoaded", updateSidebarLanguageLabel);
 
 // Mobile topbar: inject row-break div between upload-button and avatar
 // so first row = language + upload-avatar, second row = avatar + role-tag
@@ -151,11 +163,11 @@ document.addEventListener("DOMContentLoaded", function () {
 })();
 
 
-// 无障碍：侧边栏菜单项是带 onclick 的 div，补上键盘可达（Tab 聚焦、Enter / 空格触发）
+// 无障碍：侧边栏菜单项是带 data-href / data-on-click 的 div，补上键盘可达（Tab 聚焦、Enter / 空格触发）
 // 和读屏语义；弹窗标记为 dialog；没有 alt 的图片补空 alt。
 (function enhanceAccessibility() {
     function run() {
-        document.querySelectorAll(".menu-item[onclick]").forEach(item => {
+        document.querySelectorAll("div.menu-item[data-href], div.menu-item[data-on-click]").forEach(item => {
             if (item.dataset.a11yReady) {
                 return;
             }

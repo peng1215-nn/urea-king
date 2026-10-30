@@ -17,7 +17,8 @@ window.createGroupTranslations = {
         createGroupAlreadyOwner: "您已创建过一个组，每个账号只能创建一个组。",
         createGroupFailed: "创建失败，请稍后重试。",
         createGroupSuccess: "创建成功！",
-        createGroupSuccessMsg: "组「{name}」创建成功！组代码：{code}",
+        createGroupSuccessMsg: "组「{name}」创建成功！下一步：点“进入”后选择这个组，在局头后台生成邀请码，发给朋友即可加入。",
+        continueBtn: "进入",
         requestFailed: "请求失败，请稍后重试。",
     },
     en: {
@@ -38,7 +39,8 @@ window.createGroupTranslations = {
         createGroupAlreadyOwner: "You have already created a group. Each account can only create one group.",
         createGroupFailed: "Creation failed. Please try again later.",
         createGroupSuccess: "Group created!",
-        createGroupSuccessMsg: "Group \"{name}\" created! Group code: {code}",
+        createGroupSuccessMsg: "Group \"{name}\" created! Next: tap Continue, select this group, then generate invite codes in the organizer dashboard and send them to your friends so they can join.",
+        continueBtn: "Continue",
         requestFailed: "Request failed. Please try again later.",
     }
 };

@@ -4,7 +4,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="pageTitle">UREAKING-POKER</title>
+    <title data-i18n="groupJoinPageTitle">UREAKING-POKER</title>
 
     <link rel="stylesheet" href="/static/css/auth/common.css?v={{ static_version }}">
     <link rel="stylesheet" href="/static/css/auth/group_join.css?v={{ static_version }}">
@@ -28,12 +28,24 @@
             <p class="login-poker-sub">POKER</p>
         </div>
 
+        <div class="group-join-heading">
+            <h2 data-i18n="groupJoinTitle">加入组</h2>
+            <p data-i18n="groupJoinDesc">已有账号可通过邀请码加入新的组。</p>
+        </div>
+
+        <form id="group-join-form" class="auth-form" novalidate>
+
         {% if not is_logged_in %}
         <div class="form-group">
             <label for="username" data-i18n="username">用户名</label>
             <input
                 type="text"
                 id="username"
+                name="username"
+                autocomplete="username"
+                autocapitalize="off"
+                autocorrect="off"
+                spellcheck="false"
                 placeholder="请输入用户名"
                 data-i18n-placeholder="enterUsername"
             >
@@ -44,6 +56,8 @@
             <input
                 type="password"
                 id="password"
+                name="password"
+                autocomplete="current-password"
                 placeholder="请输入密码"
                 data-i18n-placeholder="enterPassword"
             >
@@ -56,20 +70,28 @@
             <input
                 type="text"
                 id="invite-code"
+                name="invite-code"
+                autocomplete="off"
+                autocapitalize="characters"
+                autocorrect="off"
+                spellcheck="false"
                 placeholder="请输入邀请码"
                 data-i18n-placeholder="enterInviteCode"
             >
         </div>
 
-        <div id="message-box"></div>
+        <div id="message-box" role="alert" aria-live="polite"></div>
 
         <button
+            type="submit"
+            id="group-join-button"
             class="group-join-button"
-            data-on-click="groupJoin"
             data-i18n="groupJoinSubmit"
         >
             加入组
         </button>
+
+        </form>
 
         <div class="bottom-links">
             {% if is_logged_in %}
@@ -93,6 +115,7 @@
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/login.js?v={{ static_version }}"></script>
 <script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/common/auth_form.js?v={{ static_version }}"></script>
 <script src="/static/js/auth/group_join/group_join.js?v={{ static_version }}"></script>
 
 </body>

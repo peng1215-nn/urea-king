@@ -10,6 +10,7 @@ body::before {
 
 .register-card {
     width: 420px;
+    max-width: 100%;
     max-height: 88vh;
     padding: 38px;
     border-radius: 18px;
@@ -84,9 +85,10 @@ input {
 .bottom-links {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 16px;
+    gap: 0 16px;
     margin-top: 16px;
     font-size: 13px;
 }
@@ -103,6 +105,10 @@ input {
     color: rgba(255, 255, 255, 0.78);
     text-decoration: none;
     cursor: pointer;
+    /* 手机上便于点按：至少 44px 高 */
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
 }
 
 
@@ -124,4 +130,100 @@ input {
 
 .platform-hint a:hover {
     color: white;
+}
+
+
+.bottom-links a[hidden] {
+    display: none;
+}
+
+
+/* 用链接做的主按钮（如“重新申请重置邮件”） */
+.register-link-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+
+.register-link-button[hidden] {
+    display: none;
+}
+
+
+.register-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* 重发验证邮件 / 修改注册邮箱面板 */
+.register-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background: #111;
+    scroll-margin: 16px;
+}
+
+.register-panel[hidden] {
+    display: none;
+}
+
+.register-panel-title {
+    color: #aaa;
+    font-size: 13px;
+}
+
+.register-panel input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 16px;
+}
+
+.register-panel-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.register-panel-actions button {
+    flex: 1;
+    min-height: 44px;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.register-panel-submit {
+    border: none;
+    background: #fff;
+    color: #111;
+    font-weight: bold;
+}
+
+.register-panel-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.register-panel-cancel {
+    border: 1px solid #444;
+    background: transparent;
+    color: #aaa;
+}
+
+.register-panel-msg {
+    font-size: 13px;
+    min-height: 18px;
 }

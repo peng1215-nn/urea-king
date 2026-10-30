@@ -85,6 +85,49 @@ def forgot_password_service(email: str, background_tasks=None):
         db.close()
 
 
+def check_reset_token_service(token: str):
+    """
+    打开重置页面时只读检查链接是否还能用（不消耗链接），让用户在填表之前就知道链接已失效。
+    返回 None 表示可用，否则返回错误码；判断规则和 reset_password_service 一致。
+    """
+    if not token:
+        return "resetInvalidLink"
+
+    db = SessionLocal()
+    try:
+        record = (
+            db.query(EmailVerification)
+            .filter(
+                EmailVerification.token == token,
+                EmailVerification.purpose == "reset_password",
+            )
+            .first()
+        )
+
+        if not record:
+            return "resetTokenInvalid"
+
+        if record.used:
+            return "resetTokenUsed"
+
+        if record.expires_at < now_columbus_naive():
+            return "resetTokenExpired"
+
+        user = db.query(User).filter(User.id == record.user_id).first()
+        if not user or user.is_active == 0 or user.deleted_at is not None:
+            return "resetTokenInvalid"
+
+        return None
+
+    except Exception as e:
+        safe_error(e)
+        # 查询出错时不拦截，提交时会再检查一次
+        return None
+
+    finally:
+        db.close()
+
+
 def reset_password_service(token: str, new_password: str, confirm_password: str):
     """用 token 重置密码。"""
     if new_password != confirm_password:

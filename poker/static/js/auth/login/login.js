@@ -1,4 +1,10 @@
+let loginSubmitting = false;
+
 async function login() {
+    if (loginSubmitting) {
+        return;
+    }
+
     const { username, password } =
         getLoginFormData();
 
@@ -8,6 +14,12 @@ async function login() {
 
     const formData =
         buildLoginFormData(username, password);
+
+    const button = document.getElementById("login-button");
+    let redirecting = false;
+
+    loginSubmitting = true;
+    authSetBusy(button, true);
 
     try {
         const response = await fetch("/login", {
@@ -35,6 +47,8 @@ async function login() {
                 sessionStorage.removeItem("login_no_group");
             }
 
+            redirecting = true;
+
             setTimeout(() => {
                 window.location.href = "/group-select";
             }, 1500);
@@ -42,8 +56,19 @@ async function login() {
             return;
         }
 
+        const errorCode = data.error_code || data.message || "loginFailed";
+
+        if (errorCode === "loginEmailNotVerified") {
+            showMessageWithLink(
+                t(errorCode),
+                t("resendVerifyLink"),
+                "/register#resend"
+            );
+            return;
+        }
+
         showMessage(
-            t(data.error_code || "loginFailed"),
+            authMessage(errorCode, data),
             false,
         );
 
@@ -54,5 +79,12 @@ async function login() {
             t("loginFailed"),
             false,
         );
+
+    } finally {
+        // 登录成功、即将跳转时保持禁用，避免重复提交
+        if (!redirecting) {
+            loginSubmitting = false;
+            authSetBusy(button, false);
+        }
     }
 }

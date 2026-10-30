@@ -15,6 +15,8 @@ from poker.services.admin.audit_log import write_audit_log
 from core.middleware import clear_session_cache
 from poker.template_config import templates
 
+from poker.routes.user.guard import user_api_denied
+
 
 router = APIRouter()
 
@@ -46,15 +48,17 @@ def change_password_page(request: Request):
 
 @router.get("/user/change-password/current")
 def get_current_account(request: Request):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
     return get_current_account_service(user_id=get_user_id(request))
 
 
 @router.post("/user/change-password/update-nickname")
 def update_nickname(request: Request, nickname: str = Form(..., max_length=200)):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
     result = update_nickname_service(user_id=get_user_id(request), nickname=nickname)
     if result.get("success"):
         request.session["nickname"] = result.get("nickname")
@@ -68,8 +72,9 @@ def update_password(
     new_password: str = Form(..., max_length=256),
     confirm_password: str = Form(..., max_length=256),
 ):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
     result = update_password_service(
         user_id=get_user_id(request),
         current_password=current_password,
@@ -86,8 +91,9 @@ def update_password(
 # 退出当前组（只有普通用户可以；局头的组需要管理员处理）
 @router.post("/user/leave-group")
 def leave_group(request: Request):
-    if not require_user(request):
-        return {"success": False, "message": "permissionDenied"}
+    denied = user_api_denied(request)
+    if denied is not None:
+        return denied
 
     user_id = get_user_id(request)
     group_id = get_group_id(request)

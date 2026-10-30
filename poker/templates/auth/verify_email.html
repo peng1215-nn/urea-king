@@ -96,7 +96,7 @@
 {% elif error_code == "verifyTokenUsed" %}
     <div class="verify-icon warn">🔒</div>
     <div class="verify-title" data-i18n="verifyUsedTitle">链接已使用</div>
-    <p class="verify-msg" data-i18n="verifyUsedMsg">该验证链接已被使用过了。如果您的邮箱尚未验证，请重新注册或联系支持。</p>
+    <p class="verify-msg" data-i18n="verifyUsedMsg">该验证链接已被使用，或因更换了邮箱而失效。如果您的邮箱尚未验证，请使用最新一封验证邮件中的链接。</p>
     <a href="/login" class="verify-btn" data-i18n="backLogin">返回登录</a>
 
 {% elif error_code == "verifyEmailTaken" %}
@@ -108,14 +108,14 @@
 {% elif error_code == "verifyTokenExpired" %}
     <div class="verify-icon warn">⏰</div>
     <div class="verify-title" data-i18n="verifyExpiredTitle">链接已过期</div>
-    <p class="verify-msg" data-i18n="verifyExpiredMsg">验证链接已过期（有效期 15 分钟）。请重新注册以获取新的验证邮件。</p>
-    <a href="/register" class="verify-btn" data-i18n="reRegister">重新注册</a>
+    <p class="verify-msg" data-i18n="verifyExpiredMsg">验证链接已过期（有效期 15 分钟）。你的账号已经保留，不需要重新注册，点击下方按钮输入注册邮箱，重新获取验证邮件即可。</p>
+    <a href="/register#resend" class="verify-btn" data-i18n="resendVerifyBtn">重发验证邮件</a>
 
 {% else %}
     <div class="verify-icon error">✕</div>
     <div class="verify-title" data-i18n="verifyInvalidTitle">验证失败</div>
-    <p class="verify-msg" data-i18n="verifyInvalidMsg">验证链接无效或已过期。请检查链接是否完整，或重新注册。</p>
-    <a href="/register" class="verify-btn" data-i18n="reRegister">重新注册</a>
+    <p class="verify-msg" data-i18n="verifyInvalidMsg">验证链接无效或已过期。请检查链接是否完整；如果账号已注册但还没验证，不需要重新注册，点击下方按钮重新获取验证邮件即可。</p>
+    <a href="/register#resend" class="verify-btn" data-i18n="resendVerifyBtn">重发验证邮件</a>
 {% endif %}
 
 </div>

@@ -1,19 +1,86 @@
-async function sendForgotPassword() {
-    const lang = localStorage.getItem("language") || "zh";
-    const t = (window.forgotPasswordTranslations || {})[lang] || (window.forgotPasswordTranslations || {}).zh || {};
+// 发送后按钮保留，60 秒后可以再发一次（服务端另有频率限制）
+const FORGOT_COOLDOWN_SECONDS = 60;
 
-    const email = document.getElementById("fp-email").value.trim();
+let forgotSending = false;
+let forgotCooldownLeft = 0;
+let forgotCooldownTimer = null;
+// 记住最后一条提示，切换语言时重新翻译
+let forgotLastMessage = null;
+
+
+function renderForgotMessage() {
     const msgBox = document.getElementById("message-box");
-    const btn = document.getElementById("fp-btn");
 
-    if (!email) {
-        msgBox.textContent = t.emailRequired || "请输入邮箱地址。";
-        msgBox.style.color = "#e55";
+    if (!forgotLastMessage) {
+        msgBox.textContent = "";
         return;
     }
 
-    btn.disabled = true;
-    btn.textContent = t.sending || "发送中…";
+    msgBox.textContent = authMessage(forgotLastMessage.key, forgotLastMessage.data);
+    msgBox.style.color = forgotLastMessage.success ? "#5c5" : "#e55";
+}
+
+
+function setForgotMessage(key, success, data) {
+    forgotLastMessage = { key, success, data };
+    renderForgotMessage();
+}
+
+
+function renderForgotButton() {
+    const btn = document.getElementById("fp-btn");
+
+    if (forgotSending) {
+        btn.disabled = true;
+        btn.textContent = t("sending");
+        return;
+    }
+
+    if (forgotCooldownLeft > 0) {
+        btn.disabled = true;
+        btn.textContent = authFormat(t("resendCountdown"), { seconds: forgotCooldownLeft });
+        return;
+    }
+
+    btn.disabled = false;
+    btn.textContent = t("sendBtn");
+}
+
+
+function startForgotCooldown() {
+    forgotCooldownLeft = FORGOT_COOLDOWN_SECONDS;
+    clearInterval(forgotCooldownTimer);
+
+    forgotCooldownTimer = setInterval(() => {
+        forgotCooldownLeft -= 1;
+        if (forgotCooldownLeft <= 0) {
+            forgotCooldownLeft = 0;
+            clearInterval(forgotCooldownTimer);
+        }
+        renderForgotButton();
+    }, 1000);
+
+    renderForgotButton();
+}
+
+
+async function sendForgotPassword() {
+    if (forgotSending || forgotCooldownLeft > 0) {
+        return;
+    }
+
+    const email = document.getElementById("fp-email").value.trim();
+
+    if (!email) {
+        setForgotMessage("emailRequired", false);
+        authFocus("fp-email");
+        return;
+    }
+
+    forgotSending = true;
+    renderForgotButton();
+
+    let cooldown = false;
 
     try {
         const fd = new FormData();
@@ -21,30 +88,29 @@ async function sendForgotPassword() {
         const res = await fetch("/forgot-password", { method: "POST", body: fd });
         const data = await res.json();
 
-        if (!data.success) {
-            if (data.error_code === "forgotPasswordTooManyAttempts") {
-                msgBox.textContent = t.forgotPasswordTooManyAttempts || "尝试次数过多，请 15 分钟后再试。";
-                msgBox.style.color = "#e55";
-                btn.disabled = false;
-                btn.textContent = t.sendBtn || "发送重置邮件";
-            } else {
-                // 其他错误显示通用提示（防枚举）
-                msgBox.textContent = t.resetSuccess || "如果该邮箱已注册，重置链接已发送，请查收邮件。";
-                msgBox.style.color = "#5c5";
-                btn.style.display = "none";
-            }
+        if (!data.success && data.error_code === "forgotPasswordTooManyAttempts") {
+            setForgotMessage("forgotPasswordTooManyAttempts", false, data);
         } else {
-            // 成功或邮箱不存在都显示同一提示（防枚举）
-            msgBox.textContent = t.resetSuccess || "如果该邮箱已注册，重置链接已发送，请查收邮件。";
-            msgBox.style.color = "#5c5";
-            btn.style.display = "none";
+            // 成功、邮箱不存在或其他错误都显示同一提示（防枚举）
+            setForgotMessage("resetSuccess", true);
+            cooldown = true;
         }
     } catch (e) {
-        msgBox.textContent = t.requestFailed || "请求失败，请稍后重试。";
-        msgBox.style.color = "#e55";
-        btn.disabled = false;
-        btn.textContent = t.sendBtn || "发送重置邮件";
+        setForgotMessage("requestFailed", false);
+    } finally {
+        forgotSending = false;
+        if (cooldown) {
+            startForgotCooldown();
+        } else {
+            renderForgotButton();
+        }
     }
 }
 
-document.getElementById("fp-btn").addEventListener("click", sendForgotPassword);
+
+authBindSubmit("fp-form", sendForgotPassword);
+
+document.addEventListener("languageChanged", function () {
+    renderForgotMessage();
+    renderForgotButton();
+});

@@ -16,7 +16,8 @@
             const data = await response.clone().json().catch(() => null);
 
             if (data && data.message === "sessionExpired") {
-                window.location.href = "/login";
+                // 登录页根据 reason=expired 提示“登录已失效，请重新登录”
+                window.location.href = "/login?reason=expired";
             }
         }
 
@@ -63,8 +64,7 @@ async function loadCurrentUser() {
 
         if (currentGroupText) {
             currentGroupText.innerText =
-                data.current_group_name ||
-                "8th-Ecosystem";
+                data.current_group_name || "";
         }
 
     } catch (error) {

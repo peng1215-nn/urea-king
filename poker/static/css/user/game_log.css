@@ -419,3 +419,18 @@ body {
         background-repeat: no-repeat !important;
     }
 }
+
+/* 自己在这局里的结果 */
+.log-my-net {
+    padding: 3px 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    font-size: 13px;
+    white-space: nowrap;
+}
+.log-player-row.is-me { border-color: rgba(92,141,255,0.45); background: rgba(92,141,255,0.08); }
+.log-player-row .me-tag { font-size: 11px; padding: 2px 7px; border-radius: 6px; background: rgba(92,141,255,0.18); color: #8fb0ff; font-weight: 600; }
+
+@media (max-width: 768px) {
+    .log-card-right { flex-wrap: wrap; flex-shrink: 1; }
+}

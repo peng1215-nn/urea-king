@@ -135,12 +135,13 @@
 
             </div>
 
-            <div class="game-panel">
+            <div class="game-panel requests-panel" id="request-panel">
 
                 <div class="panel-header">
                     <div class="panel-header-left">
                         <i class="fa-solid fa-coins"></i>
                         <h2 data-i18n="chipRequestsPending">待审批筹码请求</h2>
+                        <span id="request-count" class="request-count-badge" style="display:none;"></span>
                     </div>
                 </div>
 
@@ -150,11 +151,12 @@
 
         </div>
 
-        <div id="game-message" class="game-message"></div>
-
     </div>
 
 </div>
+
+<!-- 所有操作的结果提示（顶层浮动提示，几秒后自动消失） -->
+<div id="game-message" class="game-message" role="status" aria-live="polite"></div>
 
 <div id="start-game-modal" class="custom-modal" style="display:none;">
     <div class="custom-modal-content modal-wide">
@@ -162,7 +164,7 @@
         <h3 data-i18n="startGame">开局</h3>
 
         <p class="modal-desc" data-i18n="startGameDesc">
-            预选参与本局玩家，最多 9 人。
+            预选参与本局玩家，最多 10 人。
         </p>
 
         <div class="form-group" style="margin-bottom: 16px;">
@@ -231,11 +233,16 @@
             <textarea id="finish-game-note" class="finish-note-input" rows="2" data-i18n-placeholder="gameNotePlaceholder" placeholder="可选，输入本局备注…"></textarea>
         </div>
 
-        <div id="finish-message" class="operation-message"></div>
+        <!-- 底部固定：实时汇总 + 操作按钮，列表再长也能看到 -->
+        <div class="finish-footer">
+            <div id="finish-summary" class="finish-summary"></div>
 
-        <div class="custom-modal-actions">
-            <button class="modal-confirm-button" id="finish-confirm-btn" data-on-click="confirmFinishGame" data-i18n="finishAndCheck">结束并校验</button>
-            <button class="modal-cancel-button" data-on-click="closeFinishGameModal" data-i18n="cancel">取消</button>
+            <div id="finish-message" class="operation-message"></div>
+
+            <div class="custom-modal-actions">
+                <button class="modal-confirm-button" id="finish-confirm-btn" data-on-click="confirmFinishGame" data-i18n="finishAndCheck">结束并校验</button>
+                <button class="modal-cancel-button" data-on-click="closeFinishGameModal" data-i18n="cancel">取消</button>
+            </div>
         </div>
 
     </div>
@@ -264,6 +271,8 @@
                 id="organizer-buyin-amount"
                 class="modal-input"
                 min="1"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 data-i18n-placeholder="organizerBuyinPlaceholder"
                 placeholder="请输入买入数额"
             >
@@ -283,6 +292,7 @@
 <div id="proxy-buyin-modal" class="custom-modal" style="display:none;">
     <div class="custom-modal-content">
         <h3 data-i18n="proxyBuyin">代买筹码</h3>
+        <p class="modal-target-name" id="proxy-buyin-player"></p>
         <p class="modal-desc" data-i18n="proxyBuyinDesc">代替该玩家买入筹码，直接计入其总买入。</p>
         <div class="form-group">
             <label data-i18n="amount">金额</label>
@@ -291,6 +301,8 @@
                 id="proxy-buyin-amount"
                 class="modal-input"
                 min="1"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 data-i18n-placeholder="organizerBuyinPlaceholder"
                 placeholder="请输入买入数额"
             >
@@ -307,19 +319,20 @@
     <div class="custom-modal-content modal-wide">
 
         <div class="settlement-header">
-            <i class="fa-solid fa-circle-check settlement-success-icon"></i>
-            <h3 data-i18n="settlementSuccess">校验成功，牌局已结束</h3>
+            <i id="settlement-icon" class="fa-solid fa-circle-check settlement-success-icon"></i>
+            <h3 id="settlement-title">校验成功，牌局已结束</h3>
         </div>
 
         <div class="settlement-summary">
             <span data-i18n="totalBuyIn">总买入</span>：<strong id="settle-total-buyin">--</strong>
             &nbsp;&nbsp;
-            <span data-i18n="totalCashOut">总剩余</span>：<strong id="settle-total-cashout">--</strong>
+            <span data-i18n="totalCashOut">总卖出</span>：<strong id="settle-total-cashout">--</strong>
         </div>
 
         <div id="settlement-player-list" class="settlement-player-list"></div>
 
         <div class="custom-modal-actions">
+            <button class="modal-cancel-button" id="settlement-report-btn" data-on-click="openGameReport" data-args="[]" data-i18n="viewAuditReport">查看审计报告</button>
             <button class="modal-confirm-button" data-on-click="closeSettlementModal" data-i18n="confirm">确认</button>
         </div>
 
@@ -345,7 +358,9 @@
 <script src="/static/js/common/current_user.js?v={{ static_version }}"></script>
 <script src="/static/js/common/logout.js?v={{ static_version }}"></script>
 <script src="/static/js/common/sidebar.js?v={{ static_version }}"></script>
+<script src="/static/js/common/game_report_link.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/game_management/state.js?v={{ static_version }}"></script>
+<script src="/static/js/organizer/game_management/ui.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/game_management/game_api.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/game_management/game_render.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/game_management/start_game.js?v={{ static_version }}"></script>
@@ -358,18 +373,21 @@
 <div id="remove-player-modal" class="custom-modal" style="display:none;">
     <div class="custom-modal-content">
         <h3 data-i18n="removePlayer">移出玩家</h3>
+        <p class="modal-target-name" id="remove-player-name"></p>
         <p data-i18n="removePlayerDesc">请选择操作类型：</p>
         <div class="remove-type-btns">
             <button class="remove-type-btn" data-type="away" data-on-click="selectRemoveType" data-args="[&quot;away&quot;]" data-i18n="playerAwayOption">暂离</button>
             <button class="remove-type-btn" data-type="exit" data-on-click="selectRemoveType" data-args="[&quot;exit&quot;]" data-i18n="playerExit">退出</button>
         </div>
         <div id="remove-player-exit-section" style="display:none; margin-top:16px;">
+            <div id="remove-player-buyin-info" class="exit-buyin-info"></div>
             <label style="font-size:13px; color:rgba(255,255,255,0.5); display:block; margin-bottom:8px;" data-i18n="playerExitCashout">该玩家剩余筹码（卖出金额）</label>
-            <input type="number" id="remove-player-cashout" class="modal-input" min="0" placeholder="0">
+            <input type="number" id="remove-player-cashout" class="modal-input" min="0" inputmode="numeric" pattern="[0-9]*" placeholder="0" data-on-input="onExitCashoutInput">
+            <div id="remove-player-exit-preview" class="exit-preview"></div>
         </div>
         <div id="remove-player-message" class="operation-message" style="margin-top:12px;"></div>
         <div class="custom-modal-actions" style="margin-top:16px;">
-            <button class="modal-confirm-button" data-on-click="confirmRemovePlayer" data-i18n="confirm">确认</button>
+            <button class="modal-confirm-button" id="remove-player-confirm-btn" data-on-click="confirmRemovePlayer" data-i18n="confirm" disabled>确认</button>
             <button class="modal-cancel-button" data-on-click="closeRemovePlayerModal" data-i18n="cancel">取消</button>
         </div>
     </div>

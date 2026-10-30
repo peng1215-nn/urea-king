@@ -4,7 +4,11 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from core.middleware import clear_session_cache
 from poker.core.rate_limit import forgot_password_failures_by_ip, reset_password_failures_by_ip
 from poker.services.admin.audit_log import get_client_ip
-from poker.services.auth.reset_password import forgot_password_service, reset_password_service
+from poker.services.auth.reset_password import (
+    check_reset_token_service,
+    forgot_password_service,
+    reset_password_service,
+)
 from poker.template_config import templates
 
 router = APIRouter()
@@ -34,10 +38,12 @@ def forgot_password(request: Request, background_tasks: BackgroundTasks, email: 
 
 @router.get("/reset-password", response_class=HTMLResponse)
 def reset_password_page(request: Request, token: str = ""):
+    # 先只读检查链接，失效时直接显示错误，不用等用户填完密码才知道
+    error_code = check_reset_token_service(token[:256])
     return templates.TemplateResponse(
         request=request,
         name="auth/reset_password.html",
-        context={"token": token},
+        context={"token": token, "error_code": error_code or ""},
     )
 
 

@@ -46,7 +46,9 @@ function getMemberMatchedFields(member, keyword) {
 
     if (username === keyword) matchedFields.push("username");
     if (nickname === keyword) matchedFields.push("nickname");
-    if (role     === keyword) matchedFields.push("role");
+    // 身份既可以搜英文（organizer/user），也可以搜界面上显示的文字（局头/用户）
+    const roleLabel = String(memberRoleLabel(member.role)).toLowerCase();
+    if (role === keyword || roleLabel === keyword) matchedFields.push("role");
 
     return matchedFields;
 }

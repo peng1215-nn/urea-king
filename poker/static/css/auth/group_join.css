@@ -8,6 +8,7 @@ body::before {
 
 .group-join-card {
     width: 420px;
+    max-width: 100%;
     padding: 38px;
     border-radius: 18px;
     background: rgba(10, 10, 18, 0.88);
@@ -69,4 +70,28 @@ input {
 .bottom-links a:hover {
     color: white;
     text-decoration: underline;
+}
+
+.group-join-heading {
+    text-align: center;
+}
+
+.group-join-heading h2 {
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+
+.group-join-heading p {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.group-join-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+#message-box a {
+    color: #9cc3ff;
 }
