@@ -11,7 +11,7 @@ def get_client_ip(request):
     )
 
     if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
+        return forwarded_for.split(",")[-1].strip()
 
     if request.client:
         return request.client.host

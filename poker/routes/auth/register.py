@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from poker.core.rate_limit import register_failures_by_ip
+from poker.core.rate_limit import register_failures_by_ip, resend_verify_failures_by_ip
 from poker.services.admin.audit_log import get_client_ip
 from poker.services.auth.register import register_user_service, verify_email_service
 from poker.services.auth.resend_verify import resend_verify_email_service
@@ -54,7 +54,17 @@ def register_user(
 
 @router.post("/resend-verify-email")
 def resend_verify_email(request: Request, email: str = Form(...)):
-    return resend_verify_email_service(email)
+    ip = get_client_ip(request) or "unknown"
+    wait = resend_verify_failures_by_ip.retry_after(ip)
+    if wait:
+        return JSONResponse(
+            {"success": False, "error_code": "resendTooManyAttempts", "retry_after": wait},
+            status_code=429,
+        )
+    result = resend_verify_email_service(email)
+    if not result.get("success"):
+        resend_verify_failures_by_ip.hit(ip)
+    return result
 
 
 @router.post("/change-email")
