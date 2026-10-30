@@ -4,6 +4,7 @@
 
 from poker.models import (
     ChipRequest,
+    GameEvent,
     GroupMemberAlias,
     InvitationCode,
     PokerGame,
@@ -21,6 +22,7 @@ def purge_group(db, group):
     counts = {"games": len(game_ids), "chip_requests": 0, "players": 0}
 
     if game_ids:
+        db.query(GameEvent).filter(GameEvent.game_id.in_(game_ids)).delete(synchronize_session=False)
         counts["chip_requests"] = db.query(ChipRequest).filter(
             ChipRequest.game_id.in_(game_ids)
         ).delete(synchronize_session=False)

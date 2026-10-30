@@ -6,6 +6,7 @@ from poker.models import PokerGamePlayer
 from poker.models import User
 from poker.models import UserGroupRole
 from core.errors import safe_error
+from poker.services.common.game_events import record_game_event
 from poker.core.validators import check_amount
 
 
@@ -186,6 +187,7 @@ def submit_buyin_request_service(game_id: int, group_id: int, user_id: int, amou
             requested_at=now_columbus_naive(),
         )
         db.add(req)
+        record_game_event(db, game_id, "buyin_requested", actor_user_id=user_id, target_user_id=user_id, amount=amount, buy_type="normal")
         db.commit()
 
         return {"success": True}

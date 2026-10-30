@@ -168,6 +168,32 @@ class ChipRequest(Base):
     resolved_by = Column(Integer, ForeignKey("platform_users.id"), nullable=True)
 
 
+class GameEvent(Base):
+    """
+    牌局审计记录：牌局里每一次涉及人员或筹码的操作追加一行，只增不改。
+    昵称存当时的快照，之后改名或注销不影响报告。删除牌局时一并删除。
+    event_type 见 poker/services/common/game_events.py。
+    """
+
+    __tablename__ = "poker_game_events"
+    __table_args__ = (
+        # 报告按牌局取出全部事件、按发生顺序排列
+        Index("ix_game_events_game_id_id", "game_id", "id"),
+    )
+
+    id = Column(Integer, primary_key=True)
+    game_id = Column(Integer, ForeignKey("poker_games.id", ondelete="CASCADE"), nullable=False)
+    event_type = Column(String(30), nullable=False)
+    actor_user_id = Column(Integer, nullable=True)
+    actor_name = Column(String(50), nullable=True)
+    target_user_id = Column(Integer, nullable=True)
+    target_name = Column(String(50), nullable=True)
+    amount = Column(Integer, nullable=True)
+    buy_type = Column(String(20), nullable=True)
+    details = Column(Text, nullable=True)  # JSON
+    created_at = Column(DateTime, nullable=False, default=now_columbus_naive)
+
+
 class EmailVerification(Base):
 
     __tablename__ = "poker_email_verifications"

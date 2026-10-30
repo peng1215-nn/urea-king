@@ -152,6 +152,7 @@ def remove_player(
         game_id=game_id,
         group_id=int(group_id),
         user_id=user_id,
+        actor_id=request.session.get("user_id"),
     )
 
 
@@ -174,6 +175,7 @@ def exit_player(
         group_id=int(group_id),
         user_id=user_id,
         cash_out=cash_out,
+        actor_id=request.session.get("user_id"),
     )
 
 

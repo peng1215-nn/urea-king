@@ -81,6 +81,7 @@ function renderGameCard(game, container) {
             <div class="log-card-right">
                 <span class="log-chips">${t("totalBuyIn")}：${game.total_buy_in}</span>
                 ${balanced}
+                <button class="btn-export-log" data-on-click="openGameReport" data-args="[${game.id}]" data-stop>${t("auditReport")}</button>
                 <button class="btn-export-log" data-on-click="exportGameCard" data-args="[${game.id}]" data-stop>${t("export")}</button>
                 <button class="btn-delete-log" data-on-click="openDeleteGameModal" data-args="[${game.id}]" data-stop>${t("delete")}</button>
                 <i class="fa-solid fa-chevron-down log-chevron"></i>

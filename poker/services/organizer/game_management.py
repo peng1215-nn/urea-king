@@ -9,6 +9,7 @@ from poker.models import UserGroupRole
 from core.validators import check_name, check_text
 from poker.core.validators import GAME_NAME_MAX, GAME_NOTE_MAX, check_amount
 from core.errors import safe_error
+from poker.services.common.game_events import record_game_event
 
 
 MAX_PLAYERS = 10
@@ -42,10 +43,13 @@ def _reject_pending_requests(db, game_id, user_id=None):
     )
     if user_id is not None:
         query = query.filter(ChipRequest.user_id == user_id)
-    query.update(
-        {ChipRequest.status: "rejected", ChipRequest.resolved_at: now_columbus_naive()},
-        synchronize_session=False,
-    )
+    for req in query.with_for_update().all():
+        req.status = "rejected"
+        req.resolved_at = now_columbus_naive()
+        record_game_event(
+            db, game_id, "buyin_auto_rejected",
+            target_user_id=req.user_id, amount=req.amount, buy_type=req.type,
+        )
 
 
 def _add_to_buy_in(db, player_id, amount):
@@ -186,6 +190,7 @@ def start_game_service(group_id: int, organizer_id: int, name: str, preselected_
         db.add(game)
         db.flush()
 
+        started_players = []
         for uid in preselected_user_ids:
             user = db.query(User).filter(User.id == uid).first()
             if not user:
@@ -204,7 +209,13 @@ def start_game_service(group_id: int, organizer_id: int, name: str, preselected_
                 joined_at=now_columbus_naive(),
             )
             db.add(player)
+            started_players.append(player.nickname)
 
+        record_game_event(
+            db, game.id, "game_started",
+            actor_user_id=organizer_id,
+            details={"name": game.name or "", "players": started_players},
+        )
         db.commit()
         return {"success": True, "game_id": game.id}
     except Exception as e:
@@ -270,6 +281,7 @@ def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organi
 
         if existing_player:
             existing_player.is_active = 1
+            record_game_event(db, game_id, "player_rejoined", actor_user_id=organizer_id, target_user_id=user_id)
             db.commit()
             return {"success": True, "rejoined": True}
 
@@ -282,6 +294,7 @@ def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organi
             joined_at=now_columbus_naive(),
         )
         db.add(player)
+        record_game_event(db, game_id, "player_added", actor_user_id=organizer_id, target_user_id=user_id)
         db.commit()
         return {"success": True, "rejoined": False}
     except Exception as e:
@@ -291,7 +304,7 @@ def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organi
         db.close()
 
 
-def remove_player_from_game_service(game_id: int, group_id: int, user_id: int):
+def remove_player_from_game_service(game_id: int, group_id: int, user_id: int, actor_id: int = None):
     db = SessionLocal()
     try:
         game = _lock_ongoing_game(db, game_id, group_id)
@@ -308,6 +321,7 @@ def remove_player_from_game_service(game_id: int, group_id: int, user_id: int):
             return {"success": False, "message": "playerNotInGame"}
 
         player.is_active = 0
+        record_game_event(db, game_id, "player_removed", actor_user_id=actor_id, target_user_id=user_id)
         # 被移出后，他还没审批的买入申请一并拒绝
         _reject_pending_requests(db, game_id, user_id)
         db.commit()
@@ -319,7 +333,7 @@ def remove_player_from_game_service(game_id: int, group_id: int, user_id: int):
         db.close()
 
 
-def exit_player_from_game_service(game_id: int, group_id: int, user_id: int, cash_out: int):
+def exit_player_from_game_service(game_id: int, group_id: int, user_id: int, cash_out: int, actor_id: int = None):
     """玩家退出：记录 cash_out 并移出"""
     db = SessionLocal()
     try:
@@ -343,6 +357,11 @@ def exit_player_from_game_service(game_id: int, group_id: int, user_id: int, cas
         player.cash_out = cash_out
         player.net = cash_out - (player.total_buy_in or 0)
         player.is_active = 0
+        record_game_event(
+            db, game_id, "player_exited",
+            actor_user_id=actor_id, target_user_id=user_id, amount=cash_out,
+            details={"buy_in": player.total_buy_in or 0, "net": player.net},
+        )
         # 已经结算离场，还没审批的买入申请一并拒绝
         _reject_pending_requests(db, game_id, user_id)
         db.commit()
@@ -385,6 +404,10 @@ def approve_chip_request_service(request_id: int, game_id: int, group_id: int, r
         req.resolved_at = now_columbus_naive()
         req.resolved_by = resolver_id
         _add_to_buy_in(db, player.id, req.amount)
+        record_game_event(
+            db, game_id, "buyin_approved",
+            actor_user_id=resolver_id, target_user_id=req.user_id, amount=req.amount, buy_type=req.type,
+        )
 
         db.commit()
         return {"success": True}
@@ -415,6 +438,10 @@ def reject_chip_request_service(request_id: int, game_id: int, group_id: int, re
         req.status = "rejected"
         req.resolved_at = now_columbus_naive()
         req.resolved_by = resolver_id
+        record_game_event(
+            db, game_id, "buyin_rejected",
+            actor_user_id=resolver_id, target_user_id=req.user_id, amount=req.amount, buy_type=req.type,
+        )
 
         db.commit()
         return {"success": True}
@@ -466,6 +493,10 @@ def organizer_buyin_service(game_id: int, group_id: int, user_id: int, amount: i
             resolved_by=user_id,
         )
         db.add(req)
+        record_game_event(
+            db, game_id, "organizer_buyin",
+            actor_user_id=user_id, target_user_id=user_id, amount=amount, buy_type=buy_type,
+        )
         db.commit()
 
         return {"success": True}
@@ -525,6 +556,10 @@ def organizer_proxy_buyin_service(game_id: int, group_id: int, organizer_id: int
             resolved_by=organizer_id,
         )
         db.add(req)
+        record_game_event(
+            db, game_id, "proxy_buyin",
+            actor_user_id=organizer_id, target_user_id=target_user_id, amount=amount, buy_type="normal",
+        )
         db.commit()
 
         return {"success": True}
@@ -613,6 +648,25 @@ def finish_game_service(
         if note:
             game.note = note
 
+        record_game_event(
+            db, game_id, "game_finished",
+            actor_user_id=organizer_id,
+            details={
+                "total_buy_in": total_buy_in,
+                "total_cash_out": total_cash_out,
+                "balanced": bool(is_balanced),
+                "forced": bool(force and not is_balanced),
+                "players": [
+                    {
+                        "name": p.nickname,
+                        "buy_in": p.total_buy_in,
+                        "cash_out": p.cash_out,
+                        "net": p.net,
+                    }
+                    for p in players
+                ],
+            },
+        )
         db.commit()
 
         players_refreshed = db.query(PokerGamePlayer, User).join(

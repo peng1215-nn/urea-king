@@ -8,6 +8,10 @@ function getCurrentLanguage() {
 
 function getTranslations(language) {
 
+    if (window.gameReportTranslations) {
+        return window.gameReportTranslations[language];
+    }
+
     if (window.adminTranslations) {
         return window.adminTranslations[language];
     }
@@ -152,6 +156,11 @@ function applyLanguage(language = getCurrentLanguage()) {
 
     if (typeof refreshSelectedUserLanguage === "function") {
         refreshSelectedUserLanguage();
+    }
+
+    // 页面上由脚本生成的内容（如审计报告）在切换语言后重新渲染
+    if (typeof window.onLanguageApplied === "function") {
+        window.onLanguageApplied(language);
     }
 }
 

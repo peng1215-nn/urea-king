@@ -3,6 +3,7 @@ from poker.models import GroupMemberAlias
 from poker.models import PokerGame
 from poker.models import PokerGamePlayer
 from poker.models import ChipRequest
+from poker.models import GameEvent
 from poker.models import User
 from poker.models import UserGroupRole
 from core.errors import safe_error
@@ -344,6 +345,7 @@ def delete_game_log_service(game_id: int, group_id: int):
         if not game:
             return {"success": False, "message": "gameNotFound"}
 
+        db.query(GameEvent).filter(GameEvent.game_id == game_id).delete(synchronize_session=False)
         db.query(ChipRequest).filter(ChipRequest.game_id == game_id).delete(synchronize_session=False)
         db.query(PokerGamePlayer).filter(PokerGamePlayer.game_id == game_id).delete(synchronize_session=False)
         db.delete(game)

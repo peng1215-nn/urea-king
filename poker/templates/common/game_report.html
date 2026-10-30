@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="pageTitle">牌局审计报告 - UREAKING POKER</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="/static/js/common/actions.js?v={{ static_version }}"></script>
+    <link rel="stylesheet" href="/static/css/common/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/common/language_base.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/common/game_report.css?v={{ static_version }}">
+</head>
+<body>
+
+<div class="report-page">
+
+    <div class="report-topbar">
+        <a class="report-back" href="{{ back_url }}">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span data-i18n="backToGameLogs">返回牌局日志</span>
+        </a>
+        <div class="report-topbar-actions">
+            <button id="report-export-csv" class="report-export-button" data-on-click="exportAuditCsv" disabled>
+                <i class="fa-solid fa-file-csv"></i>
+                <span data-i18n="exportAuditCsv">导出审计记录（CSV）</span>
+            </button>
+            {% include "common/language_switcher.html" %}
+        </div>
+    </div>
+
+    <h1 class="report-title" data-i18n="reportTitle">牌局审计报告</h1>
+
+    <div id="report-message" class="report-message" data-i18n="loading">加载中...</div>
+
+    <div id="report-content" hidden>
+
+        <section class="report-section">
+            <h2 data-i18n="overviewTitle">牌局概况</h2>
+            <div id="report-overview" class="report-overview"></div>
+        </section>
+
+        <section class="report-section">
+            <h2 data-i18n="summaryTitle">按玩家汇总</h2>
+            <div id="report-check" class="report-check"></div>
+            <div class="report-table-wrap">
+                <table class="report-table" id="report-summary"></table>
+            </div>
+        </section>
+
+        <section class="report-section">
+            <h2 data-i18n="timelineTitle">操作记录</h2>
+            <div class="report-table-wrap">
+                <table class="report-table" id="report-timeline"></table>
+            </div>
+        </section>
+
+    </div>
+
+</div>
+
+<script src="/static/js/common/escape.js?v={{ static_version }}"></script>
+<script src="/static/js/i18n/game_report.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/common/game_report/game_report.js?v={{ static_version }}"></script>
+
+</body>
+</html>

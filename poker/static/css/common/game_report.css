@@ -1,0 +1,208 @@
+/* 牌局审计报告页（独立页面，三端共用） */
+
+body {
+    display: block;
+}
+
+.report-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+}
+
+.report-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+}
+
+.report-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.report-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.report-back:hover {
+    color: #ffffff;
+}
+
+.report-export-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(92, 255, 178, 0.12);
+    color: #5cffb2;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.report-export-button:hover:not(:disabled) {
+    background: rgba(92, 255, 178, 0.22);
+}
+
+.report-export-button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.language-toggle {
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 12px;
+}
+
+.report-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: 1px;
+}
+
+.report-message {
+    padding: 18px 20px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+}
+
+.report-section {
+    margin-bottom: 26px;
+    padding: 20px 22px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.report-section h2 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.report-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px 20px;
+}
+
+.report-field-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 4px;
+}
+
+.report-field-value {
+    font-size: 15px;
+    color: #ffffff;
+    word-break: break-word;
+}
+
+.report-check {
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.report-check.ok {
+    background: rgba(92, 255, 178, 0.1);
+    color: #5cffb2;
+}
+
+.report-check.bad {
+    background: rgba(255, 100, 100, 0.12);
+    color: #ff8080;
+}
+
+.report-check.none {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.report-table-wrap {
+    overflow-x: auto;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.report-table th,
+.report-table td {
+    padding: 9px 10px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    white-space: nowrap;
+}
+
+.report-table td.wrap {
+    white-space: normal;
+    min-width: 200px;
+}
+
+.report-table th {
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.report-table td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.report-table th.num {
+    text-align: right;
+}
+
+.net-pos { color: #34d399; }
+.net-neg { color: #f87171; }
+.net-zero { color: #9aa4c0; }
+
+.check-ok { color: #5cffb2; }
+.check-bad { color: #ff8080; font-weight: 700; }
+
+.event-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.event-tag.money { background: rgba(92, 141, 255, 0.16); color: #8fb0ff; }
+.event-tag.reject { background: rgba(255, 100, 100, 0.14); color: #ff8080; }
+.event-tag.people { background: rgba(250, 204, 21, 0.12); color: #facc15; }
+.event-tag.milestone { background: rgba(92, 255, 178, 0.12); color: #5cffb2; }
+
+@media (max-width: 600px) {
+    .report-page {
+        padding: 18px 14px 40px;
+    }
+
+    .report-title {
+        font-size: 22px;
+    }
+}
