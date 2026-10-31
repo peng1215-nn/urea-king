@@ -218,3 +218,36 @@ body {
         font-size: 22px;
     }
 }
+
+/* 背景跟随查看者身份：局头看到局头页面的背景，普通成员看到成员页面的背景（管理员保持默认） */
+body.report-bg-organizer {
+    background:
+        linear-gradient(135deg, rgba(15,15,22,0.82), rgba(21,25,40,0.82), rgba(26,32,51,0.82)),
+        url("/static/images/organizer_background.png") center top / cover no-repeat fixed;
+}
+
+body.report-bg-user {
+    background:
+        linear-gradient(135deg, rgba(15,15,22,0.82), rgba(21,25,40,0.82), rgba(26,32,51,0.82)),
+        url("/static/images/user_background.png") center top / cover no-repeat fixed;
+}
+
+@media (max-width: 768px) {
+    body.report-bg-organizer,
+    body.report-bg-user {
+        background-size: cover !important;
+        background-position: center center !important;
+        background-attachment: fixed !important;
+        background-repeat: no-repeat !important;
+    }
+    body.report-bg-organizer {
+        background-image:
+            linear-gradient(135deg, rgba(15,15,22,0.82), rgba(21,25,40,0.82), rgba(26,32,51,0.82)),
+            url("/static/images/organizer_background_mobile.png") !important;
+    }
+    body.report-bg-user {
+        background-image:
+            linear-gradient(135deg, rgba(15,15,22,0.82), rgba(21,25,40,0.82), rgba(26,32,51,0.82)),
+            url("/static/images/user_background_mobile.png") !important;
+    }
+}

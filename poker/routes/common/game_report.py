@@ -53,7 +53,8 @@ def game_report_page(request: Request):
     response = templates.TemplateResponse(
         request=request,
         name="common/game_report.html",
-        context={"back_url": GAME_LOG_PAGES[role]},
+        # role 决定页面背景：局头看到局头的背景，普通成员看到成员的背景
+        context={"back_url": GAME_LOG_PAGES[role], "role": role},
     )
     return add_no_cache_headers(response)
 
