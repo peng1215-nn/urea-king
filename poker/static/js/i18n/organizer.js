@@ -1,5 +1,20 @@
 const organizerTranslations = {
     zh: {
+        promoteOrganizer: "设为局头",
+        promoteOrganizerDesc: "把所选成员设为局头。每组最多 2 个局头，两人权限完全相同；设为局头后不能由你撤销，只能由他自己在个人资料页卸任。",
+        promoteOrganizerConfirmTitle: "确认设为局头？",
+        promoteOrganizerConfirmText: "确认把 {name}（用户名 {username}）设为局头？\n\n设为局头后，他拥有和你完全相同的权限：管理牌局、成员、邀请码、公告和组名。你不能撤销他的局头身份，只能由他自己卸任。每组最多 {limit} 个局头。",
+        confirmPromote: "确认设为局头",
+        promoteOrganizerSuccess: "已设为局头。他需要重新登录后才能使用局头功能。",
+        memberAlreadyOrganizer: "该成员已经是局头。",
+        organizerLimitReached: "本组已有 {limit} 个局头，达到上限。",
+        stepDownTitle: "卸任局头",
+        stepDownDesc: "卸任后你会变回本组的普通成员，牌局记录保留。组里只剩你一个局头时不能卸任。卸任后需要重新登录。",
+        stepDownConfirmTitle: "确认卸任局头？",
+        stepDownConfirmText: "卸任后你将失去局头的全部权限，只能由另一位局头重新把你设为局头。",
+        stepDownConfirm: "确认卸任",
+        stepDownSuccess: "已卸任，正在返回登录页…",
+        lastOrganizerCannotStepDown: "你是本组唯一的局头，不能卸任。可以先把另一位成员设为局头。",
         buyinHistory: "买入明细",
         reverseBuyinDesc: "记错的买入可以撤销：撤销后从总买入里减掉，原记录保留并标为“已撤销”，审计报告里也会记录。撤销不能恢复，撤错了重新买入即可。",
         reverseBuyin: "撤销",
@@ -165,7 +180,7 @@ const organizerTranslations = {
 
                 onboardingOrganizer1: "第一步：在邀请码管理里生成邀请码，邀请玩家加入",
 
-                onboardingOrganizer2: "第二步：在成员管理里给成员设置备注名，方便辨认（牌局管理和牌局日志里显示为“昵称（备注）”）",
+                onboardingOrganizer2: "第二步：在成员管理里给成员设置备注名，方便辨认（牌局管理和牌局日志里显示为“昵称（备注）”）；需要两人一起开局时，可以把一位成员设为局头（每组最多 2 个）",
 
                 onboardingOrganizer3: "第三步：在牌局管理里开局（每局最多 10 人）、审批筹码申请，结束时结算",
 
@@ -376,6 +391,21 @@ const organizerTranslations = {
     },
 
     en: {
+        promoteOrganizer: "Make Organizer",
+        promoteOrganizerDesc: "Make the selected member an organizer. A group can have at most 2 organizers with exactly the same permissions. You can't undo this — only they can step down from their profile page.",
+        promoteOrganizerConfirmTitle: "Make this member an organizer?",
+        promoteOrganizerConfirmText: "Make {name} (username {username}) an organizer?\n\nThey'll have exactly the same permissions as you: games, members, invite codes, announcements and the group name. You can't remove their organizer role — only they can step down. A group can have at most {limit} organizers.",
+        confirmPromote: "Make Organizer",
+        promoteOrganizerSuccess: "Done. They need to sign in again to use organizer features.",
+        memberAlreadyOrganizer: "This member is already an organizer.",
+        organizerLimitReached: "This group already has {limit} organizers, the maximum.",
+        stepDownTitle: "Step Down as Organizer",
+        stepDownDesc: "You'll become a regular member of this group; game records are kept. You can't step down if you're the only organizer. You'll need to sign in again afterwards.",
+        stepDownConfirmTitle: "Step down as organizer?",
+        stepDownConfirmText: "You'll lose all organizer permissions. Only the other organizer can make you an organizer again.",
+        stepDownConfirm: "Step Down",
+        stepDownSuccess: "You've stepped down. Returning to sign in…",
+        lastOrganizerCannotStepDown: "You're the only organizer of this group, so you can't step down. Make another member an organizer first.",
         buyinHistory: "Buy-ins",
         reverseBuyinDesc: "A buy-in entered by mistake can be undone: it's subtracted from the total buy-in, the record is kept and marked \"Undone\", and the audit report notes it. An undo can't be reverted — if you undo the wrong one, just buy in again.",
         reverseBuyin: "Undo",
@@ -541,7 +571,7 @@ const organizerTranslations = {
 
                 onboardingOrganizer1: "Step 1: Generate invitation codes and invite players",
 
-                onboardingOrganizer2: "Step 2: Give members aliases in Member Management so they are easy to recognize (shown as \"Nickname（alias）\" in Game Management and Game Logs)",
+                onboardingOrganizer2: "Step 2: Give members aliases in Member Management so they are easy to recognize (shown as \"Nickname（alias）\" in Game Management and Game Logs). If two of you run games together, you can make one member an organizer (up to 2 per group)",
 
                 onboardingOrganizer3: "Step 3: Start a game (up to 10 players), approve chip requests and settle it in Game Management",
 

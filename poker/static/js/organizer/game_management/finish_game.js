@@ -20,7 +20,7 @@ function openFinishGameModal() {
 
     currentPlayers.forEach(player => {
         const name = displayPlayerName(player);
-        const isOrganizer = player.user_id === organizerId;
+        const isOrganizer = player.is_group_organizer ?? (player.user_id === organizerId);
         const isActive = player.is_active === 1;
         const buyIn = player.total_buy_in || 0;
         const leftCashOut = player.left_cash_out || 0;

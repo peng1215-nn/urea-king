@@ -74,7 +74,11 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
 
             for p, u in players_by_game.get(game.id, []):
                 net = p.net if p.net is not None else 0
-                is_org = p.user_id == game.organizer_id
+                # 每笔买入明细
+                all_requests = requests_by_player.get((game.id, p.user_id), [])
+                breakdown = _sum_by_type(all_requests)
+                # 开局的局头；组里有两个局头时，另一位买过保险 / Anti（只有局头能买）也按局头显示明细
+                is_org = p.user_id == game.organizer_id or (breakdown["insurance"] + breakdown["anti"]) > 0
                 raw_nick = p.nickname or u.username
                 pd = {
                     "user_id": p.user_id,
@@ -86,9 +90,6 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
                     # 是不是正在查看的人自己（只有普通成员的日志接口会传 viewer_user_id）
                     "is_me": viewer_user_id is not None and p.user_id == viewer_user_id,
                 }
-
-                # 每笔买入明细
-                all_requests = requests_by_player.get((game.id, p.user_id), [])
 
                 # 局头看所有人明细，普通用户只看自己
                 show_details = (viewer_user_id is None) or (p.user_id == viewer_user_id)
@@ -102,7 +103,6 @@ def get_game_logs_service(group_id: int, page: int = 1, viewer_user_id: int = No
                 ] if show_details else []
 
                 if is_org:
-                    breakdown = _sum_by_type(all_requests)
                     pd["buy_in_normal"] = breakdown["normal"]
                     pd["buy_in_insurance"] = breakdown["insurance"]
                     pd["buy_in_anti"] = breakdown["anti"]

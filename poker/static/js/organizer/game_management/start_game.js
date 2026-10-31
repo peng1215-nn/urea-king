@@ -4,16 +4,20 @@ function renderStartMemberList(members) {
     const list = document.getElementById("member-select-list");
     list.innerHTML = "";
 
+    // 开局的人自己一定在局里；组里另一位局头和普通成员一样可选可不选
+    const meId = currentMeId ?? (members.find(m => m.role === "organizer") || {}).user_id;
+
     members.forEach(member => {
         const isOrganizer = member.role === "organizer";
-        // 非局头成员若已在其他进行中的牌局里，不能再选
-        const inOtherGame = !isOrganizer && (member.ongoing_game_ids || []).length > 0;
-        const selected = isOrganizer || (!inOtherGame && selectedPreselect.includes(member.user_id));
+        const isMe = member.user_id === meId;
+        // 已在其他进行中的牌局里的人（开局人自己除外）不能再选
+        const inOtherGame = !isMe && (member.ongoing_game_ids || []).length > 0;
+        const selected = isMe || (!inOtherGame && selectedPreselect.includes(member.user_id));
 
         const item = document.createElement("div");
         item.className = "member-select-item"
-            + (isOrganizer ? " selected forced" : "")
-            + (!isOrganizer && selected ? " selected" : "")
+            + (isMe ? " selected forced" : "")
+            + (!isMe && selected ? " selected" : "")
             + (inOtherGame ? " disabled" : "");
         item.dataset.userId = member.user_id;
 
@@ -27,23 +31,22 @@ function renderStartMemberList(members) {
             <div class="member-check"><i class="fa-solid fa-check" style="display:${selected ? "block" : "none"};"></i></div>
         `;
 
-        if (!isOrganizer && !inOtherGame) {
+        if (!isMe && !inOtherGame) {
             item.addEventListener("click", () => togglePreselect(item, member.user_id));
         }
 
         list.appendChild(item);
     });
 
-    // 选中名单只保留仍可选的人（局头始终在内）
+    // 选中名单只保留仍可选的人（开局人自己始终在内）
     const selectable = new Set(
         members
-            .filter(m => m.role === "organizer" || (m.ongoing_game_ids || []).length === 0)
+            .filter(m => m.user_id === meId || (m.ongoing_game_ids || []).length === 0)
             .map(m => m.user_id)
     );
     selectedPreselect = selectedPreselect.filter(id => selectable.has(id));
-    const organizer = members.find(m => m.role === "organizer");
-    if (organizer && !selectedPreselect.includes(organizer.user_id)) {
-        selectedPreselect.unshift(organizer.user_id);
+    if (meId !== undefined && meId !== null && !selectedPreselect.includes(meId)) {
+        selectedPreselect.unshift(meId);
     }
 
     document.getElementById("selected-count").innerText = selectedPreselect.length;
@@ -64,6 +67,7 @@ async function openStartGameModal() {
     }
 
     allGroupMembers = data.members;
+    if (data.me !== undefined && data.me !== null) currentMeId = data.me;
     renderStartMemberList(allGroupMembers);
 
     document.getElementById("start-game-modal").style.display = "flex";

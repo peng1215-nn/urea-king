@@ -71,6 +71,8 @@ def get_organizer_members_service(group_id: int):
             "members": members,
             "group_name": group.group_name,
             "group_code": group.group_code,
+            "organizer_count": sum(1 for m in members if m["role"] == "organizer"),
+            "max_organizers": MAX_ORGANIZERS,
         }
 
     except Exception as e:
@@ -194,5 +196,83 @@ def remove_member_service(group_id: int, target_user_id: int):
             "message": safe_error(e),
         }
 
+    finally:
+        db.close()
+
+# ── 第二个局头 ──
+# 局头可以把组内成员设为局头（每组最多 MAX_ORGANIZERS 个）。局头之间完全平等：
+# 不能互相移出、也没有撤掉别人局头身份的功能；不想当了自己卸任，变回普通成员。
+
+MAX_ORGANIZERS = 2
+
+
+def _organizer_count(db, group_id):
+    return db.query(UserGroupRole).filter(
+        UserGroupRole.group_id == group_id,
+        UserGroupRole.role == "organizer",
+    ).count()
+
+
+def promote_member_service(group_id: int, target_user_id: int):
+    db = SessionLocal()
+    try:
+        # 锁住组：两个局头同时提拔时排队执行，不会超过上限
+        group = db.query(Group).filter(Group.id == group_id).with_for_update().first()
+        if not group:
+            return {"success": False, "message": "groupNotFound"}
+
+        record = db.query(UserGroupRole).filter(
+            UserGroupRole.group_id == group_id,
+            UserGroupRole.user_id == target_user_id,
+        ).with_for_update().first()
+        if not record:
+            return {"success": False, "message": "memberNotInGroup"}
+        if record.role == "organizer":
+            return {"success": False, "message": "memberAlreadyOrganizer"}
+        if record.role != "user":
+            return {"success": False, "message": "permissionDenied"}
+
+        user = db.query(User).filter(User.id == target_user_id).first()
+        if not user or user.is_active == 0 or user.deleted_at is not None:
+            return {"success": False, "message": "memberNotInGroup"}
+
+        if _organizer_count(db, group_id) >= MAX_ORGANIZERS:
+            return {"success": False, "message": "organizerLimitReached", "limit": MAX_ORGANIZERS}
+
+        record.role = "organizer"
+        db.commit()
+        return {"success": True, "message": "promoteOrganizerSuccess"}
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "message": safe_error(e)}
+    finally:
+        db.close()
+
+
+def step_down_organizer_service(group_id: int, user_id: int):
+    """局头自己卸任，变回普通成员。组里只剩自己一个局头时不能卸任。"""
+    db = SessionLocal()
+    try:
+        group = db.query(Group).filter(Group.id == group_id).with_for_update().first()
+        if not group:
+            return {"success": False, "message": "groupNotFound"}
+
+        record = db.query(UserGroupRole).filter(
+            UserGroupRole.group_id == group_id,
+            UserGroupRole.user_id == user_id,
+            UserGroupRole.role == "organizer",
+        ).with_for_update().first()
+        if not record:
+            return {"success": False, "message": "permissionDenied"}
+
+        if _organizer_count(db, group_id) <= 1:
+            return {"success": False, "message": "lastOrganizerCannotStepDown"}
+
+        record.role = "user"
+        db.commit()
+        return {"success": True, "message": "stepDownSuccess"}
+    except Exception as e:
+        db.rollback()
+        return {"success": False, "message": safe_error(e)}
     finally:
         db.close()

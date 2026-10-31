@@ -78,6 +78,7 @@ async function loadGamePage() {
     if (!data.success) return;
 
     currentGames = data.games || [];
+    currentMeId = data.me ?? null;
     _checkNewRequests(currentGames);
     _updatePendingTitle(currentGames);
 
@@ -153,11 +154,11 @@ function renderPlayerList() {
         return;
     }
 
-    const organizerId = currentGame.organizer_id;
-
     currentPlayers.forEach(player => {
         const isActive = player.is_active === 1;
-        const isOrganizer = player.user_id === organizerId;
+        // 组里的局头（最多两个）都显示局头标签和买入明细；买入按钮只出现在"我"自己的卡片上
+        const isOrganizer = player.is_group_organizer ?? (player.user_id === currentGame.organizer_id);
+        const isMe = currentMeId !== null && player.user_id === currentMeId;
         const avatarUrl = player.avatar_url || "/static/images/default_avatar.jpg";
         const name = displayPlayerName(player);
 
@@ -197,7 +198,14 @@ function renderPlayerList() {
 
         let actionsHtml = "";
         if (isActive) {
-            if (isOrganizer) {
+            if (isOrganizer && !isMe) {
+                // 另一位局头：由他自己买入，这里只能移出
+                actionsHtml = `
+                    <div class="player-action-row player-action-remove">
+                        <button class="btn-small btn-remove" data-on-click="removePlayer" data-args="[${player.user_id}]">${t("removeFromGame")}</button>
+                    </div>
+                `;
+            } else if (isOrganizer) {
                 actionsHtml = `
                     <div class="player-action-row">
                         <button class="btn-small btn-buyin" data-on-click="openOrganizerBuyinModal" data-args="[${player.user_id}]">${t("buyInChips")}</button>

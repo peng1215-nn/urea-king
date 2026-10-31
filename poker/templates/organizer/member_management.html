@@ -179,6 +179,33 @@
         <div class="action-panel">
 
             <div class="panel-title">
+                <i class="fa-solid fa-user-shield"></i>
+                <h2 data-i18n="promoteOrganizer">设为局头</h2>
+            </div>
+
+            <p class="panel-description" data-i18n="promoteOrganizerDesc">
+                把所选成员设为局头。每组最多 2 个局头，两人权限完全相同；设为局头后不能由你撤销，只能由他自己在个人资料页卸任。
+            </p>
+
+            <button
+                id="promote-member-button"
+                class="panel-button"
+                data-i18n="promoteOrganizer"
+                data-on-click="openPromoteMemberModal"
+            >
+                设为局头
+            </button>
+
+            <div
+                id="promote-member-message"
+                class="operation-message"
+            ></div>
+
+        </div>
+
+        <div class="action-panel">
+
+            <div class="panel-title">
                 <i class="fa-solid fa-user-minus"></i>
                 <h2 data-i18n="removeMember">移除成员</h2>
             </div>
@@ -245,6 +272,43 @@
 
 </div>
 
+<div
+    id="promote-member-modal"
+    class="custom-modal"
+    style="display: none;"
+>
+
+    <div class="custom-modal-content">
+
+        <h3 data-i18n="promoteOrganizerConfirmTitle">确认设为局头？</h3>
+
+        <p id="promote-member-text"></p>
+
+        <div class="custom-modal-actions">
+
+            <button
+                id="promote-member-confirm"
+                class="modal-confirm-button"
+                data-i18n="confirmPromote"
+                data-on-click="confirmPromoteMember"
+            >
+                确认设为局头
+            </button>
+
+            <button
+                class="modal-cancel-button"
+                data-i18n="cancel"
+                data-on-click="closePromoteMemberModal"
+            >
+                取消
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 <script src="/static/js/common/actions.js?v={{ static_version }}"></script>
 <script src="/static/js/common/escape.js?v={{ static_version }}"></script>
 <script src="/static/js/i18n/organizer.js?v={{ static_version }}"></script>
@@ -258,6 +322,7 @@
 <script src="/static/js/organizer/member_management/member_search.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/member_management/member_detail.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/member_management/member_remove.js?v={{ static_version }}"></script>
+<script src="/static/js/organizer/member_management/member_promote.js?v={{ static_version }}"></script>
 <script src="/static/js/organizer/member_management/member_alias.js?v={{ static_version }}"></script>
 
 <div

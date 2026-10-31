@@ -5,3 +5,4 @@ let currentPlayers = [];
 let currentRequests = [];
 let allGroupMembers = [];
 let selectedAddPlayer = [];
+let currentMeId = null;       // 当前登录的局头（一个组可以有两个局头，各自只能给自己买入）

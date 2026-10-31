@@ -61,7 +61,10 @@ def get_ongoing_games(request: Request):
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
 
-    return get_ongoing_games_service(group_id=int(group_id))
+    result = get_ongoing_games_service(group_id=int(group_id))
+    # 页面据此判断哪张玩家卡片是"我"（一个组可以有两个局头，各自给自己买入）
+    result["me"] = get_user_id(request)
+    return result
 
 
 @router.get("/organizer/game/members")
@@ -73,7 +76,9 @@ def get_group_members(request: Request):
     if not group_id:
         return {"success": False, "message": "noGroupSelected"}
 
-    return get_group_members_for_game_service(group_id=int(group_id))
+    result = get_group_members_for_game_service(group_id=int(group_id))
+    result["me"] = get_user_id(request)
+    return result
 
 
 class StartGameBody(BaseModel):

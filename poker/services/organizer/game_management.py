@@ -122,10 +122,19 @@ def get_ongoing_games_service(group_id: int):
             ).all()
             auth_map = {r.user_id: r.allow_organizer_chip_op for r in auth_records}
 
+            # 组里的局头（最多两个）：都可以给自己买入保险 / Anti，都显示买入明细
+            group_organizer_ids = {
+                r.user_id for r in db.query(UserGroupRole.user_id).filter(
+                    UserGroupRole.group_id == game.group_id,
+                    UserGroupRole.role == "organizer",
+                ).all()
+            }
+
             players_data = []
             for p, u in players:
                 pd = _format_player(p, u)
-                if u.id == game.organizer_id:
+                pd["is_group_organizer"] = u.id in group_organizer_ids or u.id == game.organizer_id
+                if pd["is_group_organizer"]:
                     breakdown = _get_buyin_breakdown(db, game.id, u.id)
                     pd["buy_in_normal"] = breakdown["normal"]
                     pd["buy_in_insurance"] = breakdown["insurance"]

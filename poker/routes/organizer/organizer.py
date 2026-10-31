@@ -10,6 +10,8 @@ from poker.services.common.common import add_no_cache_headers
 from poker.services.organizer.member_management import get_organizer_members_service
 from poker.services.organizer.member_management import remove_member_service
 from poker.services.organizer.member_management import save_member_alias_service
+from poker.services.organizer.member_management import promote_member_service
+from poker.services.organizer.member_management import step_down_organizer_service
 from poker.template_config import templates
 
 
@@ -125,6 +127,61 @@ def remove_member(
             operator_username=request.session.get("username"),
         )
 
+    return result
+
+
+@router.post("/organizer/promote-member")
+def promote_member(request: Request, target_user_id: int = Form(...)):
+    """把组内普通成员设为局头（每组最多 2 个局头）。"""
+    if not require_organizer(request):
+        return {"success": False, "message": "permissionDenied"}
+
+    group_id = get_current_group_id(request)
+    if not group_id:
+        return {"success": False, "message": "noGroupSelected"}
+
+    result = promote_member_service(group_id=int(group_id), target_user_id=target_user_id)
+    if result.get("success"):
+        # 被提拔的人当前的登录（还是普通成员身份）立即失效，重新登录后以局头身份进入
+        clear_session_cache()
+        write_audit_log(
+            request=request,
+            action="PROMOTE_ORGANIZER",
+            target_type="user_group_role",
+            target_id=target_user_id,
+            old_value=f"group_id={group_id}, role=user",
+            new_value="role=organizer",
+            operator_id=request.session.get("user_id"),
+            operator_username=request.session.get("username"),
+        )
+    return result
+
+
+@router.post("/organizer/step-down")
+def step_down(request: Request):
+    """局头自己卸任，变回普通成员；卸任后需要重新登录。"""
+    if not require_organizer(request):
+        return {"success": False, "message": "permissionDenied"}
+
+    group_id = get_current_group_id(request)
+    user_id = request.session.get("user_id")
+    if not group_id or not user_id:
+        return {"success": False, "message": "noGroupSelected"}
+
+    result = step_down_organizer_service(group_id=int(group_id), user_id=int(user_id))
+    if result.get("success"):
+        write_audit_log(
+            request=request,
+            action="STEP_DOWN_ORGANIZER",
+            target_type="user_group_role",
+            target_id=int(user_id),
+            old_value=f"group_id={group_id}, role=organizer",
+            new_value="role=user",
+            operator_id=int(user_id),
+            operator_username=request.session.get("username"),
+        )
+        request.session.clear()
+        clear_session_cache()
     return result
 
 

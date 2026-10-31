@@ -20,6 +20,7 @@ function selectMember(member, rowElement) {
     );
 
     updateRemoveMemberPanel(member);
+    updatePromoteMemberPanel(member);
     updateAliasPanel(member);
 }
 
@@ -39,6 +40,7 @@ function resetSelectedMemberState() {
     setDetailText("detail-status",     "--");
 
     resetRemoveMemberPanel();
+    resetPromoteMemberPanel();
     resetAliasPanel();
 }
 
@@ -58,6 +60,7 @@ function refreshSelectedMemberLanguage() {
     setDetailText("detail-role", memberRoleLabel(selectedMember.role));
 
     updateRemoveMemberPanel(selectedMember);
+    updatePromoteMemberPanel(selectedMember);
 }
 
 

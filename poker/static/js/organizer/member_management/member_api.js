@@ -9,6 +9,8 @@ async function loadMembers() {
         }
 
         allMembers = data.members;
+        organizerCount = data.organizer_count ?? allMembers.filter(m => m.role === "organizer").length;
+        maxOrganizers = data.max_organizers ?? 2;
 
         renderMembers(allMembers);
 
