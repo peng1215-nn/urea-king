@@ -336,3 +336,39 @@ def test_reset_password_page_checks_token_without_using_it(client, factory):
     assert 'id="reset-form"' in valid
     form = {"token": "page-valid", "new_password": "newpass123", "confirm_password": "newpass123"}
     assert client.post("/reset-password", data=form).json()["success"] is True
+
+
+def test_privacy_page_is_public(client):
+    response = client.get("/privacy")
+    assert response.status_code == 200
+    assert "隐私说明" in response.text and "Privacy Notice" in response.text
+
+
+def test_deleted_account_email_released_after_cooldown(factory):
+    from datetime import timedelta
+
+    from core.time import now_columbus_naive
+    from database import SessionLocal
+    from poker.models import User
+    from poker.services.auth.token_cleanup import release_deleted_account_emails
+
+    old_id = factory.user("goneuser1")
+    new_id = factory.user("goneuser2")
+    db = SessionLocal()
+    try:
+        old = db.get(User, old_id)
+        old.email, old.is_active, old.deleted_at = "old@example.com", 0, now_columbus_naive() - timedelta(hours=25)
+        recent = db.get(User, new_id)
+        recent.email, recent.is_active, recent.deleted_at = "recent@example.com", 0, now_columbus_naive() - timedelta(hours=1)
+        db.commit()
+    finally:
+        db.close()
+
+    assert release_deleted_account_emails() == 1
+
+    db = SessionLocal()
+    try:
+        assert db.get(User, old_id).email == f"deleted#{old_id}@deleted"
+        assert db.get(User, new_id).email == "recent@example.com"
+    finally:
+        db.close()

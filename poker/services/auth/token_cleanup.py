@@ -33,3 +33,35 @@ def delete_expired_tokens():
         return 0
     finally:
         db.close()
+
+
+def release_deleted_account_emails():
+    """
+    注销的账号只在 24 小时冷却期内保留邮箱（防止注销后立刻用同一邮箱重新注册），
+    过了冷却期就把邮箱清掉，不再保存。和注册时的释放规则一致（见 email_owner.py）。
+    """
+    from poker.models import User
+    from poker.services.auth.email_owner import DELETE_COOLDOWN_HOURS
+
+    db = SessionLocal()
+    try:
+        cutoff = now_columbus_naive() - timedelta(hours=DELETE_COOLDOWN_HOURS)
+        rows = db.query(User).filter(
+            User.deleted_at.isnot(None),
+            User.deleted_at < cutoff,
+            User.email.isnot(None),
+            ~User.email.like("deleted#%"),
+        ).all()
+        for user in rows:
+            user.email = f"deleted#{user.id}@deleted"
+            user.pending_email = None
+        db.commit()
+        if rows:
+            logger.info("released emails of deleted accounts", extra={"count": len(rows)})
+        return len(rows)
+    except Exception:
+        db.rollback()
+        logger.exception("failed to release emails of deleted accounts")
+        return 0
+    finally:
+        db.close()

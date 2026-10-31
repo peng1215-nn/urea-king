@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隐私说明 - UREAKING POKER</title>
+    <link rel="stylesheet" href="/static/css/auth/common.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/common/language_base.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/auth/language.css?v={{ static_version }}">
+    <link rel="stylesheet" href="/static/css/auth/privacy.css?v={{ static_version }}">
+</head>
+<body>
+
+<div class="privacy-page">
+<main class="privacy-card">
+
+    {% include "common/language_switcher.html" %}
+
+    <!-- 中文 -->
+    <article class="privacy-doc" lang="zh" data-privacy-lang="zh">
+        <h1>隐私说明</h1>
+        <p class="privacy-meta">UREAKING POKER · 生效日期：2026 年 10 月 31 日</p>
+
+        <p>UREAKING POKER 是个人运营、不收费的记账工具，用来帮朋友之间组织的牌局记录买入、卖出和输赢。网站只记账，<strong>不处理任何真实资金</strong>，钱款由大家在线下自行结算。下面说明我们保存哪些信息、怎么用、谁能看到，以及你可以怎么做。</p>
+
+        <h2>我们保存哪些信息</h2>
+        <ul>
+            <li><strong>账号信息：</strong>用户名、昵称、邮箱、你自己上传的头像（可选）。密码只保存加密后的结果，任何人（包括管理员）都无法看到原密码。</li>
+            <li><strong>牌局信息：</strong>你所在的组、每局的买入、卖出和盈亏，以及每一步操作记录（谁在什么时间申请、批准、买入、离场、结束牌局）。</li>
+            <li><strong>系统日志：</strong>登录、注册、加入或退出组、更换邮箱、注销等重要操作的时间和 IP 地址，用于安全排查。</li>
+            <li><strong>浏览器本地：</strong>保持登录状态的 Cookie（网站正常使用所必需），以及语言偏好、是否关闭了新手提示等设置，只保存在你自己的浏览器里。</li>
+        </ul>
+        <p>我们不使用广告，也不做跨网站的追踪。网站监控只统计页面访问次数，不关联到个人。</p>
+
+        <h2>这些信息用来做什么</h2>
+        <ul>
+            <li>提供记账功能：计算买入、输赢，生成牌局记录和审计报告。</li>
+            <li>登录和账号安全：验证邮箱、找回密码、防止有人反复尝试密码。</li>
+            <li>排查问题：网站出错时定位原因。</li>
+        </ul>
+        <p>我们<strong>不会出售</strong>你的信息，也不会用于以上用途之外的事情。</p>
+
+        <h2>谁能看到</h2>
+        <ul>
+            <li><strong>同组成员：</strong>你的昵称、头像、局头给你设的备注名，以及本组所有牌局记录和审计报告（为了账目公开透明，组内每个人都能看到每一局）。</li>
+            <li><strong>局头：</strong>还能看到本组成员的用户名，并管理成员。</li>
+            <li><strong>网站管理员：</strong>出于维护需要，可以查看全部数据，包括邮箱和系统日志。管理员只在维护和处理问题时查看，不会另作他用。</li>
+            <li>你的邮箱和密码不会显示给其他成员。</li>
+        </ul>
+
+        <h2>使用的第三方服务</h2>
+        <p>为了运行网站，我们使用以下服务，它们只在提供各自服务所需的范围内处理数据：</p>
+        <ul>
+            <li><strong>Render：</strong>网站和数据库托管。</li>
+            <li><strong>Resend：</strong>发送验证邮件、找回密码邮件和通知邮件。</li>
+            <li><strong>Cloudinary：</strong>存放头像图片。</li>
+            <li><strong>Sentry：</strong>记录网站错误，用于排查问题；我们设置为不发送个人身份信息。</li>
+        </ul>
+        <p>这些服务的服务器可能位于你所在国家或地区以外（例如美国）。</p>
+
+        <h2>保存多久、怎么删除</h2>
+        <ul>
+            <li>账号存续期间，信息会一直保存。</li>
+            <li><strong>注销账号：</strong>你可以在登录页点“注销账号”自行注销（需要先退出你加入的组）。注销后，你的用户名、昵称、头像和密码会立即清除；邮箱会保留 24 小时（防止注销后立刻重新注册），之后清除。</li>
+            <li><strong>牌局记录：</strong>牌局记录是全组共同的账目，为了保证其他人的账目完整，注销后你在该组已有的牌局记录会保留，显示的是当时的昵称。如果你是一个组唯一的局头，并且组里已经没有其他成员，注销时这个组和它的全部记录会一起删除。</li>
+            <li>验证和找回密码链接过期 7 天后自动清除。系统日志用于安全和账目核对，会长期保存。</li>
+        </ul>
+
+        <h2>安全</h2>
+        <p>网站全程使用 HTTPS 加密传输，密码加密保存，登录有次数限制，运营所用的托管和代码账号都开启了两步验证。我们会尽力保护数据，但任何网站都无法保证绝对安全；如果发生影响你的数据泄露，我们会尽快通知你。</p>
+
+        <h2>你可以做什么</h2>
+        <ul>
+            <li>在个人资料页修改昵称、头像、密码和邮箱。</li>
+            <li>随时注销账号。</li>
+            <li>对自己的数据有疑问或需要帮助，可以联系你所在组的局头，或通过局头联系网站管理员。</li>
+        </ul>
+
+        <h2>停止运营</h2>
+        <p>如果网站将停止运营，我们会至少提前 30 天通过网站公告通知，给大家留出时间保存自己的记录。</p>
+
+        <h2>说明的更新</h2>
+        <p>本说明有变化时会更新上方的生效日期；重要变化会在网站公告中说明。</p>
+    </article>
+
+    <!-- English -->
+    <article class="privacy-doc" lang="en" data-privacy-lang="en" hidden>
+        <h1>Privacy Notice</h1>
+        <p class="privacy-meta">UREAKING POKER · Effective October 31, 2026</p>
+
+        <p>UREAKING POKER is a free bookkeeping tool run by an individual. It helps friends who organize poker games keep track of buy-ins, cash-outs and results. The site only keeps the books — <strong>it never handles real money</strong>; everyone settles up offline. This notice explains what we keep, how we use it, who can see it, and what you can do.</p>
+
+        <h2>What we keep</h2>
+        <ul>
+            <li><strong>Account details:</strong> username, nickname, email address, and an avatar if you upload one. Passwords are stored only in hashed form; nobody, including the administrator, can see your actual password.</li>
+            <li><strong>Game data:</strong> the groups you belong to, your buy-ins, cash-outs and results in each game, and a record of each action (who requested, approved, bought in, left or finished a game, and when).</li>
+            <li><strong>System logs:</strong> the time and IP address of important actions such as signing in, registering, joining or leaving a group, changing your email or deleting your account, used for security checks.</li>
+            <li><strong>In your browser:</strong> a cookie that keeps you signed in (required for the site to work), plus settings such as your language and whether you dismissed the getting-started tips, stored only in your own browser.</li>
+        </ul>
+        <p>There are no ads and no cross-site tracking. Site monitoring only counts page visits and isn't linked to any person.</p>
+
+        <h2>How we use it</h2>
+        <ul>
+            <li>To keep the books: totals, results, game logs and audit reports.</li>
+            <li>For sign-in and account security: email verification, password reset, and limiting repeated password attempts.</li>
+            <li>To investigate problems when something goes wrong.</li>
+        </ul>
+        <p>We <strong>never sell</strong> your information or use it for anything beyond the above.</p>
+
+        <h2>Who can see it</h2>
+        <ul>
+            <li><strong>Members of your group:</strong> your nickname, avatar, the alias the organizer gave you, and all of the group's game records and audit reports (so the books stay open to everyone in the group).</li>
+            <li><strong>Organizers:</strong> can also see members' usernames and manage members.</li>
+            <li><strong>The site administrator:</strong> can see all data, including email addresses and system logs, for maintenance. The administrator only looks at data to maintain the site or resolve problems, and never uses it for anything else.</li>
+            <li>Your email address and password are never shown to other members.</li>
+        </ul>
+
+        <h2>Third-party services</h2>
+        <p>The site relies on these services, which handle data only as needed to provide their service:</p>
+        <ul>
+            <li><strong>Render:</strong> hosting for the site and database.</li>
+            <li><strong>Resend:</strong> verification, password reset and notification emails.</li>
+            <li><strong>Cloudinary:</strong> avatar images.</li>
+            <li><strong>Sentry:</strong> error reports for troubleshooting; configured not to send personal information.</li>
+        </ul>
+        <p>These services may store data outside your country or region (for example, in the United States).</p>
+
+        <h2>How long we keep it, and deletion</h2>
+        <ul>
+            <li>We keep your information while your account exists.</li>
+            <li><strong>Deleting your account:</strong> you can do this yourself with "Delete account" on the sign-in page (leave the groups you joined first). Your username, nickname, avatar and password are removed right away; your email is kept for 24 hours (to prevent immediate re-registration) and then removed.</li>
+            <li><strong>Game records:</strong> game records are the group's shared books. To keep everyone else's records complete, your past game records in a group remain after you delete your account, showing the nickname you had at the time. If you are the only organizer of a group and no other members remain, the group and all its records are deleted with your account.</li>
+            <li>Verification and password-reset links are removed 7 days after they expire. System logs are kept long-term for security and to check the books.</li>
+        </ul>
+
+        <h2>Security</h2>
+        <p>The site uses HTTPS throughout, stores passwords hashed, limits sign-in attempts, and the hosting and code accounts used to run it are protected with two-factor authentication. We do our best to protect your data, but no website can guarantee perfect security. If a breach affects your data, we will let you know as soon as possible.</p>
+
+        <h2>Your choices</h2>
+        <ul>
+            <li>Change your nickname, avatar, password and email on your profile page.</li>
+            <li>Delete your account at any time.</li>
+            <li>For questions or help with your data, contact your group's organizer, or reach the site administrator through them.</li>
+        </ul>
+
+        <h2>If the site shuts down</h2>
+        <p>We will announce it on the site at least 30 days in advance so everyone has time to save their records.</p>
+
+        <h2>Changes to this notice</h2>
+        <p>When this notice changes, the effective date above will be updated; important changes will be announced on the site.</p>
+    </article>
+
+    <a class="privacy-back" href="/login" data-privacy-back>← 返回登录</a>
+
+</main>
+</div>
+
+<script src="/static/js/common/actions.js?v={{ static_version }}"></script>
+<script src="/static/js/common/language.js?v={{ static_version }}"></script>
+<script src="/static/js/auth/privacy.js?v={{ static_version }}"></script>
+
+</body>
+</html>

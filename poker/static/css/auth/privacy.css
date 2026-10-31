@@ -1,0 +1,84 @@
+/* 隐私说明页：长文阅读，左右留白，手机上也能舒服地读 */
+.privacy-page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    padding: 48px 16px 64px;
+    display: flex;
+    justify-content: center;
+}
+
+.privacy-card {
+    width: 100%;
+    max-width: 760px;
+    padding: 40px 44px;
+    border-radius: 20px;
+    background: rgba(12, 12, 20, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(6px);
+    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.privacy-card .language-switcher-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}
+
+.privacy-doc[hidden] { display: none; }
+
+.privacy-doc h1 {
+    font-size: 28px;
+    color: #fff;
+    letter-spacing: 1px;
+    text-wrap: balance;
+}
+
+.privacy-meta {
+    margin: 6px 0 22px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.privacy-doc h2 {
+    margin: 28px 0 10px;
+    font-size: 18px;
+    color: #fff;
+}
+
+.privacy-doc p,
+.privacy-doc li {
+    font-size: 15px;
+}
+
+.privacy-doc p + p { margin-top: 10px; }
+
+.privacy-doc ul {
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.privacy-doc strong { color: #fff; }
+
+.privacy-back {
+    display: inline-block;
+    margin-top: 32px;
+    color: rgba(200, 160, 255, 0.9);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.privacy-back:hover { color: #fff; }
+
+@media (max-width: 600px) {
+    .privacy-page { padding: 20px 12px 48px; }
+    .privacy-card { padding: 24px 18px; border-radius: 16px; }
+    .privacy-doc h1 { font-size: 24px; }
+    .privacy-doc p,
+    .privacy-doc li { font-size: 14px; }
+}
+
+.privacy-doc ul + p { margin-top: 12px; }

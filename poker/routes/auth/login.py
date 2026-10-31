@@ -29,6 +29,12 @@ def home(request: Request):
     return render_login_page(request)
 
 
+@router.get("/privacy", response_class=HTMLResponse)
+def privacy_page(request: Request):
+    """隐私说明（中英文），不需要登录。"""
+    return templates.TemplateResponse(request=request, name="auth/privacy.html")
+
+
 @router.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
     record_login_page_view_service()

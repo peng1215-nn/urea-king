@@ -18,6 +18,7 @@ PUBLIC_PATHS = (
     "/group-join",
     "/delete-account",
     "/account/delete",
+    "/privacy",
 )
 
 

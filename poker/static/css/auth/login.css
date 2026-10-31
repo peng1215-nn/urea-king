@@ -128,3 +128,25 @@
         padding: 28px 20px;
     }
 }
+
+/* 左下角：隐私说明（和右下角的返回首页对称） */
+.login-privacy-link {
+    position: fixed;
+    bottom: 28px;
+    left: 28px;
+    z-index: 9999;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
+    text-decoration: none;
+    padding: 6px 0;
+}
+
+.login-privacy-link:hover,
+.login-privacy-link:focus-visible {
+    color: #fff;
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .login-privacy-link { bottom: 22px; left: 18px; }
+}

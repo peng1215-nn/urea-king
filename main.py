@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from starlette.concurrency import run_in_threadpool
@@ -14,7 +15,7 @@ from core.errors import register_exception_handlers
 from core.middleware import install_middleware
 from poker.core import session as poker_session
 from poker.template_config import render_error_page
-from poker.services.auth.token_cleanup import delete_expired_tokens
+from poker.services.auth.token_cleanup import delete_expired_tokens, release_deleted_account_emails
 from poker.routes.common.health import router as health_router
 
 from root.routes.index import router as root_index_router
@@ -51,11 +52,33 @@ setup_logging(settings.LOG_LEVEL)
 setup_error_reporting()
 
 # 线上（含测试环境）不公开接口文档，避免把全部接口和参数暴露给未登录的访客
+CLEANUP_INTERVAL_SECONDS = 6 * 60 * 60
+
+
+async def _run_cleanups():
+    # 早已过期的验证、重置链接记录；注销超过 24 小时的账号的邮箱（隐私说明里承诺的）
+    await run_in_threadpool(delete_expired_tokens)
+    await run_in_threadpool(release_deleted_account_emails)
+
+
+async def _cleanup_loop():
+    while True:
+        await asyncio.sleep(CLEANUP_INTERVAL_SECONDS)
+        try:
+            await _run_cleanups()
+        except Exception:
+            pass
+
+
 @asynccontextmanager
 async def lifespan(app):
-    # 启动时清理一次早已过期的验证、重置链接记录
-    await run_in_threadpool(delete_expired_tokens)
-    yield
+    # 启动时清理一次，之后每 6 小时清理一次
+    await _run_cleanups()
+    task = asyncio.create_task(_cleanup_loop())
+    try:
+        yield
+    finally:
+        task.cancel()
 
 
 if settings.IS_PRODUCTION:
