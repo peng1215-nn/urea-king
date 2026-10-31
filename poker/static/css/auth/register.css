@@ -227,3 +227,22 @@ input {
     font-size: 13px;
     min-height: 18px;
 }
+
+/* 注册按钮下方：注册即表示已阅读《隐私说明》 */
+.privacy-consent {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.privacy-consent a {
+    color: rgba(200, 160, 255, 0.9);
+    text-decoration: none;
+}
+
+.privacy-consent a:hover,
+.privacy-consent a:focus-visible {
+    color: #fff;
+    text-decoration: underline;
+}

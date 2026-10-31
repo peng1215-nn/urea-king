@@ -159,6 +159,6 @@ window.loginTranslations = {
         accountDeleteSuccess: "Your account has been deleted.",
 
         platformAccountHint: "Registered in another platform module?",
-        platformAccountSuffix: "Use the same account to sign in.",
+        platformAccountSuffix: " Use the same account to sign in.",
     }
 };

@@ -129,24 +129,22 @@
     }
 }
 
-/* 左下角：隐私说明（和右下角的返回首页对称） */
-.login-privacy-link {
-    position: fixed;
-    bottom: 28px;
-    left: 28px;
-    z-index: 9999;
-    font-size: 13px;
+/* 隐私说明链接：在“注册账号 · 忘记密码 · 注销账号”和平台提示之间 */
+.privacy-link-row {
+    margin-top: 12px;
+    text-align: center;
+}
+
+.privacy-link-row a {
+    display: inline-block;
+    padding: 4px 6px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.55);
     text-decoration: none;
-    padding: 6px 0;
 }
 
-.login-privacy-link:hover,
-.login-privacy-link:focus-visible {
+.privacy-link-row a:hover,
+.privacy-link-row a:focus-visible {
     color: #fff;
     text-decoration: underline;
-}
-
-@media (max-width: 768px) {
-    .login-privacy-link { bottom: 22px; left: 18px; }
 }

@@ -1,5 +1,8 @@
 window.registerTranslations = {
     zh: {
+        privacyConsentPrefix: "注册即表示你已阅读",
+        privacyConsentLink: "《隐私说明》",
+        privacyConsentSuffix: "。",
         invalidRequest: "提交的内容格式不正确，请检查后重试。",
         requestTooLarge: "提交的内容太大（普通请求上限 1 MB，头像上限 10 MB），请缩小后再试。",
         pageTitle: "UREAKING-POKER 注册",
@@ -74,6 +77,9 @@ window.registerTranslations = {
     },
 
     en: {
+        privacyConsentPrefix: "By registering, you confirm you've read the ",
+        privacyConsentLink: "Privacy Notice",
+        privacyConsentSuffix: ".",
         invalidRequest: "Some of the submitted values are not in the right format. Please check and try again.",
         requestTooLarge: "The submitted data is too large (1 MB for normal requests, 10 MB for avatars). Please make it smaller and try again.",
         pageTitle: "UREAKING-POKER Register",
