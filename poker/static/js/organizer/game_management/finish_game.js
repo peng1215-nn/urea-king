@@ -24,8 +24,9 @@ function openFinishGameModal() {
         const isActive = player.is_active === 1;
         const buyIn = player.total_buy_in || 0;
         const leftCashOut = player.left_cash_out || 0;
-        const exited = !isActive && (player.leave_type === "exit" || (!player.leave_type && leftCashOut > 0));
-        const away = !isActive && !exited;
+        const manager = !isActive && player.leave_type === "manager";
+        const exited = !isActive && !manager && (player.leave_type === "exit" || (!player.leave_type && leftCashOut > 0));
+        const away = !isActive && !exited && !manager;
 
         // 已经结算离场、没再回来的玩家，手上已经没有筹码；一直没买入的人也没有筹码：默认填 0
         const prefill = exited || buyIn === 0 ? "0" : "";
@@ -36,6 +37,9 @@ function openFinishGameModal() {
         }
         if (away) {
             hints += `<div class="finish-player-away">${escapeHtml(t("awayChipsHint"))}</div>`;
+        }
+        if (manager) {
+            hints += `<div class="finish-player-away">${escapeHtml(t("managerChipsHint"))}</div>`;
         }
 
         const row = document.createElement("div");

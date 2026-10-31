@@ -1,28 +1,36 @@
 let selectedPreselect = [];
+let startSelfDefaulted = false;   // 打开弹窗时默认勾上自己（只做一次，之后由局头自己决定）
+
+// 没勾选自己 = 本局只管理、不上桌：给出提示
+function updateStartManagerHint() {
+    const hint = document.getElementById("start-manager-hint");
+    if (!hint) return;
+    hint.hidden = currentMeId === null || selectedPreselect.includes(currentMeId);
+}
 
 function renderStartMemberList(members) {
     const list = document.getElementById("member-select-list");
     list.innerHTML = "";
 
-    // 开局的人自己一定在局里；组里另一位局头和普通成员一样可选可不选
-    const meId = currentMeId ?? (members.find(m => m.role === "organizer") || {}).user_id;
+    // 开局的人默认上桌，也可以取消勾选，只管理不上桌；组里另一位局头和普通成员一样可选可不选
+    const meId = currentMeId;
 
     members.forEach(member => {
         const isOrganizer = member.role === "organizer";
         const isMe = member.user_id === meId;
         // 已在其他进行中的牌局里的人（开局人自己除外）不能再选
         const inOtherGame = !isMe && (member.ongoing_game_ids || []).length > 0;
-        const selected = isMe || (!inOtherGame && selectedPreselect.includes(member.user_id));
+        const selected = !inOtherGame && selectedPreselect.includes(member.user_id);
 
         const item = document.createElement("div");
         item.className = "member-select-item"
-            + (isMe ? " selected forced" : "")
-            + (!isMe && selected ? " selected" : "")
+            + (selected ? " selected" : "")
             + (inOtherGame ? " disabled" : "");
         item.dataset.userId = member.user_id;
 
         const avatarUrl = member.avatar_url || "/static/images/default_avatar.jpg";
-        const roleLabel = inOtherGame ? t("inOtherGame") : isOrganizer ? t("organizer") : t("roleUser");
+        const roleLabel = inOtherGame ? t("inOtherGame")
+            : isMe ? t("organizerMe") : isOrganizer ? t("organizer") : t("roleUser");
 
         item.innerHTML = `
             <img class="member-select-avatar" src="${escapeHtml(avatarUrl)}" alt="头像">
@@ -31,7 +39,7 @@ function renderStartMemberList(members) {
             <div class="member-check"><i class="fa-solid fa-check" style="display:${selected ? "block" : "none"};"></i></div>
         `;
 
-        if (!isMe && !inOtherGame) {
+        if (!inOtherGame) {
             item.addEventListener("click", () => togglePreselect(item, member.user_id));
         }
 
@@ -45,15 +53,14 @@ function renderStartMemberList(members) {
             .map(m => m.user_id)
     );
     selectedPreselect = selectedPreselect.filter(id => selectable.has(id));
-    if (meId !== undefined && meId !== null && !selectedPreselect.includes(meId)) {
-        selectedPreselect.unshift(meId);
-    }
 
     document.getElementById("selected-count").innerText = selectedPreselect.length;
+    updateStartManagerHint();
 }
 
 async function openStartGameModal() {
     selectedPreselect = [];
+    startSelfDefaulted = false;
 
     document.getElementById("start-game-message").innerText = "";
     document.getElementById("selected-count").innerText = "0";
@@ -68,6 +75,11 @@ async function openStartGameModal() {
 
     allGroupMembers = data.members;
     if (data.me !== undefined && data.me !== null) currentMeId = data.me;
+    // 默认自己上桌；取消勾选就是只管理
+    if (!startSelfDefaulted && currentMeId !== null) {
+        selectedPreselect = [currentMeId];
+        startSelfDefaulted = true;
+    }
     renderStartMemberList(allGroupMembers);
 
     document.getElementById("start-game-modal").style.display = "flex";
@@ -92,6 +104,7 @@ function togglePreselect(item, userId) {
 
     document.getElementById("selected-count").innerText = selectedPreselect.length;
     document.getElementById("start-game-message").innerText = "";
+    updateStartManagerHint();
 }
 
 function closeStartGameModal() {

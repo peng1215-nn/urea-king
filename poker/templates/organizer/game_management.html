@@ -113,6 +113,15 @@
 
         </div>
 
+        <!-- 局头本局没上桌（只管理）时显示：可以买保险 / Anti，也可以上桌 -->
+        <div id="manager-bar" class="manager-bar" hidden>
+            <span class="manager-bar-text" data-i18n="managerBarText">你在本局只管理、没上桌，不占桌上名额。可以买保险和 Anti；普通买入需要先上桌。</span>
+            <div class="manager-bar-actions">
+                <button type="button" class="btn-small btn-buyin" data-on-click="openManagerBuyinModal" data-i18n="managerBuyin">买保险 / Anti</button>
+                <button type="button" id="manager-sit-btn" class="btn-small btn-rejoin" data-on-click="sitDownAsOrganizer" data-args="[&quot;$this&quot;]" data-i18n="sitDown">上桌</button>
+            </div>
+        </div>
+
         <div class="game-panels">
 
             <div class="game-panel">
@@ -189,6 +198,8 @@
             <span id="selected-count">0</span>
             <span> / 10</span>
         </div>
+
+        <div id="start-manager-hint" class="start-manager-hint" data-i18n="startManagerHint" hidden>你没有勾选自己：本局你只管理、不上桌，不占桌上名额。只管理时可以买保险和 Anti，不能普通买入；之后想上桌，用“加入玩家”把自己加进来。</div>
 
         <div id="start-game-message" class="operation-message"></div>
 

@@ -347,8 +347,38 @@ async function rejectRequest(requestId, button) {
 
 let organizerBuyinUserId = null;
 
+// 局头没上桌时只能买保险 / Anti：把“普通买入”选项藏起来
+function _setNormalBuyinAllowed(allowed) {
+    const select = document.getElementById("organizer-buyin-type");
+    const normal = select.querySelector('option[value="normal"]');
+    normal.hidden = !allowed;
+    normal.disabled = !allowed;
+    select.value = allowed ? "normal" : "insurance";
+}
+
+function openManagerBuyinModal() {
+    if (currentMeId === null) return;
+    openOrganizerBuyinModal(currentMeId);
+    _setNormalBuyinAllowed(false);
+}
+
+// 只管理的局头上桌：和“加入玩家”一样占一个桌上名额
+async function sitDownAsOrganizer(button) {
+    if (!currentGame || currentMeId === null) return;
+    const gameId = currentGame.id;
+    const data = await runBusy("sit-down", button, () => apiAddPlayer(gameId, currentMeId));
+    if (!data) return;
+    if (data.success) {
+        showGameMessage(t("sitDownSuccess"), "success");
+    } else {
+        reportGameFailure(data, null);
+    }
+    await loadGamePage();
+}
+
 function openOrganizerBuyinModal(userId) {
     organizerBuyinUserId = userId;
+    _setNormalBuyinAllowed(true);
     document.getElementById("organizer-buyin-type").value = "normal";
     document.getElementById("organizer-buyin-amount").value = "";
     document.getElementById("organizer-buyin-message").innerText = "";

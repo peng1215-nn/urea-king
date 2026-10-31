@@ -141,8 +141,10 @@ def get_ongoing_games_service(group_id: int):
                     pd["buy_in_anti"] = breakdown["anti"]
                 pd["allow_organizer_chip_op"] = auth_map.get(u.id, 0)
                 pd["alias"] = aliases.get(u.id, "")
-                # 不在桌上的玩家：区分"暂离"（筹码还在手上）和"已结算离场"
-                if p.is_active != 1:
+                # 不在桌上的玩家：区分"暂离"（筹码还在手上）、"已结算离场"和"只管理"（局头没上桌）
+                if p.is_active != 1 and p.manager_only:
+                    pd["leave_type"] = "manager"
+                elif p.is_active != 1:
                     pd["leave_type"] = leave_types.get(
                         u.id, "exit" if (p.left_cash_out or 0) > 0 else "away"
                     )
@@ -370,6 +372,14 @@ def add_player_to_game_service(game_id: int, group_id: int, user_id: int, organi
         if active_count >= MAX_PLAYERS:
             return {"success": False, "message": "gameFull"}
 
+        if existing_player and existing_player.manager_only:
+            # 只管理的局头上桌：之前只记过保险 / Anti，这是第一次坐下
+            existing_player.is_active = 1
+            existing_player.manager_only = 0
+            record_game_event(db, game_id, "player_added", actor_user_id=organizer_id, target_user_id=user_id)
+            db.commit()
+            return {"success": True, "rejoined": False}
+
         if existing_player:
             existing_player.is_active = 1
             # 记下他这次回来之前是"暂离"还是"结算离场"，报告里区分显示
@@ -585,13 +595,27 @@ def organizer_buyin_service(game_id: int, group_id: int, user_id: int, amount: i
         player = db.query(PokerGamePlayer).filter(
             PokerGamePlayer.game_id == game_id,
             PokerGamePlayer.user_id == user_id,
-            PokerGamePlayer.is_active == 1,
-        ).first()
-
-        if not player:
-            return {"success": False, "message": "playerNotInGame"}
+        ).with_for_update().first()
 
         user = db.query(User).filter(User.id == user_id).first()
+
+        # 局头不上桌（只管理）时只能买保险 / Anti，普通买入要先上桌
+        seated = player is not None and player.is_active == 1
+        if not seated and buy_type == "normal":
+            return {"success": False, "message": "organizerNotSeatedNormalBuyin"}
+
+        if player is None:
+            # 只管理的局头第一次买保险 / Anti：建一条不占桌上名额的记录，结束时一起结算
+            player = PokerGamePlayer(
+                game_id=game_id,
+                user_id=user_id,
+                nickname=(user.nickname or user.username) if user else "",
+                is_active=0,
+                manager_only=1,
+                joined_at=now_columbus_naive(),
+            )
+            db.add(player)
+            db.flush()
 
         _add_to_buy_in(db, player.id, amount)
 
@@ -942,6 +966,7 @@ def _format_player(player, user):
         "left_cash_out": player.left_cash_out or 0,
         "net": player.net,
         "is_active": player.is_active,
+        "manager_only": player.manager_only or 0,
         "joined_at": player.joined_at.strftime("%Y-%m-%d %H:%M") if player.joined_at else "",
     }
 

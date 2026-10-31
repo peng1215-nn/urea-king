@@ -143,6 +143,13 @@ function renderGameStatus() {
     document.getElementById("game-started-at").innerText = currentGame.started_at || "--";
     const activeCount = currentPlayers.filter(p => p.is_active === 1).length;
     document.getElementById("game-player-count").innerText = activeCount;
+
+    // 我没上桌（只管理，或者已经离桌）：显示只管理的提示，可以买保险 / Anti、上桌
+    const bar = document.getElementById("manager-bar");
+    if (bar) {
+        const me = currentMeId === null ? null : currentPlayers.find(p => p.user_id === currentMeId);
+        bar.hidden = currentMeId === null || (me && me.is_active === 1);
+    }
 }
 
 function renderPlayerList() {
@@ -168,7 +175,10 @@ function renderPlayerList() {
         // 不在桌上的玩家区分"暂离"（筹码还在手上，可回来）和"已结算离场"
         let statusClass = "active";
         let statusText = t("inGame");
-        if (!isActive) {
+        if (!isActive && player.leave_type === "manager") {
+            statusClass = "inactive manager";
+            statusText = t("statusManager");
+        } else if (!isActive) {
             const exited = player.leave_type === "exit";
             statusClass = exited ? "inactive exited" : "inactive away";
             statusText = exited ? t("statusExited") : t("statusAway");
@@ -225,6 +235,9 @@ function renderPlayerList() {
                     </div>
                 `;
             }
+        } else if (player.leave_type === "manager") {
+            // 只管理的局头：上桌、买保险 / Anti 都在上方的“只管理”提示条里操作
+            actionsHtml = "";
         } else {
             actionsHtml = `
                 <div class="player-action-row">

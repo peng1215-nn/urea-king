@@ -803,3 +803,70 @@ def test_reverse_buyin_over_http_requires_organizer(client, table, login_as):
     response = client.post("/organizer/game/reverse-buyin", data={"request_id": req, "game_id": game_id})
     assert response.json()["success"] is True
     assert _player(game_id, alice).total_buy_in == 0
+
+
+# ───────────────────────── 局头只管理、不上桌 ─────────────────────────
+
+def test_organizer_can_manage_without_a_seat(table):
+    from database import SessionLocal
+    from poker.services.common.game_events import build_game_report
+
+    t = table
+    alice, bob = t["members"][0], t["members"][1]
+    # 开局时不勾选自己：只管理
+    game_id = _start(t, players=[alice, bob])
+    assert _player(game_id, t["org"]) is None
+
+    # 没上桌不能普通买入，可以买保险 / Anti
+    assert _svc().organizer_buyin_service(
+        game_id=game_id, group_id=t["group"], user_id=t["org"], amount=100, buy_type="normal",
+    )["message"] == "organizerNotSeatedNormalBuyin"
+    assert _svc().organizer_buyin_service(
+        game_id=game_id, group_id=t["group"], user_id=t["org"], amount=200, buy_type="insurance",
+    )["success"] is True
+
+    me = _player(game_id, t["org"])
+    assert me.is_active == 0 and me.manager_only == 1 and me.total_buy_in == 200
+
+    ongoing = _svc().get_ongoing_games_service(t["group"])["games"][0]
+    me_row = next(p for p in ongoing["players"] if p["user_id"] == t["org"])
+    assert me_row["leave_type"] == "manager"
+    assert me_row["buy_in_insurance"] == 200
+
+    # 不占桌上名额：在桌人数只有两人
+    assert sum(1 for p in ongoing["players"] if p["is_active"] == 1) == 2
+
+    # 上桌后可以普通买入
+    sit = _svc().add_player_to_game_service(game_id=game_id, group_id=t["group"], user_id=t["org"], organizer_id=t["org"])
+    assert sit["success"] is True and sit["rejoined"] is False
+    me = _player(game_id, t["org"])
+    assert me.is_active == 1 and me.manager_only == 0
+    assert _buyin(t, game_id, t["org"], 300)["success"] is True
+
+    req = _request_buyin(game_id, t["group"], alice, 500)
+    _svc().approve_chip_request_service(request_id=req, game_id=game_id, group_id=t["group"], resolver_id=t["org"])
+
+    result = _finish(t, game_id, {t["org"]: 700, alice: 300, bob: 0})
+    assert result["success"] is True, result
+
+    db = SessionLocal()
+    try:
+        report = build_game_report(db, game_id, t["group"])
+    finally:
+        db.close()
+    assert report["all_match"] is True
+
+
+def test_manager_only_organizer_settles_insurance(table):
+    t = table
+    alice = t["members"][0]
+    game_id = _start(t, players=[alice])
+    assert _svc().organizer_buyin_service(
+        game_id=game_id, group_id=t["group"], user_id=t["org"], amount=150, buy_type="anti",
+    )["success"] is True
+
+    # 结束时只管理的局头也在结算名单里（填他保险 / Anti 剩余的筹码）
+    assert _finish(t, game_id, {alice: 0})["message"] == "settlementPlayersMismatch"
+    result = _finish(t, game_id, {alice: 0, t["org"]: 150})
+    assert result["success"] is True, result
+    assert _player(game_id, t["org"]).net == 0

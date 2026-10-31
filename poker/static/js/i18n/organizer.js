@@ -1,5 +1,14 @@
 const organizerTranslations = {
     zh: {
+        organizerMe: "局头（我）",
+        startManagerHint: "你没有勾选自己：本局你只管理、不上桌，不占桌上名额。只管理时可以买保险和 Anti，不能普通买入；之后想上桌，点“上桌”或用“加入玩家”把自己加进来。",
+        managerBarText: "你在本局只管理、没上桌，不占桌上名额。可以买保险和 Anti；普通买入需要先上桌。",
+        managerBuyin: "买保险 / Anti",
+        sitDown: "上桌",
+        sitDownSuccess: "已上桌",
+        statusManager: "只管理",
+        managerChipsHint: "只管理、没上桌：请填他保险 / Anti 剩余的筹码",
+        organizerNotSeatedNormalBuyin: "你在本局没上桌，只能买保险和 Anti。要普通买入，请先上桌。",
         promoteOrganizer: "设为局头",
         promoteOrganizerDesc: "把所选成员设为局头。每组最多 2 个局头，两人权限完全相同；设为局头后不能由你撤销，只能由他自己在个人资料页卸任。",
         promoteOrganizerConfirmTitle: "确认设为局头？",
@@ -391,6 +400,15 @@ const organizerTranslations = {
     },
 
     en: {
+        organizerMe: "Organizer (me)",
+        startManagerHint: "You didn't select yourself: you'll only manage this game, without a seat at the table. While managing you can buy insurance and Anti but not normal buy-ins. To join the table later, tap \"Sit Down\" or add yourself with \"Add Player\".",
+        managerBarText: "You're managing this game without a seat at the table. You can buy insurance and Anti; for a normal buy-in, sit down first.",
+        managerBuyin: "Buy Insurance / Anti",
+        sitDown: "Sit Down",
+        sitDownSuccess: "You're at the table",
+        statusManager: "Managing",
+        managerChipsHint: "Managing only (no seat): enter the chips left from insurance / Anti",
+        organizerNotSeatedNormalBuyin: "You're not seated in this game, so you can only buy insurance and Anti. Sit down first for a normal buy-in.",
         promoteOrganizer: "Make Organizer",
         promoteOrganizerDesc: "Make the selected member an organizer. A group can have at most 2 organizers with exactly the same permissions. You can't undo this — only they can step down from their profile page.",
         promoteOrganizerConfirmTitle: "Make this member an organizer?",
